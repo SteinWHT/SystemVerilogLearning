@@ -1,0 +1,57 @@
+# Simulation
+*.vcd
+*.vpd
+*.fst
+*.wlf
+*.trn
+*.trn.gz
+
+# Compiled simulation libraries
+csrc/
+simv
+simv.daidir/
+simv.vdb/
+
+# Xilinx
+*.jou
+*.log
+*.str
+*.xpr
+*.xise
+*.runs/
+*.cache/
+*.hw/
+*.ip_user_files/
+
+# Intel / Altera
+db/
+incremental_db/
+*.qws
+
+# ModelSim / Questa
+work/
+transcript
+vsim.wlf
+*.mpf
+*.cr.mti
+*.mpf_new
+
+# Vivado / Quartus backups
+*.bak
+*.tmp
+*.swp
+*~
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# python cache
+*\__pycache__
+
+# only need src and testbench
+*\docs
+*\constraints
+*\docs
+*\rtl_extensions
+*\sim
