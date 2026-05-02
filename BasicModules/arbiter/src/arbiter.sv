@@ -1,4 +1,11 @@
 // Round-robin arbiter: one-hot grant, at most one winner per cycle.
+//
+// Assertion layer (below `ifndef SYNTHESIS`):
+//   Extra logic — usually SystemVerilog Assertions (SVA) — that states what must
+//   *always* be true (assert), what the environment may assume (assume, formal),
+//   and what you want to see in tests (cover). Simulators check these on clocks;
+//   formal tools prove or falsify them. They do not change synthesized hardware
+//   when guarded out of synthesis; they document intent and catch bugs early.
 
 module arbiter #(
     parameter int unsigned NUM_REQ = 4
@@ -35,5 +42,19 @@ module arbiter #(
             end
         end
     end
+
+`ifndef SYNTHESIS
+    // --- Assertion layer (simulation / formal; not for synthesis) ---
+    ap_grant_onehot0: assert property (@(posedge clk) disable iff (!rst_n)
+        $onehot0(grant_out))
+        else $error("arbiter: grant_out must be zero or exactly one-hot");
+
+    ap_grant_implies_req: assert property (@(posedge clk) disable iff (!rst_n)
+        ((grant_out & ~req_in) == '0))
+        else $error("arbiter: no grant without a matching request");
+
+    cp_grant_beat: cover property (@(posedge clk) disable iff (!rst_n)
+        |grant_out);
+`endif
 
 endmodule
