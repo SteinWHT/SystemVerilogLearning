@@ -2,19 +2,18 @@
 // 4 * 64 bit in
 // 1 * 64 bit out
 module IFQ #(
-    parameter int unsigned IN_WIDTH = 64,
-    parameter int unsigned OUT_WIDTH = 64,
+    parameter int unsigned INSTR_WIDTH = 64,
     parameter int unsigned DEPTH = 16,
     parameter int unsigned NUM_WAYS = 4,
     parameter int unsigned NUM_WAYS_WIDTH = $clog2(NUM_WAYS)
 ) (
     input  logic                        clk,
     input  logic                        rst_n,
-    input  logic [IN_WIDTH-1:0]         instr_in [0:NUM_WAYS-1],
+    input  logic [INSTR_WIDTH-1:0]         instr_in [0:NUM_WAYS-1],
     input  logic                        valid_in,
     input  logic                        flush,
     input  logic [NUM_WAYS_WIDTH-1:0]   valid_out,
-    output logic [OUT_WIDTH-1:0]        instr_out,
+    output logic [INSTR_WIDTH-1:0]        instr_out,
 
     output logic                        full,
     output logic                        empty
@@ -23,7 +22,7 @@ module IFQ #(
     localparam int unsigned one_way_depth = DEPTH / NUM_WAYS;
     logic [NUM_WAYS-1:0] empty_array;
     logic [NUM_WAYS-1:0] full_array;
-    logic [OUT_WIDTH-1:0] instr_out_array [0:NUM_WAYS-1];
+    logic [INSTR_WIDTH-1:0] instr_out_array [0:NUM_WAYS-1];
     genvar i;
     generate
         for(i = 0; i < NUM_WAYS; i++) begin: way_fifo_inst

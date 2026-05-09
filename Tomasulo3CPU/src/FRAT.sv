@@ -24,14 +24,14 @@ module FRAT #(
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rs2_phy_address
 );
     // FRAT array: maps architectural register index to physical register index
-    // We don't use the circular buffer approach for FRAT
+    // I don't use the circular buffer approach for FRAT
     logic [PHY_REGISTER_FILE_WIDTH-1:0] FRAT_array [0:ARCH_REG_COUNT-1];
     logic [PHY_REGISTER_FILE_WIDTH-1:0] checkpoint_FRAT_array [0:NUM_CHECKPOINT-1][0:ARCH_REG_COUNT-1];
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (int i = 0; i < ARCH_REG_COUNT; i++) begin
-                FRAT_array[i] <= i; // initialize with 1-to-1 mapping
+                FRAT_array[i] <= i; // initialize
             end
         end else begin
             if (is_branch) begin
