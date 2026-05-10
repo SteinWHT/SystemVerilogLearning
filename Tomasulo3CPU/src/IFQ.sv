@@ -1,19 +1,19 @@
 // 4-way interleaved fetch queue
-// 4 * 64 bit in
-// 1 * 64 bit out
+// 4 * 32 bit in
+// 1 * 32 bit out
 module IFQ #(
-    parameter int unsigned INSTR_WIDTH = 64,
+    parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned DEPTH = 16,
     parameter int unsigned NUM_WAYS = 4,
-    parameter int unsigned NUM_WAYS_WIDTH = $clog2(NUM_WAYS)
+    localparam int unsigned NUM_WAYS_WIDTH = $clog2(NUM_WAYS)
 ) (
     input  logic                        clk,
     input  logic                        rst_n,
-    input  logic [INSTR_WIDTH-1:0]         instr_in [0:NUM_WAYS-1],
+    input  logic [INSTR_WIDTH-1:0]      instr_in [0:NUM_WAYS-1],
     input  logic                        valid_in,
     input  logic                        flush,
     input  logic [NUM_WAYS_WIDTH-1:0]   valid_out,
-    output logic [INSTR_WIDTH-1:0]        instr_out,
+    output logic [INSTR_WIDTH-1:0]      instr_out,
 
     output logic                        full,
     output logic                        empty
@@ -27,7 +27,7 @@ module IFQ #(
     generate
         for(i = 0; i < NUM_WAYS; i++) begin: way_fifo_inst
             sync_fifo #(
-                .DATA_WIDTH(IN_WIDTH),
+                .DATA_WIDTH(INSTR_WIDTH),
                 .DEPTH(one_way_depth)
             ) sync_fifo_inst (
                 .clk(clk),

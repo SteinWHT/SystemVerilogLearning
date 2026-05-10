@@ -1,17 +1,15 @@
 module RAS #(
-    parameter int unsigned IMEM_WIDTH = 64,
+    parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned DEPTH = 4
-
-
 ) (
     input logic clk,
     input logic rst_n,
     
-    input logic [IMEM_WIDTH-1:0]    dis_pcplus4,
+    input logic [INSTR_WIDTH-1:0]   dis_pcplus4,
     input logic                     dis_ras_jr31_inst,
     input logic                     dis_ras_jal_inst,
 
-    output logic [IMEM_WIDTH-1:0]   ras_addr
+    output logic [INSTR_WIDTH-1:0]  ras_addr
 );
     // RAS implementation: a simple stack of return addresses
     // On a JAL, push the return address (PC+4) onto the stack
@@ -20,7 +18,7 @@ module RAS #(
     // If the RAS is empty on a JR $ra, we can treat it as a misprediction and flush the pipeline
 
     sync_lifo #(
-        .DATA_WIDTH(IMEM_WIDTH),
+        .DATA_WIDTH(INSTR_WIDTH),
         .DEPTH(DEPTH),
         .ROUND_ROBIN(1),
         .UNDERFLOW_PROTECT(0),

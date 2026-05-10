@@ -2,9 +2,9 @@
 // PC[4:2] 3-bit LSB used for indexing into BPB
 // 8 entries in BPB, each entry is 2 bits for 2-bit saturating counter
 module BPB #(
-    parameter int unsigned BUFFER_SIZE = 8,
-    parameter int unsigned BUFFER_WIDTH = $clog2(BUFFER_SIZE),
-    parameter int unsigned FSM_WIDTH = 2 // should be hardcoded to 2 for 2-bit saturating counter although it's now a configurable parameter
+    parameter int unsigned BUFFER_WIDTH = 3,
+    // should be hardcoded to 2 for 2-bit saturating counter although it's now a configurable parameter
+    parameter int unsigned FSM_WIDTH = 2 
 ) (
     input  logic clk,
     input  logic rst_n,
@@ -20,6 +20,8 @@ module BPB #(
     input  logic [BUFFER_WIDTH-1:0]     dis_cdb_upd_branch_addr,
     input  logic                        dis_cdb_branch_outcome
 );
+
+    localparam int unsigned BUFFER_SIZE = 2**BUFFER_WIDTH;
 
     logic [FSM_WIDTH-1:0] dis_cdb_upd_branch_outcome_reg;
     logic [FSM_WIDTH-1:0] dis_cdb_upd_branch_outcome_reg_next;

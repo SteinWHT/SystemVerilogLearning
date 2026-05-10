@@ -1,0 +1,494 @@
+module CPU_FRONT_END #(
+    // I-CACHE
+    parameter int unsigned INSTR_WIDTH = 32,
+    parameter int unsigned IMEM_DEPTH = 64,
+    localparam int unsigned PC_WIDTH = IMEM_DEPTH - 2,
+
+    // ARCH_REG
+    parameter int unsigned ARCH_REG_COUNT = 32,
+    parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
+
+    // PHY_REGISTER_FILE
+    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+
+    // D-CACHE
+    parameter int unsigned DMEM_WIDTH = 64,
+    parameter int unsigned DMEM_DEPTH = 32,
+
+    // BPB
+    parameter int unsigned BPB_PC_BITS = 3,
+
+    // IFQ
+    // NUM_WAYS now only support 2^N because of the valid_out signal
+    parameter int unsigned NUM_WAYS = 4,
+    localparam int unsigned NUM_WAYS_WIDTH = $clog2(NUM_WAYS),
+    parameter int unsigned IFQ_DEPTH = 16,
+
+    // RAS
+    parameter int unsigned RAS_DEPTH = 4,
+
+    // FRL
+    parameter int unsigned FRL_SIZE = 128,
+    parameter int unsigned FRL_PTR_WIDTH = $clog2(FRL_SIZE),
+
+    // FRAT
+    parameter int unsigned NUM_CHECKPOINT = 8,
+    localparam int unsigned CHECKPOINT_PTR_WIDTH = $clog2(NUM_CHECKPOINT),
+
+    // ROB
+    parameter int unsigned ROB_DEPTH = 16,
+    parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH)
+) (
+    input logic clk,
+    input logic rst_n,
+
+    // I-CACHE interface
+    input logic [IMEM_DEPTH-1:0] imem_address,
+    input logic imem_valid_in,
+    input logic [INSTR_WIDTH-1:0] imem_data [0:NUM_WAYS-1],
+
+    output logic imem_valid_out,
+
+    // D-CACHE interface
+
+    // back-end interface
+    // ISSUEQ interface
+    input logic issue_intq_full,
+    input logic issue_divq_full,
+    input logic issue_mulq_full,
+    input logic issue_ld_stq_full,
+    input logic issue_intq_two_or_more_vacant,
+    input logic issue_divq_two_or_more_vacant,
+    input logic issue_mulq_two_or_more_vacant,
+    input logic issue_ld_stq_two_or_more_vacant,
+
+    output logic dis_rs_data_ready,
+    output logic dis_rt_data_ready,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rs_phy_addr,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rt_phy_addr,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_rd_phy_addr,
+    output logic dis_reg_write,
+    output logic [15:0] dis_imm16,
+    output logic [DMEM_WIDTH-1:0] dis_branch_other_addr,
+    output logic dis_branch_prediction,
+    output logic dis_branch,
+    output logic [2:0] dis_branch_pc_bits,
+    output logic dis_jr_inst,
+    output logic dis_jal_inst,
+    output logic dis_jr31_inst,
+
+    output logic dis_int_issue_en,
+    output logic dis_div_issue_en,
+    output logic dis_mul_issue_en,
+    output logic dis_ld_st_issue_en,
+
+    // CDB interface
+    input logic cdb_valid,
+    input logic [ROB_INDEX_WIDTH-1:0] cdb_rob_tag,
+    input logic [DMEM_DEPTH-1:0] cdb_sw_addr,
+    input logic [DMEM_DEPTH-1:0] cdb_branch_addr,
+    input logic [BPB_PC_BITS-1:0] cdb_br_updt_addr,
+    input logic cdb_branch,
+    input logic cdb_branch_mispredict,
+    input logic cdb_flush,
+
+    // PRF interface
+    input logic prf_rs_data_ready,
+    input logic prf_rt_data_ready,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0] prf_rs_phy_addr,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0] prf_rt_phy_addr,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0] prf_rd_phy_addr,
+    input logic prf_reg_write,
+    input logic [ARCH_REG_WIDTH-1:0] prf_rd_arch_addr,
+    input logic [DMEM_DEPTH-1:0] prf_sw_addr
+);
+    // ------------------------------------------------------------
+    // INTERFACE
+    // ------------------------------------------------------------
+    // IFQ interface
+    logic flush;
+    logic [NUM_WAYS_WIDTH-1:0] valid_out;
+    logic [INSTR_WIDTH-1:0] instr_out;
+    logic ifq_full;
+    logic ifq_empty;
+
+    logic [PC_WIDTH-1:0] pc;
+    logic [PC_WIDTH-1:0] pc_plus4;
+    logic [PC_WIDTH-1:0] ifq_pc;
+
+    // DISPATCH interface
+    // DISPATCH <-> IFQ
+    logic dis_ren;
+    logic dis_jmpbr;
+    logic [IMEM_DEPTH-1:0] dis_jmpbr_addr;
+    logic dis_jmpbr_addr_valid;
+
+    // DISPATCH <-> FRAT
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_rd_phy_address;
+    logic [ARCH_REG_WIDTH-1:0] dis_new_arch_address;
+    logic [ARCH_REG_WIDTH-1:0] dis_rd_prev_arch_address;
+    logic [ARCH_REG_WIDTH-1:0] dis_rs1_arch_address;
+    logic [ARCH_REG_WIDTH-1:0] dis_rs2_arch_address;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rd_prev_phy_address;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rs1_phy_address;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rs2_phy_address;
+
+    // DISPATCH <-> ROB
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_sw_rt_phy_addr;
+    logic dis_inst_sw;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_pre_phy_addr;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_phy_addr;
+    logic dis_inst_valid;
+    logic [ARCH_REG_WIDTH-1:0] dis_rob_rd_arch_addr;
+
+    // BPB interface
+    logic bpb_branch_prediction;
+    logic [BPB_PC_BITS-1:0] dis_bpb_branch_pc_bits;
+    logic dis_bpb_branch;
+    logic [BPB_PC_BITS-1:0] dis_cdb_upd_branch_addr;
+    logic dis_cdb_branch_outcome;
+
+    // RAS interface
+    logic [IMEM_DEPTH-1:0] ras_addr;
+    logic dis_ras_jr31_inst;
+    logic dis_ras_jal_inst;
+
+    // FRL interface
+    logic dis_frl_empty;
+    logic dis_frl_read;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] frl_read_phy_address;
+    logic [FRL_PTR_WIDTH:0] frl_head_ptr;
+    logic [FRL_PTR_WIDTH:0] frl_head_ptr_to_frat;
+    
+    // FRAT interface
+    logic frat_full;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] frat_rs_phy_addr;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] frat_rt_phy_addr;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] frat_rd_phy_addr;
+
+    // ROB interface
+    logic [ROB_INDEX_WIDTH-1:0] rob_bottom_ptr;
+    logic rob_full;
+    logic rob_two_or_more_vacant;
+    logic [DMEM_DEPTH-1:0] rob_sw_addr;
+    logic rob_commit_mem_write;
+    logic [ROB_INDEX_WIDTH-1:0] rob_top_ptr;
+    logic rob_commit;
+    logic [ARCH_REG_WIDTH-1:0] rob_commit_rd_arch_addr;
+    logic rob_reg_write;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] rob_commit_curr_phy_addr;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] rob_commit_pre_phy_addr;
+
+    // SB interface
+    logic sb_full;
+    // RBA interface
+
+
+    // ------------------------------------------------------------
+    // SUB MODULES
+    // ------------------------------------------------------------
+    // IFQ
+    IFQ #(
+        .INSTR_WIDTH(INSTR_WIDTH),
+        .DEPTH(IFQ_DEPTH),
+        .NUM_WAYS(NUM_WAYS)
+    ) ifq (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .instr_in(imem_data),
+        .valid_in(imem_valid_in),
+        .flush(flush),
+        .valid_out(valid_out),
+        .instr_out(instr_out),
+
+        .full(ifq_full),
+        .empty(ifq_empty)
+    );
+
+    assign imem_valid_out = !ifq_full;
+    assign imem_address = ifq_pc;
+    assign pc_plus4 = pc + 4;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            ifq_pc <= '0;
+            valid_out <= '0;
+            pc <= '0;
+        end else begin
+            // IFQ logic 
+            if (flush) begin
+                pc <= dis_jmpbr_addr;
+                ifq_pc <= dis_jmpbr_addr;
+                valid_out <= '0;
+            end else begin
+                if (!ifq_full) begin
+                    ifq_pc <= ifq_pc + 16;
+                end
+
+                if (dis_ren) begin
+                    valid_out <= valid_out + 1;
+                end
+            end
+        end
+    end
+
+    // DISPATCH
+    DISPATCH #(
+        .INSTR_WIDTH(INSTR_WIDTH),
+        .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
+        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .DMEM_WIDTH(DMEM_WIDTH),
+        .ROB_DEPTH(ROB_DEPTH),
+        .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
+        .BPB_PC_BITS(BPB_PC_BITS)
+    ) dispatch (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .ifetch_instr_in(instr_out),
+        .ifetch_pcplus4_in(pc_plus4),
+        .ifetch_empty_flag(ifq_empty),
+        .dis_ren(dis_ren),
+        .dis_jmpbr(dis_jmpbr),
+        .dis_jmpbr_addr(dis_jmpbr_addr),
+        .dis_jmpbr_addr_valid(dis_jmpbr_addr_valid),
+
+        .bpb_branch_prediction(bpb_branch_prediction),
+        .dis_bpb_branch_pc_bits(dis_bpb_branch_pc_bits),
+        .dis_bpb_branch(dis_bpb_branch),
+
+        .ras_addr(ras_addr),
+        .dis_ras_jr31_inst(dis_ras_jr31_inst),
+        .dis_ras_jal_inst(dis_ras_jal_inst),
+
+        .dis_frl_empty(dis_frl_empty),
+        .dis_frl_rd_phy_addr(dis_frl_rd_phy_addr),
+        .dis_frl_read(dis_frl_read),
+
+        .dis_cdb_branch(cdb_branch),
+        .dis_cdb_branch_outcome(cdb_branch_mispredict),
+        .dis_cdb_branch_addr(cdb_branch_addr),
+        .dis_cdb_br_updt_addr(cdb_br_updt_addr),
+        .dis_cdb_flush(cdb_flush),
+        .dis_cdb_rob_tag(cdb_rob_tag),
+
+        .dis_frat_full(dis_frat_full),
+        .frat_rs_phy_addr(frat_rs_phy_addr),
+        .frat_rt_phy_addr(frat_rt_phy_addr),
+        .frat_rd_phy_addr(frat_rd_phy_addr),
+
+        .dis_prf_rs_data_ready(dis_prf_rs_data_ready),
+        .dis_prf_rt_data_ready(dis_prf_rt_data_ready),
+        .dis_new_rd_phy_addr(dis_new_rd_phy_addr),
+        .dis_reg_write(dis_reg_write),
+
+        .issue_intq_full(issue_intq_full),
+        .issue_divq_full(issue_divq_full),
+        .issue_mulq_full(issue_mulq_full),
+        .issue_ld_stq_full(issue_ld_stq_full),
+        .issue_intq_two_or_more_vacant(issue_intq_two_or_more_vacant),
+        .issue_divq_two_or_more_vacant(issue_divq_two_or_more_vacant),
+        .issue_mulq_two_or_more_vacant(issue_mulq_two_or_more_vacant),
+        .issue_ld_stq_two_or_more_vacant(issue_ld_stq_two_or_more_vacant),
+        .dis_rs_data_ready(dis_rs_data_ready),
+        .dis_rt_data_ready(dis_rt_data_ready),
+        .dis_rs_phy_addr(dis_rs_phy_addr),
+        .dis_rt_phy_addr(dis_rt_phy_addr),
+        .dis_imm16(dis_imm16),
+        .dis_branch_other_addr(dis_branch_other_addr),
+        .dis_branch_prediction(dis_branch_prediction),
+        .dis_branch(dis_branch),
+        .dis_branch_pc_bits(dis_branch_pc_bits),
+        .dis_jr_inst(dis_jr_inst),
+        .dis_jal_inst(dis_jal_inst),
+        .dis_jr31_inst(dis_jr31_inst),
+
+        .rob_bottom_ptr(rob_bottom_ptr),
+        .rob_full(rob_full),
+        .rob_two_or_more_vacant(rob_two_or_more_vacant),
+        .dis_pre_phy_addr(dis_pre_phy_addr),
+        .dis_new_phy_addr(dis_new_phy_addr),
+        .dis_rob_rd_arch_addr(dis_rob_rd_arch_addr),
+        .dis_inst_sw(dis_inst_sw),
+        .dis_sw_rt_phy_addr(dis_sw_rt_phy_addr)
+    );
+
+    assign dis_bpb_branch_pc_bits = ifq_pc[BPB_PC_BITS+1:2];
+
+    // BPB
+    BPB #(
+        .BUFFER_WIDTH(BPB_PC_BITS)
+    ) bpb (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .dis_bpb_branch_pc_bits(dis_bpb_branch_pc_bits),
+        .dis_bpb_branch(dis_bpb_branch),
+        .bpb_branch_prediction(bpb_branch_prediction),
+
+        .dis_cdb_upd_branch(cdb_branch),
+        .dis_cdb_upd_branch_addr(dis_cdb_upd_branch_addr),
+        .dis_cdb_branch_outcome(dis_cdb_branch_outcome)
+    );
+
+    assign dis_cdb_upd_branch_addr = cdb_branch_addr[BPB_PC_BITS+1:2];
+    assign dis_cdb_branch_outcome = cdb_branch_mispredict;
+
+    // RAS
+    RAS #(
+        .INSTR_WIDTH(INSTR_WIDTH),
+        .DEPTH(RAS_DEPTH)
+    ) ras (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .dis_pcplus4(pcplus4),
+        .dis_ras_jr31_inst(dis_ras_jr31_inst),
+        .dis_ras_jal_inst(dis_ras_jal_inst),
+        .ras_addr(ras_addr)
+    );
+
+    // FRL
+    FRL #(
+        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .ARCH_REG_COUNT(ARCH_REG_COUNT)
+    ) frl (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .rob_commit_pre_phy_address(rob_commit_pre_phy_addr),
+        .rob_commit(rob_commit),
+        .rob_commit_reg_write(rob_reg_write),
+
+        .frl_head_ptr(frl_head_ptr),
+
+        .cdb_flush(cdb_flush),
+
+        .dis_frl_read(dis_frl_read),
+        .frl_read_phy_address(frl_read_phy_address),
+        .frl_read_empty(frl_read_empty),
+
+        .frl_head_ptr_to_frat(frl_head_ptr_to_frat)
+    );
+
+    // FRAT
+    FRAT #(
+        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
+        .NUM_CHECKPOINT(NUM_CHECKPOINT),
+        .ROB_DEPTH(ROB_DEPTH),
+        .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH)
+    ) frat (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .is_branch(dis_jmpbr),
+        .rob_bottom_ptr(dis_rob_bottom_ptr),
+        .dis_frat_reg_write(dis_reg_write),
+        .rd_new_phy_address_in(dis_new_rd_phy_address),
+        .rd_new_arch_address_in(dis_new_arch_address),
+
+        .branch_mispredict(dis_branch_mispredict),
+        .rob_commit(rob_commit),
+        .rob_top_ptr(rob_top_ptr),
+
+        .frl_head_ptr(frl_head_ptr),
+        .frat_frl_head_ptr(frl_head_ptr_to_frat),
+
+        .rd_prev_arch_address_in(dis_rd_prev_arch_address),
+        .rs1_arch_address_in(dis_rs1_arch_address),
+        .rs2_arch_address_in(dis_rs2_arch_address),
+
+        .rd_prev_phy_address(dis_rd_prev_phy_address),
+        .rs1_phy_address(dis_rs1_phy_address),
+        .rs2_phy_address(dis_rs2_phy_address),
+
+        .full(frat_full)
+    );
+
+    // RRAT
+    RRAT #(
+        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .ARCH_REG_COUNT(ARCH_REG_COUNT),
+        .NUM_CHECKPOINT(NUM_CHECKPOINT)
+    ) rrat (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .rob_commit_rd_arch_addr(rob_commit_rd_arch_addr),
+        .rob_commit_curr_phy_addr(rob_commit_curr_phy_addr),
+        .rob_commit(rob_commit),
+        .rob_commit_reg_write(rob_reg_write)
+    );
+
+    // ROB
+    ROB #(
+        .ROB_DEPTH(ROB_DEPTH),
+        .DMEM_WIDTH(DMEM_WIDTH),
+        .DMEM_DEPTH(DMEM_DEPTH),
+        .ARCH_REG_COUNT(ARCH_REG_COUNT),
+        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH)
+    ) rob (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .dis_sw_rt_phy_addr(dis_sw_rt_phy_addr),
+        .dis_inst_sw(dis_inst_sw),
+        .dis_pre_phy_addr(dis_pre_phy_addr),
+        .dis_new_phy_addr(dis_new_phy_addr),
+        .dis_inst_valid(dis_inst_valid),
+        .dis_rob_rd_arch_addr(dis_rob_rd_arch_addr),
+        .dis_reg_write(dis_reg_write),
+
+        .rob_bottom_ptr(rob_bottom_ptr),
+        .rob_full(rob_full),
+        .rob_two_or_more_vacant(rob_two_or_more_vacant),
+
+        .cdb_valid(cdb_valid),
+        .cdb_rob_tag(cdb_rob_tag),
+        .cdb_sw_addr(cdb_sw_addr),
+        .cdb_branch_mispredict(cdb_branch_mispredict),
+
+        .sb_full(sb_full),
+        .rob_sw_addr(rob_sw_addr),
+        .rob_commit_mem_write(rob_commit_mem_write),
+
+        .rob_top_ptr(rob_top_ptr),
+        .rob_commit(rob_commit),
+
+        .rob_commit_rd_arch_addr(rob_commit_rd_arch_addr),
+        .rob_reg_write(rob_reg_write),
+        .rob_commit_curr_phy_addr(rob_commit_curr_phy_addr),
+
+        .rob_commit_pre_phy_addr(rob_commit_pre_phy_addr)
+    );
+
+    // SB
+    // TODO:
+    // SB #(
+    //     .INSTR_WIDTH(INSTR_WIDTH),
+    //     .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
+    //     .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+    //     .DMEM_WIDTH(DMEM_WIDTH),
+    //     .ROB_DEPTH(ROB_DEPTH),
+    //     .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH)
+    // ) sb (
+    //     .clk(clk),
+    //     .rst_n(rst_n),
+    // );
+
+    // RBA
+    // TODO:
+    // RBA #(
+    //     .INSTR_WIDTH(INSTR_WIDTH),
+    //     .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
+    //     .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+    //     .DMEM_WIDTH(DMEM_WIDTH),
+    //     .ROB_DEPTH(ROB_DEPTH),
+    //     .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH)
+    // ) rba (
+    //     .clk(clk),
+    //     .rst_n(rst_n),
+    // );
+endmodule

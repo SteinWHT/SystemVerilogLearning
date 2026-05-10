@@ -2,40 +2,62 @@
 // ARM64 compatible ISA
 // First step: Only the front-end part will be completed and tested
 // Second step: integrate the back-end into the total design
+
+
+// Get an instruction from IFQ (one instruction at a time in program order).
+// Decode the instruction (R-Type, Lw/Sw, Div, Mul, Jump,…etc).
+// Rename source and destination registers.
+// The architectural source register IDs ($rs and $rt) are provided to CFC (FRAT and 
+// RRAT). The architectural destination register ID ($rd) is also provided to CFC to find the 
+// "old" mapping which can be freed when this instruction commits
+// For register writing instructions, free register list (FRL) provides a free physical register 
+// that will be mapped to the destination architectural register. 
+// Dispatch will allocate one ROB entry and one instruction issue queue entry if needed. 
+// For example, Jump instruction is executed in the dispatch and hence there is no need 
+// for an ROB or issue queue allocation.
+// Writes appropriate information (i.e. dispatches the instruction) to appropriate issue 
+// queue and ROB entries
+
 module DISPATCH #(
-    parameter int unsigned INSTR_WIDTH = 64,
-    parameter int unsigned IMEM_WIDTH = 64,
+    parameter int unsigned IMEM_DEPTH = 64,
+    parameter int unsigned IMEM_WIDTH = 32,
+    parameter int unsigned DMEM_DEPTH = 64,
+    parameter int unsigned DMEM_WIDTH = 64,
     parameter int unsigned ARCH_REG_COUNT = 32,
     parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
     parameter int unsigned NUM_CHECKPOINT = 8,
-    parameter int unsigned CHECKPOINT_PTR_WIDTH = $clog2(NUM_CHECKPOINT)
+    parameter int unsigned CHECKPOINT_PTR_WIDTH = $clog2(NUM_CHECKPOINT),
+    parameter int unsigned ROB_DEPTH = 32,
+    parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
+    parameter int unsigned BPB_PC_BITS = 3
 ) (
     input  logic clk,
     input  logic rst_n,
 
     // IFQ interface
-    input  logic [INSTR_WIDTH-1:0]      ifetch_instr_in,
-    input  logic [IMEM_WIDTH-1:0]       ifetch_pcplus4_in,
+    input  logic [IMEM_WIDTH-1:0]       ifetch_instr_in,
+    input  logic [IMEM_DEPTH-1:0]       ifetch_pcplus4_in,
     input  logic                        ifetch_empty_flag,
 
     output logic                        dis_ren,
     output logic                        dis_jmpbr,
-    output logic [IMEM_WIDTH-1:0]       dis_jmpbr_addr,
+    output logic [IMEM_DEPTH-1:0]       dis_jmpbr_addr,
     output logic                        dis_jmpbr_addr_valid,
 
     // BPB interface
     input  logic                        bpb_branch_prediction,
 
-    output logic [2:0]                  dis_bpb_branch_pc_bits, // TODO: check the width
+    output logic [BPB_PC_BITS-1:0]      dis_bpb_branch_pc_bits,
     output logic                        dis_bpb_branch,
 
     // RAS interface
-    input  logic [IMEM_WIDTH-1:0]       ras_addr,
+    input  logic [IMEM_DEPTH-1:0]       ras_addr,
 
     output logic                        dis_ras_jr31_inst,
     output logic                        dis_ras_jal_inst,
-    output logic [IMEM_WIDTH-1:0]       dis_pcplus4,
+    // = ifetch_pcplus4_in
+    // output logic [IMEM_DEPTH-1:0]       dis_pcplus4,
 
     // FRL interface
     input  logic                                    frl_empty,
@@ -44,18 +66,67 @@ module DISPATCH #(
     output logic                                    dis_frl_read,
 
     // CDB interface
-    input  logic                        cdb_branch
+    input  logic                        cdb_branch,
     input  logic                        cdb_branch_outcome,
-    input  logic [IMEM_WIDTH-1:0]       cdb_branch_addr,
+    input  logic [IMEM_DEPTH-1:0]       cdb_branch_addr,
     input  logic [2:0]                  cdb_br_updt_addr,
     input  logic                        cdb_flush,
     input  logic [4:0]                  cdb_rob_tag,
 
-    // CFC interface
-    input  logic                        cfc_full,
+    // FRAT interface
+    input  logic                               frat_full,
+    input  logic [PHY_REGISTER_FILE_WIDTH-1:0] frat_rs_phy_addr,
+    input  logic [PHY_REGISTER_FILE_WIDTH-1:0] frat_rt_phy_addr,
+    input  logic [PHY_REGISTER_FILE_WIDTH-1:0] frat_rd_phy_addr,
 
+    // PRF
+    input  logic prf_rs_data_ready,
+    input  logic prf_rt_data_ready,
+    
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_rd_phy_addr,
+    output logic dis_reg_write,
 
+    // Issue Queue interface
+    input logic                         issue_intq_full,
+    input logic                         issue_divq_full,
+    input logic                         issue_mulq_full,  
+    input logic                         issue_ld_stq_full,
+    input logic                         issue_intq_two_or_more_vacant,
+    input logic                         issue_divq_two_or_more_vacant,
+    input logic                         issue_mulq_two_or_more_vacant,
+    input logic                         issue_ld_stq_two_or_more_vacant,
 
+    // output logic dis_reg_write,
+    output logic dis_rs_data_ready,
+    output logic dis_rt_data_ready,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rs_phy_addr,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rt_phy_addr,
+    //output logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_rd_phy_addr,
+    output logic [15:0] dis_imm16,
+    output logic [DMEM_WIDTH-1:0] dis_branch_other_addr,
+    output logic dis_branch_prediction,
+    output logic dis_branch,
+    output logic [2:0] dis_branch_pc_bits,
+    output logic dis_jr_inst,
+    output logic dis_jal_inst,
+    output logic dis_jr31_inst,
+
+    output logic dis_int_issue_en,
+    output logic dis_div_issue_en,
+    output logic dis_mul_issue_en,
+    output logic dis_ld_st_issue_en,
+
+    // ROB interface
+    input logic [ROB_INDEX_WIDTH-1:0] rob_bottom_ptr,
+    input logic rob_full,
+    input logic rob_two_or_more_vacant,
+
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_pre_phy_addr,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_phy_addr,
+    output logic [ARCH_REG_WIDTH-1:0] dis_rob_rd_arch_addr,
+    // output logic dis_reg_write,
+    output logic dis_inst_sw,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_sw_rt_phy_addr
 
 );
     // The decision-making logic
