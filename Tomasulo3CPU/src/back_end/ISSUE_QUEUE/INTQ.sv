@@ -10,14 +10,15 @@ module INTQ #(
     parameter int unsigned ROB_INDEX_WIDTH = 5,
     parameter int unsigned ARCH_REG_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
-    parameter int unsigned DMEM_WIDTH = 32
+    parameter int unsigned DMEM_WIDTH = 32,
+    parameter int unsigned BPB_PC_BITS = 3
 ) (
     input logic clk,
     input logic rst_n,
 
     // CDB interface
     input logic cdb_flush,
-    input logic [ROB_INDEX_WIDTH-1:0] rob_bottom_ptr,
+    input logic [ROB_INDEX_WIDTH-1:0] rob_top_ptr,
     input logic [ROB_INDEX_WIDTH-1:0] cdb_rob_depth,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] cdb_rd_phy_addr,
     input logic cdb_phy_reg_write,
@@ -34,23 +35,21 @@ module INTQ #(
     input logic ls_buf_buf_rd_write,
 
     // ALU interface
-    output logic iss_reg_write_alu,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rd_phy_addr_alu,
-    output logic [5:0] iss_rob_tag_alu,
-    output logic [2:0] iss_opcode_alu,
-    output logic [15:0] iss_imm16_alu,
-    output logic [DMEM_WIDTH-1:0] iss_branch_other_addr_alu,
-    output logic iss_branch_prediction_alu,
-    output logic iss_branch_alu,
-    output logic [2:0] iss_branch_pc_bits_alu,
-    output logic iss_jr_inst_alu,
-    output logic iss_jal_inst_alu,
-    output logic iss_jr31_inst_alu,
-
-    // PRF interface
+    output logic [ROB_INDEX_WIDTH-1:0] iss_rob_tag_alu,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rs_phy_addr_alu,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rt_phy_addr_alu,
-
+    output logic [2:0] iss_opcode_alu,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rd_phy_addr_alu,
+    output logic iss_rw_alu,
+    output logic [15:0] iss_imm16_alu,
+    output logic iss_branch_prediction_alu,
+    output logic iss_branch_alu,
+    output logic iss_jr_inst_alu,
+    output logic iss_jr31_inst_alu,
+    output logic iss_jal_inst_alu,
+    output logic [BPB_PC_BITS-1:0] iss_branch_pc_bits_alu,
+    output logic [DMEM_WIDTH-1:0] iss_branch_other_addr_alu,
+    
     // ISSUEUNIT interface
     input logic issue_int_en,
     output logic issue_int_rdy,
@@ -64,13 +63,13 @@ module INTQ #(
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rs_phy_addr,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rt_phy_addr,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_rd_phy_addr,
-    input logic [5:0]                         dis_rob_tag,
+    input logic [ROB_INDEX_WIDTH-1:0]         dis_rob_tag,
     input logic [2:0]                         dis_opcode,
     input logic [15:0]                        dis_imm16,
     input logic [DMEM_WIDTH-1:0]              dis_branch_other_addr,
     input logic                               dis_branch_prediction,
     input logic                               dis_branch,
-    input logic [2:0]                         dis_branch_pc_bits,
+    input logic [BPB_PC_BITS-1:0]             dis_branch_pc_bits,
     input logic                               dis_jr_inst,
     input logic                               dis_jal_inst,
     input logic                               dis_jr31_inst,
@@ -85,7 +84,7 @@ module INTQ #(
     // Entry Struct — groups all payload fields of one queue slot
     // valid is kept separate for easy vectorized operations
     typedef struct packed {
-        logic [5:0]                         rob_tag;
+        logic [ROB_INDEX_WIDTH-1:0]         rob_tag;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] rs;
         logic                               rs_rdy;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] rt;
@@ -99,7 +98,7 @@ module INTQ #(
         logic                               jr;
         logic                               jr31;
         logic                               jal;
-        logic [2:0]                         br_pc;
+        logic [BPB_PC_BITS-1:0]             br_pc;
         logic [DMEM_WIDTH-1:0]              br_addr;
     } intq_entry_t;
 
@@ -155,26 +154,23 @@ module INTQ #(
     end
 
     // Ready Detection & Oldest-First Selection
-    // depth = rob_tag - rob_rop_ptr (unsigned mod 2^N, smaller = older)
+    // depth = rob_tag - rob_top_ptr (unsigned mod 2^N, smaller = older)
     logic [INT_QUEUE_DEPTH-1:0] q_ready;
     logic [ROB_INDEX_WIDTH-1:0] entry_depth [INT_QUEUE_DEPTH];
     logic [IDX_WIDTH-1:0]       sel_idx;
     logic                       sel_valid;
-    logic [ROB_INDEX_WIDTH-1:0] min_depth;
 
     always_comb begin
         for (int i = 0; i < INT_QUEUE_DEPTH; i++) begin
             q_ready[i]     = q_valid[i] & wk_rs_rdy[i] & wk_rt_rdy[i];
-            entry_depth[i] = q[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_bottom_ptr;
+            entry_depth[i] = q[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_top_ptr;
         end
 
         sel_valid = 1'b0;
         sel_idx   = '0;
-        min_depth = {ROB_INDEX_WIDTH{1'b1}};
 
         for (int i = 0; i < INT_QUEUE_DEPTH; i++) begin
-            if (q_ready[i] && (entry_depth[i] < min_depth)) begin
-                min_depth = entry_depth[i];
+            if (q_ready[i]) begin
                 sel_idx   = i[IDX_WIDTH-1:0];
                 sel_valid = 1'b1;
             end
@@ -219,7 +215,7 @@ module INTQ #(
     // Issue Outputs — drive selected entry or zero
     always_comb begin
         if (issue_int) begin
-            iss_reg_write_alu         = q[sel_idx].rw;
+            iss_rw_alu                = q[sel_idx].rw;
             iss_rd_phy_addr_alu       = q[sel_idx].rd;
             iss_rob_tag_alu           = q[sel_idx].rob_tag;
             iss_opcode_alu            = q[sel_idx].op;
@@ -234,7 +230,7 @@ module INTQ #(
             iss_rs_phy_addr_alu       = q[sel_idx].rs;
             iss_rt_phy_addr_alu       = q[sel_idx].rt;
         end else begin
-            iss_reg_write_alu         = 1'b0;
+            iss_rw_alu                = 1'b0;
             iss_rd_phy_addr_alu       = '0;
             iss_rob_tag_alu           = '0;
             iss_opcode_alu            = '0;

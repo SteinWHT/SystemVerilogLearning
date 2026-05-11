@@ -37,7 +37,11 @@ module CPU_FRONT_END #(
 
     // ROB
     parameter int unsigned ROB_DEPTH = 16,
-    parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH)
+    parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
+
+    // SB
+    parameter int unsigned SB_DEPTH = 4,
+    localparam int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH)
 ) (
     input logic clk,
     input logic rst_n,
@@ -50,6 +54,11 @@ module CPU_FRONT_END #(
     output logic imem_valid_out,
 
     // D-CACHE interface
+    input logic dcache_valid,
+    input logic dcache_write_done,
+    output logic [DMEM_DEPTH-1:0] dcache_sw_addr,
+    output logic [DMEM_WIDTH-1:0] dcache_sw_data,
+    output logic dcache_ready,
 
     // back-end interface
     // ISSUEQ interface
@@ -100,7 +109,12 @@ module CPU_FRONT_END #(
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] prf_rd_phy_addr,
     input logic prf_reg_write,
     input logic [ARCH_REG_WIDTH-1:0] prf_rd_arch_addr,
-    input logic [DMEM_DEPTH-1:0] prf_sw_addr
+    input logic [DMEM_DEPTH-1:0] prf_sw_addr,
+
+    // SAB interface
+    output logic [SB_INDEX_WIDTH-1:0] sb_flush_sw_tag,
+    output logic sb_flush_sw,
+    output logic [SB_INDEX_WIDTH-1:0] sb_entry_sw_tag
 );
     // ------------------------------------------------------------
     // INTERFACE
@@ -171,6 +185,7 @@ module CPU_FRONT_END #(
     logic rob_full;
     logic rob_two_or_more_vacant;
     logic [DMEM_DEPTH-1:0] rob_sw_addr;
+    logic [DMEM_WIDTH-1:0] rob_sw_data;
     logic rob_commit_mem_write;
     logic [ROB_INDEX_WIDTH-1:0] rob_top_ptr;
     logic rob_commit;
@@ -181,6 +196,7 @@ module CPU_FRONT_END #(
 
     // SB interface
     logic sb_full;
+    logic sb_empty;
     // RBA interface
 
 
@@ -452,6 +468,7 @@ module CPU_FRONT_END #(
 
         .sb_full(sb_full),
         .rob_sw_addr(rob_sw_addr),
+        .rob_sw_data(rob_sw_data),
         .rob_commit_mem_write(rob_commit_mem_write),
 
         .rob_top_ptr(rob_top_ptr),
@@ -465,18 +482,31 @@ module CPU_FRONT_END #(
     );
 
     // SB
-    // TODO:
-    // SB #(
-    //     .INSTR_WIDTH(INSTR_WIDTH),
-    //     .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
-    //     .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
-    //     .DMEM_WIDTH(DMEM_WIDTH),
-    //     .ROB_DEPTH(ROB_DEPTH),
-    //     .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH)
-    // ) sb (
-    //     .clk(clk),
-    //     .rst_n(rst_n),
-    // );
+    SB #(
+        .SB_DEPTH(SB_DEPTH),
+        .DMEM_WIDTH(DMEM_WIDTH),
+        .DMEM_DEPTH(DMEM_DEPTH)
+    ) sb (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .rob_sw_addr(rob_sw_addr),
+        .rob_sw_data(rob_sw_data),
+        .rob_commit_mem_write(rob_commit_mem_write),
+
+        .dcache_valid(dcache_valid),
+        .dcache_write_done(dcache_write_done),
+        .dcache_sw_addr(dcache_sw_addr),
+        .dcache_sw_data(dcache_sw_data),
+        .dcache_ready(dcache_ready),
+
+        .sb_flush_sw_tag(sb_flush_sw_tag),
+        .sb_flush_sw(sb_flush_sw),
+        .sb_entry_sw_tag(sb_entry_sw_tag),
+
+        .full(sb_full),
+        .empty(sb_empty)
+    );
 
     // RBA
     // TODO:

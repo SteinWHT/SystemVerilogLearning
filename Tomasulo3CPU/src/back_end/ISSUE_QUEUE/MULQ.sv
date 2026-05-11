@@ -15,7 +15,7 @@ module MULQ #(
 
     // CDB interface
     input logic cdb_flush,
-    input logic [ROB_INDEX_WIDTH-1:0] rob_bottom_ptr,
+    input logic [ROB_INDEX_WIDTH-1:0] rob_top_ptr,
     input logic [ROB_INDEX_WIDTH-1:0] cdb_rob_depth,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] cdb_rd_phy_addr,
     input logic cdb_phy_reg_write,
@@ -35,14 +35,12 @@ module MULQ #(
     input logic ls_buf_buf_rd_write,
 
     // MULT interface
-    output logic iss_reg_write_mul,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rd_phy_addr_mul,
-    output logic [5:0] iss_rob_tag_mul,
-    output logic [2:0] iss_opcode_mul,
-
-    // PRF interface
+    output logic [ROB_INDEX_WIDTH-1:0] iss_rob_tag_mul,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rs_phy_addr_mul,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rt_phy_addr_mul,
+    output logic [2:0] iss_opcode_mul,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rd_phy_addr_mul,
+    output logic iss_rw_mul,
 
     // ISSUEUNIT interface
     output logic issue_mul_rdy,
@@ -56,7 +54,7 @@ module MULQ #(
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rs_phy_addr,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rt_phy_addr,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_rd_phy_addr,
-    input logic [5:0]                         dis_rob_tag,
+    input logic [ROB_INDEX_WIDTH-1:0]         dis_rob_tag,
     input logic [2:0]                         dis_opcode,
 
     // Issue grant from ISSUEUNIT
@@ -71,7 +69,7 @@ module MULQ #(
 
     // Entry Struct
     typedef struct packed {
-        logic [5:0]                         rob_tag;
+        logic [ROB_INDEX_WIDTH-1:0]         rob_tag;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] rs;
         logic                               rs_rdy;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] rt;
@@ -141,21 +139,18 @@ module MULQ #(
     logic [ROB_INDEX_WIDTH-1:0] entry_depth [MUL_QUEUE_DEPTH];
     logic [IDX_WIDTH-1:0]       sel_idx;
     logic                       sel_valid;
-    logic [ROB_INDEX_WIDTH-1:0] min_depth;
 
     always_comb begin
         for (int i = 0; i < MUL_QUEUE_DEPTH; i++) begin
             q_ready[i]     = q_valid[i] & wk_rs_rdy[i] & wk_rt_rdy[i];
-            entry_depth[i] = q[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_bottom_ptr;
+            entry_depth[i] = q[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_top_ptr;
         end
 
         sel_valid = 1'b0;
         sel_idx   = '0;
-        min_depth = {ROB_INDEX_WIDTH{1'b1}};
 
         for (int i = 0; i < MUL_QUEUE_DEPTH; i++) begin
-            if (q_ready[i] && (entry_depth[i] < min_depth)) begin
-                min_depth = entry_depth[i];
+            if (q_ready[i]) begin
                 sel_idx   = i[IDX_WIDTH-1:0];
                 sel_valid = 1'b1;
             end
@@ -199,14 +194,14 @@ module MULQ #(
     // Issue Outputs — drive selected entry or zero
     always_comb begin
         if (issue_mul) begin
-            iss_reg_write_mul  = q[sel_idx].rw;
+            iss_rw_mul  = q[sel_idx].rw;
             iss_rd_phy_addr_mul = q[sel_idx].rd;
             iss_rob_tag_mul    = q[sel_idx].rob_tag;
             iss_opcode_mul     = q[sel_idx].op;
             iss_rs_phy_addr_mul = q[sel_idx].rs;
             iss_rt_phy_addr_mul = q[sel_idx].rt;
         end else begin
-            iss_reg_write_mul  = 1'b0;
+            iss_rw_mul  = 1'b0;
             iss_rd_phy_addr_mul = '0;
             iss_rob_tag_mul    = '0;
             iss_opcode_mul     = '0;

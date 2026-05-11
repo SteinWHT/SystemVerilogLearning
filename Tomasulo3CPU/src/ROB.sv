@@ -14,6 +14,9 @@
 // sw_addr1: the 11 bits of the store address part1
 // sw_addr2: the 21 bits of the store address part2
 
+// read ptr = top ptr -> commit from the top
+// write ptr = bottom ptr -> dispatch from the bottom
+
 module ROB #(
     parameter int unsigned ROB_DEPTH = 32,
     localparam int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
@@ -48,8 +51,8 @@ module ROB #(
 
     // SB interface
     input logic sb_full,
-
-    output logic [DMEM_DEPTH-1:0] rob_sw_addr, 
+    output logic [DMEM_DEPTH-1:0] rob_sw_addr,
+    output logic [DMEM_WIDTH-1:0] rob_sw_data,
     output logic rob_commit_mem_write,
 
     // FRAT interface

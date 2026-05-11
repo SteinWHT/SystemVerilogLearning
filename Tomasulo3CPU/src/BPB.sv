@@ -18,6 +18,7 @@ module BPB #(
     // CDB interface
     input  logic                        dis_cdb_upd_branch,
     input  logic [BUFFER_WIDTH-1:0]     dis_cdb_upd_branch_addr,
+    // 1: taken, 0: not taken
     input  logic                        dis_cdb_branch_outcome
 );
 

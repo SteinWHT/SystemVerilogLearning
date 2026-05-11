@@ -15,7 +15,7 @@ module DIVQ #(
 
     // CDB interface
     input logic cdb_flush,
-    input logic [ROB_INDEX_WIDTH-1:0] rob_bottom_ptr,
+    input logic [ROB_INDEX_WIDTH-1:0] rob_top_ptr,
     input logic [ROB_INDEX_WIDTH-1:0] cdb_rob_depth,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] cdb_rd_phy_addr,
     input logic cdb_phy_reg_write,
@@ -35,15 +35,13 @@ module DIVQ #(
     input logic ls_buf_buf_rd_write,
 
     // DIV interface
-    output logic iss_reg_write_div,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rd_phy_addr_div,
-    output logic [5:0] iss_rob_tag_div,
-    output logic [2:0] iss_opcode_div,
-
-    // PRF interface
+    output logic [ROB_INDEX_WIDTH-1:0] iss_rob_tag_div,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rs_phy_addr_div,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rt_phy_addr_div,
-
+    output logic [2:0] iss_opcode_div,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rd_phy_addr_div,
+    output logic iss_rw_div,
+    
     // ISSUEUNIT interface
     input logic issue_div_en,
     output logic issue_div_rdy,
@@ -57,7 +55,7 @@ module DIVQ #(
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rs_phy_addr,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rt_phy_addr,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_rd_phy_addr,
-    input logic [5:0]                         dis_rob_tag,
+    input logic [ROB_INDEX_WIDTH-1:0]         dis_rob_tag,
     input logic [2:0]                         dis_opcode,
 
     // Queue status
@@ -69,7 +67,7 @@ module DIVQ #(
 
     // Entry Struct
     typedef struct packed {
-        logic [5:0]                         rob_tag;
+        logic [ROB_INDEX_WIDTH-1:0]         rob_tag;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] rs;
         logic                               rs_rdy;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] rt;
@@ -139,21 +137,18 @@ module DIVQ #(
     logic [ROB_INDEX_WIDTH-1:0] entry_depth [DIV_QUEUE_DEPTH];
     logic [IDX_WIDTH-1:0]       sel_idx;
     logic                       sel_valid;
-    logic [ROB_INDEX_WIDTH-1:0] min_depth;
 
     always_comb begin
         for (int i = 0; i < DIV_QUEUE_DEPTH; i++) begin
             q_ready[i]     = q_valid[i] & wk_rs_rdy[i] & wk_rt_rdy[i];
-            entry_depth[i] = q[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_bottom_ptr;
+            entry_depth[i] = q[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_top_ptr;
         end
 
         sel_valid = 1'b0;
         sel_idx   = '0;
-        min_depth = {ROB_INDEX_WIDTH{1'b1}};
 
         for (int i = 0; i < DIV_QUEUE_DEPTH; i++) begin
-            if (q_ready[i] && (entry_depth[i] < min_depth)) begin
-                min_depth = entry_depth[i];
+            if (q_ready[i]) begin
                 sel_idx   = i[IDX_WIDTH-1:0];
                 sel_valid = 1'b1;
             end
@@ -197,14 +192,14 @@ module DIVQ #(
     // Issue Outputs — drive selected entry or zero
     always_comb begin
         if (issue_div) begin
-            iss_reg_write_div  = q[sel_idx].rw;
+            iss_rw_div  = q[sel_idx].rw;
             iss_rd_phy_addr_div = q[sel_idx].rd;
             iss_rob_tag_div    = q[sel_idx].rob_tag;
             iss_opcode_div     = q[sel_idx].op;
             iss_rs_phy_addr_div = q[sel_idx].rs;
             iss_rt_phy_addr_div = q[sel_idx].rt;
         end else begin
-            iss_reg_write_div  = 1'b0;
+            iss_rw_div  = 1'b0;
             iss_rd_phy_addr_div = '0;
             iss_rob_tag_div    = '0;
             iss_opcode_div     = '0;

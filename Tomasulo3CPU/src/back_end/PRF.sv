@@ -1,0 +1,76 @@
+module PRF #(
+    parameter int unsigned REG_FILE_DATA_WIDTH = 64,
+    parameter int unsigned ARCH_REG_COUNT = 32,
+    localparam int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
+    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned ROB_DEPTH = 16,
+    localparam int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
+    parameter int unsigned SB_DEPTH = 4,
+    localparam int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH),
+    parameter int unsigned SAB_DEPTH = 8,
+    localparam int unsigned SAB_INDEX_WIDTH = $clog2(SAB_DEPTH)
+) (
+    input logic clk,
+    input logic rst_n,
+
+    // ROB interface
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0] rt_sb_phy_addr,
+
+    // SB interface
+    output logic [REG_FILE_DATA_WIDTH-1:0] rt_sb_data,
+
+    // CDB interface
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0] cdb_rd_phy_addr,
+    input logic [REG_FILE_DATA_WIDTH-1:0] cdb_rd_data,
+    input logic cdb_reg_write,  
+
+    // ISSUE interface
+    // 7 read ports for issue
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0] issue_rs_phy_addr_alu,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0] issue_rt_phy_addr_alu,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0] issue_rs_phy_addr_div,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0] issue_rt_phy_addr_div,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0] issue_rs_phy_addr_mul,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0] issue_rt_phy_addr_mul,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0] issue_rs_phy_addr_lsq,
+
+    output logic [REG_FILE_DATA_WIDTH-1:0] issue_rs_data_lsq,
+
+    // EXE interface
+    output logic [REG_FILE_DATA_WIDTH-1:0] exe_rs_data_alu,
+    output logic [REG_FILE_DATA_WIDTH-1:0] exe_rt_data_alu,
+    output logic [REG_FILE_DATA_WIDTH-1:0] exe_rs_data_div,
+    output logic [REG_FILE_DATA_WIDTH-1:0] exe_rt_data_div,
+    output logic [REG_FILE_DATA_WIDTH-1:0] exe_rs_data_mul,
+    output logic [REG_FILE_DATA_WIDTH-1:0] exe_rt_data_mul
+
+    
+);
+
+    logic [REG_FILE_DATA_WIDTH-1:0] prf_data_array [0:PHY_REGISTER_FILE_WIDTH-1];
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            for (int i = 0; i < PHY_REGISTER_FILE_WIDTH; i++) begin
+                prf_data_array[i] <= '0;
+            end
+        end else begin
+            if (cdb_reg_write) begin
+                prf_data_array[cdb_rd_phy_addr] <= cdb_rd_data;
+            end
+        end
+    end
+    
+    // forwarding logic
+    always_comb begin
+        exe_rs_data_alu = ((issue_rs_phy_addr_alu == cdb_rd_phy_addr) && cdb_reg_write) ? cdb_rd_data : prf_data_array[issue_rs_phy_addr_alu];
+        exe_rt_data_alu = ((issue_rt_phy_addr_alu == cdb_rd_phy_addr) && cdb_reg_write) ? cdb_rd_data : prf_data_array[issue_rt_phy_addr_alu];
+        exe_rs_data_div = ((issue_rs_phy_addr_div == cdb_rd_phy_addr) && cdb_reg_write) ? cdb_rd_data : prf_data_array[issue_rs_phy_addr_div];
+        exe_rt_data_div = ((issue_rt_phy_addr_div == cdb_rd_phy_addr) && cdb_reg_write) ? cdb_rd_data : prf_data_array[issue_rt_phy_addr_div];
+        exe_rs_data_mul = ((issue_rs_phy_addr_mul == cdb_rd_phy_addr) && cdb_reg_write) ? cdb_rd_data : prf_data_array[issue_rs_phy_addr_mul];
+        exe_rt_data_mul = ((issue_rt_phy_addr_mul == cdb_rd_phy_addr) && cdb_reg_write) ? cdb_rd_data : prf_data_array[issue_rt_phy_addr_mul];
+        issue_rs_data_lsq = ((issue_rs_phy_addr_lsq == cdb_rd_phy_addr) && cdb_reg_write) ? cdb_rd_data : prf_data_array[issue_rs_phy_addr_lsq];
+        rt_sb_data = ((rt_sb_phy_addr == cdb_rd_phy_addr) && cdb_reg_write) ? cdb_rd_data : prf_data_array[rt_sb_phy_addr];
+    end
+
+endmodule 
