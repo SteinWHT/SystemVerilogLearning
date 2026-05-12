@@ -3,6 +3,7 @@
 // 8 entries in BPB, each entry is 2 bits for 2-bit saturating counter
 module BPB #(
     parameter int unsigned BUFFER_WIDTH = 3,
+    localparam int unsigned BUFFER_SIZE = 2**BUFFER_WIDTH,
     // should be hardcoded to 2 for 2-bit saturating counter although it's now a configurable parameter
     parameter int unsigned FSM_WIDTH = 2 
 ) (
@@ -21,8 +22,6 @@ module BPB #(
     // 1: taken, 0: not taken
     input  logic                        dis_cdb_branch_outcome
 );
-
-    localparam int unsigned BUFFER_SIZE = 2**BUFFER_WIDTH;
 
     logic [FSM_WIDTH-1:0] dis_cdb_upd_branch_outcome_reg;
     logic [FSM_WIDTH-1:0] dis_cdb_upd_branch_outcome_reg_next;

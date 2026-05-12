@@ -9,7 +9,6 @@ module LSB #(
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
     parameter int unsigned OPCODE_WIDTH = 1,
     parameter int unsigned LD_ST_OPCODE_WIDTH = 1,
-
     localparam int unsigned OPCODE_LOAD = 1'b0,
     localparam int unsigned OPCODE_STORE = 1'b1
 ) (
@@ -17,153 +16,209 @@ module LSB #(
     input logic rst_n,
 
     // D-Cache Interface
-    input logic dcache_read_done,
-    input logic [DMEM_DEPTH-1:0] dcache_data,
+    input  logic                               dcache_read_done,
+    input  logic [DMEM_DEPTH-1:0]              dcache_data,
+    output logic                               dcache_ready,
+    output logic [DMEM_DEPTH-1:0]              dcache_addr,
 
-    output logic dcache_ready,
-    output logic [DMEM_DEPTH-1:0] dcache_addr,
+    // LSQ Interface
+    input  logic [LD_ST_OPCODE_WIDTH-1:0]      iss_lsb_opcode,
+    input  logic [ROB_INDEX_WIDTH-1:0]         iss_lsb_rob_tag,
+    input  logic [DMEM_DEPTH-1:0]              iss_lsb_addr,
+    input  logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_lsb_phy_addr,
+    input  logic                               iss_lsb_rdy,
+    output logic                               iss_lsb_ready,
 
-    // ISSUEQ Interface
-    input logic [LD_ST_OPCODE_WIDTH-1:0] iss_lsb_opcode,
-    input logic [ROB_INDEX_WIDTH-1:0] iss_lsb_rob_tag,
-    input logic [DMEM_DEPTH-1:0] iss_lsb_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_lsb_phy_addr,
-    input logic iss_lsb_rdy,
-    output logic iss_lsb_ready,
+    // Issue Unit Interface
+    input  logic                               issue_ld_buf,
+    output logic                               ready_ld_buf,
 
-    // ISSUE UNIT Interface
-    input logic issue_ld_buf,
-    output logic ready_ld_buf,
-    
     // CDB Interface
-    input logic cdb_flush,
-    input logic [ROB_INDEX_WIDTH-1:0] cdb_rob_depth,
-
-    output logic [ROB_INDEX_WIDTH-1:0] lsb_rob_tag,
-    output logic [DMEM_DEPTH-1:0] lsb_rd_phy_addr,
-    output logic [REG_FILE_DATA_WIDTH-1:0] lsb_data,
-    output logic lsb_rw,
-    output logic [DMEM_DEPTH-1:0] lsb_sw_addr,
-    output logic lsb_ready,
+    input  logic                               cdb_flush,
+    input  logic [ROB_INDEX_WIDTH-1:0]         cdb_rob_depth,
+    output logic [ROB_INDEX_WIDTH-1:0]         lsb_rob_tag,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0] lsb_rd_phy_addr,
+    output logic [REG_FILE_DATA_WIDTH-1:0]     lsb_data,
+    output logic                               lsb_rw,
+    output logic [DMEM_DEPTH-1:0]              lsb_sw_addr,
+    output logic                               lsb_ready,
 
     // ROB Interface
-    input logic [ROB_INDEX_WIDTH-1:0] rob_top_ptr
+    input  logic [ROB_INDEX_WIDTH-1:0]         rob_top_ptr
 );
-    typedef struct packed {
-        logic [ROB_INDEX_WIDTH-1:0] rob_tag;
-        logic rw;
-        logic [DMEM_DEPTH-1:0] addr;
-        logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_addr;
-        logic [REG_FILE_DATA_WIDTH-1:0] data;
-    } lsb_entry;
 
-    lsb_entry lsb_array [0:LSB_DEPTH-1];
-    logic [LSB_DEPTH-1:0] lsb_valid;
-    logic lsb_full;
-    logic lsb_empty;
+    typedef struct packed {
+        logic [ROB_INDEX_WIDTH-1:0]        rob_tag;
+        logic                              rw;       // 1 = load, 0 = store
+        logic [DMEM_DEPTH-1:0]             addr;
+        logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_addr;
+        logic [REG_FILE_DATA_WIDTH-1:0]    data;
+    } lsb_entry_t;
+
+    lsb_entry_t lsb_array [0:LSB_DEPTH-1];
     logic [LSB_INDEX_WIDTH:0] write_ptr, read_ptr;
 
-    // one slot for lw instruction due to dcache read latency
-    lsb_entry lw_slot_entry;
-    logic lw_slot_ready;
-    logic lw_slot_valid;
+    lsb_entry_t lw_slot;
+    logic       lw_slot_valid;
+    logic       lw_slot_data_ready;
 
-    logic [ROB_INDEX_WIDTH-1:0] lsb_entry_depth [0:LSB_DEPTH-1];
-    logic [ROB_INDEX_WIDTH-1:0] lsb_entry_depth_lw;
-    // Entry Depth
+    //  Buffer status
+    logic [LSB_INDEX_WIDTH:0] entry_count;
+    logic lsb_full, lsb_empty;
+
+    assign entry_count = write_ptr - read_ptr;
+    assign lsb_full  = (write_ptr[LSB_INDEX_WIDTH]     != read_ptr[LSB_INDEX_WIDTH]) &&
+                       (write_ptr[LSB_INDEX_WIDTH-1:0] == read_ptr[LSB_INDEX_WIDTH-1:0]);
+    assign lsb_empty = (write_ptr == read_ptr);
+
+    // Ready to accept a new instruction when the buffer has space,
+    // the lw_slot is free (so a potential load can be serviced), and
+    // no flush is in progress.
+    assign iss_lsb_ready = !lsb_full && !lw_slot_valid && !cdb_flush;
+    assign ready_ld_buf  = !lsb_empty && !cdb_flush;
+
+    // D-Cache request: active while lw_slot awaits data
+    assign dcache_ready = lw_slot_valid && !lw_slot_data_ready;
+    assign dcache_addr  = lw_slot.addr;
+
+    // ----------------------------------------------------------------
+    //  Flush compaction (combinational pre-computation)
+    //  Keeps entries whose ROB depth <= cdb_rob_depth (older or same
+    //  age as the mispredicting branch) and removes younger ones.
+    //  Entries are compacted towards the read_ptr end; write_ptr is
+    //  adjusted to read_ptr + keep_count.
+    // ----------------------------------------------------------------
+    logic [LSB_INDEX_WIDTH:0] flush_keep_count;
+    lsb_entry_t              flush_compact [0:LSB_DEPTH-1];
+    logic                    flush_lw_slot;
+
     always_comb begin
-        for (int i = read_ptr[LSB_INDEX_WIDTH-1:0]; i < write_ptr[LSB_INDEX_WIDTH-1:0]; i++) begin
-            lsb_entry_depth[i] = lsb_array[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_top_ptr;
+        flush_keep_count = '0;
+        for (int i = 0; i < LSB_DEPTH; i++)
+            flush_compact[i] = lsb_array[i];
+
+        for (int i = 0; i < LSB_DEPTH; i++) begin
+            if (i[LSB_INDEX_WIDTH:0] < entry_count) begin
+                if ((lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0] + i[LSB_INDEX_WIDTH-1:0]].rob_tag
+                     - rob_top_ptr) <= cdb_rob_depth) begin
+                    flush_compact[read_ptr[LSB_INDEX_WIDTH-1:0]
+                                  + flush_keep_count[LSB_INDEX_WIDTH-1:0]]
+                        = lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0] + i[LSB_INDEX_WIDTH-1:0]];
+                    flush_keep_count = flush_keep_count + 1;
+                end
+            end
         end
-        lsb_entry_depth_lw = lw_slot_entry.rob_tag[ROB_INDEX_WIDTH-1:0] - rob_top_ptr;
+
+        flush_lw_slot = lw_slot_valid &&
+                        ((lw_slot.rob_tag - rob_top_ptr) > cdb_rob_depth);
     end
 
+    // flush > {dcache_resp, deferred_xfer,new_instr, issue_to_cdb}
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            write_ptr <= '0;
-            read_ptr <= '0;
-            for (int i = 0; i < LSB_DEPTH; i++) begin
+            write_ptr          <= '0;
+            read_ptr           <= '0;
+            lw_slot_valid      <= 1'b0;
+            lw_slot_data_ready <= 1'b0;
+            lw_slot            <= '0;
+            lsb_ready          <= 1'b0;
+            lsb_rob_tag        <= '0;
+            lsb_rd_phy_addr    <= '0;
+            lsb_data           <= '0;
+            lsb_rw             <= '0;
+            lsb_sw_addr        <= '0;
+            for (int i = 0; i < LSB_DEPTH; i++)
                 lsb_array[i] <= '0;
-            end
-        end else begin
-            // Store the instruction if there is a free slot
-            // TODO: Optimize the logic for lw slot
-            // Does it introduce worse traffic?
-            // Since it prefers the sw.
-            if (iss_lsb_rdy && !lsb_full) begin
-                if (iss_lsb_opcode == OPCODE_LOAD) begin
-                    lw_slot_entry <= '{
-                        rob_tag: iss_lsb_rob_tag,
-                        rw: 1'b1,
-                        addr: '0,
-                        phy_addr: iss_lsb_phy_addr,
-                        data: '0};
-                    lw_slot_valid <= 1'b1;
-                    lw_slot_ready <= 1'b0;
-                    dcache_ready <= 1'b1;
 
-                    if (lw_slot_valid && lw_slot_ready) begin
-                        lsb_array[write_ptr] <= lw_slot_entry;
-                        write_ptr <= write_ptr + 1;
-                    end
+        end else if (cdb_flush) begin
+            for (int i = 0; i < LSB_DEPTH; i++)
+                lsb_array[i] <= flush_compact[i];
+            write_ptr <= read_ptr + flush_keep_count;
+
+            if (flush_lw_slot) begin
+                lw_slot_valid      <= 1'b0;
+                lw_slot_data_ready <= 1'b0;
+            end
+            lsb_ready <= 1'b0;
+
+        end else begin
+            lsb_ready <= 1'b0;
+
+            // D-Cache read response
+            if (dcache_read_done && lw_slot_valid && !lw_slot_data_ready) begin
+                if (!lsb_full) begin
+                    // Fast path: move completed load straight into the buffer
+                    lsb_array[write_ptr[LSB_INDEX_WIDTH-1:0]] <= '{
+                        rob_tag:  lw_slot.rob_tag,
+                        rw:       lw_slot.rw,
+                        addr:     lw_slot.addr,
+                        phy_addr: lw_slot.phy_addr,
+                        data:     dcache_data
+                    };
+                    write_ptr     <= write_ptr + 1;
+                    lw_slot_valid <= 1'b0;
+                end else begin
+                    // Buffer full: park data in lw_slot until space opens
+                    lw_slot.data       <= dcache_data;
+                    lw_slot_data_ready <= 1'b1;
                 end
-                else begin
-                    lsb_array[write_ptr] <= '{
-                        rob_tag: iss_lsb_rob_tag,
-                        rw: 1'b0,
-                        addr: iss_lsb_addr,
+            end
+
+            // Deferred lw_slot -> buffer transfer
+            if (lw_slot_valid && lw_slot_data_ready && !lsb_full) begin
+                lsb_array[write_ptr[LSB_INDEX_WIDTH-1:0]] <= lw_slot;
+                write_ptr          <= write_ptr + 1;
+                lw_slot_valid      <= 1'b0;
+                lw_slot_data_ready <= 1'b0;
+            end
+
+            // Accept new instruction from LSQ
+            if (iss_lsb_rdy && iss_lsb_ready) begin
+                if (iss_lsb_opcode == OPCODE_LOAD) begin
+                    lw_slot <= '{
+                        rob_tag:  iss_lsb_rob_tag,
+                        rw:       1'b1,
+                        addr:     iss_lsb_addr,
                         phy_addr: iss_lsb_phy_addr,
-                        data: '0};
+                        data:     '0
+                    };
+                    lw_slot_valid      <= 1'b1;
+                    lw_slot_data_ready <= 1'b0;
+                end else begin
+                    lsb_array[write_ptr[LSB_INDEX_WIDTH-1:0]] <= '{
+                        rob_tag:  iss_lsb_rob_tag,
+                        rw:       1'b0,
+                        addr:     iss_lsb_addr,
+                        phy_addr: iss_lsb_phy_addr,
+                        data:     '0
+                    };
                     write_ptr <= write_ptr + 1;
                 end
-            end else if (lw_slot_valid && lw_slot_ready) begin
-                lsb_array[write_ptr] <= lw_slot_entry;
-                write_ptr <= write_ptr + 1;
-                lw_slot_valid <= 1'b0;
-                lw_slot_ready <= 1'b0;
-                dcache_ready <= 1'b0;
-            end else begin
-                dcache_ready <= 1'b0;
-            end 
-
-            // TODO: Assertion check if dcache_read_done is asserted when lw_slot_valid is asserted
-            if(dcache_read_done && lw_slot_valid&&!lw_slot_ready) begin
-                lw_slot_ready <= 1'b1;
-                lw_slot_entry.data <= dcache_data;
             end
 
-            // Issue the instruction
+            // Issue head entry to CDB
             if (issue_ld_buf && !lsb_empty) begin
-                lsb_rob_tag <= lsb_array[read_ptr].rob_tag;
-                lsb_rd_phy_addr <= lsb_array[read_ptr].phy_addr;
-                lsb_data <= lsb_array[read_ptr].data;
-                lsb_rw <= lsb_array[read_ptr].rw;
-                lsb_sw_addr <= lsb_array[read_ptr].addr;
-                read_ptr <= read_ptr + 1;
-                lsb_ready <= 1'b1;
-            end
-
-            // Flush the instruction
-            if (cdb_flush) begin
-                automatic int slot = 0;
-                for (int i = read_ptr[LSB_INDEX_WIDTH-1:0]; i < write_ptr[LSB_INDEX_WIDTH-1:0]; i++) begin
-                    if (lsb_entry_depth[i] > cdb_rob_depth) begin
-                        slot ++;
-                    end else begin
-                        lsb_array[i - slot] <= lsb_array[i];
-                    end
-                end
-                read_ptr <= read_ptr + slot;
-                if (lw_slot_valid && (lsb_entry_depth_lw > cdb_rob_depth)) begin
-                    lw_slot_valid <= 1'b0;
-                    lw_slot_ready <= 1'b0;
-                end
+                lsb_rob_tag     <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].rob_tag;
+                lsb_rd_phy_addr <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].phy_addr;
+                lsb_data        <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].data;
+                lsb_rw          <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].rw;
+                lsb_sw_addr     <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].addr;
+                read_ptr        <= read_ptr + 1;
+                lsb_ready       <= 1'b1;
             end
         end
     end
 
-    assign lsb_full = (write_ptr[LSB_INDEX_WIDTH] != read_ptr[LSB_INDEX_WIDTH]) && (write_ptr[LSB_INDEX_WIDTH-1:0] == read_ptr[LSB_INDEX_WIDTH-1:0]);
-    assign iss_lsb_ready = !lsb_full && !cdb_flush;
-    assign lsb_empty = (write_ptr[LSB_INDEX_WIDTH] == read_ptr[LSB_INDEX_WIDTH]) && (write_ptr[LSB_INDEX_WIDTH-1:0] == read_ptr[LSB_INDEX_WIDTH-1:0]);
-    assign ready_ld_buf = !lsb_empty && !cdb_flush;
+    // Assertions
+    // synthesis translate_off
+    always_ff @(posedge clk) begin
+        if (rst_n) begin
+            assert (entry_count <= LSB_DEPTH)
+                else $error("LSB: buffer overflow, entry_count = %0d", entry_count);
+            assert (!(dcache_read_done && !lw_slot_valid))
+                else $warning("LSB: D-Cache responded with no pending load");
+        end
+    end
+    // synthesis translate_on
+
 endmodule

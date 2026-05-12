@@ -7,6 +7,7 @@ module CPU_FRONT_END #(
     // ARCH_REG
     parameter int unsigned ARCH_REG_COUNT = 32,
     parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
+    parameter int unsigned REG_FILE_DATA_WIDTH = 64,
 
     // PHY_REGISTER_FILE
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
@@ -93,6 +94,10 @@ module CPU_FRONT_END #(
 
     // CDB interface
     input logic cdb_valid,
+    input logic [ROB_INDEX_WIDTH-1:0] cdb_rob_depth,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0] cdb_rd_phy_addr,
+    input logic [REG_FILE_DATA_WIDTH-1:0] cdb_rd_data,
+    input logic cdb_reg_write,
     input logic [ROB_INDEX_WIDTH-1:0] cdb_rob_tag,
     input logic [DMEM_DEPTH-1:0] cdb_sw_addr,
     input logic [DMEM_DEPTH-1:0] cdb_branch_addr,
@@ -509,16 +514,26 @@ module CPU_FRONT_END #(
     );
 
     // RBA
-    // TODO:
-    // RBA #(
-    //     .INSTR_WIDTH(INSTR_WIDTH),
-    //     .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
-    //     .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
-    //     .DMEM_WIDTH(DMEM_WIDTH),
-    //     .ROB_DEPTH(ROB_DEPTH),
-    //     .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH)
-    // ) rba (
-    //     .clk(clk),
-    //     .rst_n(rst_n),
-    // );
+    RBA #(
+        .ARCH_REG_COUNT(ARCH_REG_COUNT),
+        .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
+        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .ROB_DEPTH(ROB_DEPTH),
+        .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
+        .SB_DEPTH(SB_DEPTH)
+    ) rba (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .dis_rs_phy_addr(dis_rs_phy_addr),
+        .dis_rt_phy_addr(dis_rt_phy_addr),
+        .dis_new_rd_phy_addr(dis_new_rd_phy_addr),
+        .dis_reg_write(dis_reg_write),
+
+        .rs_data_ready(rs_data_ready),
+        .rt_data_ready(rt_data_ready),
+
+        .rd_phy_addr(cdb_rd_phy_addr),
+        .cdb_reg_write(cdb_reg_write)
+    );
 endmodule
