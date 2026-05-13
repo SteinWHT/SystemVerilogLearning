@@ -1,50 +1,156 @@
 // 4-way interleaved fetch queue
-// 4 * 32 bit in
-// 1 * 32 bit out
+// n * INSTR_WIDTH bit in (n <= NUM_WAYS)
+// 1 * INSTR_WIDTH bit out
+// Assume I-CACHE can only read n instructions at a time 
+// Therefore, INSTR_WIDTH can be different from IMEM_WIDTH
+// I try to design this module in a way that is easy to extend to more ways
+// but in cost of more logic and area
 module IFQ #(
     parameter int unsigned INSTR_WIDTH = 32,
+    parameter int unsigned IMEM_DEPTH = 64,
+    parameter int unsigned IMEM_WIDTH = 32,
     parameter int unsigned DEPTH = 16,
     parameter int unsigned NUM_WAYS = 4,
-    localparam int unsigned NUM_WAYS_WIDTH = $clog2(NUM_WAYS)
+    localparam int unsigned NUM_WAYS_WIDTH = $clog2(NUM_WAYS),
+    localparam int unsigned one_way_depth = DEPTH / NUM_WAYS,
+    localparam int unsigned one_time_instr_num = IMEM_WIDTH / INSTR_WIDTH
 ) (
     input  logic                        clk,
     input  logic                        rst_n,
-    input  logic [INSTR_WIDTH-1:0]      instr_in [0:NUM_WAYS-1],
-    input  logic                        valid_in,
-    input  logic                        flush,
-    input  logic [NUM_WAYS_WIDTH-1:0]   valid_out,
-    output logic [INSTR_WIDTH-1:0]      instr_out,
 
-    output logic                        full,
-    output logic                        empty
+    // I-CACHE interface
+    input  logic [IMEM_WIDTH-1:0]       imem_data,
+    input  logic                        imem_valid,
+
+    output logic [IMEM_DEPTH-1:0]       imem_addr,
+    output logic                        imem_read_rdy,
+
+    // DISPATCH interface
+    input  logic                        dis_ren,
+    input  logic [IMEM_DEPTH-1:0]       dis_imem_addr,
+    input  logic                        dis_jmpbr,
+    input  logic [IMEM_DEPTH-1:0]       dis_jmpbr_addr,
+    input  logic                        dis_jmpbr_addr_valid,
+
+    output logic [INSTR_WIDTH-1:0]      ifq_instr_out,
+    output logic [IMEM_DEPTH-1:0]       ifq_pc_plus4,
+    output logic                        ifq_empty
 );
 
-    localparam int unsigned one_way_depth = DEPTH / NUM_WAYS;
+    // Per-FIFO status signals
     logic [NUM_WAYS-1:0] empty_array;
     logic [NUM_WAYS-1:0] full_array;
-    logic [INSTR_WIDTH-1:0] instr_out_array [0:NUM_WAYS-1];
-    genvar i;
+
+    // Per-FIFO write/read enables and data routing
+    logic [NUM_WAYS-1:0]    write_en_array;
+    logic [NUM_WAYS-1:0]    read_en_array;
+    logic [INSTR_WIDTH-1:0] data_in_array [NUM_WAYS];
+    logic [INSTR_WIDTH-1:0] instr_out_array [NUM_WAYS];
+
+    // Round-robin way pointers
+    logic [NUM_WAYS_WIDTH-1:0] wr_way;
+    logic [NUM_WAYS_WIDTH-1:0] rd_way;
+
+    logic full, empty, flush;
+
+    logic [IMEM_DEPTH-1:0] pc;
+    logic [IMEM_DEPTH-1:0] pc_plus4;
+    logic [IMEM_DEPTH-1:0] imem_pc;
+
+    assign flush   = dis_jmpbr && dis_jmpbr_addr_valid;
+    assign pc_plus4 = pc + IMEM_DEPTH'(INSTR_WIDTH / 8);
+
+    // full: any FIFO is full
+    logic [NUM_WAYS-1:0] wr_target_mask;
+    always_comb begin
+        wr_target_mask = '0;
+        for (int i = 0; i < one_time_instr_num; i++)
+            wr_target_mask[NUM_WAYS_WIDTH'(wr_way + i[NUM_WAYS_WIDTH-1:0])] = 1'b1;
+    end
+
+    assign full  = |(wr_target_mask & full_array);
+    assign empty = empty_array[rd_way];
+
+    // Compute per-FIFO write enables and data routing
+    always_comb begin
+        write_en_array = '0;
+        read_en_array  = '0;
+        data_in_array  = '{default: '0};
+
+        for (int i = 0; i < one_time_instr_num; i++) begin
+            automatic logic [NUM_WAYS_WIDTH-1:0] target;
+            target = wr_way + NUM_WAYS_WIDTH'(i);
+            write_en_array[target] = imem_valid && !full && !dis_jmpbr;
+            data_in_array[target]  = imem_data[i * INSTR_WIDTH +: INSTR_WIDTH];
+        end
+
+        read_en_array[rd_way] = dis_ren && !empty && !dis_jmpbr;
+    end
+
+    // Sub-FIFOs
+    genvar gi;
     generate
-        for(i = 0; i < NUM_WAYS; i++) begin: way_fifo_inst
+        for (gi = 0; gi < NUM_WAYS; gi++) begin: way_fifo_inst
             sync_fifo #(
                 .DATA_WIDTH(INSTR_WIDTH),
                 .DEPTH(one_way_depth)
             ) sync_fifo_inst (
                 .clk(clk),
-                .rst_n(rst_n && !flush),
-                .data_in(instr_in[i]),
-                .write_en(valid_in),
-                .read_en(valid_out == i),
-                .data_out(instr_out_array[i]),
-                .empty(empty_array[i]),
-                .full(full_array[i])
+                .rst_n(rst_n),
+                .clear(flush),
+                .data_in(data_in_array[gi]),
+                .write_en(write_en_array[gi]),
+                .read_en(read_en_array[gi]),
+                .data_out(instr_out_array[gi]),
+                .empty(empty_array[gi]),
+                .full(full_array[gi])
             );
         end
     endgenerate
 
-    assign full = |full_array;
-    assign empty = &empty_array;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            rd_way  <= '0;
+            wr_way  <= '0;
+            pc      <= '0;
+            imem_pc <= '0;
+        end else begin
+            if (dis_jmpbr) begin
+                if (dis_jmpbr_addr_valid) begin
+                    rd_way  <= '0;
+                    wr_way  <= '0;
+                    imem_pc <= dis_jmpbr_addr;
+                    pc      <= dis_jmpbr_addr;
+                end
+            end else begin
+                if (imem_valid && !full) begin
+                    wr_way  <= wr_way + NUM_WAYS_WIDTH'(one_time_instr_num);
+                    imem_pc <= imem_pc + IMEM_DEPTH'(one_time_instr_num * (INSTR_WIDTH / 8));
+                end
 
-    assign instr_out = instr_out_array[valid_out];
+                if (dis_ren && !empty) begin
+                    pc     <= pc_plus4;
+                    rd_way <= rd_way + 1'b1;
+                end
+            end
+        end
+    end
+
+    assign ifq_instr_out = instr_out_array[rd_way];
+    assign ifq_empty     = empty;
+    assign ifq_pc_plus4  = pc_plus4;
+    assign imem_addr     = imem_pc;
+    assign imem_read_rdy = !full && !dis_jmpbr;
+
+    // synthesis translate_off
+    initial begin
+        assert (one_time_instr_num <= NUM_WAYS)
+            else $error("IFQ: one_time_instr_num > NUM_WAYS");
+        assert (DEPTH % NUM_WAYS == 0)
+            else $error("IFQ: DEPTH %% NUM_WAYS != 0");
+        assert ((NUM_WAYS & (NUM_WAYS - 1)) == 0)
+            else $error("IFQ: NUM_WAYS must be a power of 2");
+    end
+    // synthesis translate_on
 
 endmodule
