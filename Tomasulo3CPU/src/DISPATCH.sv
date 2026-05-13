@@ -8,8 +8,10 @@
 
 module DISPATCH #(
     parameter int unsigned XLEN = 64,
-    parameter int unsigned IMEM_DEPTH = 64,
+    parameter int unsigned INSTR_WIDTH = 32,
+    parameter int unsigned IMEM_DEPTH = 32,
     parameter int unsigned IMEM_WIDTH = 32,
+    parameter int unsigned IMEM_WIDTH_WORD = IMEM_DEPTH - 2,
     parameter int unsigned DMEM_DEPTH = 64,
     parameter int unsigned DMEM_WIDTH = 64,
     parameter int unsigned ARCH_REG_COUNT = 32,
@@ -31,11 +33,11 @@ module DISPATCH #(
     // IFQ interface
     input  logic [IMEM_WIDTH-1:0]       ifetch_instr_in,
     input  logic [IMEM_DEPTH-1:0]       ifetch_pcplus4_in,
-    input  logic                        ifetch_empty_flag,
+    input  logic                        ifetch_empty,
 
     output logic                        dis_ren,
     output logic                        dis_jmpbr,
-    output logic [IMEM_DEPTH-1:0]       dis_jmpbr_addr,
+    output logic [IMEM_WIDTH_WORD-1:0]  dis_jmpbr_addr,
     output logic                        dis_jmpbr_addr_valid,
 
     // BPB interface
@@ -45,12 +47,12 @@ module DISPATCH #(
     output logic                        dis_bpb_branch,
 
     // RAS interface
-    input  logic [IMEM_DEPTH-1:0]       ras_addr,
+    input  logic [IMEM_WIDTH_WORD-1:0]  ras_addr,
 
     output logic                        dis_ras_jr31_inst,
     output logic                        dis_ras_jal_inst,
     // = ifetch_pcplus4_in
-    // output logic [IMEM_DEPTH-1:0]       dis_pcplus4,
+    output logic [IMEM_DEPTH-1:0]       dis_pc_plus4,
 
     // FRL interface
     input  logic                                    frl_empty,
@@ -75,14 +77,14 @@ module DISPATCH #(
     // PRF
     input  logic prf_rs_data_ready,
     input  logic prf_rt_data_ready,
-    
+
     output logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_rd_phy_addr,
     output logic dis_reg_write,
 
     // Issue Queue interface
     input logic                         issue_intq_full,
     input logic                         issue_divq_full,
-    input logic                         issue_mulq_full,  
+    input logic                         issue_mulq_full,
     input logic                         issue_ld_stq_full,
     input logic                         issue_intq_two_or_more_vacant,
     input logic                         issue_divq_two_or_more_vacant,
@@ -139,7 +141,6 @@ module DISPATCH #(
         .XLEN(XLEN),
         .INSTR_WIDTH(IMEM_WIDTH),
         .ARCH_REG_COUNT(ARCH_REG_COUNT),
-        .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .ALU_OP_WIDTH(ALU_OP_WIDTH),
         .MUL_OP_WIDTH(MUL_OP_WIDTH),
         .DIV_OP_WIDTH(DIV_OP_WIDTH),
@@ -162,7 +163,16 @@ module DISPATCH #(
         .jr31_inst(dis_jr31_inst)
     );
 
+    // BPB logic
+    assign dis_bpb_branch_pc_bits = ifetch_pcplus4_in[BPB_PC_BITS+1:2];
+    assign dis_bpb_branch = dis_branch;
 
+    // RAS logic
+    assign dis_pc_plus4 = ifetch_pcplus4_in;
+    assign dis_ras_jr31_inst = dis_jr31_inst;
+    assign dis_ras_jal_inst = dis_jal_inst;
+
+    assign dis_jmpbr_addr = ras_addr;
 
     // The decision-making logic
     // Interacts with IFQ, RAS, BPB, FRL, CFC
@@ -173,9 +183,29 @@ module DISPATCH #(
     // FRL is empty (no more free physical registers for renaming) && regwrite
     // FRAT is full (no more checkpoints for branch instructions) && (is_branch or jr)
     // jr $rs1 ($rs1 != $31) until the value of $rs1 is ready in CDB
-    // jr -> 1 bit flag register(jr_stall) + 5-bit internal register(jr_rob_tag) 
+    // jr -> 1 bit flag register(jr_stall) + 5-bit internal register(jr_rob_tag)
     // if jr_rob_tag is on the CDB and valid, then we can clear the jr_stall flag and proceed with dispatching the jr instruction
-    
+    logic stall;
+    always_comb begin
+        stall = '0;
+
+        if(ifetch_empty) begin
+            stall = 1'b1;
+        end else if (rob_full) begin
+            stall = 1'b1;
+        end else if (frat_full && (dis_branch || dis_jr_inst)) begin
+            stall = 1'b1;
+        end else if (frl_empty && dis_reg_write) begin
+            stall = 1'b1;
+        end else if (dis_jr_inst && !prf_rs_data_ready) begin
+            stall = 1'b1;
+        end
+    end
+
+    assign dis_ren = !stall;
+    assign dis_jmpbr = (dis_branch || dis_jr_inst) && !stall;
+    // if destination is $31 or $rd is ready
+    // assign dis_jmpbr_addr_valid = ;
 
 
 

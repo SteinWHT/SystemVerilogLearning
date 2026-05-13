@@ -2,6 +2,7 @@
 module dual_port_memory #(
     parameter int unsigned DATA_WIDTH = 8,
     parameter int unsigned DEPTH = 8,
+    parameter int unsigned ADDR_WIDTH = $clog2(DEPTH),
     parameter int unsigned READBEFOREWRITE = 0
 ) (
     input logic clk,
@@ -12,19 +13,18 @@ module dual_port_memory #(
     input logic write_en_b,
     input logic read_en_a,
     input logic read_en_b,
-    input logic [DEPTH-1:0] address_a,
-    input logic [DEPTH-1:0] address_b,
+    input logic [ADDR_WIDTH-1:0] address_a,
+    input logic [ADDR_WIDTH-1:0] address_b,
     output logic [DATA_WIDTH-1:0] data_out_a,
     output logic [DATA_WIDTH-1:0] data_out_b
 );
 
-    logic [DEPTH-1:0] [DATA_WIDTH-1:0] memory_data;
+    logic [DATA_WIDTH-1:0] memory_data [DEPTH];
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             memory_data <= '{default: 0};
         end else begin
-            assert(!(write_en_a && write_en_b) && (address_a != address_b)) else $warning("write a and b cannot be enabled at the same time, only one write(a) is allowed at a time");
             if(READBEFOREWRITE) begin
                 if(write_en_a && write_en_b && address_a == address_b) begin
                     memory_data[address_a] <= data_in_a;
@@ -54,4 +54,12 @@ module dual_port_memory #(
             end
         end
     end
+
+    // synthesis translate_off
+    always_ff @(posedge clk) begin
+        if(rst_n)
+            DUAL_PORT_MEMORY: assert(!((write_en_a && write_en_b) && (address_a == address_b)))
+            else $warning("write a and b to the same address cannot be enabled at the same time");
+    end
+    // synthesis translate_on
 endmodule

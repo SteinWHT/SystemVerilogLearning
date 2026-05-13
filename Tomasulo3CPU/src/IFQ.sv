@@ -3,7 +3,7 @@
 // 4-way interleaved fetch queue
 // n * INSTR_WIDTH bit in (n <= NUM_WAYS)
 // 1 * INSTR_WIDTH bit out
-// Assume I-CACHE can only read n instructions at a time 
+// Assume I-CACHE can only read n instructions at a time
 // Therefore, INSTR_WIDTH can be different from IMEM_WIDTH
 // I try to design this module in a way that is easy to extend to more ways
 // but in cost of more logic and area
@@ -11,6 +11,7 @@ module IFQ #(
     parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned IMEM_DEPTH = 64,
     parameter int unsigned IMEM_WIDTH = 32,
+    parameter int unsigned IMEM_WIDTH_WORD = IMEM_DEPTH - 2,
     parameter int unsigned DEPTH = 16,
     parameter int unsigned NUM_WAYS = 4
 ) (
@@ -27,7 +28,7 @@ module IFQ #(
     // DISPATCH interface
     input  logic                        dis_ren,
     input  logic                        dis_jmpbr,
-    input  logic [IMEM_DEPTH-1:0]       dis_jmpbr_addr,
+    input  logic [IMEM_WIDTH_WORD-1:0]  dis_jmpbr_addr,
     input  logic                        dis_jmpbr_addr_valid,
 
     output logic [INSTR_WIDTH-1:0]      ifq_instr_out,
@@ -122,8 +123,8 @@ module IFQ #(
                 if (dis_jmpbr_addr_valid) begin
                     rd_way  <= '0;
                     wr_way  <= '0;
-                    imem_pc <= dis_jmpbr_addr;
-                    pc      <= dis_jmpbr_addr;
+                    imem_pc <= {dis_jmpbr_addr, 2'b00};
+                    pc      <= {dis_jmpbr_addr, 2'b00};
                 end
             end else begin
                 if (imem_valid && !full) begin

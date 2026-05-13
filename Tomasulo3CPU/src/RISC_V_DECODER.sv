@@ -12,7 +12,7 @@ module RISC_V_DECODER
     parameter int unsigned XLEN           = 64,
     parameter int unsigned INSTR_WIDTH    = 32,
     parameter int unsigned ARCH_REG_COUNT = 32,
-    localparam int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
+    parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
     parameter int unsigned ALU_OP_WIDTH = 5,
     parameter int unsigned MUL_OP_WIDTH = 2,
     parameter int unsigned DIV_OP_WIDTH = 2,

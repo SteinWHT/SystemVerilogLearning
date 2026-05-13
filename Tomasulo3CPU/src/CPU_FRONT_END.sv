@@ -1,8 +1,10 @@
+`timescale 1ns/1ps
 module CPU_FRONT_END #(
     // I-CACHE
     parameter int unsigned INSTR_WIDTH = 32,
-    parameter int unsigned IMEM_DEPTH = 64,
-    localparam int unsigned PC_WIDTH = IMEM_DEPTH - 2,
+    parameter int unsigned IMEM_DEPTH = 32,
+    parameter int unsigned IMEM_WIDTH = 32,
+    parameter int unsigned IMEM_DEPTH_WORD = IMEM_DEPTH - 2,
 
     // ARCH_REG
     parameter int unsigned ARCH_REG_COUNT = 32,
@@ -22,7 +24,7 @@ module CPU_FRONT_END #(
     // IFQ
     // NUM_WAYS now only support 2^N because of the valid_out signal
     parameter int unsigned NUM_WAYS = 4,
-    localparam int unsigned NUM_WAYS_WIDTH = $clog2(NUM_WAYS),
+    parameter int unsigned NUM_WAYS_WIDTH = $clog2(NUM_WAYS),
     parameter int unsigned IFQ_DEPTH = 16,
 
     // RAS
@@ -34,7 +36,7 @@ module CPU_FRONT_END #(
 
     // FRAT
     parameter int unsigned NUM_CHECKPOINT = 8,
-    localparam int unsigned CHECKPOINT_PTR_WIDTH = $clog2(NUM_CHECKPOINT),
+    parameter int unsigned CHECKPOINT_PTR_WIDTH = $clog2(NUM_CHECKPOINT),
 
     // ROB
     parameter int unsigned ROB_DEPTH = 16,
@@ -42,17 +44,17 @@ module CPU_FRONT_END #(
 
     // SB
     parameter int unsigned SB_DEPTH = 4,
-    localparam int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH)
+    parameter int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH)
 ) (
-    input logic clk,
-    input logic rst_n,
+    input  logic clk,
+    input  logic rst_n,
 
     // I-CACHE interface
-    input logic [IMEM_DEPTH-1:0] imem_address,
-    input logic imem_valid_in,
-    input logic [INSTR_WIDTH-1:0] imem_data [0:NUM_WAYS-1],
+    input  logic                    imem_valid,
+    input  logic [INSTR_WIDTH-1:0]  imem_data,
 
-    output logic imem_valid_out,
+    output logic                    imem_read_rdy,
+    output logic [IMEM_DEPTH-1:0]   imem_addr,
 
     // D-CACHE interface
     input logic dcache_valid,
@@ -125,21 +127,15 @@ module CPU_FRONT_END #(
     // INTERFACE
     // ------------------------------------------------------------
     // IFQ interface
-    logic flush;
-    logic [NUM_WAYS_WIDTH-1:0] valid_out;
-    logic [INSTR_WIDTH-1:0] instr_out;
-    logic ifq_full;
+    logic [INSTR_WIDTH-1:0] ifq_instr_out;
     logic ifq_empty;
-
-    logic [PC_WIDTH-1:0] pc;
-    logic [PC_WIDTH-1:0] pc_plus4;
-    logic [PC_WIDTH-1:0] ifq_pc;
+    logic [IMEM_WIDTH-1:0] ifq_pc_plus4;
 
     // DISPATCH interface
     // DISPATCH <-> IFQ
     logic dis_ren;
     logic dis_jmpbr;
-    logic [IMEM_DEPTH-1:0] dis_jmpbr_addr;
+    logic [IMEM_DEPTH_WORD-1:0] dis_jmpbr_addr;
     logic dis_jmpbr_addr_valid;
 
     // DISPATCH <-> FRAT
@@ -171,6 +167,7 @@ module CPU_FRONT_END #(
     logic [IMEM_DEPTH-1:0] ras_addr;
     logic dis_ras_jr31_inst;
     logic dis_ras_jal_inst;
+    logic [IMEM_DEPTH-1:0] dis_pc_plus4;
 
     // FRL interface
     logic dis_frl_empty;
@@ -211,48 +208,29 @@ module CPU_FRONT_END #(
     // IFQ
     IFQ #(
         .INSTR_WIDTH(INSTR_WIDTH),
+        .IMEM_DEPTH(IMEM_DEPTH),
+        .IMEM_WIDTH(IMEM_WIDTH),
         .DEPTH(IFQ_DEPTH),
         .NUM_WAYS(NUM_WAYS)
     ) ifq (
         .clk(clk),
         .rst_n(rst_n),
 
-        .instr_in(imem_data),
-        .valid_in(imem_valid_in),
-        .flush(flush),
-        .valid_out(valid_out),
-        .instr_out(instr_out),
+        .imem_data(imem_data),
+        .imem_valid(imem_valid),
+        .imem_addr(imem_addr),
+        .imem_read_rdy(imem_read_rdy),
 
-        .full(ifq_full),
-        .empty(ifq_empty)
+        .dis_ren(dis_ren),
+        .dis_jmpbr(dis_jmpbr),
+        .dis_jmpbr_addr(dis_jmpbr_addr),
+        .dis_jmpbr_addr_valid(dis_jmpbr_addr_valid),
+
+        .ifq_instr_out(ifq_instr_out),
+        .ifq_pc_plus4(ifq_pc_plus4),
+        .ifq_empty(ifq_empty)
     );
 
-    assign imem_valid_out = !ifq_full;
-    assign imem_address = ifq_pc;
-    assign pc_plus4 = pc + 4;
-
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            ifq_pc <= '0;
-            valid_out <= '0;
-            pc <= '0;
-        end else begin
-            // IFQ logic 
-            if (flush) begin
-                pc <= dis_jmpbr_addr;
-                ifq_pc <= dis_jmpbr_addr;
-                valid_out <= '0;
-            end else begin
-                if (!ifq_full) begin
-                    ifq_pc <= ifq_pc + 16;
-                end
-
-                if (dis_ren) begin
-                    valid_out <= valid_out + 1;
-                end
-            end
-        end
-    end
 
     // DISPATCH
     DISPATCH #(
@@ -267,9 +245,9 @@ module CPU_FRONT_END #(
         .clk(clk),
         .rst_n(rst_n),
 
-        .ifetch_instr_in(instr_out),
-        .ifetch_pcplus4_in(pc_plus4),
-        .ifetch_empty_flag(ifq_empty),
+        .ifetch_instr_in(ifq_instr_out),
+        .ifetch_pcplus4_in(ifq_pc_plus4),
+        .ifetch_empty(ifq_empty),
         .dis_ren(dis_ren),
         .dis_jmpbr(dis_jmpbr),
         .dis_jmpbr_addr(dis_jmpbr_addr),
@@ -280,6 +258,7 @@ module CPU_FRONT_END #(
         .dis_bpb_branch(dis_bpb_branch),
 
         .ras_addr(ras_addr),
+        .dis_pc_plus4(dis_pc_plus4),
         .dis_ras_jr31_inst(dis_ras_jr31_inst),
         .dis_ras_jal_inst(dis_ras_jal_inst),
 
@@ -335,8 +314,6 @@ module CPU_FRONT_END #(
         .dis_sw_rt_phy_addr(dis_sw_rt_phy_addr)
     );
 
-    assign dis_bpb_branch_pc_bits = ifq_pc[BPB_PC_BITS+1:2];
-
     // BPB
     BPB #(
         .BUFFER_WIDTH(BPB_PC_BITS)
@@ -358,13 +335,14 @@ module CPU_FRONT_END #(
 
     // RAS
     RAS #(
-        .INSTR_WIDTH(INSTR_WIDTH),
+        .IMEM_DEPTH(IMEM_DEPTH),
+        .IMEM_DEPTH_WORD(IMEM_DEPTH_WORD),
         .DEPTH(RAS_DEPTH)
     ) ras (
         .clk(clk),
         .rst_n(rst_n),
 
-        .dis_pcplus4(pcplus4),
+        .dis_pc_plus4(dis_pc_plus4),
         .dis_ras_jr31_inst(dis_ras_jr31_inst),
         .dis_ras_jal_inst(dis_ras_jal_inst),
         .ras_addr(ras_addr)

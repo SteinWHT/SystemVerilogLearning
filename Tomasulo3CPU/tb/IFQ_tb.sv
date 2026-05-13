@@ -1,15 +1,18 @@
 // Disable width mismatch in my IDE which uses verilator.
 // The warning still works when I actually run simulation in Verdi.
 /* verilator lint_off WIDTH */
+// verilog_lint: waive-start explicit-parameter-storage-type
+/* verilator lint_off BLKSEQ */
 `timescale 1ns/1ps
 
 module IFQ_tb;
 
-    localparam INSTR_WIDTH = 32;
-    localparam IMEM_DEPTH  = 64;
-    localparam IMEM_WIDTH  = 32;   // 1 instr per fetch
-    localparam DEPTH       = 16;
-    localparam NUM_WAYS    = 4;
+    parameter INSTR_WIDTH = 32;
+    parameter IMEM_DEPTH  = 64;
+    parameter IMEM_WIDTH  = 32;   // 1 instr per fetch
+    parameter IMEM_WIDTH_WORD = IMEM_DEPTH - 2; // number of bits needed to index IMEM_DEPTH words
+    parameter DEPTH       = 16;
+    parameter NUM_WAYS    = 4;
 
     logic                       clk;
     logic                       rst_n;
@@ -19,7 +22,7 @@ module IFQ_tb;
     logic                       imem_read_rdy;
     logic                       dis_ren;
     logic                       dis_jmpbr;
-    logic [IMEM_DEPTH-1:0]      dis_jmpbr_addr;
+    logic [IMEM_WIDTH_WORD-1:0] dis_jmpbr_addr;
     logic                       dis_jmpbr_addr_valid;
     logic [INSTR_WIDTH-1:0]     ifq_instr_out;
     logic [IMEM_DEPTH-1:0]      ifq_pc_plus4;
@@ -204,12 +207,12 @@ module IFQ_tb;
         dis_jmpbr_addr_valid = 0;
 
         check("empty after flush",   ifq_empty,  1);
-        check("imem_addr after flush", imem_addr, 64'h100);
+        check("imem_addr after flush", imem_addr, 64'h400);
 
         // feed at new PC
         feed_one(32'h1234_5678);
         check("new instr",   ifq_instr_out, 32'h1234_5678);
-        check("pc+4 flush",  ifq_pc_plus4,  64'h104);
+        check("pc+4 flush",  ifq_pc_plus4,  64'h404);
         read_one(rdata);
 
         // ------------------------------------------------
@@ -284,3 +287,5 @@ module IFQ_tb;
 
 endmodule
 /* verilator lint_on WIDTH */
+/* verilator lint_on BLKSEQ */
+// verilog_lint: waive-stop explicit-parameter-storage-type

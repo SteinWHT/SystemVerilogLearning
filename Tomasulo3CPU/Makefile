@@ -31,7 +31,12 @@ FSDB_FILE  := $(PROJECT).fsdb
 
 SRC_FILES := \
 	$(SRC_DIR)/simple_module/sync_fifo.sv \
-	$(SRC_DIR)/IFQ.sv
+	$(SRC_DIR)/simple_module/dual_port_memory.sv \
+	$(SRC_DIR)/simple_module/sync_lifo.sv \
+	$(SRC_DIR)/IFQ.sv \
+	$(SRC_DIR)/BPB.sv \
+	$(SRC_DIR)/RAS.sv \
+	$(SRC_DIR)/FRL.sv 
 
 TB_FILES := \
 	$(TB_DIR)/$(PROJECT)_tb.sv

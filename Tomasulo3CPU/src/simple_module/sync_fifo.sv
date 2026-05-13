@@ -16,11 +16,11 @@ module sync_fifo #(
     output logic full
 );
 
-localparam int unsigned PTR_W = $clog2(DEPTH);
+localparam int unsigned PtrW = $clog2(DEPTH);
 
 logic [DATA_WIDTH-1:0] fifo_data [DEPTH];
-logic [PTR_W:0] fifo_write_ptr;
-logic [PTR_W:0] fifo_read_ptr;
+logic [PtrW:0] fifo_write_ptr;
+logic [PtrW:0] fifo_read_ptr;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
@@ -31,7 +31,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         fifo_read_ptr <= '0;
     end else begin
         if (write_en && !full) begin
-            fifo_data[fifo_write_ptr[PTR_W-1:0]] <= data_in;
+            fifo_data[fifo_write_ptr[PtrW-1:0]] <= data_in;
             fifo_write_ptr <= fifo_write_ptr + 1'b1;
         end
         if (read_en && !empty) begin
@@ -40,8 +40,8 @@ always_ff @(posedge clk or negedge rst_n) begin
     end
 end
 
-assign data_out = fifo_data[fifo_read_ptr[PTR_W-1:0]];
+assign data_out = fifo_data[fifo_read_ptr[PtrW-1:0]];
 assign empty = (fifo_write_ptr == fifo_read_ptr);
-assign full = (fifo_write_ptr[PTR_W] != fifo_read_ptr[PTR_W]) &&
-              (fifo_write_ptr[PTR_W-1:0] == fifo_read_ptr[PTR_W-1:0]);
+assign full = (fifo_write_ptr[PtrW] != fifo_read_ptr[PtrW]) &&
+              (fifo_write_ptr[PtrW-1:0] == fifo_read_ptr[PtrW-1:0]);
 endmodule
