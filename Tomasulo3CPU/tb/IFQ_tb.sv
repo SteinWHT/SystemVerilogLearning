@@ -1,3 +1,6 @@
+// Disable width mismatch in my IDE which uses verilator.
+// The warning still works when I actually run simulation in Verdi.
+/* verilator lint_off WIDTH */
 `timescale 1ns/1ps
 
 module IFQ_tb;
@@ -15,7 +18,6 @@ module IFQ_tb;
     logic [IMEM_DEPTH-1:0]      imem_addr;
     logic                       imem_read_rdy;
     logic                       dis_ren;
-    logic [IMEM_DEPTH-1:0]      dis_imem_addr;
     logic                       dis_jmpbr;
     logic [IMEM_DEPTH-1:0]      dis_jmpbr_addr;
     logic                       dis_jmpbr_addr_valid;
@@ -54,7 +56,6 @@ module IFQ_tb;
         imem_valid       = 0;
         imem_data        = '0;
         dis_ren          = 0;
-        dis_imem_addr    = '0;
         dis_jmpbr        = 0;
         dis_jmpbr_addr   = '0;
         dis_jmpbr_addr_valid = 0;
@@ -133,9 +134,9 @@ module IFQ_tb;
 
         for (int i = 0; i < 8; i++) begin
             check($sformatf("order[%0d] instr", i), ifq_instr_out, 32'hA000_0000 + i);
-            check($sformatf("order[%0d] pc+4",  i), ifq_pc_plus4,  64'(4*(i+3)));
-            // i+3 because we already consumed 2 instrs (test2) + i instrs read so far:
-            // head_pc = (2+i)*4, pc+4 = (3+i)*4
+            check($sformatf("order[%0d] pc+4",  i), ifq_pc_plus4,  64'(4*(i+2)));
+            // i+2 because we already consumed 1 instr (test2) + i instrs read so far:
+            // head_pc = (1+i)*4, pc+4 = (2+i)*4
             read_one(rdata);
         end
         check("empty after drain", ifq_empty, 1);
@@ -282,3 +283,4 @@ module IFQ_tb;
     end
 
 endmodule
+/* verilator lint_on WIDTH */

@@ -1,8 +1,3 @@
-// My IDE used now cannot directly include the packages, so I have to include them manually
-`include "riscv_opcode_pkg.sv"
-`include "riscv_funct_pkg.sv"
-`include "riscv_types_pkg.sv"
-
 // RISC-V 64 Decoder — template
 // Combinational: outputs are not latched
 // In the first version, we only support the basic instructions

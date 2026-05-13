@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 // 4-way interleaved fetch queue
 // n * INSTR_WIDTH bit in (n <= NUM_WAYS)
 // 1 * INSTR_WIDTH bit out
@@ -10,10 +12,7 @@ module IFQ #(
     parameter int unsigned IMEM_DEPTH = 64,
     parameter int unsigned IMEM_WIDTH = 32,
     parameter int unsigned DEPTH = 16,
-    parameter int unsigned NUM_WAYS = 4,
-    localparam int unsigned NUM_WAYS_WIDTH = $clog2(NUM_WAYS),
-    localparam int unsigned one_way_depth = DEPTH / NUM_WAYS,
-    localparam int unsigned one_time_instr_num = IMEM_WIDTH / INSTR_WIDTH
+    parameter int unsigned NUM_WAYS = 4
 ) (
     input  logic                        clk,
     input  logic                        rst_n,
@@ -27,7 +26,6 @@ module IFQ #(
 
     // DISPATCH interface
     input  logic                        dis_ren,
-    input  logic [IMEM_DEPTH-1:0]       dis_imem_addr,
     input  logic                        dis_jmpbr,
     input  logic [IMEM_DEPTH-1:0]       dis_jmpbr_addr,
     input  logic                        dis_jmpbr_addr_valid,
@@ -36,6 +34,11 @@ module IFQ #(
     output logic [IMEM_DEPTH-1:0]       ifq_pc_plus4,
     output logic                        ifq_empty
 );
+
+    localparam int unsigned NumWaysWidth = $clog2(NUM_WAYS);
+    localparam int unsigned OneWayDepth = DEPTH / NUM_WAYS;
+    localparam int unsigned OneTimeInstrNum = IMEM_WIDTH / INSTR_WIDTH;
+    localparam int unsigned InstrBytes = INSTR_WIDTH / 8;
 
     // Per-FIFO status signals
     logic [NUM_WAYS-1:0] empty_array;
@@ -48,8 +51,8 @@ module IFQ #(
     logic [INSTR_WIDTH-1:0] instr_out_array [NUM_WAYS];
 
     // Round-robin way pointers
-    logic [NUM_WAYS_WIDTH-1:0] wr_way;
-    logic [NUM_WAYS_WIDTH-1:0] rd_way;
+    logic [NumWaysWidth-1:0] wr_way;
+    logic [NumWaysWidth-1:0] rd_way;
 
     logic full, empty, flush;
 
@@ -58,14 +61,14 @@ module IFQ #(
     logic [IMEM_DEPTH-1:0] imem_pc;
 
     assign flush   = dis_jmpbr && dis_jmpbr_addr_valid;
-    assign pc_plus4 = pc + IMEM_DEPTH'(INSTR_WIDTH / 8);
+    assign pc_plus4 = pc + IMEM_DEPTH'(InstrBytes);
 
     // full: any FIFO is full
     logic [NUM_WAYS-1:0] wr_target_mask;
     always_comb begin
         wr_target_mask = '0;
-        for (int i = 0; i < one_time_instr_num; i++)
-            wr_target_mask[NUM_WAYS_WIDTH'(wr_way + i[NUM_WAYS_WIDTH-1:0])] = 1'b1;
+        for (int i = 0; i < OneTimeInstrNum; i++)
+            wr_target_mask[NumWaysWidth'(wr_way + i[NumWaysWidth-1:0])] = 1'b1;
     end
 
     assign full  = |(wr_target_mask & full_array);
@@ -77,9 +80,9 @@ module IFQ #(
         read_en_array  = '0;
         data_in_array  = '{default: '0};
 
-        for (int i = 0; i < one_time_instr_num; i++) begin
-            automatic logic [NUM_WAYS_WIDTH-1:0] target;
-            target = wr_way + NUM_WAYS_WIDTH'(i);
+        for (int i = 0; i < OneTimeInstrNum; i++) begin
+            automatic logic [NumWaysWidth-1:0] target;
+            target = wr_way + NumWaysWidth'(i);
             write_en_array[target] = imem_valid && !full && !dis_jmpbr;
             data_in_array[target]  = imem_data[i * INSTR_WIDTH +: INSTR_WIDTH];
         end
@@ -90,10 +93,10 @@ module IFQ #(
     // Sub-FIFOs
     genvar gi;
     generate
-        for (gi = 0; gi < NUM_WAYS; gi++) begin: way_fifo_inst
+        for (gi = 0; gi < NUM_WAYS; gi++) begin: g_way_fifo_inst
             sync_fifo #(
                 .DATA_WIDTH(INSTR_WIDTH),
-                .DEPTH(one_way_depth)
+                .DEPTH(OneWayDepth)
             ) sync_fifo_inst (
                 .clk(clk),
                 .rst_n(rst_n),
@@ -124,8 +127,8 @@ module IFQ #(
                 end
             end else begin
                 if (imem_valid && !full) begin
-                    wr_way  <= wr_way + NUM_WAYS_WIDTH'(one_time_instr_num);
-                    imem_pc <= imem_pc + IMEM_DEPTH'(one_time_instr_num * (INSTR_WIDTH / 8));
+                    wr_way  <= wr_way + NumWaysWidth'(OneTimeInstrNum);
+                    imem_pc <= imem_pc + IMEM_DEPTH'(OneTimeInstrNum * (InstrBytes));
                 end
 
                 if (dis_ren && !empty) begin
@@ -144,11 +147,11 @@ module IFQ #(
 
     // synthesis translate_off
     initial begin
-        assert (one_time_instr_num <= NUM_WAYS)
-            else $error("IFQ: one_time_instr_num > NUM_WAYS");
-        assert (DEPTH % NUM_WAYS == 0)
+        IFQ_MAX_INSTR_NUM_ASSERTIONL: assert (OneTimeInstrNum <= NUM_WAYS)
+            else $error("IFQ: OneTimeInstrNum > NUM_WAYS");
+        IFQ_DEPTH_ASSERTION: assert (DEPTH % NUM_WAYS == 0)
             else $error("IFQ: DEPTH %% NUM_WAYS != 0");
-        assert ((NUM_WAYS & (NUM_WAYS - 1)) == 0)
+        IFQ_POWER_OF_2_ASSERTION: assert ((NUM_WAYS & (NUM_WAYS - 1)) == 0)
             else $error("IFQ: NUM_WAYS must be a power of 2");
     end
     // synthesis translate_on

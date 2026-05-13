@@ -1,8 +1,9 @@
+`timescale 1ns/1ps
+
 // sync fifo with depth = 2^N
 module sync_fifo #(
     parameter int unsigned DATA_WIDTH = 8,
-    parameter int unsigned DEPTH = 8,
-    localparam int unsigned PTR_W = $clog2(DEPTH)
+    parameter int unsigned DEPTH = 8
 ) (
     input logic clk,
     input logic rst_n,
@@ -15,24 +16,26 @@ module sync_fifo #(
     output logic full
 );
 
+localparam int unsigned PTR_W = $clog2(DEPTH);
+
 logic [DATA_WIDTH-1:0] fifo_data [DEPTH];
 logic [PTR_W:0] fifo_write_ptr;
 logic [PTR_W:0] fifo_read_ptr;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        fifo_write_ptr <= 0;
-        fifo_read_ptr <= 0;
+        fifo_write_ptr <= '0;
+        fifo_read_ptr <= '0;
     end else if (clear) begin
-        fifo_write_ptr <= 0;
-        fifo_read_ptr <= 0;
+        fifo_write_ptr <= '0;
+        fifo_read_ptr <= '0;
     end else begin
         if (write_en && !full) begin
             fifo_data[fifo_write_ptr[PTR_W-1:0]] <= data_in;
-            fifo_write_ptr <= fifo_write_ptr + 1;
+            fifo_write_ptr <= fifo_write_ptr + 1'b1;
         end
         if (read_en && !empty) begin
-            fifo_read_ptr <= fifo_read_ptr + 1;
+            fifo_read_ptr <= fifo_read_ptr + 1'b1;
         end
     end
 end

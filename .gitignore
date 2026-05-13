@@ -56,3 +56,9 @@ Thumbs.db
 *\rtl_extensions
 *\sim
 INTERVIEW_GUIDE.md
+
+# synopsys script
+/Tomasulo3CPU/script/verdiLog
+/Tomasulo3CPU/script/Dockerfile.synopsys
+/Tomasulo3CPU/script/novas.*
+/Tomasulo3CPU/build

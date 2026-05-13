@@ -1,0 +1,42 @@
+{
+    "name": "Tomasulo3CPU-workspace",
+    "project_type": "genericProject",
+    "toplevel": "tb/IFQ_tb.sv",
+    "files": [
+        {
+            "name": "src/riscv_opcode_pkg.sv"
+        },
+        {
+            "name": "src/riscv_funct_pkg.sv"
+        },
+        {
+            "name": "src/riscv_types_pkg.sv"
+        },
+        {
+            "name": "src/RISC_V_DECODER.sv"
+        },
+        {
+            "name": "src/simple_module/sync_fifo.sv"
+        },
+        {
+            "name": "src/IFQ.sv"
+        },
+        {
+            "name": "tb/IFQ_tb.sv"
+        }
+    ],
+    "configuration": {
+        "linter": {
+            "general": {
+                "linter_verilog": "verilator",
+                "lstyle_verilog": "verible"
+            },
+            "verible": {
+                "arguments": "--ruleset=default"
+            },
+            "verilator": {
+                "arguments": "--timing -Wno-fatal ../src/riscv_opcode_pkg.sv ../src/riscv_funct_pkg.sv ../src/riscv_types_pkg.sv -I. -I./simple_module -I../src -I../src/simple_module -I../tb"
+            }
+        }
+    }
+}
