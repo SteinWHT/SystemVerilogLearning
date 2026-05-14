@@ -32,6 +32,7 @@ module IFQ #(
     input  logic                        dis_jmpbr_addr_valid,
 
     output logic [INSTR_WIDTH-1:0]      ifq_instr_out,
+    output logic [IMEM_DEPTH-1:0]       ifq_pc,
     output logic [IMEM_DEPTH-1:0]       ifq_pc_plus4,
     output logic                        ifq_empty
 );
@@ -142,6 +143,7 @@ module IFQ #(
 
     assign ifq_instr_out = instr_out_array[rd_way];
     assign ifq_empty     = empty;
+    assign ifq_pc        = pc;
     assign ifq_pc_plus4  = pc_plus4;
     assign imem_addr     = imem_pc;
     assign imem_read_rdy = !full && !dis_jmpbr;

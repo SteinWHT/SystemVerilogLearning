@@ -58,8 +58,9 @@ Thumbs.db
 INTERVIEW_GUIDE.md
 
 # synopsys script
-/Tomasulo3CPU/script/verdiLog
-/Tomasulo3CPU/script/Dockerfile.synopsys
-/Tomasulo3CPU/script/novas.*
-/Tomasulo3CPU/build
-/obj_dir
+\Tomasulo3CPU\script\verdiLog
+\Tomasulo3CPU\script\Dockerfile.synopsys
+\Tomasulo3CPU\script\novas.*
+\Tomasulo3CPU\build
+\obj_dir
+\Tomasulo3CPU\src\temp.sv

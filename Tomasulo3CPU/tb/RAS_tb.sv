@@ -84,21 +84,27 @@ module RAS_tb;
     task automatic pop_return_addr(output logic [IMEM_DEPTH_WORD-1:0] popped_addr);
         dis_ras_jal_inst  = 1'b0;
         dis_ras_jr31_inst = 1'b1;
-        @(posedge clk); #1;
         popped_addr       = ras_addr;
+        @(posedge clk); #1;
         dis_ras_jr31_inst = 1'b0;
     endtask
 
-    task automatic push_and_pop_same_cycle(input logic [IMEM_DEPTH-1:0] pc_plus4);
+    task automatic push_and_pop_same_cycle(
+        input  logic [IMEM_DEPTH-1:0]      pc_plus4,
+        output logic [IMEM_DEPTH_WORD-1:0] ras_out
+    );
         dis_pc_plus4      = pc_plus4;
         dis_ras_jal_inst  = 1'b1;
         dis_ras_jr31_inst = 1'b1;
+        #1;
+        ras_out           = ras_addr;
         @(posedge clk); #1;
         dis_ras_jal_inst  = 1'b0;
         dis_ras_jr31_inst = 1'b0;
     endtask
 
     logic [IMEM_DEPTH_WORD-1:0] popped_addr;
+    logic [IMEM_DEPTH_WORD-1:0] simul_addr;
 
     initial begin
         `ifdef FSDB_DUMP
@@ -164,8 +170,8 @@ module RAS_tb;
         push_return_addr(32'h0000_A004);
         push_return_addr(32'h0000_B004);
 
-        push_and_pop_same_cycle(32'h0000_C004);
-        check_word("same-cycle push/pop drives incoming word address", ras_addr, word_addr(32'h0000_C004));
+        push_and_pop_same_cycle(32'h0000_C004, simul_addr);
+        check_word("same-cycle push/pop drives incoming word address", simul_addr, word_addr(32'h0000_C004));
 
         pop_return_addr(popped_addr);
         check_word("same-cycle push/pop leaves previous top", popped_addr, word_addr(32'h0000_B004));

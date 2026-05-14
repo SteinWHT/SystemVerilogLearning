@@ -62,7 +62,7 @@ module FRAT #(
 
             checkpoint_head <= '0;
             checkpoint_tail <= '0;
-            for (int i = 0; i < CHECKPOINT_PTR_WIDTH; i++) begin
+            for (int i = 0; i < NUM_CHECKPOINT; i++) begin
                 checkpoint_tag_array[i] <= '0;
             end
         end else begin

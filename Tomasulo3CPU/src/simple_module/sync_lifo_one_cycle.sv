@@ -1,7 +1,6 @@
 `timescale 1ns/1ps
 // only support 2^N entries
-// data_out is combinational: always reflects the current top of stack
-module sync_lifo #(
+module sync_lifo_one_cycle #(
     parameter int unsigned DATA_WIDTH = 8,
     parameter int unsigned DEPTH = 8,
     parameter int unsigned PTR_WIDTH = $clog2(DEPTH),
@@ -32,59 +31,61 @@ module sync_lifo #(
     logic [PTR_WIDTH:0] top_ptr;
     // For ROUND_ROBIN, we can allow the top_ptr to wrap around and use the full range of indices.
     logic [PTR_WIDTH:0] top_entry_index;
-    logic [DATA_WIDTH-1:0] last_pop_data;
+    logic [DATA_WIDTH-1:0] last_pop_data; // to hold the last popped data for underflow protection
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             top_ptr <= 0;
+            data_out <= 'hDEAD_BEEF; // invalid value for debugging
             top_entry_index <= DEPTH;
             last_pop_data <= 'hDEAD_BEEF;
         end else if (push && !pop) begin
-            if (ROUND_ROBIN && full) begin
+            if(ROUND_ROBIN && full) begin
+                // Power-of-2 DEPTH: ring write at logical top (avoids out-of-range index)
                 lifo_array[(top_ptr) & (DEPTH - 1)] <= data_in;
                 top_ptr <= top_ptr + 1;
-                top_entry_index <= top_entry_index + 1;
-            end else if (!full) begin
+                top_entry_index <= top_entry_index + 1; // move the top entry index up
+            end else if(!ROUND_ROBIN && full) begin
+                data_out <= 'hDEAD_BEEF;
+            end else begin
                 lifo_array[top_ptr] <= data_in;
                 top_ptr <= top_ptr + 1;
+                data_out <= data_in;
             end
         end else if (pop && !push) begin
-            if (!empty) begin
+            if(UNDERFLOW_PROTECT && empty) begin
+                data_out <= last_pop_data; // keep the last popped data when underflow
+            end else if(empty) begin
+                data_out <= 'hDEAD_BEEF; // underflow case, output invalid value for debugging
+            end else begin
+                // store the popped data for potential underflow protection
                 last_pop_data <= lifo_array[(top_ptr - 1) & (DEPTH - 1)];
-                top_ptr <= top_ptr - 1;
+                data_out <= lifo_array[(top_ptr - 1) & (DEPTH - 1)]; // output the popped data
+                top_ptr <= top_ptr - 1; // move the top pointer down
             end
         end else if (push && pop) begin
             if (ALLOW_PUSH_POP_SAME_CYCLE) begin
-                // push and pop cancel out; pointer unchanged, no array modification
+                data_out <= data_in;
             end else begin
-                // Push priority: ignore pop
-                if (ROUND_ROBIN && full) begin
+                // Here we choose to prioritize push.
+                // Even when push is executed, pop will still be ignored
+                if(ROUND_ROBIN && full) begin
                     lifo_array[(top_ptr) & (DEPTH - 1)] <= data_in;
                     top_ptr <= top_ptr + 1;
-                    top_entry_index <= top_entry_index + 1;
-                end else if (!full) begin
+                    top_entry_index <= top_entry_index + 1; // move the top entry index up
+                end else if(!ROUND_ROBIN && full) begin
+                    data_out <= 'hDEAD_BEEF;
+                end else begin
                     lifo_array[top_ptr] <= data_in;
                     top_ptr <= top_ptr + 1;
+                    data_out <= data_in;
                 end
             end
         end
     end
 
-    // Combinational read: always reflects current top of stack
-    always_comb begin
-        if (push && pop && ALLOW_PUSH_POP_SAME_CYCLE) begin
-            data_out = data_in;
-        end else if (empty) begin
-            if (UNDERFLOW_PROTECT)
-                data_out = last_pop_data;
-            else
-                data_out = 'hDEAD_BEEF;
-        end else begin
-            data_out = lifo_array[(top_ptr - 1) & (DEPTH - 1)];
-        end
-    end
-
+    // LIFO is empty when top pointer is at 0
     assign empty = ((top_ptr[PTR_WIDTH-1:0] == top_entry_index[PTR_WIDTH-1:0]) &&
-                    (top_ptr[PTR_WIDTH] == !top_entry_index[PTR_WIDTH]));
+    (top_ptr[PTR_WIDTH] == !top_entry_index[PTR_WIDTH]));
     assign full = (top_ptr == top_entry_index);
 endmodule

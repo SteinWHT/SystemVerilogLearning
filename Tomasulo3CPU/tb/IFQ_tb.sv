@@ -25,6 +25,7 @@ module IFQ_tb;
     logic [IMEM_WIDTH_WORD-1:0] dis_jmpbr_addr;
     logic                       dis_jmpbr_addr_valid;
     logic [INSTR_WIDTH-1:0]     ifq_instr_out;
+    logic [IMEM_DEPTH-1:0]      ifq_pc;
     logic [IMEM_DEPTH-1:0]      ifq_pc_plus4;
     logic                       ifq_empty;
 
@@ -122,6 +123,7 @@ module IFQ_tb;
         feed_one(32'hDEAD_BEEF);
         check("not empty",    ifq_empty,     0);
         check("head instr",   ifq_instr_out, 32'hDEAD_BEEF);
+        check("pc",           ifq_pc,        64'd0);
         check("pc+4",         ifq_pc_plus4,  64'd4);
 
         read_one(rdata);
@@ -214,6 +216,7 @@ module IFQ_tb;
         // feed at new PC
         feed_one(32'h1234_5678);
         check("new instr",   ifq_instr_out, 32'h1234_5678);
+        check("pc flush",    ifq_pc,        64'h200);
         check("pc+4 flush",  ifq_pc_plus4,  64'h204);
         read_one(rdata);
 
@@ -254,6 +257,7 @@ module IFQ_tb;
         for (int i = 0; i < 4; i++) feed_one(32'hC000_0000 + i);
 
         for (int i = 0; i < 4; i++) begin
+            check($sformatf("pc[%0d]",   i), ifq_pc,      64'(4*i));
             check($sformatf("pc+4[%0d]", i), ifq_pc_plus4, 64'(4*(i+1)));
             read_one(rdata);
         end

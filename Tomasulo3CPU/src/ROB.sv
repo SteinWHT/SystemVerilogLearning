@@ -79,6 +79,7 @@ module ROB #(
         logic                               mw;
         logic                               compl;
         logic [DMEM_DEPTH-1:0]              sw_addr;
+        logic [DMEM_WIDTH-1:0]              sw_data;
     } rob_entry_t;
 
     rob_entry_t ROB_array [ROB_DEPTH];
@@ -111,7 +112,8 @@ module ROB #(
                         rw:       1'b0,
                         mw:       1'b1,
                         compl:    1'b0,
-                        sw_addr:  '0
+                        sw_addr:  '0,
+                        sw_data:  '0
                     };
                 end else begin
                     ROB_array[write_ptr[ROB_INDEX_WIDTH-1:0]] <= '{
@@ -121,7 +123,8 @@ module ROB #(
                         rw:       dis_reg_write,
                         mw:       1'b0,
                         compl:    1'b0,
-                        sw_addr:  '0
+                        sw_addr:  '0,
+                        sw_data:  '0
                     };
                 end
                 write_ptr <= write_ptr + 1;
@@ -132,12 +135,10 @@ module ROB #(
             end
 
             if (cdb_valid) begin
-                // if mw is 1, update the SW address
                 if (ROB_array[cdb_rob_tag].mw) begin
                     ROB_array[cdb_rob_tag].sw_addr <= cdb_sw_addr;
-                    rob_sw_data <= cdb_sw_data;
+                    ROB_array[cdb_rob_tag].sw_data <= cdb_sw_data;
                 end
-                // complete the instruction
                 ROB_array[cdb_rob_tag].compl <= 1'b1;
             end
 
@@ -163,6 +164,7 @@ module ROB #(
 
     // SB interface
     assign rob_sw_addr = head.sw_addr;
+    assign rob_sw_data = head.sw_data;
     assign rob_commit_mem_write = head.mw;
 
     // CFC interface

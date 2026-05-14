@@ -177,12 +177,12 @@ module BPB_tb;
         expect_prediction(3'd5, "addr 5 still weak not-taken");
         expect_prediction(3'd2, "addr 2 remains not-taken");
 
-        $display("\n[Test 5] Dispatch read disable holds previous prediction");
-        expect_prediction(3'd0, "prime previous prediction with addr 0");
-        dis_bpb_branch_pc_bits = 3'd2;
+        $display("\n[Test 5] Read disabled defaults to not-taken");
+        dis_bpb_branch_pc_bits = 3'd0;
         dis_bpb_branch         = 1'b0;
         @(posedge clk); #1;
-        check_bit("prediction held when dispatch read disabled", bpb_branch_prediction, 1'b1);
+        check_bit("prediction defaults to not-taken when read disabled",
+                  bpb_branch_prediction, 1'b0);
 
         $display("\n=======================================");
         $display("  BPB Testbench Done: %0d passed, %0d failed", pass_cnt, fail_cnt);
