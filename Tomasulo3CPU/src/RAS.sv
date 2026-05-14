@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 module RAS #(
     parameter int unsigned IMEM_DEPTH = 32,
-    parameter int unsigned IMEM_DEPTH_WORD = IMEM_DEPTH - 2,
+    parameter int unsigned IMEM_DEPTH_WORD = IMEM_DEPTH - 1,
     parameter int unsigned DEPTH = 4
 ) (
     input logic clk,
@@ -32,7 +32,7 @@ module RAS #(
         .rst_n(rst_n),
         .push(dis_ras_jal_inst),
         .pop(dis_ras_jr31_inst),
-        .data_in(dis_pc_plus4[IMEM_DEPTH-1:2]),
+        .data_in(dis_pc_plus4[IMEM_DEPTH-1:1]),
         .data_out(ras_addr),
         .empty(unused_empty),
         .full(unused_full)

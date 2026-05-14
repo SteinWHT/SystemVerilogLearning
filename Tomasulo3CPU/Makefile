@@ -36,7 +36,10 @@ SRC_FILES := \
 	$(SRC_DIR)/IFQ.sv \
 	$(SRC_DIR)/BPB.sv \
 	$(SRC_DIR)/RAS.sv \
-	$(SRC_DIR)/FRL.sv 
+	$(SRC_DIR)/FRL.sv \
+	$(SRC_DIR)/FRAT.sv \
+	$(SRC_DIR)/ROB.sv \
+	$(SRC_DIR)/RBA.sv \
 
 TB_FILES := \
 	$(TB_DIR)/$(PROJECT)_tb.sv

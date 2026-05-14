@@ -4,7 +4,7 @@ module CPU_FRONT_END #(
     parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned IMEM_DEPTH = 32,
     parameter int unsigned IMEM_WIDTH = 32,
-    parameter int unsigned IMEM_DEPTH_WORD = IMEM_DEPTH - 2,
+    parameter int unsigned IMEM_DEPTH_WORD = IMEM_DEPTH - 1,
 
     // ARCH_REG
     parameter int unsigned ARCH_REG_COUNT = 32,
@@ -102,6 +102,7 @@ module CPU_FRONT_END #(
     input logic cdb_reg_write,
     input logic [ROB_INDEX_WIDTH-1:0] cdb_rob_tag,
     input logic [DMEM_DEPTH-1:0] cdb_sw_addr,
+    input logic [DMEM_WIDTH-1:0] cdb_sw_data,
     input logic [DMEM_DEPTH-1:0] cdb_branch_addr,
     input logic [BPB_PC_BITS-1:0] cdb_br_updt_addr,
     input logic cdb_branch,
@@ -172,10 +173,10 @@ module CPU_FRONT_END #(
     // FRL interface
     logic dis_frl_empty;
     logic dis_frl_read;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] frl_read_phy_address;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_frl_rd_phy_addr;
     logic [FRL_PTR_WIDTH:0] frl_head_ptr;
     logic [FRL_PTR_WIDTH:0] frl_head_ptr_to_frat;
-    
+
     // FRAT interface
     logic frat_full;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] frat_rs_phy_addr;
@@ -273,7 +274,7 @@ module CPU_FRONT_END #(
         .dis_cdb_flush(cdb_flush),
         .dis_cdb_rob_tag(cdb_rob_tag),
 
-        .dis_frat_full(dis_frat_full),
+        .frat_full(frat_full),
         .frat_rs_phy_addr(frat_rs_phy_addr),
         .frat_rt_phy_addr(frat_rt_phy_addr),
         .frat_rd_phy_addr(frat_rd_phy_addr),
@@ -356,17 +357,17 @@ module CPU_FRONT_END #(
         .clk(clk),
         .rst_n(rst_n),
 
-        .rob_commit_pre_phy_address(rob_commit_pre_phy_addr),
+        .rob_commit_pre_phy_addr(rob_commit_pre_phy_addr),
         .rob_commit(rob_commit),
         .rob_commit_reg_write(rob_reg_write),
 
-        .frl_head_ptr(frl_head_ptr),
+        .frat_frl_head_ptr(frl_head_ptr),
 
         .cdb_flush(cdb_flush),
 
         .dis_frl_read(dis_frl_read),
-        .frl_read_phy_address(frl_read_phy_address),
-        .frl_read_empty(frl_read_empty),
+        .frl_read_phy_addr(dis_frl_rd_phy_addr),
+        .frl_read_empty(dis_frl_empty),
 
         .frl_head_ptr_to_frat(frl_head_ptr_to_frat)
     );
@@ -376,19 +377,18 @@ module CPU_FRONT_END #(
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
         .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .NUM_CHECKPOINT(NUM_CHECKPOINT),
-        .ROB_DEPTH(ROB_DEPTH),
-        .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH)
+        .ROB_DEPTH(ROB_DEPTH)
     ) frat (
         .clk(clk),
         .rst_n(rst_n),
 
-        .is_branch(dis_jmpbr),
-        .rob_bottom_ptr(dis_rob_bottom_ptr),
+        .is_branch(dis_jmpbr_addr_valid || dis_jmpbr),
+        .rob_bottom_ptr(rob_bottom_ptr),
         .dis_frat_reg_write(dis_reg_write),
         .rd_new_phy_address_in(dis_new_rd_phy_address),
         .rd_new_arch_address_in(dis_new_arch_address),
 
-        .branch_mispredict(dis_branch_mispredict),
+        .branch_mispredict(cdb_branch_mispredict),
         .rob_commit(rob_commit),
         .rob_top_ptr(rob_top_ptr),
 
@@ -447,6 +447,7 @@ module CPU_FRONT_END #(
         .cdb_valid(cdb_valid),
         .cdb_rob_tag(cdb_rob_tag),
         .cdb_sw_addr(cdb_sw_addr),
+        .cdb_sw_data(cdb_sw_data),
         .cdb_branch_mispredict(cdb_branch_mispredict),
 
         .sb_full(sb_full),
@@ -493,12 +494,7 @@ module CPU_FRONT_END #(
 
     // RBA
     RBA #(
-        .ARCH_REG_COUNT(ARCH_REG_COUNT),
-        .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
-        .ROB_DEPTH(ROB_DEPTH),
-        .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
-        .SB_DEPTH(SB_DEPTH)
+        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH)
     ) rba (
         .clk(clk),
         .rst_n(rst_n),

@@ -10,7 +10,7 @@ module IFQ_tb;
     parameter INSTR_WIDTH = 32;
     parameter IMEM_DEPTH  = 64;
     parameter IMEM_WIDTH  = 32;   // 1 instr per fetch
-    parameter IMEM_WIDTH_WORD = IMEM_DEPTH - 2; // number of bits needed to index IMEM_DEPTH words
+    parameter IMEM_WIDTH_WORD = IMEM_DEPTH - 1; // number of bits needed to index IMEM_DEPTH words
     parameter DEPTH       = 16;
     parameter NUM_WAYS    = 4;
 
@@ -32,6 +32,7 @@ module IFQ_tb;
         .INSTR_WIDTH (INSTR_WIDTH),
         .IMEM_DEPTH  (IMEM_DEPTH),
         .IMEM_WIDTH  (IMEM_WIDTH),
+        .IMEM_WIDTH_WORD(IMEM_WIDTH_WORD),
         .DEPTH       (DEPTH),
         .NUM_WAYS    (NUM_WAYS)
     ) dut (.*);
@@ -75,9 +76,9 @@ module IFQ_tb;
         imem_valid = 0;
     endtask
 
-    // Read head instruction (drives dis_ren for 1 cycle, returns data sampled before the edge)
+    // Read head instruction. IFQ/sync_fifo expose the current head before the read edge.
     task automatic read_one(output logic [INSTR_WIDTH-1:0] data);
-        data    = ifq_instr_out;   // sample before the edge
+        data    = ifq_instr_out;
         dis_ren = 1;
         @(posedge clk); #1;
         dis_ren = 0;
@@ -162,6 +163,7 @@ module IFQ_tb;
 
         check("head after simul",  ifq_instr_out, 32'h2222_2222);
         read_one(rdata);
+        check("second entry",      rdata,         32'h2222_2222);
         check("third entry",       ifq_instr_out, 32'h3333_3333);
         read_one(rdata);
         check("empty after simul", ifq_empty, 1);
@@ -207,12 +209,12 @@ module IFQ_tb;
         dis_jmpbr_addr_valid = 0;
 
         check("empty after flush",   ifq_empty,  1);
-        check("imem_addr after flush", imem_addr, 64'h400);
+        check("imem_addr after flush", imem_addr, 64'h200);
 
         // feed at new PC
         feed_one(32'h1234_5678);
         check("new instr",   ifq_instr_out, 32'h1234_5678);
-        check("pc+4 flush",  ifq_pc_plus4,  64'h404);
+        check("pc+4 flush",  ifq_pc_plus4,  64'h204);
         read_one(rdata);
 
         // ------------------------------------------------
@@ -237,8 +239,10 @@ module IFQ_tb;
         // queue should still hold original two entries
         check("stall: head unchanged", ifq_instr_out, 32'h0000_0001);
         read_one(rdata);
+        check("stall: first",          rdata,         32'h0000_0001);
         check("stall: second",         ifq_instr_out, 32'h0000_0002);
         read_one(rdata);
+        check("stall: second",         rdata,         32'h0000_0002);
         check("stall: empty",          ifq_empty, 1);
 
         // ------------------------------------------------

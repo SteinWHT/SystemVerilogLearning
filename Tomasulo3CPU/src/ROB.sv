@@ -19,53 +19,53 @@
 
 module ROB #(
     parameter int unsigned ROB_DEPTH = 32,
-    localparam int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
+    parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
     parameter int unsigned DMEM_WIDTH = 64,
     parameter int unsigned DMEM_DEPTH = 32,
     parameter int unsigned ARCH_REG_COUNT = 32,
-    localparam int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
+    parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7
 ) (
     input logic clk,
     input logic rst_n,
 
     // DISPATCH interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_sw_rt_phy_addr,
-    input logic dis_inst_sw,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_pre_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_phy_addr,
-    input logic dis_inst_valid,
-    input logic [ARCH_REG_WIDTH-1:0] dis_rob_rd_arch_addr,
-    input logic dis_reg_write,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_sw_rt_phy_addr,
+    input logic                                 dis_inst_sw,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_pre_phy_addr,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_phy_addr,
+    input logic                                 dis_inst_valid,
+    input logic [ARCH_REG_WIDTH-1:0]            dis_rob_rd_arch_addr,
+    input logic                                 dis_reg_write,
 
-    output logic [ROB_INDEX_WIDTH-1:0] rob_bottom_ptr,
-    output logic rob_full,
-    output logic rob_two_or_more_vacant,
+    output logic [ROB_INDEX_WIDTH-1:0]          rob_bottom_ptr,
+    output logic                                rob_full,
+    output logic                                rob_two_or_more_vacant,
 
     // CDB interface
-    input logic cdb_valid,
-    input logic [ROB_INDEX_WIDTH-1:0] cdb_rob_tag,
-    input logic [DMEM_DEPTH-1:0] cdb_sw_addr,
-    // TODO: check if this is correct
-    input logic cdb_branch_mispredict,
+    input logic                                 cdb_valid,
+    input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_tag,
+    input logic [DMEM_DEPTH-1:0]                cdb_sw_addr,
+    input logic [DMEM_WIDTH-1:0]                cdb_sw_data,
+    input logic                                 cdb_branch_mispredict,
 
     // SB interface
     input logic sb_full,
-    output logic [DMEM_DEPTH-1:0] rob_sw_addr,
-    output logic [DMEM_WIDTH-1:0] rob_sw_data,
-    output logic rob_commit_mem_write,
+    output logic [DMEM_DEPTH-1:0]               rob_sw_addr,
+    output logic [DMEM_WIDTH-1:0]               rob_sw_data,
+    output logic                                rob_commit_mem_write,
 
     // FRAT interface
-    output logic [ROB_INDEX_WIDTH-1:0] rob_top_ptr,
-    output logic rob_commit,
+    output logic [ROB_INDEX_WIDTH-1:0]          rob_top_ptr,
+    output logic                                rob_commit,
 
     // RRAT interface
-    output logic [ARCH_REG_WIDTH-1:0] rob_commit_rd_arch_addr,
-    output logic rob_reg_write,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] rob_commit_curr_phy_addr,
+    output logic [ARCH_REG_WIDTH-1:0]           rob_commit_rd_arch_addr,
+    output logic                                rob_reg_write,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_curr_phy_addr,
 
     // FRL interface
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] rob_commit_pre_phy_addr
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_pre_phy_addr
     // shared with other interfaces
     // output logic rob_commit,
     // output logic rob_reg_write,
@@ -81,7 +81,7 @@ module ROB #(
         logic [DMEM_DEPTH-1:0]              sw_addr;
     } rob_entry_t;
 
-    rob_entry_t ROB_array [0:ROB_DEPTH-1];
+    rob_entry_t ROB_array [ROB_DEPTH];
     // the bottom_ptr and top_ptr are the pointers to the ROB_array
     // 5 bits for bottom_ptr and top_ptr, extra bit for overflow protection
     logic [ROB_INDEX_WIDTH:0] write_ptr, read_ptr, flush_ptr;
@@ -126,7 +126,7 @@ module ROB #(
                 end
                 write_ptr <= write_ptr + 1;
             end
-            
+
             if (enable) begin
                 read_ptr <= read_ptr + 1;
             end
@@ -135,6 +135,7 @@ module ROB #(
                 // if mw is 1, update the SW address
                 if (ROB_array[cdb_rob_tag].mw) begin
                     ROB_array[cdb_rob_tag].sw_addr <= cdb_sw_addr;
+                    rob_sw_data <= cdb_sw_data;
                 end
                 // complete the instruction
                 ROB_array[cdb_rob_tag].compl <= 1'b1;
@@ -147,16 +148,18 @@ module ROB #(
         end
     end
 
-    
-    assign full = ((write_ptr[ROB_INDEX_WIDTH] != read_ptr[ROB_INDEX_WIDTH]) && (write_ptr[ROB_INDEX_WIDTH-1:0] == read_ptr[ROB_INDEX_WIDTH-1:0]));
-    assign empty = ((write_ptr[ROB_INDEX_WIDTH] == read_ptr[ROB_INDEX_WIDTH]) && (write_ptr[ROB_INDEX_WIDTH-1:0] == read_ptr[ROB_INDEX_WIDTH-1:0]));
-    
+
+    assign full = ((write_ptr[ROB_INDEX_WIDTH] != read_ptr[ROB_INDEX_WIDTH])
+            && (write_ptr[ROB_INDEX_WIDTH-1:0] == read_ptr[ROB_INDEX_WIDTH-1:0]));
+    assign empty = ((write_ptr[ROB_INDEX_WIDTH] == read_ptr[ROB_INDEX_WIDTH])
+            && (write_ptr[ROB_INDEX_WIDTH-1:0] == read_ptr[ROB_INDEX_WIDTH-1:0]));
+
     // CDB interface
     assign rob_bottom_ptr = write_ptr[ROB_INDEX_WIDTH-1:0];
     assign rob_full = full;
-    assign rob_empty = empty;
-    // TODO: check if this is correct
-    assign rob_two_or_more_vacant = ((write_ptr - read_ptr) <= ROB_DEPTH - 2);
+    // assign rob_empty = empty;
+    assign rob_two_or_more_vacant = ((write_ptr - read_ptr) <=
+                                    (ROB_INDEX_WIDTH + 1)'(ROB_DEPTH - 2));
 
     // SB interface
     assign rob_sw_addr = head.sw_addr;
@@ -165,7 +168,7 @@ module ROB #(
     // CFC interface
     assign rob_top_ptr = read_ptr[ROB_INDEX_WIDTH-1:0];
     assign rob_commit = enable;
-    
+
     // RRAT interface
     assign rob_commit_rd_arch_addr = head.rd_addr;
     assign rob_reg_write = head.rw;
@@ -188,7 +191,8 @@ module ROB #(
         end
 
         if (cdb_branch_mispredict) begin
-            flush_ptr = (write_ptr[ROB_INDEX_WIDTH-1:0] > cdb_rob_tag)? {write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag} : {~write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag};
+            flush_ptr = (write_ptr[ROB_INDEX_WIDTH-1:0] > cdb_rob_tag) ?
+            {write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag} : {~write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag};
         end
     end
 

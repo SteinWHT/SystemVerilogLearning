@@ -62,3 +62,4 @@ INTERVIEW_GUIDE.md
 /Tomasulo3CPU/script/Dockerfile.synopsys
 /Tomasulo3CPU/script/novas.*
 /Tomasulo3CPU/build
+/obj_dir

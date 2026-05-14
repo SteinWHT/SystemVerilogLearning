@@ -11,7 +11,7 @@ module IFQ #(
     parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned IMEM_DEPTH = 64,
     parameter int unsigned IMEM_WIDTH = 32,
-    parameter int unsigned IMEM_WIDTH_WORD = IMEM_DEPTH - 2,
+    parameter int unsigned IMEM_WIDTH_WORD = IMEM_DEPTH - 1,
     parameter int unsigned DEPTH = 16,
     parameter int unsigned NUM_WAYS = 4
 ) (
@@ -123,8 +123,8 @@ module IFQ #(
                 if (dis_jmpbr_addr_valid) begin
                     rd_way  <= '0;
                     wr_way  <= '0;
-                    imem_pc <= {dis_jmpbr_addr, 2'b00};
-                    pc      <= {dis_jmpbr_addr, 2'b00};
+                    imem_pc <= {dis_jmpbr_addr, 1'b0};
+                    pc      <= {dis_jmpbr_addr, 1'b0};
                 end
             end else begin
                 if (imem_valid && !full) begin

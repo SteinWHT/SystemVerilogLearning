@@ -14,7 +14,7 @@ module FRL #(
     input  logic clk,
     input  logic rst_n,
 
-    input  logic [PHY_REGISTER_FILE_WIDTH - 1:0]rob_commit_pre_phy_address,
+    input  logic [PHY_REGISTER_FILE_WIDTH - 1:0]rob_commit_pre_phy_addr,
     input  logic                                rob_commit,
     input  logic                                rob_commit_reg_write,
 
@@ -23,7 +23,7 @@ module FRL #(
     input  logic                                cdb_flush,
 
     input  logic                                dis_frl_read,
-    output logic [PHY_REGISTER_FILE_WIDTH - 1:0]frl_read_phy_address,
+    output logic [PHY_REGISTER_FILE_WIDTH - 1:0]frl_read_phy_addr,
     output logic                                frl_read_empty,
 
     output logic [FRL_PTR_WIDTH:0]              frl_head_ptr_to_frat
@@ -55,7 +55,7 @@ module FRL #(
         end else begin
             if (do_write) begin
                 // On commit, add the freed physical register back to the free list
-                frl_array[tail_ptr[FRL_PTR_WIDTH-1:0]] <= rob_commit_pre_phy_address;
+                frl_array[tail_ptr[FRL_PTR_WIDTH-1:0]] <= rob_commit_pre_phy_addr;
                 tail_ptr <= ptr_next(tail_ptr);
             end
 
@@ -64,7 +64,7 @@ module FRL #(
                 head_ptr <= frat_frl_head_ptr;
             end else if (do_read) begin
                 // On read, provide the next free physical register and move head pointer
-                frl_read_phy_address <= frl_array[head_ptr[FRL_PTR_WIDTH-1:0]];
+                frl_read_phy_addr <= frl_array[head_ptr[FRL_PTR_WIDTH-1:0]];
                 head_ptr <= ptr_next(head_ptr);
             end
         end
