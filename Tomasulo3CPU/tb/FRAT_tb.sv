@@ -24,6 +24,7 @@ module FRAT_tb;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]      rd_new_phy_address_in;
     logic [ARCH_REG_WIDTH-1:0]               rd_new_arch_address_in;
     logic                                    branch_mispredict;
+    logic [ROB_INDEX_WIDTH-1:0]              mispredict_rob_tag;
     logic                                    rob_commit;
     logic [ROB_INDEX_WIDTH-1:0]              rob_top_ptr;
     logic [FRL_PTR_WIDTH:0]                  frl_head_ptr;
@@ -55,6 +56,7 @@ module FRAT_tb;
         .rd_new_phy_address_in (rd_new_phy_address_in),
         .rd_new_arch_address_in(rd_new_arch_address_in),
         .branch_mispredict     (branch_mispredict),
+        .mispredict_rob_tag   (mispredict_rob_tag),
         .rob_commit            (rob_commit),
         .rob_top_ptr           (rob_top_ptr),
         .frl_head_ptr          (frl_head_ptr),
@@ -125,6 +127,7 @@ module FRAT_tb;
         rd_new_phy_address_in  = '0;
         rd_new_arch_address_in = '0;
         branch_mispredict      = 1'b0;
+        mispredict_rob_tag     = '0;
         rob_commit             = 1'b0;
         rob_top_ptr            = '0;
         frl_head_ptr           = '0;
@@ -198,10 +201,11 @@ module FRAT_tb;
         rob_commit  = 1'b0;
     endtask
 
-    task automatic mispredict_restore();
-        branch_mispredict = 1'b1;
+    task automatic mispredict_restore(input logic [ROB_INDEX_WIDTH-1:0] rob_tag);
+        mispredict_rob_tag = rob_tag;
+        branch_mispredict  = 1'b1;
         @(posedge clk); #1;
-        branch_mispredict = 1'b0;
+        branch_mispredict  = 1'b0;
     endtask
 
     logic [PHY_REGISTER_FILE_WIDTH-1:0] checkpoint_map [ARCH_REG_COUNT];
@@ -251,10 +255,10 @@ module FRAT_tb;
         for (int i = 0; i < ARCH_REG_COUNT; i++) begin
             exp_map[i] = checkpoint_map[i];
         end
-        mispredict_restore();
+        mispredict_restore(ROB_INDEX_WIDTH'(5));
         expect_read("after mispredict restore",
                     ARCH_REG_WIDTH'(3), ARCH_REG_WIDTH'(11), ARCH_REG_WIDTH'(10));
-        check_frl_ptr("FRL head restored from oldest checkpoint",
+        check_frl_ptr("FRL head restored from matching checkpoint",
                       frat_frl_head_ptr,
                       saved_frl_head);
 
@@ -267,7 +271,7 @@ module FRAT_tb;
         branch_checkpoint(ROB_INDEX_WIDTH'(6), {1'b0, FRL_PTR_WIDTH'(4)});
         dispatch_write(ARCH_REG_WIDTH'(1), PHY_REGISTER_FILE_WIDTH'(40));
         exp_map[1] = PHY_REGISTER_FILE_WIDTH'(1);
-        mispredict_restore();
+        mispredict_restore(ROB_INDEX_WIDTH'(6));
         expect_read("restore uses remaining checkpoint after earlier commit",
                     ARCH_REG_WIDTH'(1), ARCH_REG_WIDTH'(2), ARCH_REG_WIDTH'(3));
         check_frl_ptr("remaining checkpoint FRL head",

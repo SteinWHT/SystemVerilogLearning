@@ -68,7 +68,7 @@ import riscv_types_pkg::*;
     input  logic                                    cdb_valid,
     input  logic [IMEM_WIDTH_WORD-1:0]              cdb_branch_addr,
     input  logic                                    cdb_flush,
-    // input  logic [ROB_INDEX_WIDTH-1:0]              cdb_rob_tag,
+    input  logic                                    cdb_jalr_resolved,
 
     // FRAT interface
     input  logic                                    frat_full,
@@ -220,24 +220,26 @@ import riscv_types_pkg::*;
     // IFQ logic
     logic [IMEM_WIDTH-1:0] jal_target, branch_target;
     assign dis_ren = stage1_valid;
-    assign jr_fetch_hold = jr_stall || jr_two_stage_one_extra_instr;
+    assign jr_fetch_hold = jr_stall;
     assign stage1_redirect = stage1_valid &&
             (stage1_dis_jr31_inst ||
-            stage1_dis_jal_inst ||
+            (stage1_dis_jal_inst && !stage1_dis_jr_inst) ||
             (stage1_dis_branch && bpb_branch_prediction));
     assign dis_jmpbr = jr_fetch_hold || stage1_redirect || (cdb_flush && cdb_valid);
     assign dis_jmpbr_addr_valid = (stage1_valid && stage1_dis_branch && bpb_branch_prediction) ||
             (stage1_valid && stage1_dis_jr31_inst) ||
             (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) ||
+            cdb_jalr_resolved ||
             (cdb_flush && cdb_valid);
     assign jal_target    = (ifetch_pc + IMEM_WIDTH'(stage1_dis_imm));
     assign branch_target = (ifetch_pc + IMEM_WIDTH'(stage1_dis_imm));
     assign dis_jmpbr_addr =
-            stage1_dis_jr31_inst ? ras_addr :
-            stage1_dis_jal_inst && !stage1_dis_jr_inst ? jal_target[IMEM_DEPTH-1:1] :
-            (stage1_dis_branch && bpb_branch_prediction) ?
-            branch_target[IMEM_DEPTH-1:1] : (cdb_flush && cdb_valid) ?
-            cdb_branch_addr : '0;
+            (stage1_valid && stage1_dis_jr31_inst) ? ras_addr :
+            (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) ? jal_target[IMEM_DEPTH-1:1] :
+            (stage1_valid && stage1_dis_branch && bpb_branch_prediction) ?
+            branch_target[IMEM_DEPTH-1:1] :
+            (cdb_flush && cdb_valid) ? cdb_branch_addr :
+            cdb_jalr_resolved ? cdb_branch_addr : '0;
     assign stage1_branch_taken = stage1_dis_branch && bpb_branch_prediction;
     // Rename source and destination registers.
     // The architectural source register IDs ($rs and $rt) are provided to FRAT and RRAT.
@@ -266,7 +268,7 @@ import riscv_types_pkg::*;
                 //jr_rob_tag <= rob_bottom_ptr;
             end
 
-            if (cdb_valid && cdb_flush) begin
+            if (cdb_jalr_resolved || (cdb_valid && cdb_flush)) begin
                 jr_stall <= 1'b0;
             end
         end
@@ -335,8 +337,7 @@ import riscv_types_pkg::*;
         // check when the second stage is non-valid
         end else if (!rob_two_or_more_vacant && stage2_valid) begin
             stall = 1'b1;
-        end else if (frat_full && (stage1_dis_branch || stage1_dis_jr_inst ||
-                            stage1_dis_jr31_inst || stage1_dis_jal_inst)) begin
+        end else if (frat_full && stage1_dis_branch) begin
             stall = 1'b1;
         end else if (dis_frl_empty && stage1_reg_write) begin
             stall = 1'b1;
@@ -472,7 +473,9 @@ import riscv_types_pkg::*;
     assign dis_new_rd_phy_addr = dis_frl_rd_phy_addr;
     assign dis_opcode = stage2_dis_instr_type;
     assign dis_imm16 = stage2_dis_imm[15:0];
-    assign dis_branch_other_addr = stage2_pc_plus4;
+    assign dis_branch_other_addr = stage2_branch_prediction ?
+            stage2_pc_plus4 :
+            (stage2_pc + IMEM_DEPTH'(stage2_dis_imm));
     assign dis_branch_prediction = stage2_branch_prediction;
     assign dis_branch = stage2_dis_branch;
     assign dis_branch_pc_bits = stage2_pc[BPB_PC_BITS+1:2];

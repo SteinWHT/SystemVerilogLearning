@@ -1,6 +1,7 @@
 module RBA #(
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
-    parameter int unsigned PHY_REG_COUNT = 1 << PHY_REGISTER_FILE_WIDTH
+    parameter int unsigned PHY_REG_COUNT = 1 << PHY_REGISTER_FILE_WIDTH,
+    parameter int unsigned ARCH_REG_COUNT = 32
 ) (
     input logic clk,
     input logic rst_n,
@@ -25,7 +26,9 @@ module RBA #(
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            prf_rdy_array <= '{default: 1'b0};
+            for (int i = 0; i < PHY_REG_COUNT; i++) begin
+                prf_rdy_array[i] <= (i < ARCH_REG_COUNT) ? 1'b1 : 1'b0;
+            end
         end else begin
             if (dis_reg_write) begin
                 prf_rdy_array[dis_new_rd_phy_addr] <= 1'b0;

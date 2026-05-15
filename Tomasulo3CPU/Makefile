@@ -40,6 +40,12 @@ SRC_FILES := \
 	$(SRC_DIR)/FRAT.sv \
 	$(SRC_DIR)/ROB.sv \
 	$(SRC_DIR)/RBA.sv \
+	$(SRC_DIR)/DISPATCH.sv \
+	$(SRC_DIR)/CPU_FRONT_END.sv \
+	$(SRC_DIR)/RISC_V_DECODER.sv \
+	$(SRC_DIR)/riscv_funct_pkg.sv \
+	$(SRC_DIR)/riscv_opcode_pkg.sv \
+	$(SRC_DIR)/riscv_types_pkg.sv \
 
 TB_FILES := \
 	$(TB_DIR)/$(PROJECT)_tb.sv

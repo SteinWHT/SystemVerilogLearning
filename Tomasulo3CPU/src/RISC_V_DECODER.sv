@@ -210,11 +210,16 @@ module RISC_V_DECODER
             INSTR_JAL: begin
                 jal_inst = 1;
                 imm = imm_j;
+                rw = 1;
+                rd_arch_addr = rd;
             end
             INSTR_JALR: begin
                 if (rs == 5'd1) begin
                     jr31_inst = 1;
                     imm = imm_i;
+                    rw = 1;
+                    rs_arch_addr = rs;
+                    rd_arch_addr = rd;
                 end else if (rd == 5'd0) begin
                     // This is a JR instruction (JALR with rd = x0)
                     jr_inst = 1;
@@ -225,6 +230,8 @@ module RISC_V_DECODER
                     jr_inst = 1;
                     rs_arch_addr = rs;
                     imm = imm_i;
+                    rw = 1;
+                    rd_arch_addr = rd;
                 end
             end
             default: begin

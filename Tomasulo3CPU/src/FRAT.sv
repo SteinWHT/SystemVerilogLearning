@@ -23,8 +23,9 @@ module FRAT #(
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   rd_new_phy_address_in,
     input logic [ARCH_REG_WIDTH-1:0]            rd_new_arch_address_in,
 
-    // COMMIT
+    // COMMIT / MISPREDICT
     input logic                                 branch_mispredict,
+    input logic [ROB_INDEX_WIDTH-1:0]           mispredict_rob_tag,
     input logic                                 rob_commit,
     input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
 
@@ -54,10 +55,31 @@ module FRAT #(
     // round robin pointer
     logic [CHECKPOINT_PTR_WIDTH:0] checkpoint_head, checkpoint_tail;
 
+    // Parallel compare to find the checkpoint matching the mispredicting branch
+    logic [CHECKPOINT_PTR_WIDTH-1:0] mispredict_slot;
+    logic mispredict_found;
+    logic mispredict_wrap;
+    always_comb begin
+        mispredict_slot  = '0;
+        mispredict_found = 1'b0;
+        for (int i = 0; i < NUM_CHECKPOINT; i++) begin
+            if (checkpoint_tag_array[i] == mispredict_rob_tag) begin
+                mispredict_slot  = CHECKPOINT_PTR_WIDTH'(i);
+                mispredict_found = 1'b1;
+            end
+        end
+        // Reconstruct the correct wrap bit for the full pointer:
+        // if mispredict_slot >= tail index, it's in the same "lap" as tail;
+        // if mispredict_slot < tail index, it's in the next "lap".
+        mispredict_wrap = (mispredict_slot >= checkpoint_tail[CHECKPOINT_PTR_WIDTH-1:0]) ?
+                           checkpoint_tail[CHECKPOINT_PTR_WIDTH] :
+                           ~checkpoint_tail[CHECKPOINT_PTR_WIDTH];
+    end
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (int i = 0; i < ARCH_REG_COUNT; i++) begin
-                frat_array[i] <= (PHY_REGISTER_FILE_WIDTH)'(i); // initialize
+                frat_array[i] <= (PHY_REGISTER_FILE_WIDTH)'(i);
             end
 
             checkpoint_head <= '0;
@@ -66,28 +88,27 @@ module FRAT #(
                 checkpoint_tag_array[i] <= '0;
             end
         end else begin
-            // branch commit
+            // branch commit: free the oldest checkpoint when its branch commits
             if (rob_commit && rob_top_ptr ==
                 checkpoint_tag_array[checkpoint_tail[CHECKPOINT_PTR_WIDTH-1:0]]) begin
                 checkpoint_tail <= checkpoint_tail + 1;
             end
 
-            // branch commit: not taken branch
-            if (branch_mispredict) begin
-                // On branch mispredict, restore the FRAT from the checkpoint
+            // branch mispredict: restore from the mispredicting branch's checkpoint
+            if (branch_mispredict && mispredict_found) begin
                 for (int i = 0; i < ARCH_REG_COUNT; i++) begin
-                    frat_array[i] <= checkpoint_frat_array[checkpoint_tail[CHECKPOINT_PTR_WIDTH-1:0]][i];
+                    frat_array[i] <= checkpoint_frat_array[mispredict_slot][i];
                 end
-
-                checkpoint_head <= checkpoint_tail;
+                // Reset head to the mispredict slot: frees this checkpoint and all
+                // younger ones so the next branch dispatch reuses this slot.
+                checkpoint_head <= {mispredict_wrap, mispredict_slot};
             end
 
-            // branch dispatch
+            // branch dispatch: create a new checkpoint
             if (is_branch && !full) begin
                 checkpoint_head <= checkpoint_head + 1;
                 checkpoint_tag_array[checkpoint_head[CHECKPOINT_PTR_WIDTH-1:0]] <= rob_bottom_ptr;
                 checkpoint_frl_head_ptr[checkpoint_head[CHECKPOINT_PTR_WIDTH-1:0]] <= frl_head_ptr;
-                // On branch, create a checkpoint of the current FRAT state
                 for (int i = 0; i < ARCH_REG_COUNT; i++) begin
                     checkpoint_frat_array[checkpoint_head[CHECKPOINT_PTR_WIDTH-1:0]][i] <= frat_array[i];
                 end
@@ -106,7 +127,9 @@ module FRAT #(
 
     assign full = (checkpoint_head[CHECKPOINT_PTR_WIDTH] != checkpoint_tail[CHECKPOINT_PTR_WIDTH])
         && (checkpoint_head[CHECKPOINT_PTR_WIDTH-1:0] == checkpoint_tail[CHECKPOINT_PTR_WIDTH-1:0]);
-    assign frat_frl_head_ptr = checkpoint_frl_head_ptr[checkpoint_tail[CHECKPOINT_PTR_WIDTH-1:0]];
+    assign frat_frl_head_ptr = (branch_mispredict && mispredict_found) ?
+                                checkpoint_frl_head_ptr[mispredict_slot] :
+                                checkpoint_frl_head_ptr[checkpoint_tail[CHECKPOINT_PTR_WIDTH-1:0]];
 
     // synthesis translate_off
     always_ff @(posedge clk) begin

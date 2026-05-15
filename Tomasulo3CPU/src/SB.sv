@@ -67,7 +67,7 @@ module SB #(
     assign empty = (write_ptr[SB_INDEX_WIDTH] == read_ptr_lead[SB_INDEX_WIDTH]) && (write_ptr[SB_INDEX_WIDTH-1:0] == read_ptr_lead[SB_INDEX_WIDTH-1:0]);
     assign full = ((write_ptr[SB_INDEX_WIDTH] != read_ptr_trail[SB_INDEX_WIDTH]) && (write_ptr[SB_INDEX_WIDTH-1:0] == read_ptr_trail[SB_INDEX_WIDTH-1:0]));
 
-    assign dcache_sw_addr = sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]][SB_DATA_WIDTH-1:SB_DATA_WIDTH-DMEM_DEPTH];
-    assign dcache_sw_data = sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]][SB_DATA_WIDTH-1:SB_DATA_WIDTH-DMEM_WIDTH];
+    assign dcache_sw_addr = sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]][SB_DATA_WIDTH-1:DMEM_WIDTH];
+    assign dcache_sw_data = sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]][DMEM_WIDTH-1:0];
     assign dcache_ready = !empty;
 endmodule

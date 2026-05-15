@@ -110,6 +110,7 @@ module CPU_FRONT_END #(
     input logic cdb_branch,
     input logic cdb_branch_mispredict,
     input logic cdb_flush,
+    input logic cdb_jalr_resolved,
 
     // PRF interface
     // input logic prf_rs_data_ready,
@@ -240,13 +241,18 @@ module CPU_FRONT_END #(
 
     // DISPATCH
     DISPATCH #(
+        .XLEN(REG_FILE_DATA_WIDTH),
         .INSTR_WIDTH(INSTR_WIDTH),
+        .IMEM_DEPTH(IMEM_DEPTH),
+        .IMEM_WIDTH(IMEM_WIDTH),
+        .DMEM_DEPTH(DMEM_DEPTH),
+        .DMEM_WIDTH(DMEM_WIDTH),
         .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
-        .DMEM_WIDTH(DMEM_WIDTH),
         .ROB_DEPTH(ROB_DEPTH),
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
-        .BPB_PC_BITS(BPB_PC_BITS)
+        .BPB_PC_BITS(BPB_PC_BITS),
+        .OPCODE_WIDTH(OPCODE_WIDTH)
     ) dispatch (
         .clk(clk),
         .rst_n(rst_n),
@@ -276,6 +282,7 @@ module CPU_FRONT_END #(
         .cdb_valid(cdb_valid),
         .cdb_branch_addr(cdb_branch_addr[IMEM_DEPTH-1:1]),
         .cdb_flush(cdb_flush),
+        .cdb_jalr_resolved(cdb_jalr_resolved),
 
         .frat_full(frat_full),
         .frat_rs_phy_addr(frat_rs_phy_addr),
@@ -391,13 +398,14 @@ module CPU_FRONT_END #(
         .clk(clk),
         .rst_n(rst_n),
 
-        .is_branch(dis_inst_valid && (dis_branch || dis_jr_inst || dis_jr31_inst || dis_jal_inst)),
+        .is_branch(dis_inst_valid && dis_branch),
         .rob_bottom_ptr(rob_bottom_ptr),
         .dis_frat_reg_write(dis_reg_write),
         .rd_new_phy_address_in(dis_new_rd_phy_addr),
         .rd_new_arch_address_in(dis_rob_rd_arch_addr),
 
         .branch_mispredict(cdb_branch_mispredict),
+        .mispredict_rob_tag(cdb_rob_tag),
         .rob_commit(rob_commit),
         .rob_top_ptr(rob_top_ptr),
 
@@ -504,7 +512,8 @@ module CPU_FRONT_END #(
 
     // RBA
     RBA #(
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH)
+        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .ARCH_REG_COUNT(ARCH_REG_COUNT)
     ) rba (
         .clk(clk),
         .rst_n(rst_n),
