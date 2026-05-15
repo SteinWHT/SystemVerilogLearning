@@ -1,6 +1,6 @@
 // DIV QUEUE DATA STRUCTURE:
-//  robtag      rs      rsrdy       rt      rtrdy       op      rd      valid       rw     
-//  5b          6b      1b          6b      1b          3/b     6b      1b          1b      
+//  robtag      rs      rsrdy       rt      rtrdy       op      rd      valid       rw
+//  5b          6b      1b          6b      1b          3/b     6b      1b          1b
 
 module DIVQ #(
     parameter int unsigned DIV_QUEUE_DEPTH = 8,
@@ -41,7 +41,7 @@ module DIVQ #(
     output logic [2:0] iss_opcode_div,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rd_phy_addr_div,
     output logic iss_rw_div,
-    
+
     // ISSUEUNIT interface
     input logic issue_div_en,
     output logic issue_div_rdy,

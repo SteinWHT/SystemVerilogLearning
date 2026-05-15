@@ -12,100 +12,93 @@ module ISSUEQ #(
     localparam int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH),
     parameter int unsigned LSB_DEPTH = 4,
     parameter int unsigned LSB_INDEX_WIDTH = $clog2(LSB_DEPTH),
+    parameter int unsigned BPB_PC_BITS = 2,
     parameter int unsigned ALU_OPCODE_WIDTH = 3,
     parameter int unsigned DIV_OPCODE_WIDTH = 3,
     parameter int unsigned MUL_OPCODE_WIDTH = 3,
-    parameter int unsigned LD_ST_OPCODE_WIDTH = 1,
-
-    localparam int unsigned ALU_OPCODE_LOAD = 3'b000,
-    localparam int unsigned ALU_OPCODE_STORE = 3'b001,
-    localparam int unsigned ALU_OPCODE_ADD = 3'b010,
-    localparam int unsigned ALU_OPCODE_SUB = 3'b011,
-    localparam int unsigned ALU_OPCODE_MUL = 3'b100,
-    localparam int unsigned ALU_OPCODE_DIV = 3'b101
-
+    parameter int unsigned LD_ST_OPCODE_WIDTH = 1
 ) (
     input logic clk,
     input logic rst_n,
 
     // CDB interface
-    input logic cdb_flush,
-    input logic [ROB_INDEX_WIDTH-1:0] rob_top_ptr,
-    input logic [ROB_INDEX_WIDTH-1:0] cdb_rob_depth,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] cdb_rd_phy_addr,
-    input logic cdb_phy_reg_write,
+    input logic                                 cdb_flush,
+    input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
+    input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_depth,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,
+    input logic                                 cdb_phy_reg_write,
 
     // PRF interface
-    input logic [REG_FILE_DATA_WIDTH-1:0] iss_rs_data_lsq,
+    input logic [REG_FILE_DATA_WIDTH-1:0]       iss_rs_data_lsq,
 
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rs_phy_addr_alu,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rt_phy_addr_alu,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rs_phy_addr_div,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rt_phy_addr_div,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rs_phy_addr_mul,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rt_phy_addr_mul,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rs_phy_addr_ls,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_alu,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rt_phy_addr_alu,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_div,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rt_phy_addr_div,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_mul,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rt_phy_addr_mul,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_ls,
 
     // DISPATCH interface
-    input logic dis_int_issq_en,
-    input logic dis_div_issq_en,
-    input logic dis_mul_issq_en,
-    input logic dis_ld_st_issq_en,
-    input logic dis_reg_write,
-    input logic dis_rs_data_ready,
-    input logic dis_rt_data_ready,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rs_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rt_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_rd_phy_addr,
-    input logic [ROB_INDEX_WIDTH-1:0] dis_rob_tag,
-    input logic [2:0] dis_opcode,
-    input logic [15:0] dis_imm16,
-    input logic [DMEM_WIDTH-1:0] dis_branch_other_addr,
-    input logic [2:0] dis_branch_pc_bits,
-    input logic dis_branch_prediction,
-    input logic dis_branch,
-    input logic dis_jr_inst,
-    input logic dis_jal_inst,
-    
-    output logic issq_intq_full,
-    output logic issq_divq_full,
-    output logic issq_mulq_full,
-    output logic issq_ld_stq_full,
-    output logic issq_intq_two_or_more_vacant,
-    output logic issq_divq_two_or_more_vacant,
-    output logic issq_mulq_two_or_more_vacant,
-    output logic issq_ld_stq_two_or_more_vacant,
+    input logic                                 dis_int_issq_en,
+    input logic                                 dis_div_issq_en,
+    input logic                                 dis_mul_issq_en,
+    input logic                                 dis_ld_st_issq_en,
+    input logic                                 dis_reg_write,
+    input logic                                 dis_rs_data_ready,
+    input logic                                 dis_rt_data_ready,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rs_phy_addr,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rt_phy_addr,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
+    input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
+    input logic [2:0]                           dis_opcode,
+    input logic [15:0]                          dis_imm16,
+    input logic [DMEM_WIDTH-1:0]                dis_branch_other_addr,
+    input logic [BPB_PC_BITS:0]                 dis_branch_pc_bits,
+    input logic                                 dis_branch_prediction,
+    input logic                                 dis_branch,
+    input logic                                 dis_jr_inst,
+    input logic                                 dis_jal_inst,
+
+    output logic                                issq_intq_full,
+    output logic                                issq_divq_full,
+    output logic                                issq_mulq_full,
+    output logic                                issq_ld_stq_full,
+    output logic                                issq_intq_two_or_more_vacant,
+    output logic                                issq_divq_two_or_more_vacant,
+    output logic                                issq_mulq_two_or_more_vacant,
+    output logic                                issq_ld_stq_two_or_more_vacant,
 
     // ISSUEUNIT interface
-    input logic issue_int_en,
-    input logic issue_div_en,
-    input logic issue_mul_en,
+    input logic                                 issue_int_en,
+    input logic                                 issue_div_en,
+    input logic                                 issue_mul_en,
 
-    output logic issue_int_rdy,
-    output logic issue_div_rdy,
-    output logic issue_mul_rdy,
+    output logic                                issue_int_rdy,
+    output logic                                issue_div_rdy,
+    output logic                                issue_mul_rdy,
 
     // SB Interface
-    input logic sb_flush_sw_tag,
-    input logic sb_flush_sw,
-    input logic [SB_INDEX_WIDTH-1:0] sb_entry_sw_tag,
-    input logic [DMEM_DEPTH-1:0] sb_entry_sw_addr,
+    input logic                                 sb_flush_sw_tag,
+    input logic                                 sb_flush_sw,
+    input logic [SB_INDEX_WIDTH-1:0]            sb_entry_sw_tag,
+    input logic [DMEM_DEPTH-1:0]                sb_entry_sw_addr,
 
     // ROB Interface
-    input logic [ROB_INDEX_WIDTH-1:0] rob_tag,
-    input logic rob_commit_mem_write,
+    input logic [ROB_INDEX_WIDTH-1:0]           rob_tag,
+    input logic                                 rob_commit_mem_write,
 
     // LSB Interface
-    input logic lsb_full,
+    input logic                                 lsb_full,
 
-    output logic [LD_ST_OPCODE_WIDTH-1:0] iss_lsb_opcode,
-    output logic [ROB_INDEX_WIDTH-1:0] iss_lsb_rob_tag,
-    output logic [DMEM_DEPTH-1:0] iss_lsb_addr,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_lsb_phy_addr,
-    output logic iss_lsb_rdy,
+    output logic [LD_ST_OPCODE_WIDTH-1:0]       iss_lsb_opcode,
+    output logic [ROB_INDEX_WIDTH-1:0]          iss_lsb_rob_tag,
+    output logic [DMEM_DEPTH-1:0]               iss_lsb_addr,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_lsb_phy_addr,
+    output logic                                iss_lsb_rdy,
 
     // D-Cache Interface
-    input logic dcache_read_busy
+    input logic                                 dcache_read_busy
 );
 
     // INTQ

@@ -17,69 +17,70 @@ module INTQ #(
     input logic rst_n,
 
     // CDB interface
-    input logic cdb_flush,
-    input logic [ROB_INDEX_WIDTH-1:0] rob_top_ptr,
-    input logic [ROB_INDEX_WIDTH-1:0] cdb_rob_depth,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] cdb_rd_phy_addr,
-    input logic cdb_phy_reg_write,
+    input logic                                 cdb_flush,
+    input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
+    input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_depth,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,
+    input logic                                 cdb_phy_reg_write,
 
     // forwarding logic interface
     // MULT interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] mul_rd_phy_addr,
-    input logic mul_exe_ready,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   mul_rd_phy_addr,
+    input logic                                 mul_exe_ready,
     // DIV interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] div_rd_phy_addr,
-    input logic div_exe_ready,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   div_rd_phy_addr,
+    input logic                                 div_exe_ready,
     // LD/ST interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] ls_buf_rd_phy_addr,
-    input logic ls_buf_buf_rd_write,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   ls_buf_rd_phy_addr,
+    input logic                                 ls_buf_buf_rd_write,
 
     // ALU interface
-    output logic [ROB_INDEX_WIDTH-1:0] iss_rob_tag_alu,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rs_phy_addr_alu,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rt_phy_addr_alu,
-    output logic [2:0] iss_opcode_alu,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rd_phy_addr_alu,
-    output logic iss_rw_alu,
-    output logic [15:0] iss_imm16_alu,
-    output logic iss_branch_prediction_alu,
-    output logic iss_branch_alu,
-    output logic iss_jr_inst_alu,
-    output logic iss_jr31_inst_alu,
-    output logic iss_jal_inst_alu,
-    output logic [BPB_PC_BITS-1:0] iss_branch_pc_bits_alu,
-    output logic [DMEM_WIDTH-1:0] iss_branch_other_addr_alu,
-    
+    output logic [ROB_INDEX_WIDTH-1:0]           iss_rob_tag_alu,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rs_phy_addr_alu,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rt_phy_addr_alu,
+    output logic [2:0]                           iss_opcode_alu,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rd_phy_addr_alu,
+    output logic                                 iss_rw_alu,
+    output logic [15:0]                          iss_imm16_alu,
+    output logic                                 iss_branch_prediction_alu,
+    output logic                                 iss_branch_alu,
+    output logic                                 iss_jr_inst_alu,
+    output logic                                 iss_jr31_inst_alu,
+    output logic                                 iss_jal_inst_alu,
+    output logic [BPB_PC_BITS-1:0]               iss_branch_pc_bits_alu,
+    output logic [DMEM_WIDTH-1:0]                iss_branch_other_addr_alu,
+
     // ISSUEUNIT interface
-    input logic issue_int_en,
-    output logic issue_int_rdy,
-    output logic issue_int,
+    input logic                                 issue_int_en,
+
+    output logic                                issue_int_rdy,
+    output logic                                issue_int,
 
     // Dispatch interface
-    input logic                               dis_int_en,
-    input logic                               dis_reg_write,
-    input logic                               dis_rs_data_ready,
-    input logic                               dis_rt_data_ready,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rs_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rt_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_rd_phy_addr,
-    input logic [ROB_INDEX_WIDTH-1:0]         dis_rob_tag,
-    input logic [2:0]                         dis_opcode,
-    input logic [15:0]                        dis_imm16,
-    input logic [DMEM_WIDTH-1:0]              dis_branch_other_addr,
-    input logic                               dis_branch_prediction,
-    input logic                               dis_branch,
-    input logic [BPB_PC_BITS-1:0]             dis_branch_pc_bits,
-    input logic                               dis_jr_inst,
-    input logic                               dis_jal_inst,
-    input logic                               dis_jr31_inst,
-    
+    input logic                                 dis_int_en,
+    input logic                                 dis_reg_write,
+    input logic                                 dis_rs_data_ready,
+    input logic                                 dis_rt_data_ready,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rs_phy_addr,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rt_phy_addr,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
+    input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
+    input logic [2:0]                           dis_opcode,
+    input logic [15:0]                          dis_imm16,
+    input logic [DMEM_WIDTH-1:0]                dis_branch_other_addr,
+    input logic                                 dis_branch_prediction,
+    input logic                                 dis_branch,
+    input logic [BPB_PC_BITS-1:0]               dis_branch_pc_bits,
+    input logic                                 dis_jr_inst,
+    input logic                                 dis_jal_inst,
+    input logic                                 dis_jr31_inst,
+
     // ISSUEQ interface
-    output logic iss_intq_full,
-    output logic iss_intq_two_or_more_vacant
+    output logic                                iss_intq_full,
+    output logic                                iss_intq_two_or_more_vacant
 );
 
-    localparam int unsigned IDX_WIDTH = $clog2(INT_QUEUE_DEPTH);
+    localparam int unsigned IdxWidth = $clog2(INT_QUEUE_DEPTH);
 
     // Entry Struct — groups all payload fields of one queue slot
     // valid is kept separate for easy vectorized operations
@@ -118,15 +119,15 @@ module INTQ #(
             if (q_valid[i]) begin
                 if (!q[i].rs_rdy) begin
                     if (cdb_phy_reg_write   && (q[i].rs == cdb_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
-                    if (mul_exe_ready        && (q[i].rs == mul_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
-                    if (div_exe_ready        && (q[i].rs == div_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
-                    if (ls_buf_buf_rd_write  && (q[i].rs == ls_buf_rd_phy_addr))  wk_rs_rdy[i] = 1'b1;
+                    if (mul_exe_ready       && (q[i].rs == mul_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
+                    if (div_exe_ready       && (q[i].rs == div_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
+                    if (ls_buf_buf_rd_write && (q[i].rs == ls_buf_rd_phy_addr))  wk_rs_rdy[i] = 1'b1;
                 end
                 if (!q[i].rt_rdy) begin
                     if (cdb_phy_reg_write   && (q[i].rt == cdb_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
-                    if (mul_exe_ready        && (q[i].rt == mul_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
-                    if (div_exe_ready        && (q[i].rt == div_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
-                    if (ls_buf_buf_rd_write  && (q[i].rt == ls_buf_rd_phy_addr))  wk_rt_rdy[i] = 1'b1;
+                    if (mul_exe_ready       && (q[i].rt == mul_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
+                    if (div_exe_ready       && (q[i].rt == div_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
+                    if (ls_buf_buf_rd_write && (q[i].rt == ls_buf_rd_phy_addr))  wk_rt_rdy[i] = 1'b1;
                 end
             end
         end
@@ -141,15 +142,15 @@ module INTQ #(
 
         if (!dis_rs_data_ready) begin
             if (cdb_phy_reg_write   && (dis_rs_phy_addr == cdb_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
-            if (mul_exe_ready        && (dis_rs_phy_addr == mul_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
-            if (div_exe_ready        && (dis_rs_phy_addr == div_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
-            if (ls_buf_buf_rd_write  && (dis_rs_phy_addr == ls_buf_rd_phy_addr))  dis_rs_rdy_eff = 1'b1;
+            if (mul_exe_ready       && (dis_rs_phy_addr == mul_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
+            if (div_exe_ready       && (dis_rs_phy_addr == div_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
+            if (ls_buf_buf_rd_write && (dis_rs_phy_addr == ls_buf_rd_phy_addr))  dis_rs_rdy_eff = 1'b1;
         end
         if (!dis_rt_data_ready) begin
             if (cdb_phy_reg_write   && (dis_rt_phy_addr == cdb_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
-            if (mul_exe_ready        && (dis_rt_phy_addr == mul_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
-            if (div_exe_ready        && (dis_rt_phy_addr == div_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
-            if (ls_buf_buf_rd_write  && (dis_rt_phy_addr == ls_buf_rd_phy_addr))  dis_rt_rdy_eff = 1'b1;
+            if (mul_exe_ready       && (dis_rt_phy_addr == mul_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
+            if (div_exe_ready       && (dis_rt_phy_addr == div_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
+            if (ls_buf_buf_rd_write && (dis_rt_phy_addr == ls_buf_rd_phy_addr))  dis_rt_rdy_eff = 1'b1;
         end
     end
 
@@ -157,7 +158,7 @@ module INTQ #(
     // depth = rob_tag - rob_top_ptr (unsigned mod 2^N, smaller = older)
     logic [INT_QUEUE_DEPTH-1:0] q_ready;
     logic [ROB_INDEX_WIDTH-1:0] entry_depth [INT_QUEUE_DEPTH];
-    logic [IDX_WIDTH-1:0]       sel_idx;
+    logic [IdxWidth-1:0]       sel_idx;
     logic                       sel_valid;
 
     always_comb begin
@@ -171,7 +172,7 @@ module INTQ #(
 
         for (int i = 0; i < INT_QUEUE_DEPTH; i++) begin
             if (q_ready[i]) begin
-                sel_idx   = i[IDX_WIDTH-1:0];
+                sel_idx   = i[IdxWidth-1:0];
                 sel_valid = 1'b1;
             end
         end
@@ -187,7 +188,7 @@ module INTQ #(
     end
 
     // Free Slot Allocation & Vacancy Count
-    logic [IDX_WIDTH-1:0]                 free_idx;
+    logic [IdxWidth-1:0]                 free_idx;
     logic                                 has_free;
     logic [$clog2(INT_QUEUE_DEPTH+1)-1:0] vacant_count;
 
@@ -199,7 +200,7 @@ module INTQ #(
             if (!q_valid[i]) begin
                 vacant_count += {{($clog2(INT_QUEUE_DEPTH+1)-1){1'b0}}, 1'b1};
                 if (!has_free) begin
-                    free_idx = i[IDX_WIDTH-1:0];
+                    free_idx = i[IdxWidth-1:0];
                     has_free = 1'b1;
                 end
             end
