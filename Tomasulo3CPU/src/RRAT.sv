@@ -7,9 +7,9 @@
 module RRAT #(
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
     parameter int unsigned ARCH_REG_COUNT = 32,
-    localparam int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
+    parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
     parameter int unsigned NUM_CHECKPOINT = 8,
-    localparam int unsigned CHECKPOINT_PTR_WIDTH = $clog2(NUM_CHECKPOINT)
+    parameter int unsigned CHECKPOINT_PTR_WIDTH = $clog2(NUM_CHECKPOINT)
 ) (
     input logic clk,
     input logic rst_n,
@@ -24,12 +24,12 @@ module RRAT #(
 );
     // Maybe later we need to send the whole array to the FRAT or other modules for recovery
     // So we use a register array instead of a dual port RAM
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] rrat_array [0:ARCH_REG_COUNT-1];
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] rrat_array [ARCH_REG_COUNT];
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (int i = 0; i < ARCH_REG_COUNT; i++) begin
-                rrat_array[i] <= i;
+                rrat_array[i] <= PHY_REGISTER_FILE_WIDTH'(i);
             end
         end
         else begin

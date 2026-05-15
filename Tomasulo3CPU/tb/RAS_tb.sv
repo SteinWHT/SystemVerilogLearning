@@ -7,7 +7,7 @@
 module RAS_tb;
 
     parameter int unsigned IMEM_DEPTH      = 32;
-    parameter int unsigned IMEM_DEPTH_WORD = IMEM_DEPTH - 2;
+    parameter int unsigned IMEM_DEPTH_WORD = IMEM_DEPTH - 1;
     parameter int unsigned DEPTH           = 4;
 
     logic                         clk;
@@ -50,10 +50,10 @@ module RAS_tb;
         end
     endtask
 
-    function automatic logic [IMEM_DEPTH_WORD-1:0] word_addr(
+    function automatic logic [IMEM_DEPTH_WORD-1:0] ifq_jmp_addr(
         input logic [IMEM_DEPTH-1:0] pc_plus4
     );
-        word_addr = pc_plus4[IMEM_DEPTH-1:2];
+        ifq_jmp_addr = pc_plus4[IMEM_DEPTH-1:1];
     endfunction
 
     task automatic reset_dut();
@@ -84,6 +84,7 @@ module RAS_tb;
     task automatic pop_return_addr(output logic [IMEM_DEPTH_WORD-1:0] popped_addr);
         dis_ras_jal_inst  = 1'b0;
         dis_ras_jr31_inst = 1'b1;
+        #1;
         popped_addr       = ras_addr;
         @(posedge clk); #1;
         dis_ras_jr31_inst = 1'b0;
@@ -125,11 +126,11 @@ module RAS_tb;
 
         $display("\n[Test 2] Single call and return");
         push_return_addr(32'h0000_1004);
-        check_word("push exposes new return word address", ras_addr, word_addr(32'h0000_1004));
+        check_word("push exposes new return jump address", ras_addr, ifq_jmp_addr(32'h0000_1004));
         pop_return_addr(popped_addr);
-        check_word("pop returns pushed word address", popped_addr, word_addr(32'h0000_1004));
+        check_word("pop returns pushed jump address", popped_addr, ifq_jmp_addr(32'h0000_1004));
         pop_return_addr(popped_addr);
-        check_word("empty pop returns last popped address", popped_addr, word_addr(32'h0000_1004));
+        check_word("empty pop returns last popped address", popped_addr, ifq_jmp_addr(32'h0000_1004));
 
         $display("\n[Test 3] Nested calls pop in LIFO order");
         reset_dut();
@@ -138,13 +139,13 @@ module RAS_tb;
         push_return_addr(32'h0000_4004);
 
         pop_return_addr(popped_addr);
-        check_word("nested pop 0", popped_addr, word_addr(32'h0000_4004));
+        check_word("nested pop 0", popped_addr, ifq_jmp_addr(32'h0000_4004));
         pop_return_addr(popped_addr);
-        check_word("nested pop 1", popped_addr, word_addr(32'h0000_3004));
+        check_word("nested pop 1", popped_addr, ifq_jmp_addr(32'h0000_3004));
         pop_return_addr(popped_addr);
-        check_word("nested pop 2", popped_addr, word_addr(32'h0000_2004));
+        check_word("nested pop 2", popped_addr, ifq_jmp_addr(32'h0000_2004));
         pop_return_addr(popped_addr);
-        check_word("nested empty pop repeats last", popped_addr, word_addr(32'h0000_2004));
+        check_word("nested empty pop repeats last", popped_addr, ifq_jmp_addr(32'h0000_2004));
 
         $display("\n[Test 4] Full stack round-robin overwrite");
         reset_dut();
@@ -155,15 +156,15 @@ module RAS_tb;
         push_return_addr(32'h0000_9004);
 
         pop_return_addr(popped_addr);
-        check_word("round-robin newest", popped_addr, word_addr(32'h0000_9004));
+        check_word("round-robin newest", popped_addr, ifq_jmp_addr(32'h0000_9004));
         pop_return_addr(popped_addr);
-        check_word("round-robin next 0", popped_addr, word_addr(32'h0000_8004));
+        check_word("round-robin next 0", popped_addr, ifq_jmp_addr(32'h0000_8004));
         pop_return_addr(popped_addr);
-        check_word("round-robin next 1", popped_addr, word_addr(32'h0000_7004));
+        check_word("round-robin next 1", popped_addr, ifq_jmp_addr(32'h0000_7004));
         pop_return_addr(popped_addr);
-        check_word("round-robin next 2", popped_addr, word_addr(32'h0000_6004));
+        check_word("round-robin next 2", popped_addr, ifq_jmp_addr(32'h0000_6004));
         pop_return_addr(popped_addr);
-        check_word("round-robin empty pop repeats last", popped_addr, word_addr(32'h0000_6004));
+        check_word("round-robin empty pop repeats last", popped_addr, ifq_jmp_addr(32'h0000_6004));
 
         $display("\n[Test 5] Simultaneous call and return");
         reset_dut();
@@ -171,14 +172,14 @@ module RAS_tb;
         push_return_addr(32'h0000_B004);
 
         push_and_pop_same_cycle(32'h0000_C004, simul_addr);
-        check_word("same-cycle push/pop drives incoming word address", simul_addr, word_addr(32'h0000_C004));
+        check_word("same-cycle push/pop drives incoming jump address", simul_addr, ifq_jmp_addr(32'h0000_C004));
 
         pop_return_addr(popped_addr);
-        check_word("same-cycle push/pop leaves previous top", popped_addr, word_addr(32'h0000_B004));
+        check_word("same-cycle push/pop leaves previous top", popped_addr, ifq_jmp_addr(32'h0000_B004));
         pop_return_addr(popped_addr);
-        check_word("same-cycle push/pop leaves older entry", popped_addr, word_addr(32'h0000_A004));
+        check_word("same-cycle push/pop leaves older entry", popped_addr, ifq_jmp_addr(32'h0000_A004));
         pop_return_addr(popped_addr);
-        check_word("same-cycle empty pop repeats last", popped_addr, word_addr(32'h0000_A004));
+        check_word("same-cycle empty pop repeats last", popped_addr, ifq_jmp_addr(32'h0000_A004));
 
         idle_cycle();
 

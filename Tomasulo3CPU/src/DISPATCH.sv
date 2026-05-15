@@ -10,9 +10,9 @@
 // Second stage: write to ROB and issue queues
 
 module DISPATCH
-    import riscv_opcode_pkg::*;
-    import riscv_funct_pkg::*;
-    import riscv_types_pkg::*;
+import riscv_opcode_pkg::*;
+import riscv_funct_pkg::*;
+import riscv_types_pkg::*;
 #(
     parameter int unsigned XLEN = 64,
     parameter int unsigned INSTR_WIDTH = 32,
@@ -28,7 +28,7 @@ module DISPATCH
     parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
     parameter int unsigned BPB_PC_BITS = 3,
     parameter int unsigned OPCODE_WIDTH = 6
-  ) (
+   ) (
     input  logic clk,
     input  logic rst_n,
 
@@ -99,7 +99,7 @@ module DISPATCH
     output logic [IMEM_DEPTH-1:0]                   dis_branch_other_addr,
     output logic                                    dis_branch_prediction,
     output logic                                    dis_branch,
-    output logic [2:0]                              dis_branch_pc_bits,
+    output logic [BPB_PC_BITS-1:0]                  dis_branch_pc_bits,
     output logic                                    dis_jr_inst,
     output logic                                    dis_jal_inst,
     output logic                                    dis_jr31_inst,
@@ -110,7 +110,7 @@ module DISPATCH
     output logic                                    dis_ld_st_issue_en,
 
     // ROB interface
-    input logic [ROB_INDEX_WIDTH-1:0]               rob_bottom_ptr,
+    // input logic [ROB_INDEX_WIDTH-1:0]               rob_bottom_ptr,
     input logic                                     rob_full,
     input logic                                     rob_two_or_more_vacant,
 
@@ -128,34 +128,50 @@ module DISPATCH
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      dis_rba_new_rd_phy_addr,
     output logic                                    dis_rba_reg_write
 
-);
+   );
 
     // ------------------------------------------------------
     // Stage 1: Decode and read from FRAT and FRL
     // ------------------------------------------------------
     logic [XLEN-1:0] stage1_dis_imm;
     logic stage1_dis_mem_write, stage1_dis_reg_write, stage1_dis_branch,
-        stage1_dis_jr_inst, stage1_dis_jal_inst, stage1_dis_jr31_inst;
+            stage1_dis_jr_inst, stage1_dis_jal_inst, stage1_dis_jr31_inst;
     instr_e stage1_dis_instr_type;
-    logic [ARCH_REG_WIDTH-1:0] stage1_rd_arch_addr, stage1_rs_arch_addr, stage1_rt_arch_addr;
+    logic [ARCH_REG_WIDTH-1:0] stage1_rd_arch_addr;
+    logic [ARCH_REG_WIDTH-1:0] stage1_rs_arch_addr;
+    logic [ARCH_REG_WIDTH-1:0]stage1_rt_arch_addr;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] stage1_rs_phy_addr;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] stage1_rt_phy_addr;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] stage1_pre_phy_addr;
     logic stage1_branch_taken;
     logic stage1_valid;
+    logic stage1_reg_write;
+    logic stage1_needs_issue_entry;
+    logic stage1_issue_entry_available;
     logic stage1_dis_int_issue_en, stage1_dis_div_issue_en,
-        stage1_dis_mul_issue_en, stage1_dis_ld_st_issue_en;
+            stage1_dis_mul_issue_en, stage1_dis_ld_st_issue_en;
     logic jr_two_stage_one_extra_instr;
+    logic stage1_redirect;
+    logic jr_fetch_hold;
 
     // ------------------------------------------------------
     // Stage 2: write to ROB and issue queues
     // ------------------------------------------------------
     logic [XLEN-1:0] stage2_dis_imm;
     logic stage2_dis_mem_write, stage2_dis_reg_write, stage2_dis_branch,
-        stage2_dis_jr_inst, stage2_dis_jal_inst, stage2_dis_jr31_inst;
+            stage2_dis_jr_inst, stage2_dis_jal_inst, stage2_dis_jr31_inst;
     instr_e stage2_dis_instr_type;
     logic [ARCH_REG_WIDTH-1:0] stage2_rd_arch_addr;
-    logic [IMEM_DEPTH-1:0] stage2_pc_plus4;
+    logic [IMEM_DEPTH-1:0] stage2_pc_plus4, stage2_pc;
     logic stage2_valid;
+    logic stage2_fire;
     logic stage2_dis_int_issue_en, stage2_dis_div_issue_en,
-        stage2_dis_mul_issue_en, stage2_dis_ld_st_issue_en;
+            stage2_dis_mul_issue_en, stage2_dis_ld_st_issue_en;
+    logic stage2_branch_prediction;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_rs_phy_addr;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_rt_phy_addr;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_pre_phy_addr;
+
 
     // jalr $rd, imm($rs)
     logic jr_stall;
@@ -182,34 +198,46 @@ module DISPATCH
                    .jal_inst(stage1_dis_jal_inst),
                    .jr31_inst(stage1_dis_jr31_inst)
                  );
-    assign stage1_valid = !stall && !cdb_flush;
+
+    assign stage1_valid = (!stall || jr_two_stage_one_extra_instr) && !cdb_flush;
+    assign stage1_reg_write = stage1_dis_reg_write && (stage1_rd_arch_addr != '0);
+    assign stage1_needs_issue_entry = stage1_dis_instr_type != INSTR_NONE;
+    assign stage1_issue_entry_available = stage1_dis_int_issue_en ||
+            stage1_dis_div_issue_en ||
+            stage1_dis_mul_issue_en ||
+            stage1_dis_ld_st_issue_en;
+
 
     // BPB logic
-    assign dis_bpb_branch_pc_bits = ifetch_pcplus4_in[BPB_PC_BITS+1:2];
+    assign dis_bpb_branch_pc_bits = ifetch_pc[BPB_PC_BITS+1:2];
     assign dis_bpb_branch = stage1_dis_branch;
 
     // RAS logic
     assign dis_pc_plus4 = ifetch_pcplus4_in;
-    assign dis_ras_jr31_inst = stage1_dis_jr31_inst;
-    assign dis_ras_jal_inst = stage1_dis_jal_inst;
+    assign dis_ras_jr31_inst = stage1_dis_jr31_inst && stage1_valid;
+    assign dis_ras_jal_inst = stage1_dis_jal_inst && stage1_valid;
 
     // IFQ logic
     logic [IMEM_WIDTH-1:0] jal_target, branch_target;
-    assign dis_ren = !stall && !cdb_flush;
-    assign dis_jmpbr = stage1_dis_jr_inst || stage1_dis_jr31_inst || stage1_dis_jal_inst ||
-                      (stage1_dis_branch && bpb_branch_prediction) ||
-                      (cdb_flush && cdb_valid);
-    assign dis_jmpbr_addr_valid = (stage1_dis_branch && bpb_branch_prediction) ||
-                                  (stage1_dis_jr31_inst) ||
-                                  (cdb_flush && cdb_valid);
+    assign dis_ren = stage1_valid;
+    assign jr_fetch_hold = jr_stall || jr_two_stage_one_extra_instr;
+    assign stage1_redirect = stage1_valid &&
+            (stage1_dis_jr31_inst ||
+            stage1_dis_jal_inst ||
+            (stage1_dis_branch && bpb_branch_prediction));
+    assign dis_jmpbr = jr_fetch_hold || stage1_redirect || (cdb_flush && cdb_valid);
+    assign dis_jmpbr_addr_valid = (stage1_valid && stage1_dis_branch && bpb_branch_prediction) ||
+            (stage1_valid && stage1_dis_jr31_inst) ||
+            (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) ||
+            (cdb_flush && cdb_valid);
     assign jal_target    = (ifetch_pc + IMEM_WIDTH'(stage1_dis_imm));
     assign branch_target = (ifetch_pc + IMEM_WIDTH'(stage1_dis_imm));
     assign dis_jmpbr_addr =
             stage1_dis_jr31_inst ? ras_addr :
             stage1_dis_jal_inst && !stage1_dis_jr_inst ? jal_target[IMEM_DEPTH-1:1] :
             (stage1_dis_branch && bpb_branch_prediction) ?
-                branch_target[IMEM_DEPTH-1:1] : (cdb_flush && cdb_valid) ?
-                cdb_branch_addr : '0;
+            branch_target[IMEM_DEPTH-1:1] : (cdb_flush && cdb_valid) ?
+            cdb_branch_addr : '0;
     assign stage1_branch_taken = stage1_dis_branch && bpb_branch_prediction;
     // Rename source and destination registers.
     // The architectural source register IDs ($rs and $rt) are provided to FRAT and RRAT.
@@ -218,7 +246,7 @@ module DISPATCH
     // FRL logic
     assign dis_rs_arch_addr = stage1_rs_arch_addr;
     assign dis_rt_arch_addr = stage1_rt_arch_addr;
-    assign dis_frl_read = stage1_dis_reg_write && !dis_frl_empty;
+    assign dis_frl_read = stage1_valid && stage1_reg_write;
     // The architectural destination register ID ($rd) is also provided to FRAT to find the
     // "old" mapping which can be freed when this instruction commits
     // FRAT logic
@@ -231,9 +259,9 @@ module DISPATCH
         if (!rst_n) begin
             jr_stall <= 1'b0;
             //jr_rob_tag <= '0;
-        end else begin
+            end else begin
             // when a jr instruction is in stage 1 and it's stalled, we set the jr_stall flag and record its ROB tag and target address
-            if (stage1_dis_jr_inst && !jr_stall) begin
+            if (jr_two_stage_one_extra_instr) begin
                 jr_stall <= 1'b1;
                 //jr_rob_tag <= rob_bottom_ptr;
             end
@@ -307,31 +335,49 @@ module DISPATCH
         // check when the second stage is non-valid
         end else if (!rob_two_or_more_vacant && stage2_valid) begin
             stall = 1'b1;
-        end else if (frat_full && (stage1_dis_branch || stage1_dis_jr_inst)) begin
+        end else if (frat_full && (stage1_dis_branch || stage1_dis_jr_inst ||
+                            stage1_dis_jr31_inst || stage1_dis_jal_inst)) begin
             stall = 1'b1;
-        end else if (dis_frl_empty && stage1_dis_reg_write) begin
+        end else if (dis_frl_empty && stage1_reg_write) begin
             stall = 1'b1;
-        end else if (!(dis_int_issue_en && dis_div_issue_en
-                        && dis_mul_issue_en && dis_ld_st_issue_en)) begin
+        end else if (stage1_needs_issue_entry && !stage1_issue_entry_available) begin
             stall = 1'b1;
-        end else if (stage2_dis_int_issue_en && stage1_dis_int_issue_en &&
-            !issue_intq_two_or_more_vacant) begin
+        end else if ((stage2_dis_int_issue_en && stage1_dis_int_issue_en &&
+                !issue_intq_two_or_more_vacant) || (stage2_dis_int_issue_en &&
+                                                    issue_intq_full)) begin
             stall = 1'b1;
-        end else if (stage2_dis_div_issue_en && stage1_dis_div_issue_en &&
-            !issue_divq_two_or_more_vacant) begin
+        end else if ((stage2_dis_div_issue_en && stage1_dis_div_issue_en &&
+                !issue_divq_two_or_more_vacant) || (stage2_dis_div_issue_en &&
+                                                    issue_divq_full)) begin
             stall = 1'b1;
-        end else if (stage2_dis_mul_issue_en && stage1_dis_mul_issue_en &&
-            !issue_mulq_two_or_more_vacant) begin
+        end else if ((stage2_dis_mul_issue_en && stage1_dis_mul_issue_en &&
+                !issue_mulq_two_or_more_vacant) || (stage2_dis_mul_issue_en &&
+                                                    issue_mulq_full)) begin
             stall = 1'b1;
-        end else if (stage2_dis_ld_st_issue_en && stage1_dis_ld_st_issue_en &&
-            !issue_ld_stq_two_or_more_vacant) begin
+        end else if ((stage2_dis_ld_st_issue_en && stage1_dis_ld_st_issue_en &&
+                !issue_ld_stq_two_or_more_vacant) || (stage2_dis_ld_st_issue_en &&
+                                                        issue_ld_stq_full)) begin
             stall = 1'b1;
         end else if (stage1_dis_jr_inst || jr_stall) begin
             stall = 1'b1;
-            if (stage1_dis_jr_inst && !jr_stall)
-                jr_two_stage_one_extra_instr = 1'b1;
+
+        if (stage1_dis_jr_inst && !jr_stall)
+            jr_two_stage_one_extra_instr = 1'b1;
         end
     end
+
+    // Rename forwarding: FRAT updates on the clock edge after stage2 dispatch,
+    // so the instruction in stage1 must see stage2's newly allocated physical
+    // register directly when it reads the same architectural register.
+    assign stage1_rs_phy_addr = (stage2_valid && stage2_dis_reg_write &&
+                                 (stage2_rd_arch_addr == stage1_rs_arch_addr)) ?
+                                dis_frl_rd_phy_addr : frat_rs_phy_addr;
+    assign stage1_rt_phy_addr = (stage2_valid && stage2_dis_reg_write &&
+                                 (stage2_rd_arch_addr == stage1_rt_arch_addr)) ?
+                                dis_frl_rd_phy_addr : frat_rt_phy_addr;
+    assign stage1_pre_phy_addr = (stage2_valid && stage2_dis_reg_write &&
+                                  (stage2_rd_arch_addr == stage1_rd_arch_addr)) ?
+                                 dis_frl_rd_phy_addr : frat_rd_phy_addr;
 
     // ------------------------------------------------------
     // Stage 1 to Stage 2 pipeline register
@@ -352,14 +398,18 @@ module DISPATCH
             stage2_rd_arch_addr         <= '0;
 
             stage2_pc_plus4             <= '0;
+            stage2_pc                   <= '0;
 
             stage2_dis_int_issue_en     <= '0;
             stage2_dis_div_issue_en     <= '0;
             stage2_dis_mul_issue_en     <= '0;
             stage2_dis_ld_st_issue_en   <= '0;
-
+            stage2_branch_prediction    <= '0;
+            stage2_rs_phy_addr          <= '0;
+            stage2_rt_phy_addr          <= '0;
+            stage2_pre_phy_addr         <= '0;
         end else begin
-            if (cdb_flush || (stall && !jr_two_stage_one_extra_instr) || !stage1_valid) begin
+            if (!stage1_valid) begin
                 // On flush, we need to invalidate the instruction in stage 2
                 stage2_valid                <= 1'b0;
                 stage2_dis_int_issue_en     <= 1'b0;
@@ -378,15 +428,21 @@ module DISPATCH
                 stage2_dis_instr_type       <= stage1_dis_instr_type;
                 stage2_dis_imm              <= stage1_dis_imm;
                 stage2_dis_mem_write        <= stage1_dis_mem_write;
-                stage2_dis_reg_write        <= stage1_dis_reg_write;
+                stage2_dis_reg_write        <= stage1_reg_write;
                 stage2_rd_arch_addr         <= stage1_rd_arch_addr;
 
                 stage2_pc_plus4             <= dis_pc_plus4;
+                stage2_pc                   <= ifetch_pc;
 
                 stage2_dis_int_issue_en     <= stage1_dis_int_issue_en;
                 stage2_dis_div_issue_en     <= stage1_dis_div_issue_en;
                 stage2_dis_mul_issue_en     <= stage1_dis_mul_issue_en;
                 stage2_dis_ld_st_issue_en   <= stage1_dis_ld_st_issue_en;
+
+                stage2_branch_prediction    <= stage1_branch_taken;
+                stage2_rs_phy_addr          <= stage1_rs_phy_addr;
+                stage2_rt_phy_addr          <= stage1_rt_phy_addr;
+                stage2_pre_phy_addr         <= stage1_pre_phy_addr;
             end
         end
     end
@@ -403,30 +459,31 @@ module DISPATCH
     // Writes appropriate information (i.e. dispatches the instruction) to appropriate issue
     // queue and ROB entries
     // ROB
-    assign dis_pre_phy_addr = frat_rd_phy_addr;
+    assign stage2_fire = stage2_valid && !cdb_flush;
+    assign dis_pre_phy_addr = stage2_pre_phy_addr;
     assign dis_new_phy_addr = dis_frl_rd_phy_addr;
     assign dis_rob_rd_arch_addr = stage2_rd_arch_addr;
-    assign dis_inst_valid = !stage2_valid;
+    assign dis_inst_valid = stage2_fire;
     assign dis_inst_sw = stage2_dis_mem_write;
-    assign dis_sw_rt_phy_addr = frat_rt_phy_addr;
+    assign dis_sw_rt_phy_addr = stage2_rt_phy_addr;
     // ISSUE QUEUE
-    assign dis_rs_phy_addr = frat_rs_phy_addr;
-    assign dis_rt_phy_addr = frat_rt_phy_addr;
+    assign dis_rs_phy_addr = stage2_rs_phy_addr;
+    assign dis_rt_phy_addr = stage2_rt_phy_addr;
     assign dis_new_rd_phy_addr = dis_frl_rd_phy_addr;
     assign dis_opcode = stage2_dis_instr_type;
     assign dis_imm16 = stage2_dis_imm[15:0];
     assign dis_branch_other_addr = stage2_pc_plus4;
-    assign dis_branch_prediction = bpb_branch_prediction;
+    assign dis_branch_prediction = stage2_branch_prediction;
     assign dis_branch = stage2_dis_branch;
-    assign dis_branch_pc_bits = stage2_pc_plus4[BPB_PC_BITS+1:2];
+    assign dis_branch_pc_bits = stage2_pc[BPB_PC_BITS+1:2];
     assign dis_jr_inst = stage2_dis_jr_inst;
     assign dis_jal_inst = stage2_dis_jal_inst;
     assign dis_jr31_inst = stage2_dis_jr31_inst;
-    assign dis_int_issue_en = stage2_dis_int_issue_en;
-    assign dis_div_issue_en = stage2_dis_div_issue_en;
-    assign dis_mul_issue_en = stage2_dis_mul_issue_en;
-    assign dis_ld_st_issue_en = stage2_dis_ld_st_issue_en;
+    assign dis_int_issue_en = stage2_fire && stage2_dis_int_issue_en;
+    assign dis_div_issue_en = stage2_fire && stage2_dis_div_issue_en;
+    assign dis_mul_issue_en = stage2_fire && stage2_dis_mul_issue_en;
+    assign dis_ld_st_issue_en = stage2_fire && stage2_dis_ld_st_issue_en;
     // RBA
     assign dis_rba_new_rd_phy_addr = dis_frl_rd_phy_addr;
-    assign dis_rba_reg_write = stage2_dis_reg_write;
+    assign dis_rba_reg_write = stage2_fire && stage2_dis_reg_write;
 endmodule
