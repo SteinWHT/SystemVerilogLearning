@@ -61,6 +61,7 @@ module DISPATCH_tb;
     logic                               cdb_valid;
     logic [IMEM_WIDTH_WORD-1:0]         cdb_branch_addr;
     logic                               cdb_flush;
+    logic                               cdb_jalr_resolved;
 
     // FRAT interface
     logic                               frat_full;
@@ -321,8 +322,9 @@ module DISPATCH_tb;
         @(posedge clk); #1;
     endtask
 
-    // Present an instruction to stage 1 and let it propagate to stage 2.
-    // Returns after stage 2 has valid outputs (2 clock edges).
+    // Present an instruction as an IFQ read response and let it propagate to stage 2.
+    // With last_cycle_stall, the first non-stalled cycle requests IFQ data; the
+    // instruction is usable by stage 1 one cycle later.
     task automatic present_instr(
         input logic [31:0] instr,
         input logic [IMEM_DEPTH-1:0] pc_val,
@@ -340,12 +342,13 @@ module DISPATCH_tb;
         frat_rt_phy_addr    = frat_rt;
         frat_rd_phy_addr    = frat_rd;
         @(posedge clk); #1;
-        // stage 1 captured; now advance to stage 2
-        ifetch_empty = 1'b1;
+        // IFQ response is now visible to stage 1. Advance it into stage 2.
         @(posedge clk); #1;
+        ifetch_empty = 1'b1;
     endtask
 
-    // Present instruction to stage 1 only (don't wait for stage 2)
+    // Present instruction to stage 1 only (don't wait for stage 2).
+    // Returns when stage 1 may decode/use ifetch_*.
     task automatic present_instr_stage1(
         input logic [31:0] instr,
         input logic [IMEM_DEPTH-1:0] pc_val,
@@ -362,6 +365,7 @@ module DISPATCH_tb;
         frat_rs_phy_addr    = frat_rs;
         frat_rt_phy_addr    = frat_rt;
         frat_rd_phy_addr    = frat_rd;
+        @(posedge clk); #1;
     endtask
 
     // ----------------------------------------------------------------
@@ -758,11 +762,12 @@ module DISPATCH_tb;
         ifetch_pc           = 32'h0000_0C04;
         ifetch_pcplus4_in   = 32'h0000_0C08;
         ifetch_empty        = 1'b0;
-        dis_frl_rd_phy_addr = 7'd61;
+        //dis_frl_rd_phy_addr = 7'd61;
         frat_rs_phy_addr    = 7'd3;  // old mapping of x3
         frat_rt_phy_addr    = 7'd4;
         frat_rd_phy_addr    = 7'd5;
         @(posedge clk); #1;
+        dis_frl_rd_phy_addr = 7'd61;
         // Now SUB is in stage 2; check its source registers
         ifetch_empty = 1'b1;
         @(posedge clk); #1;
@@ -789,7 +794,7 @@ module DISPATCH_tb;
         // Stage 2 is now valid; second instruction should stall
         ifetch_instr_in = INSTR_SUB_X5_X3_X4;
         ifetch_empty = 1'b0;
-        @(posedge clk); #1;
+        @(posedge clk);
         check_bit("dis_ren when ROB has 1 entry and stage2 valid", dis_ren, 1'b0);
 
         // ==============================================================
@@ -808,21 +813,20 @@ module DISPATCH_tb;
         );
         @(posedge clk); #1;
         // ADD now in stage 2, SUB in stage 1
-        present_instr_stage1(
-            .instr(INSTR_SUB_X5_X3_X4),
-            .pc_val(32'h0000_1004),
-            .frl_phy(7'd71),
-            .frat_rs(7'd33),
-            .frat_rt(7'd34),
-            .frat_rd(7'd35)
-        );
+        ifetch_instr_in     = INSTR_SUB_X5_X3_X4;
+        ifetch_pc           = 32'h0000_1004;
+        ifetch_pcplus4_in   = 32'h0000_1008;
+        ifetch_empty        = 1'b0;
+        dis_frl_rd_phy_addr = 7'd71;
+        frat_rs_phy_addr    = 7'd33;
+        frat_rt_phy_addr    = 7'd34;
+        frat_rd_phy_addr    = 7'd35;
         // Check ADD in stage 2
         check_bit("ADD fires in stage 2", dis_inst_valid, 1'b1);
         check_val("ADD opcode in stage 2", dis_opcode, INSTR_ADD);
         @(posedge clk); #1;
         // Now SUB should be in stage 2
         ifetch_empty = 1'b1;
-        @(posedge clk); #1;
         check_bit("SUB fires in stage 2", dis_inst_valid, 1'b1);
         check_val("SUB opcode in stage 2", dis_opcode, INSTR_SUB);
 
@@ -918,7 +922,7 @@ module DISPATCH_tb;
         ifetch_instr_in = INSTR_SUB_X5_X3_X4;
         ifetch_empty = 1'b0;
         dis_frl_rd_phy_addr = 7'd81;
-        @(posedge clk); #1;
+        @(posedge clk);
         // Should stall: stage 2 has INT, stage 1 has INT, only 1 entry in INT queue
         check_bit("dis_ren stall: 1 INT entry, both stages INT", dis_ren, 1'b0);
 
@@ -946,16 +950,15 @@ module DISPATCH_tb;
         $display("\n[Test 29] RAS jr31_inst signal for JALR return");
         reset_dut();
         // JALR x0, x1, 0 — rs=x1 triggers jr31_inst
-        ifetch_instr_in = encode_i(12'd0, 5'd1, 3'b000, 5'd0, OP_JALR);
-        ifetch_pc = 32'h0000_6000;
-        ifetch_pcplus4_in = 32'h0000_6004;
-        ifetch_empty = 1'b0;
-        dis_frl_rd_phy_addr = 7'd83;
-        frat_rs_phy_addr = 7'd1;
-        frat_rt_phy_addr = 7'd0;
-        frat_rd_phy_addr = 7'd0;
         ras_addr = 31'h0000_200;
-        #1;
+        present_instr_stage1(
+            .instr(encode_i(12'd0, 5'd1, 3'b000, 5'd0, OP_JALR)),
+            .pc_val(32'h0000_6000),
+            .frl_phy(7'd83),
+            .frat_rs(7'd1),
+            .frat_rt(7'd0),
+            .frat_rd(7'd0)
+        );
         check_bit("dis_ras_jr31_inst for JALR return", dis_ras_jr31_inst, 1'b1);
         check_bit("dis_jmpbr for JALR return", dis_jmpbr, 1'b1);
         check_bit("dis_jmpbr_addr_valid for return", dis_jmpbr_addr_valid, 1'b1);

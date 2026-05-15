@@ -26,7 +26,7 @@ package riscv_types_pkg;
         INSTR_SLT,
         INSTR_SLTU,
         INSTR_XOR,
-        INSTR_SRL,  
+        INSTR_SRL,
         INSTR_SRA,
         INSTR_OR,
         INSTR_AND,

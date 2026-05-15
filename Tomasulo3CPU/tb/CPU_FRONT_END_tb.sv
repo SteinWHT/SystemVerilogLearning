@@ -83,6 +83,7 @@ module CPU_FRONT_END_tb;
     logic cdb_branch;
     logic cdb_branch_mispredict;
     logic cdb_flush;
+    logic cdb_jalr_resolved;
 
     // SB interface
     logic [SB_INDEX_WIDTH-1:0] sb_flush_sw_tag;
@@ -234,8 +235,8 @@ module CPU_FRONT_END_tb;
     // Helper tasks
     // ----------------------------------------------------------------
     task automatic clear_all_inputs();
-        imem_valid              = 1'b0;
-        imem_data               = '0;
+        //imem_valid              = 1'b0;
+        //imem_data               = '0;
         dcache_valid            = 1'b0;
         dcache_write_done       = 1'b0;
         issue_intq_full         = 1'b0;
@@ -257,6 +258,7 @@ module CPU_FRONT_END_tb;
         cdb_branch              = 1'b0;
         cdb_branch_mispredict   = 1'b0;
         cdb_flush               = 1'b0;
+        cdb_jalr_resolved       = 1'b0;
     endtask
 
     task automatic reset_dut();
@@ -265,9 +267,8 @@ module CPU_FRONT_END_tb;
         for (int i = 0; i < IMEM_SIZE; i++) begin
             imem_array[i] = encode_i(12'd0, 5'd0, FUNCT3_ADD_SUB, 5'd0, OP_IMM); // NOP
         end
-        repeat (3) @(posedge clk);
+        repeat (3) @(negedge clk);#1;
         rst_n = 1'b1;
-        @(posedge clk); #1;
     endtask
 
     // Load instruction into the simulated I-mem at word-aligned address
@@ -320,8 +321,9 @@ module CPU_FRONT_END_tb;
     // Main test sequence
     // ----------------------------------------------------------------
     logic [OPCODE_WIDTH-1:0] dispatched_opcode;
-
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_regs [3];
     initial begin
+        int dispatch_count;
         `ifdef FSDB_DUMP
             $fsdbDumpfile("CPU_FRONT_END.fsdb");
             $fsdbDumpvars(0, CPU_FRONT_END_tb);
@@ -353,7 +355,6 @@ module CPU_FRONT_END_tb;
         reset_dut();
         // ADD x3, x1, x2
         load_instr(32'h0000_0000, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_ADD_SUB, 5'd3, OP_REG));
-
         wait_for_dispatch(dispatched_opcode, 30);
         check_val("ADD dispatched opcode", dispatched_opcode, INSTR_ADD);
         check_bit("dis_int_issue_en for ADD", dis_int_issue_en, 1'b1);
@@ -517,7 +518,7 @@ module CPU_FRONT_END_tb;
         cdb_flush = 1'b1;
         cdb_valid = 1'b1;
         cdb_branch_addr = 32'h0000_0100;
-        @(posedge clk); #1;
+        @(posedge clk);
         cdb_flush = 1'b0;
         cdb_valid = 1'b0;
 
@@ -534,15 +535,14 @@ module CPU_FRONT_END_tb;
         load_instr(32'h0000_0004, encode_r(FUNCT7_ALT,  5'd4, 5'd3, FUNCT3_ADD_SUB, 5'd5, OP_REG));
         load_instr(32'h0000_0008, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_AND,     5'd6, OP_REG));
 
-        logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_regs [3];
         for (int i = 0; i < 3; i++) begin
             wait_for_dispatch(dispatched_opcode, 30);
             phy_regs[i] = dis_new_rd_phy_addr;
-            cdb_complete(
-                .rob_tag(ROB_INDEX_WIDTH'(i)),
-                .rd_phy(dis_new_rd_phy_addr),
-                .reg_wr(1'b1)
-            );
+            // cdb_complete(
+            //     .rob_tag(ROB_INDEX_WIDTH'(i)),
+            //     .rd_phy(dis_new_rd_phy_addr),
+            //     .reg_wr(1'b1)
+            // );
         end
 
         // All three should be distinct
@@ -568,27 +568,27 @@ module CPU_FRONT_END_tb;
         // ADD -> INT
         wait_for_dispatch(dispatched_opcode, 30);
         check_bit("ADD->INT", dis_int_issue_en, 1'b1);
-        cdb_complete(ROB_INDEX_WIDTH'(0), dis_new_rd_phy_addr, 1'b1);
+        //cdb_complete(ROB_INDEX_WIDTH'(0), dis_new_rd_phy_addr, 1'b1);
 
         // MUL -> MUL
         wait_for_dispatch(dispatched_opcode, 30);
         check_bit("MUL->MUL", dis_mul_issue_en, 1'b1);
-        cdb_complete(ROB_INDEX_WIDTH'(1), dis_new_rd_phy_addr, 1'b1);
+        //cdb_complete(ROB_INDEX_WIDTH'(1), dis_new_rd_phy_addr, 1'b1);
 
         // DIV -> DIV
         wait_for_dispatch(dispatched_opcode, 30);
         check_bit("DIV->DIV", dis_div_issue_en, 1'b1);
-        cdb_complete(ROB_INDEX_WIDTH'(2), dis_new_rd_phy_addr, 1'b1);
+        //cdb_complete(ROB_INDEX_WIDTH'(2), dis_new_rd_phy_addr, 1'b1);
 
         // SW -> LD_ST
         wait_for_dispatch(dispatched_opcode, 30);
         check_bit("SW->LD_ST", dis_ld_st_issue_en, 1'b1);
-        cdb_complete(ROB_INDEX_WIDTH'(3), '0, 1'b0);
+        //cdb_complete(ROB_INDEX_WIDTH'(3), '0, 1'b0);
 
         // LW -> LD_ST
         wait_for_dispatch(dispatched_opcode, 30);
         check_bit("LW->LD_ST", dis_ld_st_issue_en, 1'b1);
-        cdb_complete(ROB_INDEX_WIDTH'(4), dis_new_rd_phy_addr, 1'b1);
+        //cdb_complete(ROB_INDEX_WIDTH'(4), dis_new_rd_phy_addr, 1'b1);
 
         // ==============================================================
         // Test 14: ROB fills up and stalls dispatch
@@ -601,7 +601,6 @@ module CPU_FRONT_END_tb;
                        encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_ADD_SUB, 5'd3, OP_REG));
         end
 
-        int dispatch_count;
         dispatch_count = 0;
         for (int cyc = 0; cyc < 100; cyc++) begin
             @(posedge clk); #1;
