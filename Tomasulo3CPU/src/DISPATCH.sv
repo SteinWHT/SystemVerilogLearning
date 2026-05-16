@@ -150,9 +150,13 @@ import riscv_types_pkg::*;
     logic stage1_issue_entry_available;
     logic stage1_dis_int_issue_en, stage1_dis_div_issue_en,
             stage1_dis_mul_issue_en, stage1_dis_ld_st_issue_en;
-    logic jr_two_stage_one_extra_instr;
     logic stage1_redirect;
     logic jr_fetch_hold;
+    // only stage1 will be stalled
+    logic stall;
+    // if last cycle stalls, it means dispatch didn't fetch data.
+    // it needs one extra cycle to have the data ready.
+    logic last_cycle_stall;
 
     // ------------------------------------------------------
     // Stage 2: write to ROB and issue queues
@@ -199,7 +203,7 @@ import riscv_types_pkg::*;
                    .jr31_inst(stage1_dis_jr31_inst)
                  );
 
-    assign stage1_valid = (!stall || jr_two_stage_one_extra_instr) && !cdb_flush;
+    assign stage1_valid = (!stall) && !cdb_flush && !last_cycle_stall;
     assign stage1_reg_write = stage1_dis_reg_write && (stage1_rd_arch_addr != '0);
     assign stage1_needs_issue_entry = stage1_dis_instr_type != INSTR_NONE;
     assign stage1_issue_entry_available = stage1_dis_int_issue_en ||
@@ -219,7 +223,7 @@ import riscv_types_pkg::*;
 
     // IFQ logic
     logic [IMEM_WIDTH-1:0] jal_target, branch_target;
-    assign dis_ren = stage1_valid;
+    assign dis_ren = (!stall) && !cdb_flush;
     assign jr_fetch_hold = jr_stall;
     assign stage1_redirect = stage1_valid &&
             (stage1_dis_jr31_inst ||
@@ -231,7 +235,7 @@ import riscv_types_pkg::*;
             (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) ||
             cdb_jalr_resolved ||
             (cdb_flush && cdb_valid);
-    assign jal_target    = (ifetch_pc + IMEM_WIDTH'(stage1_dis_imm));
+    assign jal_target    = IMEM_WIDTH'(stage1_dis_imm);
     assign branch_target = (ifetch_pc + IMEM_WIDTH'(stage1_dis_imm));
     assign dis_jmpbr_addr =
             (stage1_valid && stage1_dis_jr31_inst) ? ras_addr :
@@ -263,7 +267,7 @@ import riscv_types_pkg::*;
             //jr_rob_tag <= '0;
             end else begin
             // when a jr instruction is in stage 1 and it's stalled, we set the jr_stall flag and record its ROB tag and target address
-            if (jr_two_stage_one_extra_instr) begin
+            if (stage1_valid && stage1_dis_jr_inst && !jr_stall) begin
                 jr_stall <= 1'b1;
                 //jr_rob_tag <= rob_bottom_ptr;
             end
@@ -325,13 +329,11 @@ import riscv_types_pkg::*;
     // FRAT is full (no more checkpoints for branch instructions) && (is_branch or jr)
     // if jr
     // if the instruction can be issued but the corresponding issue queue is full, we should also stall
-    logic stall;
     always_comb begin
         stall = '0;
-        jr_two_stage_one_extra_instr = '0;
 
         if(ifetch_empty) begin
-            stall = 1'b1;
+           stall = 1'b1;
         end else if (rob_full) begin
             stall = 1'b1;
         // check when the second stage is non-valid
@@ -359,11 +361,11 @@ import riscv_types_pkg::*;
                 !issue_ld_stq_two_or_more_vacant) || (stage2_dis_ld_st_issue_en &&
                                                         issue_ld_stq_full)) begin
             stall = 1'b1;
-        end else if (stage1_dis_jr_inst || jr_stall) begin
+        end else if (jr_stall) begin
             stall = 1'b1;
 
-        if (stage1_dis_jr_inst && !jr_stall)
-            jr_two_stage_one_extra_instr = 1'b1;
+        // if (stage1_dis_jr_inst && !jr_stall)
+        //     jr_two_stage_one_extra_instr = 1'b1;
         end
     end
 
@@ -409,7 +411,10 @@ import riscv_types_pkg::*;
             stage2_rs_phy_addr          <= '0;
             stage2_rt_phy_addr          <= '0;
             stage2_pre_phy_addr         <= '0;
+
+            last_cycle_stall            <= 1'b1;
         end else begin
+            last_cycle_stall            <= stall;
             if (!stage1_valid) begin
                 // On flush, we need to invalidate the instruction in stage 2
                 stage2_valid                <= 1'b0;

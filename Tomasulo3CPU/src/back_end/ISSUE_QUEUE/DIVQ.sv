@@ -14,56 +14,56 @@ module DIVQ #(
     input logic rst_n,
 
     // CDB interface
-    input logic cdb_flush,
-    input logic [ROB_INDEX_WIDTH-1:0] rob_top_ptr,
-    input logic [ROB_INDEX_WIDTH-1:0] cdb_rob_depth,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] cdb_rd_phy_addr,
-    input logic cdb_phy_reg_write,
+    input logic                                 cdb_flush,
+    input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
+    input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_depth,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,
+    input logic                                 cdb_phy_reg_write,
 
     // forwarding logic interface
     // ALU interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rd_phy_addr_alu,
-    input logic iss_rd_reg_valid_alu,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rd_phy_addr_alu,
+    input logic                                 iss_rd_reg_valid_alu,
     // MULT interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] mul_rd_phy_addr,
-    input logic mul_exe_ready,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   mul_rd_phy_addr,
+    input logic                                 mul_exe_ready,
     // DIV interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] div_rd_phy_addr,
-    input logic div_exe_ready,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   div_rd_phy_addr,
+    input logic                                 div_exe_ready,
     // LD/ST interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] ls_buf_rd_phy_addr,
-    input logic ls_buf_buf_rd_write,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   ls_buf_rd_phy_addr,
+    input logic                                 ls_buf_buf_rd_write,
 
     // DIV interface
-    output logic [ROB_INDEX_WIDTH-1:0] iss_rob_tag_div,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rs_phy_addr_div,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rt_phy_addr_div,
-    output logic [2:0] iss_opcode_div,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rd_phy_addr_div,
-    output logic iss_rw_div,
+    output logic [ROB_INDEX_WIDTH-1:0]          iss_rob_tag_div,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_div,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rt_phy_addr_div,
+    output logic [2:0]                          iss_opcode_div,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rd_phy_addr_div,
+    output logic                                iss_rw_div,
 
     // ISSUEUNIT interface
-    input logic issue_div_en,
-    output logic issue_div_rdy,
-    output logic issue_div,
+    input logic                                 issue_div_en,
+
+    output logic                                issue_div_rdy,
 
     // Dispatch interface
-    input logic                               dis_div_issq_en,
-    input logic                               dis_reg_write,
-    input logic                               dis_rs_data_ready,
-    input logic                               dis_rt_data_ready,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rs_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rt_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_rd_phy_addr,
-    input logic [ROB_INDEX_WIDTH-1:0]         dis_rob_tag,
-    input logic [2:0]                         dis_opcode,
+    input logic                                 dis_div_issq_en,
+    input logic                                 dis_reg_write,
+    input logic                                 dis_rs_data_ready,
+    input logic                                 dis_rt_data_ready,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rs_phy_addr,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rt_phy_addr,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
+    input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
+    input logic [2:0]                           dis_opcode,
 
     // Queue status
     output logic divq_full,
     output logic iss_divq_two_or_more_vacant
 );
 
-    localparam int unsigned IDX_WIDTH = $clog2(DIV_QUEUE_DEPTH);
+    localparam int unsigned IdxWidth = $clog2(DIV_QUEUE_DEPTH);
 
     // Entry Struct
     typedef struct packed {
@@ -92,14 +92,14 @@ module DIVQ #(
 
             if (q_valid[i]) begin
                 if (!q[i].rs_rdy) begin
-                    if (cdb_phy_reg_write   && (q[i].rs == cdb_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
+                    if (cdb_phy_reg_write    && (q[i].rs == cdb_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
                     if (iss_rd_reg_valid_alu && (q[i].rs == iss_rd_phy_addr_alu)) wk_rs_rdy[i] = 1'b1;
                     if (mul_exe_ready        && (q[i].rs == mul_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
                     if (div_exe_ready        && (q[i].rs == div_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
                     if (ls_buf_buf_rd_write  && (q[i].rs == ls_buf_rd_phy_addr))  wk_rs_rdy[i] = 1'b1;
                 end
                 if (!q[i].rt_rdy) begin
-                    if (cdb_phy_reg_write   && (q[i].rt == cdb_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
+                    if (cdb_phy_reg_write    && (q[i].rt == cdb_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
                     if (iss_rd_reg_valid_alu && (q[i].rt == iss_rd_phy_addr_alu)) wk_rt_rdy[i] = 1'b1;
                     if (mul_exe_ready        && (q[i].rt == mul_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
                     if (div_exe_ready        && (q[i].rt == div_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
@@ -117,14 +117,14 @@ module DIVQ #(
         dis_rt_rdy_eff = dis_rt_data_ready;
 
         if (!dis_rs_data_ready) begin
-            if (cdb_phy_reg_write   && (dis_rs_phy_addr == cdb_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
+            if (cdb_phy_reg_write    && (dis_rs_phy_addr == cdb_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
             if (iss_rd_reg_valid_alu && (dis_rs_phy_addr == iss_rd_phy_addr_alu)) dis_rs_rdy_eff = 1'b1;
             if (mul_exe_ready        && (dis_rs_phy_addr == mul_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
             if (div_exe_ready        && (dis_rs_phy_addr == div_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
             if (ls_buf_buf_rd_write  && (dis_rs_phy_addr == ls_buf_rd_phy_addr))  dis_rs_rdy_eff = 1'b1;
         end
         if (!dis_rt_data_ready) begin
-            if (cdb_phy_reg_write   && (dis_rt_phy_addr == cdb_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
+            if (cdb_phy_reg_write    && (dis_rt_phy_addr == cdb_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
             if (iss_rd_reg_valid_alu && (dis_rt_phy_addr == iss_rd_phy_addr_alu)) dis_rt_rdy_eff = 1'b1;
             if (mul_exe_ready        && (dis_rt_phy_addr == mul_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
             if (div_exe_ready        && (dis_rt_phy_addr == div_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
@@ -135,7 +135,7 @@ module DIVQ #(
     // Ready Detection & Oldest-First Selection
     logic [DIV_QUEUE_DEPTH-1:0] q_ready;
     logic [ROB_INDEX_WIDTH-1:0] entry_depth [DIV_QUEUE_DEPTH];
-    logic [IDX_WIDTH-1:0]       sel_idx;
+    logic [IdxWidth-1:0]        sel_idx;
     logic                       sel_valid;
 
     always_comb begin
@@ -149,7 +149,7 @@ module DIVQ #(
 
         for (int i = 0; i < DIV_QUEUE_DEPTH; i++) begin
             if (q_ready[i]) begin
-                sel_idx   = i[IDX_WIDTH-1:0];
+                sel_idx   = i[IdxWidth-1:0];
                 sel_valid = 1'b1;
             end
         end
@@ -165,7 +165,7 @@ module DIVQ #(
     end
 
     // Free Slot Allocation & Vacancy Count
-    logic [IDX_WIDTH-1:0]                 free_idx;
+    logic [IdxWidth-1:0]                 free_idx;
     logic                                 has_free;
     logic [$clog2(DIV_QUEUE_DEPTH+1)-1:0] vacant_count;
 
@@ -177,12 +177,14 @@ module DIVQ #(
             if (!q_valid[i]) begin
                 vacant_count += {{($clog2(DIV_QUEUE_DEPTH+1)-1){1'b0}}, 1'b1};
                 if (!has_free) begin
-                    free_idx = i[IDX_WIDTH-1:0];
+                    free_idx = i[IdxWidth-1:0];
                     has_free = 1'b1;
                 end
             end
         end
     end
+
+    logic                               issue_div;
 
     assign divq_full                   = &q_valid;
     assign iss_divq_two_or_more_vacant = (vacant_count >= 2);
@@ -192,17 +194,17 @@ module DIVQ #(
     // Issue Outputs — drive selected entry or zero
     always_comb begin
         if (issue_div) begin
-            iss_rw_div  = q[sel_idx].rw;
+            iss_rw_div          = q[sel_idx].rw;
             iss_rd_phy_addr_div = q[sel_idx].rd;
-            iss_rob_tag_div    = q[sel_idx].rob_tag;
-            iss_opcode_div     = q[sel_idx].op;
+            iss_rob_tag_div     = q[sel_idx].rob_tag;
+            iss_opcode_div      = q[sel_idx].op;
             iss_rs_phy_addr_div = q[sel_idx].rs;
             iss_rt_phy_addr_div = q[sel_idx].rt;
         end else begin
-            iss_rw_div  = 1'b0;
+            iss_rw_div          = 1'b0;
             iss_rd_phy_addr_div = '0;
-            iss_rob_tag_div    = '0;
-            iss_opcode_div     = '0;
+            iss_rob_tag_div     = '0;
+            iss_opcode_div      = '0;
             iss_rs_phy_addr_div = '0;
             iss_rt_phy_addr_div = '0;
         end

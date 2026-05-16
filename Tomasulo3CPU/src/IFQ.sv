@@ -143,8 +143,11 @@ module IFQ #(
 
     assign ifq_instr_out = instr_out_array[rd_way];
     assign ifq_empty     = empty;
-    assign ifq_pc        = pc;
-    assign ifq_pc_plus4  = pc_plus4;
+    // Since the data should arrive at the same cycle.
+    // Namely next cycle ptr will be latched in this cycle posedge
+    // The pc here is one cycle before, we need to subtract 4 to get the correct PC for the current instruction
+    assign ifq_pc        = pc - 4;
+    assign ifq_pc_plus4  = pc;
     assign imem_addr     = imem_pc;
     assign imem_read_rdy = !full && !dis_jmpbr;
 

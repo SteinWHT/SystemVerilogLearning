@@ -49,6 +49,10 @@ SRC_FILES := \
 	$(SRC_DIR)/DISPATCH.sv \
 	$(SRC_DIR)/CPU_FRONT_END.sv \
 	$(SRC_DIR)/back_end/ISSUE_QUEUE/INTQ.sv \
+	$(SRC_DIR)/back_end/ISSUE_QUEUE/MULQ.sv \
+	$(SRC_DIR)/back_end/ISSUE_QUEUE/DIVQ.sv \
+	$(SRC_DIR)/back_end/ISSUE_QUEUE/LSQ.sv \
+	$(SRC_DIR)/back_end/ISSUE_QUEUE/ISSUEQ.sv \
 
 
 TB_FILES := \

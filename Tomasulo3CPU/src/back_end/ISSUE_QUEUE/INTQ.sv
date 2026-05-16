@@ -1,6 +1,6 @@
 // INT QUEUE DATA STRUCTURE:
 //  robtag      rs      rsrdy       rt      rtrdy       op      rd      valid       rw      IMM     Branch      BrPred
-//  5b          6b      1b          6b      1b          3/b     6b      1b          1b      16b     1b          1b   
+//  5b          6b      1b          6b      1b          3/b     6b      1b          1b      16b     1b          1b
 //  jr          jr31    jal         BrPC    BrAddr
 //  1b          1b      1b          3b      32b
 
@@ -35,26 +35,25 @@ module INTQ #(
     input logic                                 ls_buf_buf_rd_write,
 
     // ALU interface
-    output logic [ROB_INDEX_WIDTH-1:0]           iss_rob_tag_alu,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rs_phy_addr_alu,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rt_phy_addr_alu,
-    output logic [2:0]                           iss_opcode_alu,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rd_phy_addr_alu,
-    output logic                                 iss_rw_alu,
-    output logic [15:0]                          iss_imm16_alu,
-    output logic                                 iss_branch_prediction_alu,
-    output logic                                 iss_branch_alu,
-    output logic                                 iss_jr_inst_alu,
-    output logic                                 iss_jr31_inst_alu,
-    output logic                                 iss_jal_inst_alu,
-    output logic [BPB_PC_BITS-1:0]               iss_branch_pc_bits_alu,
-    output logic [DMEM_WIDTH-1:0]                iss_branch_other_addr_alu,
+    output logic [ROB_INDEX_WIDTH-1:0]          iss_rob_tag_alu,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_alu,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rt_phy_addr_alu,
+    output logic [2:0]                          iss_opcode_alu,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rd_phy_addr_alu,
+    output logic                                iss_rw_alu,
+    output logic [15:0]                         iss_imm16_alu,
+    output logic                                iss_branch_prediction_alu,
+    output logic                                iss_branch_alu,
+    output logic                                iss_jr_inst_alu,
+    output logic                                iss_jr31_inst_alu,
+    output logic                                iss_jal_inst_alu,
+    output logic [BPB_PC_BITS-1:0]              iss_branch_pc_bits_alu,
+    output logic [DMEM_WIDTH-1:0]               iss_branch_other_addr_alu,
 
     // ISSUEUNIT interface
     input logic                                 issue_int_en,
 
     output logic                                issue_int_rdy,
-    output logic                                issue_int,
 
     // Dispatch interface
     input logic                                 dis_int_en,
@@ -188,7 +187,7 @@ module INTQ #(
     end
 
     // Free Slot Allocation & Vacancy Count
-    logic [IdxWidth-1:0]                 free_idx;
+    logic [IdxWidth-1:0]                  free_idx;
     logic                                 has_free;
     logic [$clog2(INT_QUEUE_DEPTH+1)-1:0] vacant_count;
 
@@ -206,6 +205,8 @@ module INTQ #(
             end
         end
     end
+
+    logic                               issue_int;
 
     assign iss_intq_full               = &q_valid;
     assign iss_intq_two_or_more_vacant = (vacant_count >= 2);
