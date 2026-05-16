@@ -235,8 +235,8 @@ module CPU_FRONT_END_tb;
     // Helper tasks
     // ----------------------------------------------------------------
     task automatic clear_all_inputs();
-        //imem_valid              = 1'b0;
-        //imem_data               = '0;
+        imem_valid              = 1'b0;
+        imem_data               = '0;
         dcache_valid            = 1'b0;
         dcache_write_done       = 1'b0;
         issue_intq_full         = 1'b0;
@@ -267,8 +267,9 @@ module CPU_FRONT_END_tb;
         for (int i = 0; i < IMEM_SIZE; i++) begin
             imem_array[i] = encode_i(12'd0, 5'd0, FUNCT3_ADD_SUB, 5'd0, OP_IMM); // NOP
         end
-        repeat (3) @(negedge clk);#1;
+        repeat (3) @(posedge clk);
         rst_n = 1'b1;
+        @(posedge clk); #1;
     endtask
 
     // Load instruction into the simulated I-mem at word-aligned address
@@ -279,8 +280,9 @@ module CPU_FRONT_END_tb;
         imem_array[addr[IMEM_DEPTH-1:2]] = instr;
     endtask
 
-    // Wait for a dispatch to fire (dis_int/div/mul/ld_st_issue_en goes high)
-    // Returns the opcode that was dispatched
+    // Wait for a dispatch to fire (dis_int/div/mul/ld_st_issue_en goes high).
+    // Auto-clears one-cycle CDB pulses after the posedge so the ROB sees
+    // them exactly once, fixing the off-by-one the old cdb_complete caused.
     task automatic wait_for_dispatch(
         output logic [OPCODE_WIDTH-1:0] opcode_out,
         input int unsigned max_cycles = 50
@@ -290,6 +292,7 @@ module CPU_FRONT_END_tb;
         opcode_out = '0;
         while (cyc < max_cycles) begin
             @(posedge clk); #1;
+            cdb_clear();
             if (dis_int_issue_en || dis_div_issue_en || dis_mul_issue_en || dis_ld_st_issue_en) begin
                 opcode_out = dis_opcode;
                 return;
@@ -299,7 +302,9 @@ module CPU_FRONT_END_tb;
         $warning("wait_for_dispatch: timed out after %0d cycles @ %0t", max_cycles, $time);
     endtask
 
-    // Complete an instruction via CDB
+    // Set CDB signals for instruction completion (no clock advance).
+    // The next @(posedge clk) lets the ROB sample these; call cdb_clear()
+    // or wait_for_dispatch (which auto-clears) afterward.
     task automatic cdb_complete(
         input logic [ROB_INDEX_WIDTH-1:0] rob_tag,
         input logic [PHY_REGISTER_FILE_WIDTH-1:0] rd_phy,
@@ -312,18 +317,38 @@ module CPU_FRONT_END_tb;
         cdb_branch      = 1'b0;
         cdb_branch_mispredict = 1'b0;
         cdb_flush       = 1'b0;
-        @(posedge clk); #1;
-        cdb_valid       = 1'b0;
-        cdb_reg_write   = 1'b0;
+        cdb_jalr_resolved = 1'b0;
+    endtask
+
+    task automatic cdb_clear();
+        cdb_valid         = 1'b0;
+        cdb_reg_write     = 1'b0;
+        cdb_jalr_resolved = 1'b0;
+    endtask
+
+    // Set CDB signals for JALR resolution (no clock advance).
+    task automatic cdb_jalr_resolve(
+        input logic [ROB_INDEX_WIDTH-1:0] rob_tag,
+        input logic [PHY_REGISTER_FILE_WIDTH-1:0] rd_phy,
+        input logic [IMEM_DEPTH-1:0] target_addr
+    );
+        cdb_valid         = 1'b1;
+        cdb_rob_tag       = rob_tag;
+        cdb_rd_phy_addr   = rd_phy;
+        cdb_reg_write     = 1'b1;
+        cdb_jalr_resolved = 1'b1;
+        cdb_branch_addr   = target_addr;
+        cdb_branch        = 1'b0;
+        cdb_branch_mispredict = 1'b0;
+        cdb_flush         = 1'b0;
     endtask
 
     // ----------------------------------------------------------------
     // Main test sequence
     // ----------------------------------------------------------------
     logic [OPCODE_WIDTH-1:0] dispatched_opcode;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_regs [3];
+
     initial begin
-        int dispatch_count;
         `ifdef FSDB_DUMP
             $fsdbDumpfile("CPU_FRONT_END.fsdb");
             $fsdbDumpvars(0, CPU_FRONT_END_tb);
@@ -355,6 +380,7 @@ module CPU_FRONT_END_tb;
         reset_dut();
         // ADD x3, x1, x2
         load_instr(32'h0000_0000, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_ADD_SUB, 5'd3, OP_REG));
+
         wait_for_dispatch(dispatched_opcode, 30);
         check_val("ADD dispatched opcode", dispatched_opcode, INSTR_ADD);
         check_bit("dis_int_issue_en for ADD", dis_int_issue_en, 1'b1);
@@ -443,11 +469,11 @@ module CPU_FRONT_END_tb;
             .reg_wr(1'b1)
         );
 
-        // Wait a cycle for ROB to commit
+        // Cycle 1: ROB sees cdb_valid, marks entry complete (non-blocking)
         @(posedge clk); #1;
-        // ROB should have committed — check rob_commit via internal signal
-        // We can indirectly check: after commit, ROB should not be full and
-        // should have freed resources
+        cdb_clear();
+        // Cycle 2: ROB commits (head.compl now 1 → enable=1)
+        @(posedge clk); #1;
         check_bit("ROB not full after commit", dut.rob_full, 1'b0);
 
         // ==============================================================
@@ -518,7 +544,7 @@ module CPU_FRONT_END_tb;
         cdb_flush = 1'b1;
         cdb_valid = 1'b1;
         cdb_branch_addr = 32'h0000_0100;
-        @(posedge clk);
+        @(posedge clk); #1;
         cdb_flush = 1'b0;
         cdb_valid = 1'b0;
 
@@ -535,14 +561,15 @@ module CPU_FRONT_END_tb;
         load_instr(32'h0000_0004, encode_r(FUNCT7_ALT,  5'd4, 5'd3, FUNCT3_ADD_SUB, 5'd5, OP_REG));
         load_instr(32'h0000_0008, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_AND,     5'd6, OP_REG));
 
+        logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_regs [3];
         for (int i = 0; i < 3; i++) begin
             wait_for_dispatch(dispatched_opcode, 30);
             phy_regs[i] = dis_new_rd_phy_addr;
-            // cdb_complete(
-            //     .rob_tag(ROB_INDEX_WIDTH'(i)),
-            //     .rd_phy(dis_new_rd_phy_addr),
-            //     .reg_wr(1'b1)
-            // );
+            cdb_complete(
+                .rob_tag(ROB_INDEX_WIDTH'(i)),
+                .rd_phy(dis_new_rd_phy_addr),
+                .reg_wr(1'b1)
+            );
         end
 
         // All three should be distinct
@@ -568,27 +595,27 @@ module CPU_FRONT_END_tb;
         // ADD -> INT
         wait_for_dispatch(dispatched_opcode, 30);
         check_bit("ADD->INT", dis_int_issue_en, 1'b1);
-        //cdb_complete(ROB_INDEX_WIDTH'(0), dis_new_rd_phy_addr, 1'b1);
+        cdb_complete(ROB_INDEX_WIDTH'(0), dis_new_rd_phy_addr, 1'b1);
 
         // MUL -> MUL
         wait_for_dispatch(dispatched_opcode, 30);
         check_bit("MUL->MUL", dis_mul_issue_en, 1'b1);
-        //cdb_complete(ROB_INDEX_WIDTH'(1), dis_new_rd_phy_addr, 1'b1);
+        cdb_complete(ROB_INDEX_WIDTH'(1), dis_new_rd_phy_addr, 1'b1);
 
         // DIV -> DIV
         wait_for_dispatch(dispatched_opcode, 30);
         check_bit("DIV->DIV", dis_div_issue_en, 1'b1);
-        //cdb_complete(ROB_INDEX_WIDTH'(2), dis_new_rd_phy_addr, 1'b1);
+        cdb_complete(ROB_INDEX_WIDTH'(2), dis_new_rd_phy_addr, 1'b1);
 
         // SW -> LD_ST
         wait_for_dispatch(dispatched_opcode, 30);
         check_bit("SW->LD_ST", dis_ld_st_issue_en, 1'b1);
-        //cdb_complete(ROB_INDEX_WIDTH'(3), '0, 1'b0);
+        cdb_complete(ROB_INDEX_WIDTH'(3), '0, 1'b0);
 
         // LW -> LD_ST
         wait_for_dispatch(dispatched_opcode, 30);
         check_bit("LW->LD_ST", dis_ld_st_issue_en, 1'b1);
-        //cdb_complete(ROB_INDEX_WIDTH'(4), dis_new_rd_phy_addr, 1'b1);
+        cdb_complete(ROB_INDEX_WIDTH'(4), dis_new_rd_phy_addr, 1'b1);
 
         // ==============================================================
         // Test 14: ROB fills up and stalls dispatch
@@ -601,6 +628,7 @@ module CPU_FRONT_END_tb;
                        encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_ADD_SUB, 5'd3, OP_REG));
         end
 
+        int dispatch_count;
         dispatch_count = 0;
         for (int cyc = 0; cyc < 100; cyc++) begin
             @(posedge clk); #1;
@@ -626,6 +654,138 @@ module CPU_FRONT_END_tb;
         wait_for_dispatch(dispatched_opcode, 30);
         check_val("ADDI opcode", dispatched_opcode, INSTR_ADDI);
         check_val("ADDI imm16", dis_imm16, 16'd1234);
+
+        // ==============================================================
+        // Test 16: JAL end-to-end — dispatch, redirect, target dispatches
+        // ==============================================================
+        $display("\n[Test 16] JAL x1, +16 end-to-end");
+        reset_dut();
+        // JAL x1, +16 at addr 0x0000 → target 0x0010
+        load_instr(32'h0000_0000, encode_j(21'd16, 5'd1, OP_JAL));
+        // ADDI x10, x0, 42 at the JAL target (0x0010)
+        load_instr(32'h0000_0010, encode_i(12'd42, 5'd0, FUNCT3_ADD_SUB, 5'd10, OP_IMM));
+
+        wait_for_dispatch(dispatched_opcode, 50);
+        check_val("JAL dispatched", dispatched_opcode, INSTR_JAL);
+        check_bit("JAL dis_jal_inst", dis_jal_inst, 1'b1);
+        check_bit("JAL dis_reg_write (rd=x1)", dis_reg_write, 1'b1);
+        check_bit("JAL dis_int_issue_en", dis_int_issue_en, 1'b1);
+
+        // The IFQ should have redirected to 0x0010; wait for target ADDI
+        wait_for_dispatch(dispatched_opcode, 50);
+        check_val("JAL target ADDI dispatched", dispatched_opcode, INSTR_ADDI);
+        check_val("ADDI imm16 at target", dis_imm16, 16'd42);
+
+        // ==============================================================
+        // Test 17: JALR general end-to-end — dispatch, stall, resolve
+        // JALR x5, 0(x3): rd=x5, rs=x3 → jr_inst=1, jal_inst=1
+        // ==============================================================
+        $display("\n[Test 17] JALR x5, 0(x3) end-to-end with cdb_jalr_resolved");
+        reset_dut();
+        // JALR x5, 0(x3) at addr 0x0000
+        load_instr(32'h0000_0000, encode_i(12'd0, 5'd3, 3'b000, 5'd5, OP_JALR));
+        // ADDI x10, x0, 99 at the JALR target (0x0200, will be resolved via CDB)
+        load_instr(32'h0000_0200, encode_i(12'd99, 5'd0, FUNCT3_ADD_SUB, 5'd10, OP_IMM));
+
+        // Wait for JALR to dispatch (stage 2 fires even though stalled)
+        wait_for_dispatch(dispatched_opcode, 50);
+        check_val("JALR dispatched", dispatched_opcode, INSTR_JALR);
+        check_bit("JALR dis_jr_inst", dis_jr_inst, 1'b1);
+        check_bit("JALR dis_jal_inst", dis_jal_inst, 1'b1);
+        check_bit("JALR dis_reg_write (rd=x5)", dis_reg_write, 1'b1);
+        check_bit("JALR dis_int_issue_en", dis_int_issue_en, 1'b1);
+
+        // Capture JALR's physical register for CDB completion
+        begin
+            logic [PHY_REGISTER_FILE_WIDTH-1:0] jalr_phy;
+            jalr_phy = dis_new_rd_phy_addr;
+
+            // Pipeline should be stalled (jr_stall=1), no dispatch for a few cycles
+            repeat (3) @(posedge clk);
+            #1;
+            check_bit("JALR stall: no dispatch", dis_int_issue_en, 1'b0);
+            check_bit("JALR stall: no ld_st", dis_ld_st_issue_en, 1'b0);
+
+            // Resolve JALR: redirect to 0x0200
+            cdb_jalr_resolve(
+                .rob_tag(ROB_INDEX_WIDTH'(0)),
+                .rd_phy(jalr_phy),
+                .target_addr(32'h0000_0200)
+            );
+
+            // Wait for the target ADDI at 0x0200 to dispatch
+            wait_for_dispatch(dispatched_opcode, 50);
+            check_val("JALR target ADDI dispatched", dispatched_opcode, INSTR_ADDI);
+            check_val("ADDI imm16 at JALR target", dis_imm16, 16'd99);
+        end
+
+        // ==============================================================
+        // Test 18: JAL + JALR return (jr31_inst) via RAS end-to-end
+        // JAL pushes PC+4 to RAS, JALR x0,0(x1) pops RAS and returns
+        // ==============================================================
+        $display("\n[Test 18] JAL + JALR return via RAS");
+        reset_dut();
+        // JAL x1, +8 at addr 0x0000 → target 0x0008, pushes 0x0004 to RAS
+        load_instr(32'h0000_0000, encode_j(21'd8, 5'd1, OP_JAL));
+        // JALR x0, 0(x1) at addr 0x0008 → jr31_inst, pops RAS → returns to 0x0004
+        load_instr(32'h0000_0008, encode_i(12'd0, 5'd1, 3'b000, 5'd0, OP_JALR));
+        // ADDI x11, x0, 77 at return address 0x0004
+        load_instr(32'h0000_0004, encode_i(12'd77, 5'd0, FUNCT3_ADD_SUB, 5'd11, OP_IMM));
+
+        // 1. JAL dispatches, redirects to 0x0008
+        wait_for_dispatch(dispatched_opcode, 50);
+        check_val("JAL dispatched", dispatched_opcode, INSTR_JAL);
+        check_bit("JAL dis_jal_inst", dis_jal_inst, 1'b1);
+
+        // 2. JALR return dispatches (jr31_inst), redirects via RAS to 0x0004
+        wait_for_dispatch(dispatched_opcode, 50);
+        check_val("JALR return dispatched", dispatched_opcode, INSTR_JALR);
+        check_bit("JALR dis_jr31_inst", dis_jr31_inst, 1'b1);
+
+        // 3. ADDI at return address 0x0004 dispatches
+        wait_for_dispatch(dispatched_opcode, 50);
+        check_val("Return ADDI dispatched", dispatched_opcode, INSTR_ADDI);
+        check_val("Return ADDI imm16", dis_imm16, 16'd77);
+
+        // ==============================================================
+        // Test 19: JALR stall does not leak dispatches
+        // ==============================================================
+        $display("\n[Test 19] JALR stall blocks all dispatch");
+        reset_dut();
+        // JALR x5, 0(x3) at 0x0000 followed by ADD at 0x0004
+        load_instr(32'h0000_0000, encode_i(12'd0, 5'd3, 3'b000, 5'd5, OP_JALR));
+        load_instr(32'h0000_0004, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_ADD_SUB, 5'd3, OP_REG));
+
+        // JALR dispatches first
+        wait_for_dispatch(dispatched_opcode, 50);
+        check_val("JALR dispatched first", dispatched_opcode, INSTR_JALR);
+
+        // Now stalled — no dispatch should fire for 10 cycles
+        begin
+            int leak_count;
+            leak_count = 0;
+            for (int cyc = 0; cyc < 10; cyc++) begin
+                @(posedge clk); #1;
+                if (dis_int_issue_en || dis_div_issue_en || dis_mul_issue_en || dis_ld_st_issue_en)
+                    leak_count++;
+            end
+            if (leak_count == 0) begin
+                $display("  No dispatch during JALR stall (10 cycles) — correct");
+                pass_cnt++;
+            end else begin
+                $error("[FAIL] %0d dispatches leaked during JALR stall", leak_count);
+                fail_cnt++;
+            end
+        end
+
+        // Resolve to unblock
+        cdb_jalr_resolve(
+            .rob_tag(ROB_INDEX_WIDTH'(0)),
+            .rd_phy(7'd32),
+            .target_addr(32'h0000_0300)
+        );
+        @(posedge clk); #1;
+        cdb_clear();
 
         // ==============================================================
         // Summary

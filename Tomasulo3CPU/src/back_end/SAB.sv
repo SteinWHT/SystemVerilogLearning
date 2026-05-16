@@ -25,9 +25,6 @@ module SAB #(
     input logic lsq_empty,
     
     output logic valid_out
-
-
-    
 );
     typedef struct packed {
         logic valid;
@@ -40,10 +37,12 @@ module SAB #(
     sab_entry_t SAB_array [0:SAB_DEPTH-1];
     logic [SAB_INDEX_WIDTH:0] write_ptr, read_ptr;
 
+    assign valid_out = 1'b0;
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             write_ptr <= '0;
-            read_ptr <= '0;
+            read_ptr  <= '0;
             for (int i = 0; i < SAB_DEPTH; i++) begin
                 SAB_array[i] <= '0;
             end

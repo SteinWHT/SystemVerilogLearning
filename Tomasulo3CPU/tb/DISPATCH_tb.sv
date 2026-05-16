@@ -283,6 +283,14 @@ module DISPATCH_tb;
     logic [31:0] INSTR_ADD_X0_X1_X2;
     assign INSTR_ADD_X0_X1_X2 = encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_ADD_SUB, 5'd0, OP_REG);
 
+    // JALR x5, 0(x3) — general JALR (rd!=x0, rs!=x1 → jal_inst=1, jr_inst=1)
+    logic [31:0] INSTR_JALR_X5_X3_0;
+    assign INSTR_JALR_X5_X3_0 = encode_i(12'd0, 5'd3, 3'b000, 5'd5, OP_JALR);
+
+    // JALR x0, 0(x3) — JR x3 (rd=x0, rs!=x1 → jr_inst=1 only)
+    logic [31:0] INSTR_JALR_X0_X3_0;
+    assign INSTR_JALR_X0_X3_0 = encode_i(12'd0, 5'd3, 3'b000, 5'd0, OP_JALR);
+
     // ----------------------------------------------------------------
     // Helper tasks
     // ----------------------------------------------------------------
@@ -298,6 +306,7 @@ module DISPATCH_tb;
         cdb_valid           = 1'b0;
         cdb_branch_addr     = '0;
         cdb_flush           = 1'b0;
+        cdb_jalr_resolved   = 1'b0;
         frat_full           = 1'b0;
         frat_rs_phy_addr    = '0;
         frat_rt_phy_addr    = '0;
@@ -322,9 +331,8 @@ module DISPATCH_tb;
         @(posedge clk); #1;
     endtask
 
-    // Present an instruction as an IFQ read response and let it propagate to stage 2.
-    // With last_cycle_stall, the first non-stalled cycle requests IFQ data; the
-    // instruction is usable by stage 1 one cycle later.
+    // Present an instruction to stage 1 and let it propagate to stage 2.
+    // Returns after stage 2 has valid outputs (2 clock edges).
     task automatic present_instr(
         input logic [31:0] instr,
         input logic [IMEM_DEPTH-1:0] pc_val,
@@ -342,13 +350,12 @@ module DISPATCH_tb;
         frat_rt_phy_addr    = frat_rt;
         frat_rd_phy_addr    = frat_rd;
         @(posedge clk); #1;
-        // IFQ response is now visible to stage 1. Advance it into stage 2.
-        @(posedge clk); #1;
+        // stage 1 captured; now advance to stage 2
         ifetch_empty = 1'b1;
+        @(posedge clk); #1;
     endtask
 
-    // Present instruction to stage 1 only (don't wait for stage 2).
-    // Returns when stage 1 may decode/use ifetch_*.
+    // Present instruction to stage 1 only (don't wait for stage 2)
     task automatic present_instr_stage1(
         input logic [31:0] instr,
         input logic [IMEM_DEPTH-1:0] pc_val,
@@ -365,7 +372,6 @@ module DISPATCH_tb;
         frat_rs_phy_addr    = frat_rs;
         frat_rt_phy_addr    = frat_rt;
         frat_rd_phy_addr    = frat_rd;
-        @(posedge clk); #1;
     endtask
 
     // ----------------------------------------------------------------
@@ -762,12 +768,11 @@ module DISPATCH_tb;
         ifetch_pc           = 32'h0000_0C04;
         ifetch_pcplus4_in   = 32'h0000_0C08;
         ifetch_empty        = 1'b0;
-        //dis_frl_rd_phy_addr = 7'd61;
+        dis_frl_rd_phy_addr = 7'd61;
         frat_rs_phy_addr    = 7'd3;  // old mapping of x3
         frat_rt_phy_addr    = 7'd4;
         frat_rd_phy_addr    = 7'd5;
         @(posedge clk); #1;
-        dis_frl_rd_phy_addr = 7'd61;
         // Now SUB is in stage 2; check its source registers
         ifetch_empty = 1'b1;
         @(posedge clk); #1;
@@ -794,7 +799,7 @@ module DISPATCH_tb;
         // Stage 2 is now valid; second instruction should stall
         ifetch_instr_in = INSTR_SUB_X5_X3_X4;
         ifetch_empty = 1'b0;
-        @(posedge clk);
+        @(posedge clk); #1;
         check_bit("dis_ren when ROB has 1 entry and stage2 valid", dis_ren, 1'b0);
 
         // ==============================================================
@@ -813,20 +818,21 @@ module DISPATCH_tb;
         );
         @(posedge clk); #1;
         // ADD now in stage 2, SUB in stage 1
-        ifetch_instr_in     = INSTR_SUB_X5_X3_X4;
-        ifetch_pc           = 32'h0000_1004;
-        ifetch_pcplus4_in   = 32'h0000_1008;
-        ifetch_empty        = 1'b0;
-        dis_frl_rd_phy_addr = 7'd71;
-        frat_rs_phy_addr    = 7'd33;
-        frat_rt_phy_addr    = 7'd34;
-        frat_rd_phy_addr    = 7'd35;
+        present_instr_stage1(
+            .instr(INSTR_SUB_X5_X3_X4),
+            .pc_val(32'h0000_1004),
+            .frl_phy(7'd71),
+            .frat_rs(7'd33),
+            .frat_rt(7'd34),
+            .frat_rd(7'd35)
+        );
         // Check ADD in stage 2
         check_bit("ADD fires in stage 2", dis_inst_valid, 1'b1);
         check_val("ADD opcode in stage 2", dis_opcode, INSTR_ADD);
         @(posedge clk); #1;
         // Now SUB should be in stage 2
         ifetch_empty = 1'b1;
+        @(posedge clk); #1;
         check_bit("SUB fires in stage 2", dis_inst_valid, 1'b1);
         check_val("SUB opcode in stage 2", dis_opcode, INSTR_SUB);
 
@@ -922,7 +928,7 @@ module DISPATCH_tb;
         ifetch_instr_in = INSTR_SUB_X5_X3_X4;
         ifetch_empty = 1'b0;
         dis_frl_rd_phy_addr = 7'd81;
-        @(posedge clk);
+        @(posedge clk); #1;
         // Should stall: stage 2 has INT, stage 1 has INT, only 1 entry in INT queue
         check_bit("dis_ren stall: 1 INT entry, both stages INT", dis_ren, 1'b0);
 
@@ -950,15 +956,16 @@ module DISPATCH_tb;
         $display("\n[Test 29] RAS jr31_inst signal for JALR return");
         reset_dut();
         // JALR x0, x1, 0 — rs=x1 triggers jr31_inst
+        ifetch_instr_in = encode_i(12'd0, 5'd1, 3'b000, 5'd0, OP_JALR);
+        ifetch_pc = 32'h0000_6000;
+        ifetch_pcplus4_in = 32'h0000_6004;
+        ifetch_empty = 1'b0;
+        dis_frl_rd_phy_addr = 7'd83;
+        frat_rs_phy_addr = 7'd1;
+        frat_rt_phy_addr = 7'd0;
+        frat_rd_phy_addr = 7'd0;
         ras_addr = 31'h0000_200;
-        present_instr_stage1(
-            .instr(encode_i(12'd0, 5'd1, 3'b000, 5'd0, OP_JALR)),
-            .pc_val(32'h0000_6000),
-            .frl_phy(7'd83),
-            .frat_rs(7'd1),
-            .frat_rt(7'd0),
-            .frat_rd(7'd0)
-        );
+        #1;
         check_bit("dis_ras_jr31_inst for JALR return", dis_ras_jr31_inst, 1'b1);
         check_bit("dis_jmpbr for JALR return", dis_jmpbr, 1'b1);
         check_bit("dis_jmpbr_addr_valid for return", dis_jmpbr_addr_valid, 1'b1);
@@ -979,6 +986,156 @@ module DISPATCH_tb;
         );
         check_bit("dis_rba_reg_write for NOP", dis_rba_reg_write, 1'b0);
         check_bit("dis_int_issue_en for NOP", dis_int_issue_en, 1'b1);
+
+        // ==============================================================
+        // Test 31: JAL x1, +64 — full stage 1 redirect + stage 2 dispatch
+        // ==============================================================
+        $display("\n[Test 31] JAL x1, +64 — full dispatch");
+        reset_dut();
+        present_instr_stage1(
+            .instr(INSTR_JAL_X1_64),
+            .pc_val(32'h0000_5000),
+            .frl_phy(7'd85),
+            .frat_rs(7'd0),
+            .frat_rt(7'd0),
+            .frat_rd(7'd1)
+        );
+        #1;
+        // Stage 1: JAL triggers redirect (jal_inst && !jr_inst)
+        check_bit("JAL s1: dis_ren", dis_ren, 1'b1);
+        check_bit("JAL s1: dis_jmpbr", dis_jmpbr, 1'b1);
+        check_bit("JAL s1: dis_jmpbr_addr_valid", dis_jmpbr_addr_valid, 1'b1);
+        // JAL target = PC + imm = 0x5000 + 64 = 0x5040
+        check_val("JAL s1: redirect addr", dis_jmpbr_addr, (32'h0000_5040) >> 1);
+        check_bit("JAL s1: dis_ras_jal_inst", dis_ras_jal_inst, 1'b1);
+        // Advance to stage 2
+        @(posedge clk); #1;
+        ifetch_empty = 1'b1;
+        @(posedge clk); #1;
+        check_bit("JAL s2: dis_inst_valid", dis_inst_valid, 1'b1);
+        check_val("JAL s2: dis_opcode", dis_opcode, INSTR_JAL);
+        check_bit("JAL s2: dis_jal_inst", dis_jal_inst, 1'b1);
+        check_bit("JAL s2: dis_jr_inst=0", dis_jr_inst, 1'b0);
+        check_bit("JAL s2: dis_rba_reg_write (rd=x1)", dis_rba_reg_write, 1'b1);
+        check_val("JAL s2: dis_rob_rd_arch_addr", dis_rob_rd_arch_addr, 5'd1);
+        check_bit("JAL s2: dis_int_issue_en", dis_int_issue_en, 1'b1);
+
+        // ==============================================================
+        // Test 32: JALR x5, 0(x3) — general JALR stall + cdb_jalr_resolved
+        // Decoder: jal_inst=1, jr_inst=1, rw=1, rd=x5, rs=x3
+        // ==============================================================
+        $display("\n[Test 32] JALR x5, 0(x3) — stall + cdb_jalr_resolved");
+        reset_dut();
+        present_instr_stage1(
+            .instr(INSTR_JALR_X5_X3_0),
+            .pc_val(32'h0000_8000),
+            .frl_phy(7'd86),
+            .frat_rs(7'd3),
+            .frat_rt(7'd0),
+            .frat_rd(7'd5)
+        );
+        #1;
+        // Cycle 0: JALR in stage 1
+        // jr_two_stage_one_extra_instr=1 → stage1_valid=1 (override stall)
+        check_bit("JALR c0: dis_ren (IFQ pops)", dis_ren, 1'b1);
+        // No redirect yet: jr_fetch_hold=0, jr31=0, jal&&!jr=0, branch=0
+        check_bit("JALR c0: dis_jmpbr=0", dis_jmpbr, 1'b0);
+
+        @(posedge clk); #1;
+        // Cycle 1: JALR moved to stage 2, jr_stall=1
+        check_bit("JALR c1: dis_inst_valid", dis_inst_valid, 1'b1);
+        check_val("JALR c1: dis_opcode", dis_opcode, INSTR_JALR);
+        check_bit("JALR c1: dis_jr_inst", dis_jr_inst, 1'b1);
+        check_bit("JALR c1: dis_jal_inst", dis_jal_inst, 1'b1);
+        check_bit("JALR c1: dis_rba_reg_write (rd=x5)", dis_rba_reg_write, 1'b1);
+        check_val("JALR c1: dis_rob_rd_arch_addr", dis_rob_rd_arch_addr, 5'd5);
+        check_bit("JALR c1: dis_int_issue_en", dis_int_issue_en, 1'b1);
+        // Fetch held by jr_stall
+        check_bit("JALR c1: dis_jmpbr (fetch hold)", dis_jmpbr, 1'b1);
+        check_bit("JALR c1: dis_jmpbr_addr_valid=0", dis_jmpbr_addr_valid, 1'b0);
+
+        @(posedge clk); #1;
+        // Cycle 2: stage2 now invalid (stage1_valid was 0 last cycle), stall continues
+        check_bit("JALR c2: dis_inst_valid=0", dis_inst_valid, 1'b0);
+        check_bit("JALR c2: dis_jmpbr (still held)", dis_jmpbr, 1'b1);
+
+        // Assert cdb_jalr_resolved with target address
+        cdb_jalr_resolved = 1'b1;
+        cdb_branch_addr = 31'h0000_400;
+        #1;
+        check_bit("JALR resolve: dis_jmpbr_addr_valid", dis_jmpbr_addr_valid, 1'b1);
+        check_val("JALR resolve: dis_jmpbr_addr", dis_jmpbr_addr, 31'h0000_400);
+
+        @(posedge clk); #1;
+        cdb_jalr_resolved = 1'b0;
+        // jr_stall cleared on posedge
+        check_bit("JALR post-resolve: jr_stall=0", dut.jr_stall, 1'b0);
+
+        // ==============================================================
+        // Test 33: JALR x0, 0(x3) — JR (no reg write) stall + resolve
+        // Decoder: jr_inst=1, jal_inst=0, rw=0, rd=x0
+        // ==============================================================
+        $display("\n[Test 33] JALR x0, 0(x3) — JR, no reg write");
+        reset_dut();
+        present_instr_stage1(
+            .instr(INSTR_JALR_X0_X3_0),
+            .pc_val(32'h0000_9000),
+            .frl_phy(7'd87),
+            .frat_rs(7'd3),
+            .frat_rt(7'd0),
+            .frat_rd(7'd0)
+        );
+        #1;
+        check_bit("JR c0: dis_ren (IFQ pops)", dis_ren, 1'b1);
+
+        @(posedge clk); #1;
+        // Stage 2: dispatches but no register write
+        check_bit("JR c1: dis_inst_valid", dis_inst_valid, 1'b1);
+        check_val("JR c1: dis_opcode", dis_opcode, INSTR_JALR);
+        check_bit("JR c1: dis_jr_inst", dis_jr_inst, 1'b1);
+        check_bit("JR c1: dis_jal_inst=0", dis_jal_inst, 1'b0);
+        check_bit("JR c1: dis_rba_reg_write=0 (rd=x0)", dis_rba_reg_write, 1'b0);
+        check_bit("JR c1: dis_jmpbr (fetch hold)", dis_jmpbr, 1'b1);
+
+        // Resolve
+        @(posedge clk); #1;
+        cdb_jalr_resolved = 1'b1;
+        cdb_branch_addr = 31'h0000_500;
+        #1;
+        check_bit("JR resolve: dis_jmpbr_addr_valid", dis_jmpbr_addr_valid, 1'b1);
+        check_val("JR resolve: dis_jmpbr_addr", dis_jmpbr_addr, 31'h0000_500);
+
+        @(posedge clk); #1;
+        cdb_jalr_resolved = 1'b0;
+        check_bit("JR post-resolve: jr_stall=0", dut.jr_stall, 1'b0);
+
+        // ==============================================================
+        // Test 34: cdb_flush also clears jr_stall
+        // ==============================================================
+        $display("\n[Test 34] cdb_flush clears jr_stall");
+        reset_dut();
+        present_instr_stage1(
+            .instr(INSTR_JALR_X5_X3_0),
+            .pc_val(32'h0000_A000),
+            .frl_phy(7'd88),
+            .frat_rs(7'd3),
+            .frat_rt(7'd0),
+            .frat_rd(7'd5)
+        );
+        @(posedge clk); #1;
+        // Cycle 1: jr_stall=1, JALR in stage 2
+        @(posedge clk); #1;
+        // Cycle 2: confirm stall
+        check_bit("pre-flush: jr_stall=1", dut.jr_stall, 1'b1);
+
+        // Send cdb_flush (simulates branch mispredict clearing the pipeline)
+        cdb_valid = 1'b1;
+        cdb_flush = 1'b1;
+        cdb_branch_addr = 31'h0000_100;
+        @(posedge clk); #1;
+        cdb_valid = 1'b0;
+        cdb_flush = 1'b0;
+        check_bit("post-flush: jr_stall=0", dut.jr_stall, 1'b0);
 
         // ==============================================================
         // Summary

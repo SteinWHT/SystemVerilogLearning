@@ -153,11 +153,6 @@ import riscv_types_pkg::*;
     logic jr_two_stage_one_extra_instr;
     logic stage1_redirect;
     logic jr_fetch_hold;
-    // only stage1 will be stalled
-    logic stall;
-    // if last cycle stalls, it means dispatch didn't fetch data.
-    // it needs one extra cycle to have the data ready.
-    logic last_cycle_stall;
 
     // ------------------------------------------------------
     // Stage 2: write to ROB and issue queues
@@ -204,7 +199,7 @@ import riscv_types_pkg::*;
                    .jr31_inst(stage1_dis_jr31_inst)
                  );
 
-    assign stage1_valid = (!stall || jr_two_stage_one_extra_instr) && !cdb_flush && !last_cycle_stall;
+    assign stage1_valid = (!stall || jr_two_stage_one_extra_instr) && !cdb_flush;
     assign stage1_reg_write = stage1_dis_reg_write && (stage1_rd_arch_addr != '0);
     assign stage1_needs_issue_entry = stage1_dis_instr_type != INSTR_NONE;
     assign stage1_issue_entry_available = stage1_dis_int_issue_en ||
@@ -224,7 +219,7 @@ import riscv_types_pkg::*;
 
     // IFQ logic
     logic [IMEM_WIDTH-1:0] jal_target, branch_target;
-    assign dis_ren = (!stall || jr_two_stage_one_extra_instr) && !cdb_flush;
+    assign dis_ren = stage1_valid;
     assign jr_fetch_hold = jr_stall;
     assign stage1_redirect = stage1_valid &&
             (stage1_dis_jr31_inst ||
@@ -330,12 +325,13 @@ import riscv_types_pkg::*;
     // FRAT is full (no more checkpoints for branch instructions) && (is_branch or jr)
     // if jr
     // if the instruction can be issued but the corresponding issue queue is full, we should also stall
+    logic stall;
     always_comb begin
         stall = '0;
         jr_two_stage_one_extra_instr = '0;
 
         if(ifetch_empty) begin
-           stall = 1'b1;
+            stall = 1'b1;
         end else if (rob_full) begin
             stall = 1'b1;
         // check when the second stage is non-valid
@@ -413,10 +409,7 @@ import riscv_types_pkg::*;
             stage2_rs_phy_addr          <= '0;
             stage2_rt_phy_addr          <= '0;
             stage2_pre_phy_addr         <= '0;
-
-            last_cycle_stall            <= 1'b1;
         end else begin
-            last_cycle_stall            <= stall;
             if (!stage1_valid) begin
                 // On flush, we need to invalidate the instruction in stage 2
                 stage2_valid                <= 1'b0;

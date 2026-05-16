@@ -48,7 +48,7 @@ module DIVQ #(
     output logic issue_div,
 
     // Dispatch interface
-    input logic                               dis_div_en,
+    input logic                               dis_div_issq_en,
     input logic                               dis_reg_write,
     input logic                               dis_rs_data_ready,
     input logic                               dis_rt_data_ready,
@@ -230,7 +230,7 @@ module DIVQ #(
             if (issue_div)
                 q_valid[sel_idx] <= 1'b0;
 
-            if (dis_div_en && has_free && !cdb_flush) begin
+            if (dis_div_issq_en && has_free && !cdb_flush) begin
                 q_valid[free_idx] <= 1'b1;
                 q[free_idx]       <= '{
                     rob_tag : dis_rob_tag,

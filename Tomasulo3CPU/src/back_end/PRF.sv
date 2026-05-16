@@ -47,11 +47,12 @@ module PRF #(
     
 );
 
-    logic [REG_FILE_DATA_WIDTH-1:0] prf_data_array [0:PHY_REGISTER_FILE_WIDTH-1];
+    localparam int unsigned NUM_PHY_REGS = 1 << PHY_REGISTER_FILE_WIDTH;
+    logic [REG_FILE_DATA_WIDTH-1:0] prf_data_array [NUM_PHY_REGS];
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            for (int i = 0; i < PHY_REGISTER_FILE_WIDTH; i++) begin
+            for (int i = 0; i < NUM_PHY_REGS; i++) begin
                 prf_data_array[i] <= '0;
             end
         end else begin
