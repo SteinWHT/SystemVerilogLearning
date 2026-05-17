@@ -1,9 +1,11 @@
 // LS QUEUE DATA STRUCTURE:
 //  valid   rs_data_valid   opcode      addr_rdy      robtag        rs_phy_addr     rd_phy_addr    addr/offset
-//  1b      1b              1b           1b           5b            6b              6b             32b
+//  1b      1b              6b           1b           5b            6b              6b             32b
 // The LSQ and SAB are intergrated into one module, and the SAB is used to store the store addresses.
 // Because they are fully coupled, I don't want to use so many ports to connect them.
-module LSQ #(
+module LSQ 
+import riscv_types_pkg::*;
+#(
     parameter int unsigned LSQ_DEPTH = 8,
     parameter int unsigned LSQ_INDEX_WIDTH = $clog2(LSQ_DEPTH),
     parameter int unsigned SAB_DEPTH = 8,
@@ -15,12 +17,9 @@ module LSQ #(
     parameter int unsigned ARCH_REG_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
-    parameter int unsigned OPCODE_WIDTH = 2,
     parameter int unsigned SB_DEPTH = 4,
     parameter int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH),
-    parameter int unsigned OPCODE_NONE = 2'd0,
-    parameter int unsigned OPCODE_LOAD = 2'd1,
-    parameter int unsigned OPCODE_STORE = 2'd2
+    parameter int unsigned OPCODE_WIDTH = 6
 ) (
     input logic clk,
     input logic rst_n,
@@ -172,7 +171,7 @@ module LSQ #(
             match_number[i] = '0;
         end
         for (int i = 0; i < LSQ_DEPTH; i++) begin
-            if (q[i].opcode == OPCODE_LOAD) begin
+            if (q[i].opcode == INSTR_LOAD) begin
                 for (int j = 0; j < SAB_DEPTH; j++) begin
                     if (sab_array[j].addr == q[i].addr_offset && sab_valid[j] == 1'b1) begin
                         match_number[i] = match_number[i] + 1;
@@ -214,12 +213,12 @@ module LSQ #(
         for (int i = 0; i < LSQ_DEPTH; i++) begin
             if (q_ready[i]) begin
                 debug_in = 1'b1;
-                if (q[i].opcode == OPCODE_STORE) begin
+                if (q[i].opcode == INSTR_STORE) begin
                     debug_sw = 1'b1;
                     for (int j = 0; j < LSQ_DEPTH; j++) begin
                         // 1. for sw: all the older lw addresses are known
                         // 2. for sw: sab is not full
-                        if(!sab_full && (j != i) && (q[j].opcode == OPCODE_LOAD) &&
+                        if(!sab_full && (j != i) && (q[j].opcode == INSTR_LOAD) &&
                         (entry_depth[j] < entry_depth[i])
                             && ((q[j].addr_rdy == 1'b0)) ) begin
                             sel_valid = 1'b0;
@@ -289,7 +288,7 @@ module LSQ #(
             iss_lsq_rdy               = '1;
         end else begin
             iss_lsq_rob_tag           = '0;
-            iss_lsq_opcode            =  OPCODE_NONE;
+            iss_lsq_opcode            =  INSTR_NONE;
             iss_lsq_addr              = '0;
             iss_lsq_phy_addr          = '0;
             iss_lsq_rdy               = '0;
@@ -301,7 +300,15 @@ module LSQ #(
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (int i = 0; i < LSQ_DEPTH; i++) begin
-                q[i]       <= '0;
+                q[i]       <= {
+                    rs_data_valid : 1'b0,
+                    opcode : INSTR_NONE,
+                    addr_rdy : 1'b0,
+                    rob_tag : '0,
+                    rs_phy_addr : '0,
+                    rd_phy_addr : '0,
+                    addr_offset : '0
+                };
                 q_valid[i] <= 1'b0;
                 junior_counter[i] <= '0;
             end
@@ -320,7 +327,7 @@ module LSQ #(
             // Flush: invalidate entries younger than the branch
             for (int i = 0; i < LSQ_DEPTH; i++) begin
                 if (flush_mask[i] && q_valid[i]) begin
-                    if (q[i].opcode == OPCODE_LOAD) begin
+                    if (q[i].opcode == INSTR_LOAD) begin
                         for (int j = 0; j < SAB_DEPTH; j++) begin
                             if (sab_array[j].addr == q[i].addr_offset && sab_valid[j] == 1'b1 &&
                                 sab_entry_depth[j] > cdb_rob_depth) begin
@@ -335,10 +342,10 @@ module LSQ #(
             // Issue: dequeue the selected entry
             if (issue_lsq && lsb_rdy) begin
                 q_valid[sel_idx] <= 1'b0;
-                if (q[sel_idx].opcode == OPCODE_STORE) begin
+                if (q[sel_idx].opcode == INSTR_STORE) begin
                     for (int i = 0; i < LSQ_DEPTH; i++) begin
                         // when sw is issued, the junior counter of the older lw is incremented
-                        if (q[i].opcode == OPCODE_LOAD && (entry_depth[i] < entry_depth[sel_idx]) &&
+                        if (q[i].opcode == INSTR_LOAD && (entry_depth[i] < entry_depth[sel_idx]) &&
                             (q[i].addr_offset == q[sel_idx].addr_offset)) begin
                             junior_counter[i] <= junior_counter[i] + 1;
                         end
@@ -408,7 +415,7 @@ module LSQ #(
             end
         end else begin
             // Issue Store
-            if (issue_lsq && q[sel_idx].opcode == OPCODE_STORE) begin
+            if (issue_lsq && q[sel_idx].opcode == INSTR_STORE) begin
                 sab_valid[q[sel_idx].addr_offset] <= 1'b1;
                 sab_array[q[sel_idx].addr_offset] <= '{
                     addr: q[sel_idx].addr_offset,

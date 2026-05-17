@@ -64,3 +64,4 @@ INTERVIEW_GUIDE.md
 /Tomasulo3CPU/build
 /obj_dir
 /Tomasulo3CPU/src/temp.sv
+/Tomasulo3CPU/teroshdl.project.windows.json

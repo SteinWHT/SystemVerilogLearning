@@ -1,4 +1,6 @@
-module ISSUEQ #(
+module ISSUEQ 
+import riscv_types_pkg::*;
+#(
     parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned ISSUE_QUEUE_DEPTH = 16,
     parameter int unsigned ARCH_REG_WIDTH = 5,
@@ -13,17 +15,13 @@ module ISSUEQ #(
     parameter int unsigned LSB_DEPTH = 4,
     parameter int unsigned LSB_INDEX_WIDTH = $clog2(LSB_DEPTH),
     parameter int unsigned BPB_PC_BITS = 2,
-    parameter int unsigned ALU_OPCODE_WIDTH = 3,
-    parameter int unsigned DIV_OPCODE_WIDTH = 3,
-    parameter int unsigned MUL_OPCODE_WIDTH = 3,
-    parameter int unsigned LD_ST_OPCODE_WIDTH = 1
+    parameter int unsigned OPCODE_WIDTH = 6
 ) (
     input logic clk,
     input logic rst_n,
 
     // CDB interface
     input logic                                 cdb_flush,
-    input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_depth,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,
     input logic                                 cdb_phy_reg_write,
@@ -51,7 +49,7 @@ module ISSUEQ #(
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rt_phy_addr,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
-    input logic [2:0]                           dis_opcode,
+    input logic [OPCODE_WIDTH-1:0]              dis_opcode,
     input logic [15:0]                          dis_imm16,
     input logic [DMEM_WIDTH-1:0]                dis_branch_other_addr,
     input logic [BPB_PC_BITS:0]                 dis_branch_pc_bits,
@@ -61,14 +59,6 @@ module ISSUEQ #(
     input logic                                 dis_jal_inst,
     input logic                                 dis_jr31_inst,
 
-    // EXE / CDB forwarding into reservation queues
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   mul_rd_phy_addr,
-    input logic                                 mul_exe_ready,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   div_rd_phy_addr,
-    input logic                                 div_exe_ready,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   ls_buf_rd_phy_addr,
-    input logic                                 ls_buf_buf_rd_write,
-
     output logic                                issq_intq_full,
     output logic                                issq_divq_full,
     output logic                                issq_mulq_full,
@@ -77,6 +67,35 @@ module ISSUEQ #(
     output logic                                issq_divq_two_or_more_vacant,
     output logic                                issq_mulq_two_or_more_vacant,
     output logic                                issq_ld_stq_two_or_more_vacant,
+
+
+    // EXE / CDB forwarding into reservation queues
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   mul_rd_phy_addr,
+    input logic                                 mul_exe_ready,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   div_rd_phy_addr,
+    input logic                                 div_exe_ready,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   ls_buf_rd_phy_addr,
+    input logic                                 ls_buf_buf_rd_write,
+
+    output logic                                exe_int_grant,
+    output logic                                exe_div_grant,
+    output logic                                exe_mul_grant,
+
+    // EXE interface
+    output logic [ROB_INDEX_WIDTH-1:0]          exe_rob_tag,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  exe_rd_phy_addr,
+    output logic [REG_FILE_DATA_WIDTH-1:0]      exe_rd_data,
+    output logic                                exe_reg_write,
+    output logic                                exe_result_valid,
+    output logic                                exe_branch_taken,
+    output logic                                exe_branch_mispredicted,
+    output logic                                exe_branch_prediction,
+    output logic                                exe_branch,
+    output logic                                exe_jr_inst,
+    output logic                                exe_jr31_inst,
+    output logic                                exe_jal_inst,
+    output logic [BPB_PC_BITS-1:0]              exe_branch_pc_bits,
+    output logic [DMEM_WIDTH-1:0]               exe_branch_other_addr,
 
     // ISSUEUNIT interface
     input logic                                 issue_int_en,
@@ -89,25 +108,21 @@ module ISSUEQ #(
     output logic                                issue_mul_rdy,
     output logic                                issue_ld_st_rdy,
 
-    output logic                                issue_int,
-    output logic                                issue_div,
-    output logic                                issue_mul,
-
     // SB Interface
     input logic [SB_INDEX_WIDTH-1:0]            sb_flush_sw_tag,
     input logic                                 sb_flush_sw,
     input logic [SB_INDEX_WIDTH-1:0]            sb_entry_sw_tag,
     input logic [DMEM_DEPTH-1:0]                sb_entry_sw_addr,
-    input logic                                 sb_entry_sw_en,
 
     // ROB Interface
     input logic [ROB_INDEX_WIDTH-1:0]           rob_tag,
+    input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
     input logic                                 rob_commit_mem_write,
 
     // LSB Interface
     input logic                                 iss_lsb_ready,
 
-    output logic [LD_ST_OPCODE_WIDTH-1:0]       iss_lsb_opcode,
+    output logic [OPCODE_WIDTH-1:0]             iss_lsb_opcode,
     output logic [ROB_INDEX_WIDTH-1:0]          iss_lsb_rob_tag,
     output logic [DMEM_DEPTH-1:0]               iss_lsb_addr,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_lsb_phy_addr,
@@ -119,7 +134,7 @@ module ISSUEQ #(
 
     // INTQ-only issue bus (also used for DIV/MUL wakeup)
     logic [ROB_INDEX_WIDTH-1:0]           iss_rob_tag_alu;
-    logic [2:0]                           iss_opcode_alu;
+    logic [OPCODE_WIDTH-1:0]              iss_opcode_alu;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rd_phy_addr_alu;
     logic                                 iss_rw_alu;
     logic [15:0]                          iss_imm16_alu;
@@ -133,17 +148,17 @@ module ISSUEQ #(
 
     // DIV / MUL issue metadata (internal until EXE is wired)
     logic [ROB_INDEX_WIDTH-1:0]           iss_rob_tag_div;
-    logic [2:0]                           iss_opcode_div;
+    logic [OPCODE_WIDTH-1:0]              iss_opcode_div;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rd_phy_addr_div;
     logic                                 iss_rw_div;
     logic [ROB_INDEX_WIDTH-1:0]           iss_rob_tag_mul;
-    logic [2:0]                           iss_opcode_mul;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_rd_phy_addr_mul;
+    logic [OPCODE_WIDTH-1:0]              iss_opcode_mul;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rd_phy_addr_mul;
     logic                                 iss_rw_mul;
 
     // INTQ ALU destination valid for DIV/MUL operand wakeup
     logic iss_rd_reg_valid_alu;
-    assign iss_rd_reg_valid_alu = issue_int & iss_rw_alu;
+    assign iss_rd_reg_valid_alu = exe_int_grant & iss_rw_alu;
 
     // INTQ
     INTQ #(
@@ -153,7 +168,8 @@ module ISSUEQ #(
         .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
         .DMEM_WIDTH(DMEM_WIDTH),
-        .BPB_PC_BITS(BPB_PC_BITS)
+        .BPB_PC_BITS(BPB_PC_BITS),
+        .OPCODE_WIDTH(OPCODE_WIDTH)
     ) intq (
         .clk(clk),
         .rst_n(rst_n),
@@ -188,7 +204,6 @@ module ISSUEQ #(
 
         .issue_int_en(issue_int_en),
         .issue_int_rdy(issue_int_rdy),
-        .issue_int(issue_int),
 
         .dis_int_en(dis_int_issq_en),
         .dis_reg_write(dis_reg_write),
@@ -219,7 +234,8 @@ module ISSUEQ #(
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
         .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
-        .DMEM_WIDTH(DMEM_WIDTH)
+        .DMEM_WIDTH(DMEM_WIDTH),
+        .OPCODE_WIDTH(OPCODE_WIDTH)
     ) divq (
         .clk(clk),
         .rst_n(rst_n),
@@ -248,7 +264,6 @@ module ISSUEQ #(
 
         .issue_div_en(issue_div_en),
         .issue_div_rdy(issue_div_rdy),
-        .issue_div(issue_div),
 
         .dis_div_issq_en(dis_div_issq_en),
         .dis_reg_write(dis_reg_write),
@@ -271,7 +286,8 @@ module ISSUEQ #(
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
         .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
-        .DMEM_WIDTH(DMEM_WIDTH)
+        .DMEM_WIDTH(DMEM_WIDTH),
+        .OPCODE_WIDTH(OPCODE_WIDTH)
     ) mulq (
         .clk(clk),
         .rst_n(rst_n),
@@ -300,7 +316,6 @@ module ISSUEQ #(
 
         .issue_mul_en(issue_mul_en),
         .issue_mul_rdy(issue_mul_rdy),
-        .issue_mul(issue_mul),
 
         .dis_mul_issq_en(dis_mul_issq_en),
         .dis_reg_write(dis_reg_write),
@@ -346,7 +361,7 @@ module ISSUEQ #(
         .dis_rs_phy_addr(dis_rs_phy_addr),
         .dis_new_rd_phy_addr(dis_new_rd_phy_addr),
         .dis_rob_tag(dis_rob_tag),
-        .dis_opcode(dis_opcode[0]),
+        .dis_opcode(dis_opcode),
         .dis_ld_st_issq_en(dis_ld_st_issq_en),
         .dis_imm16(dis_imm16),
 
@@ -364,12 +379,11 @@ module ISSUEQ #(
         .cdb_phy_reg_write(cdb_phy_reg_write),
         .cdb_valid(cdb_phy_reg_write),
 
-        .sb_entry_sw_en(sb_entry_sw_en),
-
         .iss_rs_data_lsq(iss_rs_data_lsq),
         .iss_rs_phy_addr_ls(iss_rs_phy_addr_ls),
 
-        .iss_lsb_ready(iss_lsb_ready),
+        .lsb_ready(iss_lsb_ready),
+
         .iss_lsq_opcode(iss_lsb_opcode),
         .iss_lsq_rob_tag(iss_lsb_rob_tag),
         .iss_lsq_addr(iss_lsb_addr),

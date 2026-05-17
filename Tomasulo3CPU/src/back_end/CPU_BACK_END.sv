@@ -1,7 +1,8 @@
 // Back-end shell: ISSUEQ, ISSUEUNIT, PRF, LSB, and optional standalone SAB.
 // DISPATCH, ROB commit/CDB, EXE completion, and D-cache are driven from outside.
 module CPU_BACK_END #(
-    parameter int unsigned INSTR_WIDTH              = 32,
+    parameter int unsigned XLEN                   = 64,
+    parameter int unsigned INSTR_WIDTH            = 32,
     parameter int unsigned ARCH_REG_COUNT         = 32,
     parameter int unsigned ARCH_REG_WIDTH         = $clog2(ARCH_REG_COUNT),
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
@@ -18,7 +19,8 @@ module CPU_BACK_END #(
     parameter int unsigned DIV_CYCLES             = 7,
     parameter int unsigned MUL_CYCLES             = 3,
     parameter int unsigned INT_CYCLES             = 1,
-    parameter int unsigned LD_ST_CYCLES           = 1
+    parameter int unsigned LD_ST_CYCLES           = 1,
+    parameter int unsigned OPCODE_WIDTH           = 6
 ) (
     input logic clk,
     input logic rst_n,
@@ -30,14 +32,6 @@ module CPU_BACK_END #(
     input logic [REG_FILE_DATA_WIDTH-1:0]       cdb_rd_data,
     input logic                                 cdb_reg_write,
     input logic                                 cdb_phy_reg_write,
-
-    // Forwarding completion (from EXE / load-buffer when wired)
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   mul_rd_phy_addr,
-    input logic                                 mul_exe_ready,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   div_rd_phy_addr,
-    input logic                                 div_exe_ready,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   ls_buf_rd_phy_addr,
-    input logic                                 ls_buf_buf_rd_write,
 
     // DISPATCH -> issue queues
     input logic                                 dis_int_issq_en,
@@ -65,6 +59,8 @@ module CPU_BACK_END #(
     input logic [ROB_INDEX_WIDTH-1:0]           rob_tag,
     input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
     input logic                                 rob_commit_mem_write,
+
+    output logic [REG_FILE_DATA_WIDTH-1:0]      rt_sb_data,
 
     // SB -> LSQ / SAB (index widths follow SB_DEPTH)
     input logic [$clog2(SB_DEPTH)-1:0]           sb_flush_sw_tag,
@@ -133,9 +129,9 @@ module CPU_BACK_END #(
     logic issue_int_grant;
     logic issue_div_grant;
     logic issue_mul_grant;
-    logic issue_int_fire;
-    logic issue_div_fire;
-    logic issue_mul_fire;
+    logic exe_int_grant;
+    logic exe_div_grant;
+    logic exe_mul_grant;
 
     logic iss_lsb_ready;
     logic [LD_ST_OPCODE_WIDTH-1:0] iss_lsb_opcode;
@@ -161,12 +157,11 @@ module CPU_BACK_END #(
         .SB_DEPTH(SB_DEPTH),
         .LSB_DEPTH(LSB_DEPTH),
         .BPB_PC_BITS(BPB_PC_BITS),
-        .LD_ST_OPCODE_WIDTH(LD_ST_OPCODE_WIDTH)
+        .OPCODE_WIDTH(OPCODE_WIDTH)
     ) issueq (
         .clk(clk),
         .rst_n(rst_n),
         .cdb_flush(cdb_flush),
-        .rob_top_ptr(rob_top_ptr),
         .cdb_rob_depth(cdb_rob_depth),
         .cdb_rd_phy_addr(cdb_rd_phy_addr),
         .cdb_phy_reg_write(cdb_phy_reg_write),
@@ -220,15 +215,15 @@ module CPU_BACK_END #(
         .issue_div_rdy(issue_div_rdy),
         .issue_mul_rdy(issue_mul_rdy),
         .issue_ld_st_rdy(issue_ld_st_rdy),
-        .issue_int(issue_int_fire),
-        .issue_div(issue_div_fire),
-        .issue_mul(issue_mul_fire),
+        .exe_int_grant(exe_int_grant),
+        .exe_div_grant(exe_div_grant),
+        .exe_mul_grant(exe_mul_grant),
         .sb_flush_sw_tag(sb_flush_sw_tag),
         .sb_flush_sw(sb_flush_sw),
         .sb_entry_sw_tag(sb_entry_sw_tag),
         .sb_entry_sw_addr(sb_entry_sw_addr),
-        .sb_entry_sw_en(sb_entry_sw_en),
         .rob_tag(rob_tag),
+        .rob_top_ptr(rob_top_ptr),
         .rob_commit_mem_write(rob_commit_mem_write),
         .iss_lsb_ready(iss_lsb_ready),
         .iss_lsb_opcode(iss_lsb_opcode),
@@ -258,20 +253,65 @@ module CPU_BACK_END #(
         .issue_ld_buf(issue_ld_buf)
     );
 
-    logic [REG_FILE_DATA_WIDTH-1:0] unused_rt_sb_data;
+    EXE #(
+        .XLEN(XLEN),
+        .INSTR_WIDTH(INSTR_WIDTH),
+        .OPCODE_WIDTH(OPCODE_WIDTH),
+        .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
+        .DMEM_WIDTH(DMEM_WIDTH),
+        .BPB_PC_BITS(BPB_PC_BITS),
+        .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
+        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH)
+    ) exe (
+        .clk(clk),
+        .rst_n(rst_n),
+        .cdb_rob_depth(cdb_rob_depth),
+        .cdb_rd_phy_addr(cdb_rd_phy_addr),
+        .cdb_phy_reg_write(cdb_phy_reg_write),
+        .cdb_rd_data(cdb_rd_data),
+        .cdb_reg_write(cdb_reg_write),
+        .exe_rs_data_alu(exe_rs_data_alu),
+        .exe_rt_data_alu(exe_rt_data_alu),
+        .exe_rs_data_div(exe_rs_data_div),
+        .exe_rt_data_div(exe_rt_data_div),
+        .exe_rs_data_mul(exe_rs_data_mul),
+        .exe_rt_data_mul(exe_rt_data_mul),
+
+        .issue_int_en(exe_int_grant),
+        .issue_div_en(exe_div_grant),
+        .issue_mul_en(exe_mul_grant),
+        .issue_rs_data_lsq(iss_rs_data_lsq),
+        .issue_rs_phy_addr_alu(prf_issue_rs_alu),
+        .issue_rt_phy_addr_alu(prf_issue_rt_alu),
+        .issue_rs_phy_addr_div(prf_issue_rs_div),
+        .issue_rt_phy_addr_div(prf_issue_rt_div),
+        .issue_rs_phy_addr_mul(prf_issue_rs_mul),
+        .issue_rt_phy_addr_mul(prf_issue_rt_mul),
+        
+        .exe_valid(exe_valid),
+        .exe_rob_tag(exe_rob_tag),
+        .exe_rd_phy_addr(exe_rd_phy_addr),
+        .exe_rd_data(exe_rd_data),
+        .exe_reg_write(exe_reg_write),
+        .exe_branch_taken(exe_branch_taken),
+        .exe_branch_mispredicted(exe_branch_mispredicted),
+        .exe_branch_prediction(exe_branch_prediction),
+        .exe_branch(exe_branch),
+        .exe_jr_inst(exe_jr_inst),
+        .exe_jr31_inst(exe_jr31_inst),
+        .exe_jal_inst(exe_jal_inst),
+        .exe_branch_pc_bits(exe_branch_pc_bits),
+        .exe_branch_other_addr(exe_branch_other_addr)
+    );
 
     PRF #(
         .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
-        .ARCH_REG_COUNT(ARCH_REG_COUNT),
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
-        .ROB_DEPTH(ROB_DEPTH),
-        .SB_DEPTH(SB_DEPTH),
-        .SAB_DEPTH(8)
+        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH)
     ) prf (
         .clk(clk),
         .rst_n(rst_n),
         .rt_sb_phy_addr(rt_sb_phy_addr),
-        .rt_sb_data(unused_rt_sb_data),
+        .rt_sb_data(rt_sb_data),
         .cdb_rd_phy_addr(cdb_rd_phy_addr),
         .cdb_rd_data(cdb_rd_data),
         .cdb_reg_write(cdb_reg_write),

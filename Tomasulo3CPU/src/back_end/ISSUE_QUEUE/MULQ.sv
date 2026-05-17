@@ -1,14 +1,17 @@
 // MUL QUEUE DATA STRUCTURE:
 //  robtag      rs      rsrdy       rt      rtrdy       op      rd      valid       rw
-//  5b          6b      1b          6b      1b          3/b     6b      1b          1b
+//  5b          6b      1b          6b      1b          6       6b      1b          1b
 
-module MULQ #(
+module MULQ 
+import riscv_types_pkg::*;
+#(
     parameter int unsigned MUL_QUEUE_DEPTH = 8,
     parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
     parameter int unsigned ARCH_REG_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
-    parameter int unsigned DMEM_WIDTH = 32
+    parameter int unsigned DMEM_WIDTH = 32,
+    parameter int unsigned OPCODE_WIDTH = 6
 ) (
     input logic clk,
     input logic rst_n,
@@ -38,9 +41,10 @@ module MULQ #(
     output logic [ROB_INDEX_WIDTH-1:0]          iss_rob_tag_mul,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_mul,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rt_phy_addr_mul,
-    output logic [2:0]                          iss_opcode_mul,
+    output logic [OPCODE_WIDTH-1:0]             iss_opcode_mul,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rd_phy_addr_mul,
     output logic                                iss_rw_mul,
+    output logic                                exe_mul_grant,
 
     // ISSUEUNIT interface
     input logic                                 issue_mul_en,
@@ -56,7 +60,7 @@ module MULQ #(
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rt_phy_addr,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
-    input logic [2:0]                           dis_opcode,
+    input logic [OPCODE_WIDTH-1:0]              dis_opcode,
 
     // Queue status
     output logic mulq_full,
@@ -72,7 +76,7 @@ module MULQ #(
         logic                               rs_rdy;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] rt;
         logic                               rt_rdy;
-        logic [2:0]                         op;
+        logic [OPCODE_WIDTH-1:0]            op;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] rd;
         logic                               rw;
     } mulq_entry_t;
@@ -184,16 +188,14 @@ module MULQ #(
         end
     end
 
-    logic                               issue_mul;
-
     assign mulq_full                   = &q_valid;
     assign iss_mulq_two_or_more_vacant = (vacant_count >= 2);
     assign issue_mul_rdy               = sel_valid & ~cdb_flush;
-    assign issue_mul                   = sel_valid & issue_mul_en & ~cdb_flush;
+    assign exe_mul_grant                   = sel_valid & issue_mul_en & ~cdb_flush;
 
     // Issue Outputs — drive selected entry or zero
     always_comb begin
-        if (issue_mul) begin
+        if (exe_mul_grant) begin
             iss_rw_mul          = q[sel_idx].rw;
             iss_rd_phy_addr_mul = q[sel_idx].rd;
             iss_rob_tag_mul     = q[sel_idx].rob_tag;
@@ -204,7 +206,7 @@ module MULQ #(
             iss_rw_mul          = 1'b0;
             iss_rd_phy_addr_mul = '0;
             iss_rob_tag_mul     = '0;
-            iss_opcode_mul      = '0;
+            iss_opcode_mul      = INSTR_NONE;
             iss_rs_phy_addr_mul = '0;
             iss_rt_phy_addr_mul = '0;
         end
@@ -215,7 +217,16 @@ module MULQ #(
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (int i = 0; i < MUL_QUEUE_DEPTH; i++) begin
-                q[i]       <= '0;
+                q[i]       <= {
+                    rob_tag : '0,
+                    rs      : '0,
+                    rs_rdy  : 1'b0,
+                    rt      : '0,
+                    rt_rdy  : 1'b0,
+                    op      : INSTR_NONE,
+                    rd      : '0,
+                    rw      : 1'b0
+                };
                 q_valid[i] <= 1'b0;
             end
         end else begin
@@ -229,7 +240,7 @@ module MULQ #(
                     q_valid[i] <= 1'b0;
             end
 
-            if (issue_mul)
+            if (exe_mul_grant)
                 q_valid[sel_idx] <= 1'b0;
 
             if (dis_mul_issq_en && has_free && !cdb_flush) begin

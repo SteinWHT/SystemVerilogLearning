@@ -1,14 +1,17 @@
 // DIV QUEUE DATA STRUCTURE:
 //  robtag      rs      rsrdy       rt      rtrdy       op      rd      valid       rw
-//  5b          6b      1b          6b      1b          3/b     6b      1b          1b
+//  5b          6b      1b          6b      1b          6b      6b      1b          1b
 
-module DIVQ #(
+module DIVQ 
+import riscv_types_pkg::*;
+#(
     parameter int unsigned DIV_QUEUE_DEPTH = 8,
     parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
     parameter int unsigned ARCH_REG_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
-    parameter int unsigned DMEM_WIDTH = 32
+    parameter int unsigned DMEM_WIDTH = 32,
+    parameter int unsigned OPCODE_WIDTH = 6
 ) (
     input logic clk,
     input logic rst_n,
@@ -38,9 +41,10 @@ module DIVQ #(
     output logic [ROB_INDEX_WIDTH-1:0]          iss_rob_tag_div,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_div,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rt_phy_addr_div,
-    output logic [2:0]                          iss_opcode_div,
+    output logic [OPCODE_WIDTH-1:0]             iss_opcode_div,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rd_phy_addr_div,
     output logic                                iss_rw_div,
+    output logic                                exe_div_grant,
 
     // ISSUEUNIT interface
     input logic                                 issue_div_en,
@@ -72,7 +76,7 @@ module DIVQ #(
         logic                               rs_rdy;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] rt;
         logic                               rt_rdy;
-        logic [2:0]                         op;
+        logic [OPCODE_WIDTH-1:0]            op;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] rd;
         logic                               rw;
     } divq_entry_t;
@@ -184,16 +188,14 @@ module DIVQ #(
         end
     end
 
-    logic                               issue_div;
-
     assign divq_full                   = &q_valid;
     assign iss_divq_two_or_more_vacant = (vacant_count >= 2);
     assign issue_div_rdy               = sel_valid & ~cdb_flush;
-    assign issue_div                   = sel_valid & issue_div_en & ~cdb_flush;
+    assign exe_div_grant               = sel_valid & issue_div_en & ~cdb_flush;
 
     // Issue Outputs — drive selected entry or zero
     always_comb begin
-        if (issue_div) begin
+        if (exe_div_grant) begin
             iss_rw_div          = q[sel_idx].rw;
             iss_rd_phy_addr_div = q[sel_idx].rd;
             iss_rob_tag_div     = q[sel_idx].rob_tag;
@@ -204,7 +206,7 @@ module DIVQ #(
             iss_rw_div          = 1'b0;
             iss_rd_phy_addr_div = '0;
             iss_rob_tag_div     = '0;
-            iss_opcode_div      = '0;
+            iss_opcode_div      = INSTR_NONE;
             iss_rs_phy_addr_div = '0;
             iss_rt_phy_addr_div = '0;
         end
@@ -215,7 +217,16 @@ module DIVQ #(
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (int i = 0; i < DIV_QUEUE_DEPTH; i++) begin
-                q[i]       <= '0;
+                q[i]       <= {
+                    rob_tag : '0,
+                    rs      : '0,
+                    rs_rdy  : 1'b0,
+                    rt      : '0,
+                    rt_rdy  : 1'b0,
+                    op      : INSTR_NONE,
+                    rd      : '0,
+                    rw      : 1'b0
+                };
                 q_valid[i] <= 1'b0;
             end
         end else begin
@@ -229,7 +240,7 @@ module DIVQ #(
                     q_valid[i] <= 1'b0;
             end
 
-            if (issue_div)
+            if (exe_div_grant)
                 q_valid[sel_idx] <= 1'b0;
 
             if (dis_div_issq_en && has_free && !cdb_flush) begin

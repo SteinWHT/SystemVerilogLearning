@@ -1,14 +1,6 @@
 module PRF #(
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
-    parameter int unsigned ARCH_REG_COUNT = 32,
-    localparam int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
-    parameter int unsigned ROB_DEPTH = 16,
-    localparam int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
-    parameter int unsigned SB_DEPTH = 4,
-    localparam int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH),
-    parameter int unsigned SAB_DEPTH = 8,
-    localparam int unsigned SAB_INDEX_WIDTH = $clog2(SAB_DEPTH)
+    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7
 ) (
     input logic clk,
     input logic rst_n,

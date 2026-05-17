@@ -1,17 +1,20 @@
 // INT QUEUE DATA STRUCTURE:
 //  robtag      rs      rsrdy       rt      rtrdy       op      rd      valid       rw      IMM     Branch      BrPred
-//  5b          6b      1b          6b      1b          3/b     6b      1b          1b      16b     1b          1b
+//  5b          6b      1b          6b      1b          6b      6b      1b          1b      16b     1b          1b
 //  jr          jr31    jal         BrPC    BrAddr
 //  1b          1b      1b          3b      32b
 
-module INTQ #(
+module INTQ 
+import riscv_types_pkg::*;
+#(
     parameter int unsigned INT_QUEUE_DEPTH = 8,
     parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
     parameter int unsigned ARCH_REG_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
     parameter int unsigned DMEM_WIDTH = 32,
-    parameter int unsigned BPB_PC_BITS = 3
+    parameter int unsigned BPB_PC_BITS = 3,
+    parameter int unsigned OPCODE_WIDTH = 6
 ) (
     input logic clk,
     input logic rst_n,
@@ -38,7 +41,7 @@ module INTQ #(
     output logic [ROB_INDEX_WIDTH-1:0]          iss_rob_tag_alu,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_alu,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rt_phy_addr_alu,
-    output logic [2:0]                          iss_opcode_alu,
+    output logic [OPCODE_WIDTH-1:0]             iss_opcode_alu,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rd_phy_addr_alu,
     output logic                                iss_rw_alu,
     output logic [15:0]                         iss_imm16_alu,
@@ -49,6 +52,7 @@ module INTQ #(
     output logic                                iss_jal_inst_alu,
     output logic [BPB_PC_BITS-1:0]              iss_branch_pc_bits_alu,
     output logic [DMEM_WIDTH-1:0]               iss_branch_other_addr_alu,
+    output logic                                exe_int_grant,
 
     // ISSUEUNIT interface
     input logic                                 issue_int_en,
@@ -64,7 +68,7 @@ module INTQ #(
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rt_phy_addr,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
-    input logic [2:0]                           dis_opcode,
+    input logic [OPCODE_WIDTH-1:0]              dis_opcode,
     input logic [15:0]                          dis_imm16,
     input logic [DMEM_WIDTH-1:0]                dis_branch_other_addr,
     input logic                                 dis_branch_prediction,
@@ -89,7 +93,7 @@ module INTQ #(
         logic                               rs_rdy;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] rt;
         logic                               rt_rdy;
-        logic [2:0]                         op;
+        logic [OPCODE_WIDTH-1:0]            op;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] rd;
         logic                               rw;
         logic [15:0]                        imm;
@@ -206,17 +210,15 @@ module INTQ #(
         end
     end
 
-    logic                               issue_int;
-
     assign iss_intq_full               = &q_valid;
     assign iss_intq_two_or_more_vacant = (vacant_count >= 2);
 
     assign issue_int_rdy = sel_valid & ~cdb_flush;
-    assign issue_int     = sel_valid & issue_int_en & ~cdb_flush;
+    assign exe_int_grant = sel_valid & issue_int_en & ~cdb_flush;
 
     // Issue Outputs — drive selected entry or zero
     always_comb begin
-        if (issue_int) begin
+        if (exe_int_grant) begin
             iss_rw_alu                = q[sel_idx].rw;
             iss_rd_phy_addr_alu       = q[sel_idx].rd;
             iss_rob_tag_alu           = q[sel_idx].rob_tag;
@@ -235,7 +237,7 @@ module INTQ #(
             iss_rw_alu                = 1'b0;
             iss_rd_phy_addr_alu       = '0;
             iss_rob_tag_alu           = '0;
-            iss_opcode_alu            = '0;
+            iss_opcode_alu            = INSTR_NONE; 
             iss_imm16_alu             = '0;
             iss_branch_other_addr_alu = '0;
             iss_branch_prediction_alu = 1'b0;
@@ -254,7 +256,24 @@ module INTQ #(
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (int i = 0; i < INT_QUEUE_DEPTH; i++) begin
-                q[i]       <= '0;
+                q[i]       <= {
+                    rob_tag : '0,
+                    rs      : '0,
+                    rs_rdy  : 1'b0,
+                    rt      : '0,
+                    rt_rdy  : 1'b0,
+                    op      : INSTR_NONE,
+                    rd      : '0,
+                    rw      : 1'b0,
+                    imm     : '0,
+                    branch  : 1'b0,
+                    br_pred : 1'b0,
+                    jr      : 1'b0,
+                    jr31    : 1'b0,
+                    jal     : 1'b0,
+                    br_pc   : '0,
+                    br_addr : '0
+                };
                 q_valid[i] <= 1'b0;
             end
         end else begin
@@ -271,7 +290,7 @@ module INTQ #(
             end
 
             // Issue: dequeue the selected entry
-            if (issue_int)
+            if (exe_int_grant)
                 q_valid[sel_idx] <= 1'b0;
 
             // Dispatch: enqueue new entry (suppressed during flush)
