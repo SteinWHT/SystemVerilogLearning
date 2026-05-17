@@ -16,20 +16,13 @@ import riscv_types_pkg::*;
 
     // CDB interface
     input logic [ROB_INDEX_WIDTH-1:0]               cdb_rob_depth,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]       cdb_rd_phy_addr,
-    input logic                                     cdb_phy_reg_write,
-    input logic [REG_FILE_DATA_WIDTH-1:0]           cdb_rd_data,
-    input logic                                     cdb_reg_write,
     
     output logic                                    exe_valid,
     output logic [ROB_INDEX_WIDTH-1:0]              exe_rob_tag,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      exe_rd_phy_addr,
     output logic [REG_FILE_DATA_WIDTH-1:0]          exe_rd_data,
     output logic                                    exe_reg_write,
-    output logic                                    exe_result_valid,
-    output logic                                    exe_branch_taken,
     output logic                                    exe_branch_mispredicted,
-    output logic                                    exe_branch_prediction,
     output logic                                    exe_branch,
     output logic                                    exe_jr_inst,
     output logic                                    exe_jr31_inst,
@@ -74,9 +67,7 @@ import riscv_types_pkg::*;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]      alu_exe_rd_phy_addr;
     logic [REG_FILE_DATA_WIDTH-1:0]          alu_exe_rd_data;
     logic                                    alu_exe_reg_write;
-    logic                                    alu_exe_branch_taken;
     logic                                    alu_exe_branch_mispredicted;
-    logic                                    alu_exe_branch_prediction;
     logic                                    alu_exe_branch;
     logic                                    alu_exe_jr_inst;
     logic                                    alu_exe_jr31_inst;
@@ -136,9 +127,7 @@ import riscv_types_pkg::*;
         .exe_rd_phy_addr(alu_exe_rd_phy_addr),
         .exe_rd_data(alu_exe_rd_data),
         .exe_reg_write(alu_exe_reg_write),
-        .exe_branch_taken(alu_exe_branch_taken),
         .exe_branch_mispredicted(alu_exe_branch_mispredicted),
-        .exe_branch_prediction(alu_exe_branch_prediction),
         .exe_branch(alu_exe_branch),
         .exe_jr_inst(alu_exe_jr_inst),
         .exe_jr31_inst(alu_exe_jr31_inst),
@@ -217,9 +206,7 @@ import riscv_types_pkg::*;
         exe_rd_phy_addr = '0;
         exe_rd_data = '0;
         exe_reg_write = '0;
-        exe_branch_taken = '0;
         exe_branch_mispredicted = '0;
-        exe_branch_prediction = '0;
         exe_branch = '0;
         exe_jr_inst = '0;
         exe_jr31_inst = '0;
@@ -233,9 +220,7 @@ import riscv_types_pkg::*;
             exe_rd_phy_addr = alu_exe_rd_phy_addr;
             exe_rd_data = alu_exe_rd_data;
             exe_reg_write = alu_exe_reg_write;
-            exe_branch_taken = alu_exe_branch_taken;
             exe_branch_mispredicted = alu_exe_branch_mispredicted;
-            exe_branch_prediction = alu_exe_branch_prediction;
             exe_branch = alu_exe_branch;
             exe_jr_inst = alu_exe_jr_inst;
             exe_jr31_inst = alu_exe_jr31_inst;

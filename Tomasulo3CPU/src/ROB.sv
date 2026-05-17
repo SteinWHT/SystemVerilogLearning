@@ -46,8 +46,11 @@ module ROB #(
     input logic                                 cdb_valid,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_tag,
     input logic [DMEM_DEPTH-1:0]                cdb_sw_addr,
+    
+    input logic                                 cdb_flush,
+
+    // PRF interface
     input logic [DMEM_WIDTH-1:0]                cdb_sw_data,
-    input logic                                 cdb_branch_mispredict,
 
     // SB interface
     input logic sb_full,
@@ -142,7 +145,7 @@ module ROB #(
                 ROB_array[cdb_rob_tag].compl <= 1'b1;
             end
 
-            if (cdb_branch_mispredict) begin
+            if (cdb_flush) begin
                 // flush the ROB
                 write_ptr <= flush_ptr;
             end
@@ -192,7 +195,7 @@ module ROB #(
             enable = 1'b1;
         end
 
-        if (cdb_branch_mispredict) begin
+        if (cdb_flush) begin
             flush_ptr = (write_ptr[ROB_INDEX_WIDTH-1:0] > cdb_rob_tag) ?
             {write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag} : {~write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag};
         end

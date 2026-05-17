@@ -42,9 +42,7 @@ import riscv_types_pkg::*;
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      exe_rd_phy_addr,
     output logic [REG_FILE_DATA_WIDTH-1:0]          exe_rd_data,
     output logic                                    exe_reg_write,
-    output logic                                    exe_branch_taken,
     output logic                                    exe_branch_mispredicted,
-    output logic                                    exe_branch_prediction,
     output logic                                    exe_branch,
     output logic                                    exe_jr_inst,
     output logic                                    exe_jr31_inst,
@@ -54,7 +52,10 @@ import riscv_types_pkg::*;
 
 );
     logic [REG_FILE_DATA_WIDTH-1:0]     result_alu;
+    logic [DMEM_WIDTH-1:0]              jr31_result;
     always_comb begin
+        jr31_result = '0;
+        result_alu = '0;
         unique case (opcode)
             INSTR_ADD:      result_alu = rs_data_alu + rt_data_alu;
 
@@ -68,8 +69,16 @@ import riscv_types_pkg::*;
             INSTR_SRA:      result_alu = rs_data_alu >>> rt_data_alu;
             INSTR_OR:       result_alu = rs_data_alu | rt_data_alu;
             INSTR_AND:      result_alu = rs_data_alu & rt_data_alu;
+            INSTR_ADDI:     result_alu = rs_data_alu + imm_alu;
 
-            INSTR_ADDI, INSTR_JALR:     result_alu = rs_data_alu + imm_alu;
+            INSTR_JALR:     begin
+                if(jr31_inst) begin
+                    result_alu = rs_data_alu + imm16;
+                    jr31_result = rs_data_alu - branch_other_addr;
+                end else begin
+                    result_alu = rs_data_alu + imm_alu;
+                end
+            end
 
             INSTR_SLTI:     result_alu = rs_data_alu < imm_alu;
             INSTR_SLTIU:    result_alu = rs_data_alu < imm_alu;
@@ -87,9 +96,23 @@ import riscv_types_pkg::*;
     always_comb begin
         branch_mispredicted = 1'b0;
         if (opcode == INSTR_BEQ) begin
-            branch_mispredicted = result_alu == 0;
+            if (branch_prediction && (result_alu != 0)) begin
+                branch_mispredicted = 1'b0;
+            end else if (!branch_prediction && (result_alu == 0)) begin
+                branch_mispredicted = 1'b0;
+            end else begin
+                branch_mispredicted = 1'b1;
+            end
         end else if (opcode == INSTR_BNE) begin
-            branch_mispredicted = result_alu != 0;
+            if (branch_prediction && (result_alu == 0)) begin
+                branch_mispredicted = 1'b0;
+            end else if (!branch_prediction && (result_alu != 0)) begin
+                branch_mispredicted = 1'b0;
+            end else begin
+                branch_mispredicted = 1'b1;
+            end
+        end else if (opcode == INSTR_JALR) begin
+            branch_mispredicted = jr31_result != 0;
         end
     end
 
@@ -100,9 +123,7 @@ import riscv_types_pkg::*;
             exe_rd_phy_addr         <= '0;
             exe_rd_data             <= '0;
             exe_reg_write           <= 1'b0;
-            exe_branch_taken        <= 1'b0;
             exe_branch_mispredicted <= 1'b0;
-            exe_branch_prediction   <= 1'b0;
             exe_branch              <= 1'b0;
             exe_jr_inst             <= 1'b0;
             exe_jr31_inst           <= 1'b0;
@@ -115,9 +136,7 @@ import riscv_types_pkg::*;
             exe_rd_phy_addr         <= rd_phy_addr;
             exe_rd_data             <= result_alu;
             exe_reg_write           <= rw;
-            exe_branch_taken        <= branch;
             exe_branch_mispredicted <= branch_mispredicted;
-            exe_branch_prediction   <= branch_prediction;
             exe_branch              <= branch;
             exe_jr_inst             <= jr_inst;
             exe_jr31_inst           <= jr31_inst;

@@ -139,7 +139,7 @@ import riscv_types_pkg::*;
     instr_e stage1_dis_instr_type;
     logic [ARCH_REG_WIDTH-1:0] stage1_rd_arch_addr;
     logic [ARCH_REG_WIDTH-1:0] stage1_rs_arch_addr;
-    logic [ARCH_REG_WIDTH-1:0]stage1_rt_arch_addr;
+    logic [ARCH_REG_WIDTH-1:0] stage1_rt_arch_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage1_rs_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage1_rt_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage1_pre_phy_addr;
@@ -175,6 +175,7 @@ import riscv_types_pkg::*;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_rs_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_rt_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_pre_phy_addr;
+    logic [IMEM_WIDTH_WORD-1:0] stage2_ras_address;
 
 
     // jalr $rd, imm($rs)
@@ -411,6 +412,7 @@ import riscv_types_pkg::*;
             stage2_rs_phy_addr          <= '0;
             stage2_rt_phy_addr          <= '0;
             stage2_pre_phy_addr         <= '0;
+            stage2_ras_address          <= '0;
 
             last_cycle_stall            <= 1'b1;
         end else begin
@@ -449,6 +451,7 @@ import riscv_types_pkg::*;
                 stage2_rs_phy_addr          <= stage1_rs_phy_addr;
                 stage2_rt_phy_addr          <= stage1_rt_phy_addr;
                 stage2_pre_phy_addr         <= stage1_pre_phy_addr;
+                stage2_ras_address          <= ras_addr;
             end
         end
     end
@@ -478,7 +481,8 @@ import riscv_types_pkg::*;
     assign dis_new_rd_phy_addr = dis_frl_rd_phy_addr;
     assign dis_opcode = stage2_dis_instr_type;
     assign dis_imm16 = stage2_dis_imm[15:0];
-    assign dis_branch_other_addr = stage2_branch_prediction ?
+    assign dis_branch_other_addr = stage2_dis_jr31_inst ? stage2_ras_address :
+            stage2_branch_prediction ?
             stage2_pc_plus4 :
             (stage2_pc + IMEM_DEPTH'(stage2_dis_imm));
     assign dis_branch_prediction = stage2_branch_prediction;

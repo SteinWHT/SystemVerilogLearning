@@ -265,11 +265,41 @@ module CPU_BACK_END #(
     ) exe (
         .clk(clk),
         .rst_n(rst_n),
+
         .cdb_rob_depth(cdb_rob_depth),
-        .cdb_rd_phy_addr(cdb_rd_phy_addr),
-        .cdb_phy_reg_write(cdb_phy_reg_write),
-        .cdb_rd_data(cdb_rd_data),
-        .cdb_reg_write(cdb_reg_write),
+        .exe_valid(exe_valid),
+        .exe_rob_tag(exe_rob_tag),
+        .exe_rd_phy_addr(exe_rd_phy_addr),
+        .exe_rd_data(exe_rd_data),
+        .exe_reg_write(exe_reg_write),
+        .exe_branch_mispredicted(exe_branch_mispredicted),
+        .exe_branch(exe_branch),
+        .exe_jr_inst(exe_jr_inst),
+        .exe_jr31_inst(exe_jr31_inst),
+        .exe_jal_inst(exe_jal_inst),
+        .exe_branch_pc_bits(exe_branch_pc_bits),
+        .exe_branch_other_addr(exe_branch_other_addr),
+
+        .iss_rob_tag(dis_rob_tag),
+        .iss_rs_phy_addr(dis_rs_phy_addr),
+        .iss_rt_phy_addr(dis_rt_phy_addr),
+        .iss_opcode(dis_opcode),
+        .iss_rd_phy_addr(dis_new_rd_phy_addr),
+        .iss_rw(dis_reg_write),
+        .iss_imm16(dis_imm16),
+        .iss_branch_other_addr(dis_branch_other_addr),
+        .iss_branch_prediction(dis_branch_prediction),
+        .iss_branch(dis_branch),
+        .iss_jr_inst(dis_jr_inst),
+        .iss_jr31_inst(dis_jr31_inst),
+        .iss_jal_inst(dis_jal_inst),
+        .iss_branch_pc_bits(dis_branch_pc_bits),
+        .issue_int_en(exe_int_grant),
+        .issue_div_en(exe_div_grant),
+        .issue_mul_en(exe_mul_grant),
+
+        .div_exe_ready(div_exe_ready),
+
         .exe_rs_data_alu(exe_rs_data_alu),
         .exe_rt_data_alu(exe_rt_data_alu),
         .exe_rs_data_div(exe_rs_data_div),
@@ -277,31 +307,14 @@ module CPU_BACK_END #(
         .exe_rs_data_mul(exe_rs_data_mul),
         .exe_rt_data_mul(exe_rt_data_mul),
 
-        .issue_int_en(exe_int_grant),
-        .issue_div_en(exe_div_grant),
-        .issue_mul_en(exe_mul_grant),
         .issue_rs_data_lsq(iss_rs_data_lsq),
         .issue_rs_phy_addr_alu(prf_issue_rs_alu),
         .issue_rt_phy_addr_alu(prf_issue_rt_alu),
         .issue_rs_phy_addr_div(prf_issue_rs_div),
         .issue_rt_phy_addr_div(prf_issue_rt_div),
         .issue_rs_phy_addr_mul(prf_issue_rs_mul),
-        .issue_rt_phy_addr_mul(prf_issue_rt_mul),
+        .issue_rt_phy_addr_mul(prf_issue_rt_mul)
         
-        .exe_valid(exe_valid),
-        .exe_rob_tag(exe_rob_tag),
-        .exe_rd_phy_addr(exe_rd_phy_addr),
-        .exe_rd_data(exe_rd_data),
-        .exe_reg_write(exe_reg_write),
-        .exe_branch_taken(exe_branch_taken),
-        .exe_branch_mispredicted(exe_branch_mispredicted),
-        .exe_branch_prediction(exe_branch_prediction),
-        .exe_branch(exe_branch),
-        .exe_jr_inst(exe_jr_inst),
-        .exe_jr31_inst(exe_jr31_inst),
-        .exe_jal_inst(exe_jal_inst),
-        .exe_branch_pc_bits(exe_branch_pc_bits),
-        .exe_branch_other_addr(exe_branch_other_addr)
     );
 
     PRF #(
@@ -381,6 +394,58 @@ module CPU_BACK_END #(
         .rob_commit_mem_write(rob_commit_mem_write),
         .lsq_empty(sab_lsq_empty),
         .valid_out(sab_valid_out)
+    );
+
+    CDB #(
+        .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
+        .DMEM_WIDTH(DMEM_WIDTH),
+        .DMEM_DEPTH(DMEM_DEPTH),
+        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
+        .ROB_DEPTH(ROB_DEPTH),
+        .BPB_PC_BITS(BPB_PC_BITS)
+    ) cdb (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .rob_top_ptr(rob_top_ptr),
+        .cdb_valid(cdb_valid),
+        .cdb_rob_tag(cdb_rob_tag),
+        .cdb_sw_addr(cdb_sw_addr),
+        .cdb_flush(cdb_flush),
+
+        .cdb_rd_phy_addr(cdb_rd_phy_addr),
+        .cdb_rd_data(cdb_rd_data),
+        .cdb_reg_write(cdb_reg_write),
+
+        .cdb_rob_depth(cdb_rob_depth),
+
+        .exe_valid(exe_valid),
+        .exe_rob_tag(exe_rob_tag),
+        .exe_rd_phy_addr(exe_rd_phy_addr),
+        .exe_rd_data(exe_rd_data),
+        .exe_reg_write(exe_reg_write),
+        .exe_branch_mispredicted(exe_branch_mispredicted),
+        .exe_branch(exe_branch),
+        .exe_jr_inst(exe_jr_inst),
+        .exe_jr31_inst(exe_jr31_inst),
+        .exe_jal_inst(exe_jal_inst),
+        .exe_branch_pc_bits(exe_branch_pc_bits),
+        .exe_branch_other_addr(exe_branch_other_addr),
+
+        .lsb_rob_tag(lsb_rob_tag),
+        .lsb_rd_phy_addr(lsb_rd_phy_addr),
+        .lsb_data(lsb_data),
+        .lsb_rw(lsb_rw),
+        .lsb_sw_addr(lsb_sw_addr),
+        .lsb_ready(lsb_result_valid),
+
+        .cdb_upd_branch(cdb_upd_branch),
+        .cdb_upd_branch_addr(cdb_upd_branch_addr),
+        .cdb_branch_outcome(cdb_branch_outcome),
+
+        .cdb_branch_addr(cdb_branch_addr),
+        .cdb_jalr_resolved(cdb_jalr_resolved)
     );
 
 endmodule
