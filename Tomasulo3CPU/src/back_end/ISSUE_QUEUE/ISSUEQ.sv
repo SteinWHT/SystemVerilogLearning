@@ -101,12 +101,10 @@ import riscv_types_pkg::*;
     input logic                                 issue_int_en,
     input logic                                 issue_div_en,
     input logic                                 issue_mul_en,
-    input logic                                 issue_ld_st_en,
 
     output logic                                issue_int_rdy,
     output logic                                issue_div_rdy,
     output logic                                issue_mul_rdy,
-    output logic                                issue_ld_st_rdy,
 
     // SB Interface
     input logic [SB_INDEX_WIDTH-1:0]            sb_flush_sw_tag,
@@ -204,6 +202,7 @@ import riscv_types_pkg::*;
 
         .issue_int_en(issue_int_en),
         .issue_int_rdy(issue_int_rdy),
+        .exe_int_grant(exe_int_grant),
 
         .dis_int_en(dis_int_issq_en),
         .dis_reg_write(dis_reg_write),
@@ -264,6 +263,7 @@ import riscv_types_pkg::*;
 
         .issue_div_en(issue_div_en),
         .issue_div_rdy(issue_div_rdy),
+        .exe_div_grant(exe_div_grant),
 
         .dis_div_issq_en(dis_div_issq_en),
         .dis_reg_write(dis_reg_write),
@@ -316,6 +316,7 @@ import riscv_types_pkg::*;
 
         .issue_mul_en(issue_mul_en),
         .issue_mul_rdy(issue_mul_rdy),
+        .exe_mul_grant(exe_mul_grant),
 
         .dis_mul_issq_en(dis_mul_issq_en),
         .dis_reg_write(dis_reg_write),
@@ -364,9 +365,6 @@ import riscv_types_pkg::*;
         .dis_opcode(dis_opcode),
         .dis_ld_st_issq_en(dis_ld_st_issq_en),
         .dis_imm16(dis_imm16),
-
-        .issue_ld_st_en(issue_ld_st_en),
-        .issue_ld_st_rdy(issue_ld_st_rdy),
 
         .lsq_ld_st_full(issq_ld_stq_full),
         .lsq_ld_st_two_or_more_vacant(issq_ld_stq_two_or_more_vacant),

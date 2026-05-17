@@ -275,8 +275,8 @@ import riscv_types_pkg::*;
     assign lsq_ld_st_full              = &q_valid;
     assign lsq_ld_st_two_or_more_vacant= (vacant_count >= 2);
 
-    // assign issue_lsq_rdy = sel_valid & ~cdb_flush;
-    assign issue_lsq     = sel_valid & ~cdb_flush;
+    // LSQ issues to LSB when an entry is ready and LSB can accept (not ISSUEUNIT).
+    assign issue_lsq = sel_valid & ~cdb_flush & lsb_rdy;
 
     // Issue Outputs — drive selected entry or zero
     always_comb begin
@@ -339,8 +339,8 @@ import riscv_types_pkg::*;
                 end
             end
 
-            // Issue: dequeue the selected entry
-            if (issue_lsq && lsb_rdy) begin
+            // Issue: dequeue into LSB (issue_lsq already requires lsb_rdy)
+            if (issue_lsq) begin
                 q_valid[sel_idx] <= 1'b0;
                 if (q[sel_idx].opcode == INSTR_STORE) begin
                     for (int i = 0; i < LSQ_DEPTH; i++) begin

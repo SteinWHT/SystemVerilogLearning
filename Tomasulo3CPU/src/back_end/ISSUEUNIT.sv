@@ -26,7 +26,8 @@ module ISSUEUNIT #(
     input logic ready_mul,
     output logic issue_mul,
     
-    // ld/st
+    // LSB (load/store buffer) — ISSUEUNIT drains completed mem ops to CDB.
+    // LSQ issues into LSB independently when LSB asserts iss_lsb_ready.
     input logic ready_ld_buf,
     output logic issue_ld_buf
 );

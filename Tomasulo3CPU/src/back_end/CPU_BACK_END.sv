@@ -124,8 +124,6 @@ module CPU_BACK_END #(
     logic issue_int_rdy;
     logic issue_div_rdy;
     logic issue_mul_rdy;
-    logic issue_ld_st_rdy;
-
     logic issue_int_grant;
     logic issue_div_grant;
     logic issue_mul_grant;
@@ -210,11 +208,9 @@ module CPU_BACK_END #(
         .issue_int_en(issue_int_grant),
         .issue_div_en(issue_div_grant),
         .issue_mul_en(issue_mul_grant),
-        .issue_ld_st_en(issue_ld_buf),
         .issue_int_rdy(issue_int_rdy),
         .issue_div_rdy(issue_div_rdy),
         .issue_mul_rdy(issue_mul_rdy),
-        .issue_ld_st_rdy(issue_ld_st_rdy),
         .exe_int_grant(exe_int_grant),
         .exe_div_grant(exe_div_grant),
         .exe_mul_grant(exe_mul_grant),

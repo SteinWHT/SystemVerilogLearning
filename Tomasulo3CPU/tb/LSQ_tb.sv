@@ -262,8 +262,7 @@ module LSQ_tb;
         input logic [DMEM_DEPTH-1:0]              addr_i,
         input logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_addr_i
     );
-        // Current LSQ.sv has no separate issue-grant port; iss_lsq_en is used
-        // by the RTL as both dispatch enable and issue enable.
+        // LSQ issues when lsb_rdy is set; no ISSUEUNIT grant on the LSQ side.
         drive_dispatch('0, '0, 1'b0, '0, OPCODE_LOAD, 16'h0);
         #1;
         check_bit({tag, " iss_lsq_rdy"}, iss_lsq_rdy, 1'b1);
