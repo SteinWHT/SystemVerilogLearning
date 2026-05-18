@@ -127,7 +127,13 @@ module CPU_FRONT_END #(
     output logic [SB_INDEX_WIDTH-1:0]           sb_flush_sw_tag,
     output logic                                sb_flush_sw,
     output logic [SB_INDEX_WIDTH-1:0]           sb_entry_sw_tag,
-    output logic [DMEM_DEPTH-1:0]               sb_entry_sw_addr
+    output logic [DMEM_DEPTH-1:0]               sb_entry_sw_addr,
+
+    // Back-end ROB sideband
+    output logic [ROB_INDEX_WIDTH-1:0]          rob_bottom_ptr_out,
+    output logic [ROB_INDEX_WIDTH-1:0]          rob_top_ptr_out,
+    output logic                                rob_commit_mem_write_out,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_curr_phy_addr_out
 );
     // ------------------------------------------------------------
     // INTERFACE
@@ -530,4 +536,9 @@ module CPU_FRONT_END #(
         .rd_phy_addr(cdb_rd_phy_addr),
         .cdb_reg_write(cdb_reg_write)
     );
+
+    assign rob_bottom_ptr_out          = rob_bottom_ptr;
+    assign rob_top_ptr_out             = rob_top_ptr;
+    assign rob_commit_mem_write_out    = rob_commit_mem_write;
+    assign rob_commit_curr_phy_addr_out = rob_commit_curr_phy_addr;
 endmodule
