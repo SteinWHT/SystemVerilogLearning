@@ -61,7 +61,7 @@ import riscv_types_pkg::*;
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rt_phy_addr,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
-    input logic [2:0]                           dis_opcode,
+    input logic [OPCODE_WIDTH-1:0]              dis_opcode,
 
     // Queue status
     output logic divq_full,
@@ -170,7 +170,7 @@ import riscv_types_pkg::*;
     end
 
     // Free Slot Allocation & Vacancy Count
-    logic [IdxWidth-1:0]                 free_idx;
+    logic [IdxWidth-1:0]                  free_idx;
     logic                                 has_free;
     logic [$clog2(DIV_QUEUE_DEPTH+1)-1:0] vacant_count;
 
@@ -218,7 +218,7 @@ import riscv_types_pkg::*;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (int i = 0; i < DIV_QUEUE_DEPTH; i++) begin
-                q[i]       <= {
+                q[i]       <= '{
                     rob_tag : '0,
                     rs      : '0,
                     rs_rdy  : 1'b0,

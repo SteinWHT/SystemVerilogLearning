@@ -218,7 +218,7 @@ import riscv_types_pkg::*;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (int i = 0; i < MUL_QUEUE_DEPTH; i++) begin
-                q[i]       <= {
+                q[i]       <= '{
                     rob_tag : '0,
                     rs      : '0,
                     rs_rdy  : 1'b0,

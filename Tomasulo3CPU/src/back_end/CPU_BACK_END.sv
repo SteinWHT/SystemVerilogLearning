@@ -1,4 +1,4 @@
-// Back-end: ISSUEQ, ISSUEUNIT, PRF, EXE, LSB, CDB, SAB.
+// Back-end: ISSUEQ, ISSUEUNIT, PRF, EXE, LSB, CDB.
 module CPU_BACK_END #(
     parameter int unsigned XLEN                   = 64,
     parameter int unsigned INSTR_WIDTH            = 32,
@@ -14,7 +14,6 @@ module CPU_BACK_END #(
     parameter int unsigned SB_DEPTH               = 4,
     parameter int unsigned LSB_DEPTH              = 4,
     parameter int unsigned BPB_PC_BITS            = 2,
-    parameter int unsigned LD_ST_OPCODE_WIDTH     = 1,
     parameter int unsigned DIV_CYCLES             = 7,
     parameter int unsigned MUL_CYCLES             = 4,
     parameter int unsigned INT_CYCLES             = 1,
@@ -51,28 +50,23 @@ module CPU_BACK_END #(
     // ROB / LSQ tag sideband
     input logic [ROB_INDEX_WIDTH-1:0]           rob_tag,
     input logic                                 rob_commit_mem_write,
-    input logic [ROB_INDEX_WIDTH-1:0]           rob_bottom_ptr,
 
     output logic [REG_FILE_DATA_WIDTH-1:0]      rt_sb_data,
 
-    // SB -> LSQ / SAB
+    // SB -> LSQ integrated store-address buffer
     input logic [$clog2(SB_DEPTH)-1:0]          sb_flush_sw_tag,
     input logic                                 sb_flush_sw,
     input logic [$clog2(SB_DEPTH)-1:0]          sb_entry_sw_tag,
     input logic [DMEM_DEPTH-1:0]                sb_entry_sw_addr,
-    input logic                                 sb_entry_sw_en,
 
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   rt_sb_phy_addr,
 
     // D-cache
     input logic                                 dcache_read_busy,
     input logic                                 dcache_read_done,
-    input logic [DMEM_DEPTH-1:0]                dcache_rdata,
+    input logic [REG_FILE_DATA_WIDTH-1:0]       dcache_rdata,
     output logic                                dcache_req,
     output logic [DMEM_DEPTH-1:0]               dcache_addr,
-
-    input logic                                 sab_lsq_empty,
-    output logic                                sab_valid_out,
 
     // Issue queue occupancy (to front-end / DISPATCH)
     output logic                                issq_intq_full,
@@ -92,9 +86,9 @@ module CPU_BACK_END #(
     output logic                                cdb_reg_write,
     output logic                                cdb_flush,
     output logic [ROB_INDEX_WIDTH-1:0]          cdb_rob_depth,
-    output logic [DMEM_DEPTH-1:0]              cdb_sw_addr,
+    output logic [DMEM_DEPTH-1:0]               cdb_sw_addr,
     output logic                                cdb_upd_branch,
-    output logic [BPB_PC_BITS-1:0]             cdb_upd_branch_addr,
+    output logic [BPB_PC_BITS-1:0]              cdb_upd_branch_addr,
     output logic                                cdb_branch_outcome,
     output logic [31:0]                         cdb_branch_addr,
     output logic                                cdb_jalr_resolved,
@@ -104,7 +98,7 @@ module CPU_BACK_END #(
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  lsb_rd_phy_addr,
     output logic [REG_FILE_DATA_WIDTH-1:0]      lsb_data,
     output logic                                lsb_rw,
-    output logic [DMEM_DEPTH-1:0]              lsb_sw_addr,
+    output logic [DMEM_DEPTH-1:0]               lsb_sw_addr,
     output logic                                lsb_result_valid
 );
 
@@ -129,7 +123,7 @@ module CPU_BACK_END #(
     logic exe_mul_grant;
 
     logic iss_lsb_ready;
-    logic [LD_ST_OPCODE_WIDTH-1:0] iss_lsb_opcode;
+    logic [OPCODE_WIDTH-1:0] iss_lsb_opcode;
     logic [ROB_INDEX_WIDTH-1:0] iss_lsb_rob_tag;
     logic [DMEM_DEPTH-1:0] iss_lsb_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_lsb_phy_addr;
@@ -387,6 +381,7 @@ module CPU_BACK_END #(
     LSB #(
         .LSB_DEPTH(LSB_DEPTH),
         .DMEM_DEPTH(DMEM_DEPTH),
+        .DMEM_WIDTH(REG_FILE_DATA_WIDTH),
         .ROB_DEPTH(ROB_DEPTH),
         .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
@@ -415,25 +410,6 @@ module CPU_BACK_END #(
         .lsb_sw_addr(lsb_sw_addr),
         .lsb_ready(lsb_result_valid),
         .rob_top_ptr(rob_top_ptr)
-    );
-
-    SAB #(
-        .SAB_DEPTH(8),
-        .SB_DEPTH(SB_DEPTH),
-        .DMEM_WIDTH(REG_FILE_DATA_WIDTH),
-        .DMEM_DEPTH(DMEM_DEPTH),
-        .ROB_DEPTH(ROB_DEPTH)
-    ) sab (
-        .clk(clk),
-        .rst_n(rst_n),
-        .sb_flush_sw_tag(sb_flush_sw_tag),
-        .sb_flush_sw(sb_flush_sw),
-        .sb_entry_sw_tag(sb_entry_sw_tag),
-        .rob_tag(rob_tag),
-        .rob_bottom_ptr(rob_bottom_ptr),
-        .rob_commit_mem_write(rob_commit_mem_write),
-        .lsq_empty(sab_lsq_empty),
-        .valid_out(sab_valid_out)
     );
 
     CDB #(

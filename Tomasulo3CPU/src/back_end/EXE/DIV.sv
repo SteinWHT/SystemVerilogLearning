@@ -46,9 +46,14 @@ import riscv_types_pkg::*;
     logic [XLEN-1:0] quotient;
     logic [XLEN-1:0] remainder;
     logic busy;
+    logic [XLEN-1:0] dw_divisor;
+
+    assign dw_divisor = (valid && (rt_data_div != '0)) ?
+        rt_data_div : {{(XLEN-1){1'b0}}, 1'b1};
 
     logic killed;
     logic                                     div_valid;
+    logic [OPCODE_WIDTH-1:0]                  div_opcode;
     logic [ROB_INDEX_WIDTH-1:0]               div_rob_tag;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]       div_rd_phy_addr;
 
@@ -73,13 +78,18 @@ import riscv_types_pkg::*;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             div_valid       <= 1'b0;
+            div_opcode      <= '0;
             div_rob_tag     <= '0;
             div_rd_phy_addr <= '0;
+            exe_rd_data     <= '0;
         end else begin
+            exe_rd_data         <= div_opcode == INSTR_DIV ? quotient : div_opcode == INSTR_REM ? remainder : '0;
+            exe_result_valid    <= complete && div_valid && !killed;
             if (killed) begin
                 div_valid       <= 1'b0;
             end else if (valid) begin
                 div_valid       <= valid;
+                div_opcode      <= opcode;
                 div_rob_tag     <= rob_tag;
                 div_rd_phy_addr <= rd_phy_addr;
             end else if (complete) begin
@@ -106,7 +116,7 @@ import riscv_types_pkg::*;
         .start       (start),
 
         .a           (rs_data_div),
-        .b           (rt_data_div),
+        .b           (dw_divisor),
 
         .complete    (complete),
         .divide_by_0 (divide_by_0),
@@ -116,9 +126,7 @@ import riscv_types_pkg::*;
 
     assign exe_rob_tag = div_rob_tag;
     assign exe_rd_phy_addr = div_rd_phy_addr;
-    assign exe_rd_data = opcode == INSTR_DIV ? quotient : opcode == INSTR_REM ? remainder : '0;
     assign exe_reg_write = 1'b1;
-    assign exe_result_valid = complete && div_valid && !killed;
     assign div_exe_ready    = !busy;
 
     // synthesis translate_off

@@ -13,6 +13,9 @@
 #  You manually edit SRC_FILES for each test.
 # ============================================================
 
+SHELL := /bin/bash
+.SHELLFLAGS := -o pipefail -c
+
 PROJECT ?= IFQ
 
 # ---- paths ----
@@ -20,6 +23,18 @@ PROJ_DIR  := $(shell pwd)
 SRC_DIR   := $(PROJ_DIR)/src
 TB_DIR    := $(PROJ_DIR)/tb
 BUILD_DIR := $(PROJ_DIR)/build/$(PROJECT)
+
+# ---- Synopsys DesignWare simulation library ----
+# Override these from the command line if your Synopsys install moves:
+#   make sim DC_HOME=/path/to/syn/V-2023.12-SP3
+#   make sim DW_HOME=/path/to/dw
+USE_DW     ?= 1
+DC_HOME    ?= /home/synopsys/syn/V-2023.12-SP3
+DW_HOME    ?= $(DC_HOME)/dw
+DW_SIM_DIR := $(DW_HOME)/sim_ver
+DW_SIM_FILES := \
+	$(DW_SIM_DIR)/DW02_mult_4_stage.v \
+	$(DW_SIM_DIR)/DW_div_seq.v
 
 # ---- derived names ----
 TOP_MODULE := $(PROJECT)_tb
@@ -56,6 +71,12 @@ SRC_FILES := \
 	$(SRC_DIR)/back_end/LSB.sv \
 	$(SRC_DIR)/back_end/ISSUEUNIT.sv \
 	$(SRC_DIR)/back_end/PRF.sv \
+	$(SRC_DIR)/back_end/EXE/ALU.sv \
+	$(SRC_DIR)/back_end/EXE/DIV.sv \
+	$(SRC_DIR)/back_end/EXE/MUL.sv \
+	$(SRC_DIR)/back_end/EXE/EXE.sv \
+	$(SRC_DIR)/back_end/CDB.sv \
+	$(SRC_DIR)/back_end/CPU_BACK_END.sv \
 
 
 TB_FILES := \
@@ -68,7 +89,21 @@ VCS_OPTS := \
 	-debug_access+all \
 	-timescale=1ns/1ps \
 	+define+FSDB_DUMP \
+	+define+DW_SUPPRESS_WARN \
 	+lint=all
+
+ifeq ($(USE_DW),1)
+VCS_OPTS += +incdir+$(DW_SIM_DIR)
+endif
+
+# ---- Verdi options ----
+VERDI_FILES := $(SRC_FILES) $(TB_FILES)
+VERDI_OPTS  := -sv
+
+ifeq ($(USE_DW),1)
+VERDI_FILES := $(DW_SIM_FILES) $(VERDI_FILES)
+VERDI_OPTS  += +incdir+$(DW_SIM_DIR)
+endif
 
 # ---- default target ----
 .PHONY: all
@@ -79,6 +114,14 @@ all: sim
 check:
 	@test -f "$(TB_DIR)/$(PROJECT)_tb.sv" || \
 		(echo "[ERROR] Missing TB file: $(TB_DIR)/$(PROJECT)_tb.sv"; exit 1)
+ifeq ($(USE_DW),1)
+	@test -d "$(DW_SIM_DIR)" || \
+		(echo "[ERROR] Missing DesignWare sim directory: $(DW_SIM_DIR)"; exit 1)
+	@for file in $(DW_SIM_FILES); do \
+		test -f "$$file" || \
+			(echo "[ERROR] Missing DesignWare sim model: $$file"; exit 1); \
+	done
+endif
 
 # ---- compile ----
 .PHONY: compile
@@ -88,14 +131,24 @@ compile: check
 	@echo "  Project: $(PROJECT)"
 	@echo "  Top:     $(TOP_MODULE)"
 	@echo "  Build:   $(BUILD_DIR)"
+ifeq ($(USE_DW),1)
+	@echo "  DW lib:  $(DW_SIM_DIR)"
+endif
 	@echo "  Compiling with VCS"
 	@echo "============================================"
+	@if [ ! -x "$(BUILD_DIR)/simv" ] && [ -f "$(BUILD_DIR)/simv.daidir/.vcs.timestamp" ]; then \
+		echo "[WARN] Found stale VCS cache without simv; forcing relink."; \
+		rm -f "$(BUILD_DIR)/simv.daidir/.vcs.timestamp"; \
+	fi
 	cd $(BUILD_DIR) && vcs $(VCS_OPTS) \
+		$(if $(filter 1,$(USE_DW)),$(DW_SIM_FILES)) \
 		$(SRC_FILES) $(TB_FILES) \
 		-top $(TOP_MODULE) \
 		-o simv \
 		-l compile.log \
 		2>&1 | tee compile_screen.log
+	@test -x "$(BUILD_DIR)/simv" || \
+		(echo "[ERROR] VCS did not create $(BUILD_DIR)/simv. Check $(BUILD_DIR)/compile.log"; exit 1)
 
 # ---- simulate ----
 .PHONY: sim
@@ -104,6 +157,8 @@ sim: compile
 	@echo "============================================"
 	@echo "  Running simulation"
 	@echo "============================================"
+	@test -x "$(BUILD_DIR)/simv" || \
+		(echo "[ERROR] Missing simulator executable: $(BUILD_DIR)/simv"; exit 1)
 	cd $(BUILD_DIR) && ./simv -l sim.log +fsdbfile+$(FSDB_FILE) \
 		2>&1 | tee sim_screen.log
 	@echo ""
@@ -115,8 +170,8 @@ sim: compile
 .PHONY: gui
 gui: sim
 	@echo "Opening Verdi..."
-	cd $(BUILD_DIR) && verdi -ssf $(FSDB_FILE) -sv \
-		$(SRC_FILES) $(TB_FILES) \
+	cd $(BUILD_DIR) && verdi -ssf $(FSDB_FILE) $(VERDI_OPTS) \
+		$(VERDI_FILES) \
 		-top $(TOP_MODULE) &
 
 # ---- clean current project ----

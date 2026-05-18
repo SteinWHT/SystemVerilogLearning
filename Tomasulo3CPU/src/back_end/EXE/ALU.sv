@@ -13,12 +13,12 @@ import riscv_types_pkg::*;
 ) (
     input logic clk,
     input logic rst_n,
-    
+
     // PRF interface
     input logic [REG_FILE_DATA_WIDTH-1:0]           rs_data_alu,
     input logic [REG_FILE_DATA_WIDTH-1:0]           rt_data_alu,
 
-    // ISSUEQ interface 
+    // ISSUEQ interface
     input logic [ROB_INDEX_WIDTH-1:0]               rob_tag,
     input logic [OPCODE_WIDTH-1:0]                  opcode,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]       rd_phy_addr,
@@ -89,6 +89,7 @@ import riscv_types_pkg::*;
             INSTR_SRLI:     result_alu = rs_data_alu >> imm_alu;
             INSTR_SRAI:     result_alu = rs_data_alu >>> imm_alu;
             INSTR_NONE:     result_alu = '0;
+            default   :     result_alu = '0;
         endcase
     end
 
@@ -130,21 +131,25 @@ import riscv_types_pkg::*;
             exe_jal_inst            <= 1'b0;
             exe_branch_pc_bits      <= '0;
             exe_branch_other_addr   <= '0;
-        end else if (valid) begin
-            exe_valid               <= valid;
-            exe_rob_tag             <= rob_tag; 
-            exe_rd_phy_addr         <= rd_phy_addr;
-            exe_rd_data             <= result_alu;
-            exe_reg_write           <= rw;
-            exe_branch_mispredicted <= branch_mispredicted;
-            exe_branch              <= branch;
-            exe_jr_inst             <= jr_inst;
-            exe_jr31_inst           <= jr31_inst;
-            exe_jal_inst            <= jal_inst;
-            exe_branch_pc_bits      <= branch_pc_bits;
-            exe_branch_other_addr   <= branch_other_addr;
-        end else if (cdb_flush) begin
-            exe_valid <= 1'b0;
+        end else begin
+            if (cdb_flush) begin
+                exe_valid <= 1'b0;
+            end else if (valid) begin
+                exe_valid               <= valid;
+                exe_rob_tag             <= rob_tag;
+                exe_rd_phy_addr         <= rd_phy_addr;
+                exe_rd_data             <= result_alu;
+                exe_reg_write           <= rw;
+                exe_branch_mispredicted <= branch_mispredicted;
+                exe_branch              <= branch;
+                exe_jr_inst             <= jr_inst;
+                exe_jr31_inst           <= jr31_inst;
+                exe_jal_inst            <= jal_inst;
+                exe_branch_pc_bits      <= branch_pc_bits;
+                exe_branch_other_addr   <= branch_other_addr;
+            end else begin
+                exe_valid <= 1'b0;
+            end
         end
     end
 endmodule

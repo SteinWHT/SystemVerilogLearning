@@ -44,12 +44,14 @@ import riscv_types_pkg::*;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]       mul_rd_phy_addr[MUL_CYCLES];
     logic                                     mul_valid[MUL_CYCLES];
     logic                                     killed[MUL_CYCLES];
+    logic [XLEN-1:0]                          product;
 
     always_comb begin
-        killed = '0;
         for (int i = 0; i < MUL_CYCLES; i++) begin
             if (cdb_flush) begin
                 killed[i] = (cdb_rob_depth < (mul_rob_tag[i] - cdb_rob_tag));
+            end else begin
+                killed [i] = '0;
             end
         end
     end
@@ -61,7 +63,9 @@ import riscv_types_pkg::*;
                 mul_rob_tag[i]      <= '0;
                 mul_rd_phy_addr[i]  <= '0;
             end
+            exe_rd_data             <= '0;
         end else begin
+            exe_rd_data         <= product;
             if (valid) begin
                 mul_valid[0]        <= valid;
                 mul_rob_tag[0]      <= rob_tag;
@@ -79,18 +83,15 @@ import riscv_types_pkg::*;
         end
     end
 
-    DW_mult_pipe #(
-        .a_width    (MulXLen),
-        .b_width    (MulXLen),
-        .num_stages (MUL_CYCLES)
+    DW02_mult_4_stage #(
+        .A_width    (MulXLen),
+        .B_width    (MulXLen)
     ) u_mul (
-        .clk     (clk),
-        .rst_n   (rst_n),
-        .en      (1'b1),
-        .tc      (1'b0),
-        .a       (rs_data_mul),
-        .b       (rt_data_mul),
-        .product (exe_rd_data)
+        .CLK     (clk),
+        .TC      (1'b0),
+        .A       (rs_data_mul[MulXLen-1:0]),
+        .B       (rt_data_mul[MulXLen-1:0]),
+        .PRODUCT (product)
     );
 
     assign exe_rob_tag = mul_rob_tag[MUL_CYCLES-1];

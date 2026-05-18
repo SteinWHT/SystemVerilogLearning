@@ -122,7 +122,7 @@ module CDB #(
         if (!rst_n) begin
             valid <= 1'b0;
             cdb_jalr_resolved <= 1'b0;
-            cdb_entry <= {
+            cdb_entry <= '{
                 rob_tag: '0,
                 addr: '0,
                 data: '0,
@@ -136,7 +136,7 @@ module CDB #(
         end else begin
             if (exe_valid) begin
                 valid <= 1'b1;
-                cdb_entry <= {
+                cdb_entry <= '{
                     rob_tag: exe_rob_tag,
                     addr: exe_rd_phy_addr,
                     data: exe_rd_data,
@@ -150,7 +150,7 @@ module CDB #(
                 cdb_jalr_resolved <= jalr_resolved;
             end else if (lsb_ready) begin
                 valid <= 1'b1;
-                cdb_entry <= {
+                cdb_entry <= '{
                     rob_tag: lsb_rob_tag,
                     addr: lsb_rd_phy_addr,
                     data: lsb_data,
@@ -166,7 +166,7 @@ module CDB #(
                 // Robust design
                 // Previous some designs didn't detect valid first.
                 // TODO: correct those designs.
-                cdb_entry <= {
+                cdb_entry <= '{
                     rob_tag: '0,
                     addr: '0,
                     data: '0,
