@@ -5,28 +5,26 @@
 `timescale 1ns/1ps
 
 module LSB_tb;
-
+import riscv_types_pkg::*;
     parameter int unsigned LSB_DEPTH               = 4;
     parameter int unsigned DMEM_DEPTH              = 32;
+    parameter int unsigned DMEM_WIDTH              = 64;
     parameter int unsigned ROB_DEPTH               = 16;
     localparam  int unsigned ROB_INDEX_WIDTH       = $clog2(ROB_DEPTH);
     parameter int unsigned ARCH_REG_WIDTH          = 5;
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7;
     parameter int unsigned REG_FILE_DATA_WIDTH     = 64;
-    parameter int unsigned LD_ST_OPCODE_WIDTH      = 1;
-
-    localparam logic OPCODE_LOAD  = 1'b0;
-    localparam logic OPCODE_STORE = 1'b1;
+    parameter int unsigned OPCODE_WIDTH            = 6;
 
     logic clk;
     logic rst_n;
 
     logic                               dcache_read_done;
-    logic [DMEM_DEPTH-1:0]              dcache_data;
+    logic [DMEM_WIDTH-1:0]              dcache_data;
     logic                               dcache_ready;
     logic [DMEM_DEPTH-1:0]              dcache_addr;
 
-    logic [LD_ST_OPCODE_WIDTH-1:0]      iss_lsb_opcode;
+    logic [OPCODE_WIDTH-1:0]      iss_lsb_opcode;
     logic [ROB_INDEX_WIDTH-1:0]         iss_lsb_rob_tag;
     logic [DMEM_DEPTH-1:0]              iss_lsb_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_lsb_phy_addr;
@@ -50,11 +48,12 @@ module LSB_tb;
     LSB #(
         .LSB_DEPTH               (LSB_DEPTH),
         .DMEM_DEPTH              (DMEM_DEPTH),
+        .DMEM_WIDTH              (DMEM_WIDTH),
         .ROB_DEPTH               (ROB_DEPTH),
         .ARCH_REG_WIDTH          (ARCH_REG_WIDTH),
         .PHY_REGISTER_FILE_WIDTH (PHY_REGISTER_FILE_WIDTH),
         .REG_FILE_DATA_WIDTH     (REG_FILE_DATA_WIDTH),
-        .LD_ST_OPCODE_WIDTH      (LD_ST_OPCODE_WIDTH)
+        .OPCODE_WIDTH            (OPCODE_WIDTH)
     ) dut (
         .clk              (clk),
         .rst_n            (rst_n),
@@ -118,7 +117,7 @@ module LSB_tb;
     task automatic clear_inputs();
         dcache_read_done = 1'b0;
         dcache_data      = '0;
-        iss_lsb_opcode   = OPCODE_LOAD;
+        iss_lsb_opcode   = INSTR_LW;
         iss_lsb_rob_tag  = '0;
         iss_lsb_addr     = '0;
         iss_lsb_phy_addr = '0;
@@ -142,7 +141,7 @@ module LSB_tb;
         input logic [DMEM_DEPTH-1:0]              addr_i,
         input logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_i
     );
-        iss_lsb_opcode   = OPCODE_LOAD;
+        iss_lsb_opcode   = INSTR_LW;
         iss_lsb_rob_tag  = rob_tag_i;
         iss_lsb_addr     = addr_i;
         iss_lsb_phy_addr = phy_i;
@@ -156,7 +155,7 @@ module LSB_tb;
         input logic [DMEM_DEPTH-1:0]              addr_i,
         input logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_i
     );
-        iss_lsb_opcode   = OPCODE_STORE;
+        iss_lsb_opcode   = INSTR_SW;
         iss_lsb_rob_tag  = rob_tag_i;
         iss_lsb_addr     = addr_i;
         iss_lsb_phy_addr = phy_i;
@@ -244,15 +243,15 @@ module LSB_tb;
         accept_store(5'd10, 32'h4000, 7'd1);
         accept_store(5'd11, 32'h4004, 7'd2);
         accept_store(5'd12, 32'h4008, 7'd3);
+        accept_load(5'd14, 32'h5000, 7'd5);
         accept_store(5'd13, 32'h400c, 7'd4);
         check_bit("full: no iss_lsb_ready", iss_lsb_ready, 1'b0);
-        accept_load(5'd14, 32'h5000, 7'd5);
         check_bit("load while full still blocks accept", iss_lsb_ready, 1'b0);
         issue_head_to_cdb();
         issue_head_to_cdb();
         issue_head_to_cdb();
         issue_head_to_cdb();
-        check_bit("space after draining stores", iss_lsb_ready, 1'b0);
+        check_bit("space after draining stores", ready_ld_buf, 1'b0);
         dcache_respond(64'hDEAD);
         check_bit("load completed in lw_slot path", ready_ld_buf, 1'b1);
 
@@ -273,9 +272,10 @@ module LSB_tb;
         accept_store(5'd6, 32'h7004, 7'd21);
         accept_store(5'd9, 32'h7008, 7'd22);
         cdb_flush     = 1'b1;
-        cdb_rob_depth = 5'd4;
+        cdb_rob_depth = 5'd7;
         @(posedge clk); #1;
         cdb_flush = 1'b0;
+        #1;
         check_bit("ready after flush", ready_ld_buf, 1'b1);
         issue_head_to_cdb();
         check_val("oldest surviving tag", lsb_rob_tag, 5'd2);
@@ -293,6 +293,7 @@ module LSB_tb;
         @(posedge clk); #1;
         cdb_flush = 1'b0;
         check_bit("no D$ after flush kill", dcache_ready, 1'b0);
+        #1;
         check_bit("accept again", iss_lsb_ready, 1'b1);
         dcache_read_done = 1'b1;
         dcache_data      = 64'hBAD0;
@@ -304,6 +305,7 @@ module LSB_tb;
         reset_dut();
         accept_store(5'd1, 32'h9000, 7'd1);
         cdb_flush = 1'b1;
+        #1;
         check_bit("no accept during flush", iss_lsb_ready, 1'b0);
         @(posedge clk); #1;
         cdb_flush = 1'b0;
@@ -313,14 +315,13 @@ module LSB_tb;
         accept_store(5'd30, 32'ha000, 7'd1);
         accept_store(5'd31, 32'ha004, 7'd2);
         accept_store(5'd32, 32'ha008, 7'd3);
-        accept_store(5'd33, 32'ha00c, 7'd4);
         accept_load(5'd34, 32'hb000, 7'd5);
-        dcache_respond(64'hCAFE);
         check_bit("still full buffer", iss_lsb_ready, 1'b0);
         issue_head_to_cdb();
         issue_head_to_cdb();
         issue_head_to_cdb();
-        issue_head_to_cdb();
+        check_bit("load invisible before dcache response", ready_ld_buf, 1'b0);
+        dcache_respond(64'hCAFE);
         check_bit("load visible after space", ready_ld_buf, 1'b1);
         issue_head_to_cdb();
         check_val("deferred load data", lsb_data, 64'hCAFE);

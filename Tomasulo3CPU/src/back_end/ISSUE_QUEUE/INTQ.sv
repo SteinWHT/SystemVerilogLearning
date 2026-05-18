@@ -20,6 +20,7 @@ import riscv_types_pkg::*;
     input logic rst_n,
 
     // CDB interface
+    input logic                                 cdb_valid,
     input logic                                 cdb_flush,
     input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_depth,
@@ -121,13 +122,13 @@ import riscv_types_pkg::*;
 
             if (q_valid[i]) begin
                 if (!q[i].rs_rdy) begin
-                    if (cdb_phy_reg_write   && (q[i].rs == cdb_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
+                    if (cdb_valid && cdb_phy_reg_write   && (q[i].rs == cdb_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
                     if (mul_exe_ready       && (q[i].rs == mul_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
                     if (div_exe_ready       && (q[i].rs == div_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
                     if (ls_buf_buf_rd_write && (q[i].rs == ls_buf_rd_phy_addr))  wk_rs_rdy[i] = 1'b1;
                 end
                 if (!q[i].rt_rdy) begin
-                    if (cdb_phy_reg_write   && (q[i].rt == cdb_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
+                    if (cdb_valid && cdb_phy_reg_write   && (q[i].rt == cdb_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
                     if (mul_exe_ready       && (q[i].rt == mul_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
                     if (div_exe_ready       && (q[i].rt == div_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
                     if (ls_buf_buf_rd_write && (q[i].rt == ls_buf_rd_phy_addr))  wk_rt_rdy[i] = 1'b1;
@@ -144,13 +145,13 @@ import riscv_types_pkg::*;
         dis_rt_rdy_eff = dis_rt_data_ready;
 
         if (!dis_rs_data_ready) begin
-            if (cdb_phy_reg_write   && (dis_rs_phy_addr == cdb_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
+            if (cdb_valid && cdb_phy_reg_write   && (dis_rs_phy_addr == cdb_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
             if (mul_exe_ready       && (dis_rs_phy_addr == mul_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
             if (div_exe_ready       && (dis_rs_phy_addr == div_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
             if (ls_buf_buf_rd_write && (dis_rs_phy_addr == ls_buf_rd_phy_addr))  dis_rs_rdy_eff = 1'b1;
         end
         if (!dis_rt_data_ready) begin
-            if (cdb_phy_reg_write   && (dis_rt_phy_addr == cdb_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
+            if (cdb_valid && cdb_phy_reg_write   && (dis_rt_phy_addr == cdb_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
             if (mul_exe_ready       && (dis_rt_phy_addr == mul_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
             if (div_exe_ready       && (dis_rt_phy_addr == div_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
             if (ls_buf_buf_rd_write && (dis_rt_phy_addr == ls_buf_rd_phy_addr))  dis_rt_rdy_eff = 1'b1;
@@ -161,7 +162,7 @@ import riscv_types_pkg::*;
     // depth = rob_tag - rob_top_ptr (unsigned mod 2^N, smaller = older)
     logic [INT_QUEUE_DEPTH-1:0] q_ready;
     logic [ROB_INDEX_WIDTH-1:0] entry_depth [INT_QUEUE_DEPTH];
-    logic [IdxWidth-1:0]       sel_idx;
+    logic [IdxWidth-1:0]        sel_idx;
     logic                       sel_valid;
 
     always_comb begin

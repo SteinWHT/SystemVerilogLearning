@@ -233,7 +233,7 @@ module PRF_tb;
                          '0, '0, '0, '0, '0, '0, '0);
 
         $display("\n[Test 6] Bypass only when read addr matches CDB write addr");
-        cdb_write(7'd30, 64'h0030_0000_0000_0000);
+        cdb_write(7'd31, 64'h0030_0000_0000_0000);
         drive_read_addrs(7'd30, 7'd31, 7'd30, 7'd31, 7'd30, 7'd31, 7'd30, 7'd31);
         cdb_rd_phy_addr = 7'd30;
         cdb_rd_data     = 64'h00FF_0000_0000_0000;

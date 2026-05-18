@@ -8,10 +8,10 @@ import riscv_types_pkg::*;
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
     parameter int unsigned DMEM_WIDTH = 32,
     parameter int unsigned ROB_DEPTH = 16,
-    localparam int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
+    parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
     parameter int unsigned DMEM_DEPTH = 32,
     parameter int unsigned SB_DEPTH = 4,
-    localparam int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH),
+    parameter int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH),
     parameter int unsigned LSB_DEPTH = 4,
     parameter int unsigned LSB_INDEX_WIDTH = $clog2(LSB_DEPTH),
     parameter int unsigned BPB_PC_BITS = 2,
@@ -21,6 +21,7 @@ import riscv_types_pkg::*;
     input logic rst_n,
 
     // CDB interface
+    input logic                                 cdb_valid,
     input logic                                 cdb_flush,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_depth,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,
@@ -172,6 +173,7 @@ import riscv_types_pkg::*;
         .clk(clk),
         .rst_n(rst_n),
 
+        .cdb_valid(cdb_valid),
         .cdb_flush(cdb_flush),
         .rob_top_ptr(rob_top_ptr),
         .cdb_rob_depth(cdb_rob_depth),
@@ -239,6 +241,7 @@ import riscv_types_pkg::*;
         .clk(clk),
         .rst_n(rst_n),
 
+        .cdb_valid(cdb_valid),
         .cdb_flush(cdb_flush),
         .rob_top_ptr(rob_top_ptr),
         .cdb_rob_depth(cdb_rob_depth),
@@ -292,6 +295,7 @@ import riscv_types_pkg::*;
         .clk(clk),
         .rst_n(rst_n),
 
+        .cdb_valid(cdb_valid),
         .cdb_flush(cdb_flush),
         .rob_top_ptr(rob_top_ptr),
         .cdb_rob_depth(cdb_rob_depth),
@@ -335,7 +339,6 @@ import riscv_types_pkg::*;
     // LD/STQ
     LSQ #(
         .LSQ_DEPTH(ISSUE_QUEUE_DEPTH),
-        .INSTR_WIDTH(INSTR_WIDTH),
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
         .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
@@ -363,7 +366,7 @@ import riscv_types_pkg::*;
         .dis_new_rd_phy_addr(dis_new_rd_phy_addr),
         .dis_rob_tag(dis_rob_tag),
         .dis_opcode(dis_opcode),
-        .dis_ld_st_issq_en(dis_ld_st_issq_en),
+        .dis_ld_st_issue_en(dis_ld_st_issq_en),
         .dis_imm16(dis_imm16),
 
         .lsq_ld_st_full(issq_ld_stq_full),
@@ -371,6 +374,7 @@ import riscv_types_pkg::*;
 
         .dcache_read_busy(dcache_read_busy),
 
+        .cdb_valid(cdb_valid),
         .cdb_flush(cdb_flush),
         .cdb_rob_depth(cdb_rob_depth),
         .cdb_rd_phy_addr(cdb_rd_phy_addr),
@@ -380,7 +384,7 @@ import riscv_types_pkg::*;
         .iss_rs_data_lsq(iss_rs_data_lsq),
         .iss_rs_phy_addr_ls(iss_rs_phy_addr_ls),
 
-        .lsb_ready(iss_lsb_ready),
+        .lsb_rdy(iss_lsb_ready),
 
         .iss_lsq_opcode(iss_lsb_opcode),
         .iss_lsq_rob_tag(iss_lsb_rob_tag),

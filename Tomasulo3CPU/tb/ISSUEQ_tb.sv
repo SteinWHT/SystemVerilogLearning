@@ -12,7 +12,7 @@ import riscv_types_pkg::*;
     parameter int unsigned ARCH_REG_WIDTH          = 5;
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7;
     parameter int unsigned REG_FILE_DATA_WIDTH     = 64;
-    parameter int unsigned DMEM_WIDTH              = 32;
+    parameter int unsigned DMEM_WIDTH              = 64;
     parameter int unsigned ROB_DEPTH               = 16;
     localparam  int unsigned ROB_INDEX_WIDTH       = $clog2(ROB_DEPTH);
     parameter int unsigned DMEM_DEPTH              = 32;
@@ -21,7 +21,6 @@ import riscv_types_pkg::*;
     parameter int unsigned LSB_DEPTH               = 4;
     parameter int unsigned BPB_PC_BITS             = 3;
     parameter int unsigned OPCODE_WIDTH            = 6;
-    parameter int unsigned LD_ST_OPCODE_WIDTH      = 1;
     parameter int unsigned DIV_CYCLES              = 7;
     parameter int unsigned MUL_CYCLES              = 3;
 
@@ -32,6 +31,7 @@ import riscv_types_pkg::*;
     logic [ROB_INDEX_WIDTH-1:0]         cdb_rob_depth;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] cdb_rd_phy_addr;
     logic                               cdb_phy_reg_write;
+    logic                               cdb_valid;
 
     logic [REG_FILE_DATA_WIDTH-1:0] iss_rs_data_lsq;
 
@@ -108,11 +108,12 @@ import riscv_types_pkg::*;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_lsb_phy_addr;
     logic                       iss_lsb_rdy;
 
-    logic [LD_ST_OPCODE_WIDTH-1:0] lsb_opcode;
+    logic [OPCODE_WIDTH-1:0]       lsb_opcode;
     logic                          dcache_read_busy;
     logic                          dcache_read_done;
-    logic [DMEM_DEPTH-1:0]         dcache_rdata;
+    logic [DMEM_WIDTH-1:0]         dcache_rdata;
     logic                          dcache_req;
+    logic                          dcache_ready;
     logic [DMEM_DEPTH-1:0]         dcache_addr;
 
     logic issue_int;
@@ -132,17 +133,8 @@ import riscv_types_pkg::*;
     assign issue_div_en = issue_div;
     assign issue_mul_en = issue_mul;
 
-    // LSB uses 1-bit opcodes; LSQ carries full instr_e.
-    always_comb begin
-        if (iss_lsb_opcode == INSTR_LW)
-            lsb_opcode = 1'b0;
-        else if (iss_lsb_opcode == INSTR_SW)
-            lsb_opcode = 1'b1;
-        else
-            lsb_opcode = 1'b0;
-    end
-
-    assign dcache_read_busy = dcache_req;
+    assign dcache_read_done = dcache_ready;
+    assign dcache_read_busy = !dcache_ready;
 
     ISSUEQ #(
         .INSTR_WIDTH            (INSTR_WIDTH),
@@ -160,6 +152,7 @@ import riscv_types_pkg::*;
     ) issueq (
         .clk                          (clk),
         .rst_n                        (rst_n),
+        .cdb_valid                    (cdb_valid),
         .cdb_flush                    (cdb_flush),
         .cdb_rob_depth                (cdb_rob_depth),
         .cdb_rd_phy_addr              (cdb_rd_phy_addr),
@@ -257,7 +250,7 @@ import riscv_types_pkg::*;
         .ARCH_REG_WIDTH         (ARCH_REG_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
         .REG_FILE_DATA_WIDTH    (REG_FILE_DATA_WIDTH),
-        .LD_ST_OPCODE_WIDTH     (LD_ST_OPCODE_WIDTH)
+        .OPCODE_WIDTH           (OPCODE_WIDTH)
     ) lsb (
         .clk              (clk),
         .rst_n            (rst_n),
@@ -265,7 +258,7 @@ import riscv_types_pkg::*;
         .dcache_data      (dcache_rdata),
         .dcache_ready     (dcache_req),
         .dcache_addr      (dcache_addr),
-        .iss_lsb_opcode   (lsb_opcode),
+        .iss_lsb_opcode   (iss_lsb_opcode),
         .iss_lsb_rob_tag  (iss_lsb_rob_tag),
         .iss_lsb_addr     (iss_lsb_addr),
         .iss_lsb_phy_addr (iss_lsb_phy_addr),
@@ -360,9 +353,10 @@ import riscv_types_pkg::*;
         rob_top_ptr          = '0;
         rob_commit_mem_write = 1'b0;
         iss_rs_data_lsq      = '0;
-        dcache_read_done     = 1'b0;
         dcache_rdata         = '0;
-        issue_ld_buf         = 1'b0;
+        dcache_ready         = '0;
+        cdb_valid            = '0;
+        //issue_ld_buf         = 1'b0;
     endtask
 
     task automatic reset_dut();
@@ -394,6 +388,26 @@ import riscv_types_pkg::*;
         dis_int_issq_en = 1'b0;
     endtask
 
+    task automatic dispatch_int_this_cycle(
+        input logic [ROB_INDEX_WIDTH-1:0]         rob_tag_i,
+        input logic [PHY_REGISTER_FILE_WIDTH-1:0] rs,
+        input logic [PHY_REGISTER_FILE_WIDTH-1:0] rt,
+        input logic [PHY_REGISTER_FILE_WIDTH-1:0] rd
+    );
+        clear_dispatch();
+        dis_int_issq_en       = 1'b1;
+        dis_reg_write         = 1'b1;
+        dis_rs_data_ready     = 1'b0;
+        dis_rt_data_ready     = 1'b1;
+        dis_rs_phy_addr       = rs;
+        dis_rt_phy_addr       = rt;
+        dis_new_rd_phy_addr   = rd;
+        dis_rob_tag           = rob_tag_i;
+        dis_opcode            = INSTR_ADD;
+        @(posedge clk); #1;
+        dis_int_issq_en = 1'b0;
+    endtask
+
     task automatic dispatch_mul(
         input logic [ROB_INDEX_WIDTH-1:0]         rob_tag_i,
         input logic [PHY_REGISTER_FILE_WIDTH-1:0] rs,
@@ -414,7 +428,47 @@ import riscv_types_pkg::*;
         dis_mul_issq_en = 1'b0;
     endtask
 
+    task automatic dispatch_mul_not_rdy(
+        input logic [ROB_INDEX_WIDTH-1:0]         rob_tag_i,
+        input logic [PHY_REGISTER_FILE_WIDTH-1:0] rs,
+        input logic [PHY_REGISTER_FILE_WIDTH-1:0] rt,
+        input logic [PHY_REGISTER_FILE_WIDTH-1:0] rd
+    );
+        clear_dispatch();
+        dis_mul_issq_en       = 1'b1;
+        dis_reg_write         = 1'b1;
+        dis_rs_data_ready     = 1'b0;
+        dis_rt_data_ready     = 1'b1;
+        dis_rs_phy_addr       = rs;
+        dis_rt_phy_addr       = rt;
+        dis_new_rd_phy_addr   = rd;
+        dis_rob_tag           = rob_tag_i;
+        dis_opcode            = INSTR_MUL;
+        @(posedge clk); #1;
+        dis_mul_issq_en = 1'b0;
+    endtask
+
     task automatic dispatch_div(
+        input logic [ROB_INDEX_WIDTH-1:0]         rob_tag_i,
+        input logic [PHY_REGISTER_FILE_WIDTH-1:0] rs,
+        input logic [PHY_REGISTER_FILE_WIDTH-1:0] rt,
+        input logic [PHY_REGISTER_FILE_WIDTH-1:0] rd
+    );
+        clear_dispatch();
+        dis_div_issq_en       = 1'b1;
+        dis_reg_write         = 1'b1;
+        dis_rs_data_ready     = 1'b1;
+        dis_rt_data_ready     = 1'b1;
+        dis_rs_phy_addr       = rs;
+        dis_rt_phy_addr       = rt;
+        dis_new_rd_phy_addr   = rd;
+        dis_rob_tag           = rob_tag_i;
+        dis_opcode            = INSTR_DIV;
+        @(posedge clk); #1;
+        dis_div_issq_en = 1'b0;
+    endtask
+
+    task automatic dispatch_div_this_cycle(
         input logic [ROB_INDEX_WIDTH-1:0]         rob_tag_i,
         input logic [PHY_REGISTER_FILE_WIDTH-1:0] rs,
         input logic [PHY_REGISTER_FILE_WIDTH-1:0] rt,
@@ -451,6 +505,29 @@ import riscv_types_pkg::*;
         dis_imm16             = imm;
         @(posedge clk); #1;
         dis_ld_st_issq_en = 1'b0;
+    endtask
+
+    task automatic cdb_forwarding(
+        input logic [PHY_REGISTER_FILE_WIDTH-1:0] rd
+    );
+        cdb_valid            = 1'b1;
+        cdb_rd_phy_addr      = rd;
+        cdb_phy_reg_write    = 1'b1;
+        @(posedge clk);
+        cdb_valid            = 1'b0;
+        cdb_phy_reg_write    = 1'b0;
+    endtask
+
+
+    task automatic wait_issue_int_no_extra_latency(input int max_cycles = 20);
+        int c;
+        c = 0;
+        while (!exe_int_grant && c < max_cycles) begin
+            @(posedge clk);
+            c++;
+        end
+        if (!exe_int_grant)
+            $error("[FAIL] timeout waiting for exe_int_grant @ %0t", $time);
     endtask
 
     task automatic wait_issue_int(input int max_cycles = 20);
@@ -490,6 +567,7 @@ import riscv_types_pkg::*;
         `ifdef FSDB_DUMP
             $fsdbDumpfile("issueq.fsdb");
             $fsdbDumpvars(0, ISSUEQ_tb);
+            $fsdbDumpMDA();
         `else
             $dumpfile("issueq.vcd");
             $dumpvars(0, ISSUEQ_tb);
@@ -522,19 +600,26 @@ import riscv_types_pkg::*;
         check_bit("mul ready", issue_mul_rdy, 1'b1);
         wait_issue_mul();
         check_val("mul rs", iss_rs_phy_addr_mul, 7'd30);
-        check_val("mul rt", iss_rs_phy_addr_mul, 7'd31);
+        check_val("mul rt", iss_rt_phy_addr_mul, 7'd31);
 
         $display("\n[Test 4] DIV has priority over INT when both ready");
-        dispatch_int(5'd3, 7'd1, 7'd2, 7'd3);
-        dispatch_div(5'd4, 7'd4, 7'd5, 7'd6);
+        dispatch_int_this_cycle(5'd3, 7'd1, 7'd2, 7'd3);
+        dispatch_div_this_cycle(5'd4, 7'd4, 7'd5, 7'd6);
+        cdb_valid            = 1'b1;
+        cdb_rd_phy_addr      = 7'd1;
+        cdb_phy_reg_write    = 1'b1;
+        #1;
         check_bit("both int and div ready", issue_int_rdy & issue_div_rdy, 1'b1);
+        @(posedge clk);
+        cdb_valid            = 1'b0;
+        cdb_phy_reg_write    = 1'b0;
         wait_issue_div();
         check_bit("div wins first", exe_div_grant, 1'b1);
         check_bit("int not granted same cycle", exe_int_grant, 1'b0);
-        repeat (DIV_CYCLES) @(posedge clk); #1;
-        wait_issue_int();
+        wait_issue_int_no_extra_latency();
 
         $display("\n[Test 5] Operand wakeup via CDB at INT dispatch time");
+        cdb_valid = 1'b1;
         cdb_rd_phy_addr     = 7'd50;
         cdb_phy_reg_write   = 1'b1;
         clear_dispatch();
@@ -550,25 +635,28 @@ import riscv_types_pkg::*;
         @(posedge clk); #1;
         dis_int_issq_en     = 1'b0;
         cdb_phy_reg_write   = 1'b0;
+        cdb_valid           = 1'b0;
         wait_issue_int();
         check_val("wakeup rs", iss_rs_phy_addr_alu, 7'd50);
         check_val("rt already ready", iss_rt_phy_addr_alu, 7'd51);
 
         $display("\n[Test 6] INTQ flush removes younger entry; older survives");
         reset_dut();
-        dispatch_int(5'd2, 7'd60, 7'd61, 7'd62);
+        dispatch_int_this_cycle(5'd2, 7'd60, 7'd61, 7'd62);
         dispatch_int(5'd6, 7'd63, 7'd64, 7'd65);
         cdb_flush     = 1'b1;
         rob_top_ptr   = 5'd0;
         cdb_rob_depth = 5'd4;
         @(posedge clk); #1;
         cdb_flush = 1'b0;
-        wait_issue_int();
+        cdb_forwarding(7'd60);
+        wait_issue_int_no_extra_latency();
         check_val("surviving entry rs", iss_rs_phy_addr_alu, 7'd60);
 
         $display("\n[Test 7] LW: LSQ issues to LSB when iss_lsb_ready (no ISSUEUNIT grant)");
         reset_dut();
         dispatch_lw(5'd7, 7'd70, 7'd71, 16'h0100);
+        dcache_ready = 1'b1;
         repeat (24) begin
             if (iss_rs_phy_addr_ls == 7'd70)
                 iss_rs_data_lsq = 64'h0000_0000_0000_2000;
@@ -584,22 +672,24 @@ import riscv_types_pkg::*;
         if (!iss_lsb_rdy)
             $error("[FAIL] timeout: LSQ did not issue to LSB @ %0t", $time);
         @(posedge clk); #1;
+        dcache_ready = 1'b0;
         check_bit("D$ request after load enters LSB", dcache_req, 1'b1);
-        dcache_read_done = 1'b1;
+        @(posedge clk); #1;
+        dcache_ready = 1'b1;
         dcache_rdata     = 64'hCAFEBABE_DEADBEEF;
         @(posedge clk); #1;
-        dcache_read_done = 1'b0;
+        //dcache_read_done = 1'b0;
         check_bit("LSB has result for ISSUEUNIT", ready_ld_buf, 1'b1);
-        repeat (8) @(posedge clk); #1;
         check_bit("ISSUEUNIT drains LSB", issue_ld_buf, 1'b1);
+        @(posedge clk); #1;
         check_val("CDB load data", lsb_data, 64'hCAFEBABE_DEADBEEF);
 
         $display("\n[Test 8] Fill MULQ and observe full flag");
         reset_dut();
-        dispatch_mul(5'd10, 7'd1, 7'd2, 7'd3);
-        dispatch_mul(5'd11, 7'd4, 7'd5, 7'd6);
-        dispatch_mul(5'd12, 7'd7, 7'd8, 7'd9);
-        dispatch_mul(5'd13, 7'd10, 7'd11, 7'd12);
+        dispatch_mul_not_rdy(5'd10, 7'd1, 7'd2, 7'd3);
+        dispatch_mul_not_rdy(5'd11, 7'd4, 7'd5, 7'd6);
+        dispatch_mul_not_rdy(5'd12, 7'd7, 7'd8, 7'd9);
+        dispatch_mul_not_rdy(5'd13, 7'd10, 7'd11, 7'd12);
         check_bit("mulq full", issq_mulq_full, 1'b1);
 
         $display("\n=======================================");

@@ -161,6 +161,20 @@ module CDB #(
                 };
             end else
                 valid <= 1'b0;
+                // Robust design
+                // Previous some designs didn't detect valid first.
+                // TODO: correct those designs.
+                cdb_entry <= {
+                    rob_tag: '0,
+                    addr: '0,
+                    data: '0,
+                    rw: 1'b0,
+                    flush: 1'b0,
+                    branch: 1'b0,
+                    branch_pc: '0,
+                    branch_addr: '0,
+                    sw_addr: '0
+                };
         end
     end
 

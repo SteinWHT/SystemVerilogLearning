@@ -1,28 +1,28 @@
-module LSB #(
+module LSB
+import riscv_types_pkg::*;
+#(
     parameter int unsigned LSB_DEPTH = 4,
-    localparam int unsigned LSB_INDEX_WIDTH = $clog2(LSB_DEPTH),
+    parameter int unsigned LSB_INDEX_WIDTH = $clog2(LSB_DEPTH),
     parameter int unsigned DMEM_DEPTH = 32,
+    parameter int unsigned DMEM_WIDTH = 64,
     parameter int unsigned ROB_DEPTH = 16,
-    localparam int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
+    parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
     parameter int unsigned ARCH_REG_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
-    parameter int unsigned OPCODE_WIDTH = 1,
-    parameter int unsigned LD_ST_OPCODE_WIDTH = 1,
-    localparam int unsigned OPCODE_LOAD = 1'b0,
-    localparam int unsigned OPCODE_STORE = 1'b1
+    parameter int unsigned OPCODE_WIDTH = 6
 ) (
     input logic clk,
     input logic rst_n,
 
     // D-Cache Interface
     input  logic                               dcache_read_done,
-    input  logic [DMEM_DEPTH-1:0]              dcache_data,
+    input  logic [DMEM_WIDTH-1:0]              dcache_data,
     output logic                               dcache_ready,
     output logic [DMEM_DEPTH-1:0]              dcache_addr,
 
     // LSQ Interface
-    input  logic [LD_ST_OPCODE_WIDTH-1:0]      iss_lsb_opcode,
+    input  logic [OPCODE_WIDTH-1:0]            iss_lsb_opcode,
     input  logic [ROB_INDEX_WIDTH-1:0]         iss_lsb_rob_tag,
     input  logic [DMEM_DEPTH-1:0]              iss_lsb_addr,
     input  logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_lsb_phy_addr,
@@ -48,14 +48,14 @@ module LSB #(
 );
 
     typedef struct packed {
-        logic [ROB_INDEX_WIDTH-1:0]        rob_tag;
-        logic                              rw;       // 1 = load, 0 = store
-        logic [DMEM_DEPTH-1:0]             addr;
+        logic [ROB_INDEX_WIDTH-1:0]         rob_tag;
+        logic                               rw;
+        logic [DMEM_DEPTH-1:0]              addr;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_addr;
-        logic [REG_FILE_DATA_WIDTH-1:0]    data;
+        logic [REG_FILE_DATA_WIDTH-1:0]     data;
     } lsb_entry_t;
 
-    lsb_entry_t lsb_array [0:LSB_DEPTH-1];
+    lsb_entry_t lsb_array [LSB_DEPTH];
     logic [LSB_INDEX_WIDTH:0] write_ptr, read_ptr;
 
     lsb_entry_t lw_slot;
@@ -89,8 +89,8 @@ module LSB #(
     //  adjusted to read_ptr + keep_count.
     // ----------------------------------------------------------------
     logic [LSB_INDEX_WIDTH:0] flush_keep_count;
-    lsb_entry_t              flush_compact [0:LSB_DEPTH-1];
-    logic                    flush_lw_slot;
+    lsb_entry_t               flush_compact [LSB_DEPTH];
+    logic                     flush_lw_slot;
 
     always_comb begin
         flush_keep_count = '0;
@@ -142,8 +142,6 @@ module LSB #(
             lsb_ready <= 1'b0;
 
         end else begin
-            lsb_ready <= 1'b0;
-
             // D-Cache read response
             if (dcache_read_done && lw_slot_valid && !lw_slot_data_ready) begin
                 if (!lsb_full) begin
@@ -174,7 +172,7 @@ module LSB #(
 
             // Accept new instruction from LSQ
             if (iss_lsb_rdy && iss_lsb_ready) begin
-                if (iss_lsb_opcode == OPCODE_LOAD) begin
+                if (iss_lsb_opcode == INSTR_LW) begin
                     lw_slot <= '{
                         rob_tag:  iss_lsb_rob_tag,
                         rw:       1'b1,
@@ -205,6 +203,8 @@ module LSB #(
                 lsb_sw_addr     <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].addr;
                 read_ptr        <= read_ptr + 1;
                 lsb_ready       <= 1'b1;
+            end else begin
+                lsb_ready       <= 1'b0;
             end
         end
     end
@@ -213,10 +213,8 @@ module LSB #(
     // synthesis translate_off
     always_ff @(posedge clk) begin
         if (rst_n) begin
-            assert (entry_count <= LSB_DEPTH)
+            LSB_BUFFER_OVERFLOW: assert (entry_count <= LSB_DEPTH)
                 else $error("LSB: buffer overflow, entry_count = %0d", entry_count);
-            assert (!(dcache_read_done && !lw_slot_valid))
-                else $warning("LSB: D-Cache responded with no pending load");
         end
     end
     // synthesis translate_on

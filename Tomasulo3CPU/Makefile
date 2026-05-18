@@ -53,6 +53,9 @@ SRC_FILES := \
 	$(SRC_DIR)/back_end/ISSUE_QUEUE/DIVQ.sv \
 	$(SRC_DIR)/back_end/ISSUE_QUEUE/LSQ.sv \
 	$(SRC_DIR)/back_end/ISSUE_QUEUE/ISSUEQ.sv \
+	$(SRC_DIR)/back_end/LSB.sv \
+	$(SRC_DIR)/back_end/ISSUEUNIT.sv \
+	$(SRC_DIR)/back_end/PRF.sv \
 
 
 TB_FILES := \
