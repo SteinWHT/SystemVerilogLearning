@@ -82,21 +82,19 @@ import riscv_types_pkg::*;
     output logic                                exe_div_grant,
     output logic                                exe_mul_grant,
 
-    // EXE interface
-    output logic [ROB_INDEX_WIDTH-1:0]          exe_rob_tag,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  exe_rd_phy_addr,
-    output logic [REG_FILE_DATA_WIDTH-1:0]      exe_rd_data,
-    output logic                                exe_reg_write,
-    output logic                                exe_result_valid,
-    output logic                                exe_branch_taken,
-    output logic                                exe_branch_mispredicted,
-    output logic                                exe_branch_prediction,
-    output logic                                exe_branch,
-    output logic                                exe_jr_inst,
-    output logic                                exe_jr31_inst,
-    output logic                                exe_jal_inst,
-    output logic [BPB_PC_BITS-1:0]              exe_branch_pc_bits,
-    output logic [DMEM_WIDTH-1:0]               exe_branch_other_addr,
+    // Muxed issue metadata to EXE (one functional unit granted per cycle)
+    output logic [ROB_INDEX_WIDTH-1:0]          iss_exe_rob_tag,
+    output logic [OPCODE_WIDTH-1:0]             iss_exe_opcode,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rd_phy_addr,
+    output logic                                iss_exe_rw,
+    output logic [15:0]                         iss_exe_imm16,
+    output logic [DMEM_WIDTH-1:0]               iss_exe_branch_other_addr,
+    output logic                                iss_exe_branch_prediction,
+    output logic                                iss_exe_branch,
+    output logic                                iss_exe_jr_inst,
+    output logic                                iss_exe_jr31_inst,
+    output logic                                iss_exe_jal_inst,
+    output logic [BPB_PC_BITS-1:0]              iss_exe_branch_pc_bits,
 
     // ISSUEUNIT interface
     input logic                                 issue_int_en,
@@ -379,7 +377,6 @@ import riscv_types_pkg::*;
         .cdb_rob_depth(cdb_rob_depth),
         .cdb_rd_phy_addr(cdb_rd_phy_addr),
         .cdb_phy_reg_write(cdb_phy_reg_write),
-        .cdb_valid(cdb_phy_reg_write),
 
         .iss_rs_data_lsq(iss_rs_data_lsq),
         .iss_rs_phy_addr_ls(iss_rs_phy_addr_ls),
@@ -392,5 +389,45 @@ import riscv_types_pkg::*;
         .iss_lsq_phy_addr(iss_lsb_phy_addr),
         .iss_lsq_rdy(iss_lsb_rdy)
     );
+
+    always_comb begin
+        iss_exe_rob_tag             = '0;
+        iss_exe_opcode              = '0;
+        iss_exe_rd_phy_addr         = '0;
+        iss_exe_rw                  = 1'b0;
+        iss_exe_imm16               = '0;
+        iss_exe_branch_other_addr   = '0;
+        iss_exe_branch_prediction   = 1'b0;
+        iss_exe_branch              = 1'b0;
+        iss_exe_jr_inst             = 1'b0;
+        iss_exe_jr31_inst           = 1'b0;
+        iss_exe_jal_inst            = 1'b0;
+        iss_exe_branch_pc_bits      = '0;
+
+        if (exe_int_grant) begin
+            iss_exe_rob_tag             = iss_rob_tag_alu;
+            iss_exe_opcode              = iss_opcode_alu;
+            iss_exe_rd_phy_addr         = iss_rd_phy_addr_alu;
+            iss_exe_rw                  = iss_rw_alu;
+            iss_exe_imm16               = iss_imm16_alu;
+            iss_exe_branch_other_addr   = iss_branch_other_addr_alu;
+            iss_exe_branch_prediction   = iss_branch_prediction_alu;
+            iss_exe_branch              = iss_branch_alu;
+            iss_exe_jr_inst             = iss_jr_inst_alu;
+            iss_exe_jr31_inst           = iss_jr31_inst_alu;
+            iss_exe_jal_inst            = iss_jal_inst_alu;
+            iss_exe_branch_pc_bits      = iss_branch_pc_bits_alu;
+        end else if (exe_div_grant) begin
+            iss_exe_rob_tag     = iss_rob_tag_div;
+            iss_exe_opcode      = iss_opcode_div;
+            iss_exe_rd_phy_addr = iss_rd_phy_addr_div;
+            iss_exe_rw          = iss_rw_div;
+        end else if (exe_mul_grant) begin
+            iss_exe_rob_tag     = iss_rob_tag_mul;
+            iss_exe_opcode      = iss_opcode_mul;
+            iss_exe_rd_phy_addr = iss_rd_phy_addr_mul;
+            iss_exe_rw          = iss_rw_mul;
+        end
+    end
 
 endmodule

@@ -46,11 +46,10 @@ import riscv_types_pkg::*;
     logic                                     killed[MUL_CYCLES];
 
     always_comb begin
+        killed = '0;
         for (int i = 0; i < MUL_CYCLES; i++) begin
             if (cdb_flush) begin
-                killed[i] = (cdb_rob_depth < mul_rob_tag[i] - cdb_rob_tag);
-            end else begin
-                killed[i] = 1'b0;
+                killed[i] = (cdb_rob_depth < (mul_rob_tag[i] - cdb_rob_tag));
             end
         end
     end

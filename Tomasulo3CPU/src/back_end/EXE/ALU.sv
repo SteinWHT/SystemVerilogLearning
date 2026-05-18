@@ -117,7 +117,7 @@ import riscv_types_pkg::*;
     end
 
     always_ff @(posedge clk or negedge rst_n) begin
-        if (rst_n) begin
+        if (!rst_n) begin
             exe_valid               <= 1'b0;
             exe_rob_tag             <= '0;
             exe_rd_phy_addr         <= '0;

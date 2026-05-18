@@ -56,9 +56,7 @@ import riscv_types_pkg::*;
         if (!rst_n) begin
             busy <= 1'b0;
         end else begin
-            if (killed) begin
-                busy <= 1'b0;
-            end else if (start && !killed) begin
+            if (start) begin
                 busy <= 1'b1;
             end else if (complete && busy) begin
                 busy <= 1'b0;
@@ -67,11 +65,9 @@ import riscv_types_pkg::*;
     end
 
     always_comb begin
-        if (cdb_flush) begin
-            killed = (cdb_rob_depth < div_rob_tag - cdb_rob_tag);
-        end else begin
-            killed <= 1'b0;
-        end
+        killed = 1'b0;
+        if (cdb_flush)
+            killed = (cdb_rob_depth < (div_rob_tag - cdb_rob_tag));
     end
 
     always_ff @(posedge clk or negedge rst_n) begin
@@ -122,8 +118,8 @@ import riscv_types_pkg::*;
     assign exe_rd_phy_addr = div_rd_phy_addr;
     assign exe_rd_data = opcode == INSTR_DIV ? quotient : opcode == INSTR_REM ? remainder : '0;
     assign exe_reg_write = 1'b1;
-    assign exe_result_valid = complete && div_valid;
-    assign div_exe_ready = !busy;
+    assign exe_result_valid = complete && div_valid && !killed;
+    assign div_exe_ready    = !busy;
 
     // synthesis translate_off
     DIV_BUSY_ASSERT: assert property (@(posedge clk) disable iff (!rst_n)

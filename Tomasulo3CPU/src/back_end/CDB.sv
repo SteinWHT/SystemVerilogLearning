@@ -105,21 +105,23 @@ module CDB #(
     end
 
     logic flush;
-    logic branch_other_addr;
+    logic [IMEM_DEPTH-1:0] branch_other_addr;
     always_comb begin
         flush = 1'b0;
+        branch_other_addr = '0;
         if (exe_branch && exe_branch_mispredicted && !exe_jr31_inst) begin
             flush = 1'b1;
-            branch_other_addr = exe_branch_other_addr;
+            branch_other_addr = {{(IMEM_DEPTH-DMEM_WIDTH){1'b0}}, exe_branch_other_addr};
         end else if (exe_branch && exe_branch_mispredicted && exe_jr31_inst) begin
             flush = 1'b1;
-            branch_other_addr = exe_rd_data;
+            branch_other_addr = exe_rd_data[IMEM_DEPTH-1:0];
         end
     end
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             valid <= 1'b0;
+            cdb_jalr_resolved <= 1'b0;
             cdb_entry <= {
                 rob_tag: '0,
                 addr: '0,
@@ -159,7 +161,7 @@ module CDB #(
                     branch_addr: '0,
                     sw_addr: lsb_sw_addr
                 };
-            end else
+            end else begin
                 valid <= 1'b0;
                 // Robust design
                 // Previous some designs didn't detect valid first.
@@ -175,6 +177,7 @@ module CDB #(
                     branch_addr: '0,
                     sw_addr: '0
                 };
+            end
         end
     end
 
@@ -184,7 +187,6 @@ module CDB #(
     assign cdb_rd_data = cdb_entry.data;
     assign cdb_reg_write = cdb_entry.rw;
     assign cdb_flush = cdb_entry.flush;
-    assign cdb_branch = cdb_entry.branch;
     assign cdb_branch_addr = cdb_entry.branch_addr;
     assign cdb_sw_addr = cdb_entry.sw_addr;
 
