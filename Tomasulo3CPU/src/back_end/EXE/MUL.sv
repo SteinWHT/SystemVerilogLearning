@@ -1,14 +1,11 @@
 // When flush is asserted, the incoming instruction will be handled by ISSUEQ
 // Here we only handle the latched instructions
-module MUL 
+module MUL
 import riscv_types_pkg::*;
 #(
     parameter int unsigned XLEN = 64,
-    parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned OPCODE_WIDTH = 6,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
-    parameter int unsigned DMEM_WIDTH = 32,
-    parameter int unsigned BPB_PC_BITS = 3,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
     parameter int unsigned MUL_CYCLES = 4

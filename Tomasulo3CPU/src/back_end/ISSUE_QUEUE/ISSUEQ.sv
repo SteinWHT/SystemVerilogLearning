@@ -1,19 +1,15 @@
 module ISSUEQ
 import riscv_types_pkg::*;
 #(
-    parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned ISSUE_QUEUE_DEPTH = 16,
-    parameter int unsigned ARCH_REG_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
-    parameter int unsigned DMEM_WIDTH = 32,
+    parameter int unsigned DMEM_DEPTH = 32,
+    parameter int unsigned IMEM_DEPTH = 64,
     parameter int unsigned ROB_DEPTH = 16,
     parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
-    parameter int unsigned DMEM_DEPTH = 32,
     parameter int unsigned SB_DEPTH = 4,
     parameter int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH),
-    parameter int unsigned LSB_DEPTH = 4,
-    parameter int unsigned LSB_INDEX_WIDTH = $clog2(LSB_DEPTH),
     parameter int unsigned BPB_PC_BITS = 2,
     parameter int unsigned OPCODE_WIDTH = 6
 ) (
@@ -52,7 +48,7 @@ import riscv_types_pkg::*;
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
     input logic [OPCODE_WIDTH-1:0]              dis_opcode,
     input logic [15:0]                          dis_imm16,
-    input logic [DMEM_WIDTH-1:0]                dis_branch_other_addr,
+    input logic [IMEM_DEPTH-1:0]                dis_branch_other_addr,
     input logic [BPB_PC_BITS:0]                 dis_branch_pc_bits,
     input logic                                 dis_branch_prediction,
     input logic                                 dis_branch,
@@ -92,7 +88,7 @@ import riscv_types_pkg::*;
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rt_phy_addr,
     output logic                                iss_exe_rw,
     output logic [15:0]                         iss_exe_imm16,
-    output logic [DMEM_WIDTH-1:0]               iss_exe_branch_other_addr,
+    output logic [IMEM_DEPTH-1:0]               iss_exe_branch_other_addr,
     output logic                                iss_exe_branch_prediction,
     output logic                                iss_exe_branch,
     output logic                                iss_exe_jr_inst,
@@ -145,7 +141,7 @@ import riscv_types_pkg::*;
     logic                                 iss_jr31_inst_alu;
     logic                                 iss_jal_inst_alu;
     logic [BPB_PC_BITS-1:0]               iss_branch_pc_bits_alu;
-    logic [DMEM_WIDTH-1:0]                iss_branch_other_addr_alu;
+    logic [IMEM_DEPTH-1:0]                iss_branch_other_addr_alu;
 
     // DIV / MUL issue metadata (internal until EXE is wired)
     logic [ROB_INDEX_WIDTH-1:0]           iss_rob_tag_div;
@@ -164,11 +160,9 @@ import riscv_types_pkg::*;
     // INTQ
     INTQ #(
         .INT_QUEUE_DEPTH(ISSUE_QUEUE_DEPTH),
-        .INSTR_WIDTH(INSTR_WIDTH),
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
-        .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
-        .DMEM_WIDTH(DMEM_WIDTH),
+        .IMEM_DEPTH(IMEM_DEPTH),
         .BPB_PC_BITS(BPB_PC_BITS),
         .OPCODE_WIDTH(OPCODE_WIDTH)
     ) intq (
@@ -233,11 +227,8 @@ import riscv_types_pkg::*;
     // DIVQ
     DIVQ #(
         .DIV_QUEUE_DEPTH(ISSUE_QUEUE_DEPTH),
-        .INSTR_WIDTH(INSTR_WIDTH),
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
-        .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
-        .DMEM_WIDTH(DMEM_WIDTH),
         .OPCODE_WIDTH(OPCODE_WIDTH)
     ) divq (
         .clk(clk),
@@ -287,11 +278,8 @@ import riscv_types_pkg::*;
     // MULQ
     MULQ #(
         .MUL_QUEUE_DEPTH(ISSUE_QUEUE_DEPTH),
-        .INSTR_WIDTH(INSTR_WIDTH),
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
-        .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
-        .DMEM_WIDTH(DMEM_WIDTH),
         .OPCODE_WIDTH(OPCODE_WIDTH)
     ) mulq (
         .clk(clk),
@@ -341,10 +329,13 @@ import riscv_types_pkg::*;
     // LD/STQ
     LSQ #(
         .LSQ_DEPTH(ISSUE_QUEUE_DEPTH),
-        .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
-        .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
+        .SAB_DEPTH(),
+        .DMEM_DEPTH(DMEM_DEPTH),
+        .ROB_DEPTH(ROB_DEPTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
-        .DMEM_WIDTH(DMEM_WIDTH)
+        .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
+        .SB_DEPTH(SB_DEPTH),
+        .OPCODE_WIDTH(OPCODE_WIDTH)
     ) lsq (
         .clk(clk),
         .rst_n(rst_n),

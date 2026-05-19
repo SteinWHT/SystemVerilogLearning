@@ -147,7 +147,7 @@ module ROB #(
 
             if (cdb_flush) begin
                 // flush the ROB
-                write_ptr <= flush_ptr;
+                write_ptr <= flush_ptr + 1;
             end
         end
     end

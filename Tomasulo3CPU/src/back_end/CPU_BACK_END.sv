@@ -4,9 +4,10 @@ module CPU_BACK_END #(
     parameter int unsigned INSTR_WIDTH            = 32,
     parameter int unsigned ARCH_REG_COUNT         = 32,
     parameter int unsigned ARCH_REG_WIDTH         = $clog2(ARCH_REG_COUNT),
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned PHY_REGISTER_FILE_WIDTH= 7,
     parameter int unsigned REG_FILE_DATA_WIDTH    = 64,
-    parameter int unsigned DMEM_WIDTH             = 32,
+    parameter int unsigned IMEM_DEPTH             = 64,
+    parameter int unsigned DMEM_WIDTH             = 64,
     parameter int unsigned DMEM_DEPTH             = 32,
     parameter int unsigned ROB_DEPTH              = 16,
     parameter int unsigned ROB_INDEX_WIDTH        = $clog2(ROB_DEPTH),
@@ -39,7 +40,7 @@ module CPU_BACK_END #(
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
     input logic [OPCODE_WIDTH-1:0]              dis_opcode,
     input logic [15:0]                          dis_imm16,
-    input logic [DMEM_WIDTH-1:0]                dis_branch_other_addr,
+    input logic [IMEM_DEPTH-1:0]                dis_branch_other_addr,
     input logic [BPB_PC_BITS:0]                 dis_branch_pc_bits,
     input logic                                 dis_branch_prediction,
     input logic                                 dis_branch,
@@ -141,7 +142,7 @@ module CPU_BACK_END #(
     logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rt_phy_addr;
     logic                                iss_exe_rw;
     logic [15:0]                         iss_exe_imm16;
-    logic [DMEM_WIDTH-1:0]               iss_exe_branch_other_addr;
+    logic [IMEM_DEPTH-1:0]               iss_exe_branch_other_addr;
     logic                                iss_exe_branch_prediction;
     logic                                iss_exe_branch;
     logic                                iss_exe_jr_inst;
@@ -160,7 +161,7 @@ module CPU_BACK_END #(
     logic                                exe_jr31_inst;
     logic                                exe_jal_inst;
     logic [BPB_PC_BITS-1:0]              exe_branch_pc_bits;
-    logic [DMEM_WIDTH-1:0]               exe_branch_other_addr;
+    logic [IMEM_DEPTH-1:0]               exe_branch_other_addr;
 
     logic [REG_FILE_DATA_WIDTH-1:0] exe_rs_data_alu;
     logic [REG_FILE_DATA_WIDTH-1:0] exe_rt_data_alu;
@@ -180,16 +181,13 @@ module CPU_BACK_END #(
     assign cdb_phy_reg_write = cdb_reg_write & cdb_valid;
 
     ISSUEQ #(
-        .INSTR_WIDTH(INSTR_WIDTH),
         .ISSUE_QUEUE_DEPTH(ISSUE_QUEUE_DEPTH),
-        .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
         .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
-        .DMEM_WIDTH(DMEM_WIDTH),
-        .ROB_DEPTH(ROB_DEPTH),
         .DMEM_DEPTH(DMEM_DEPTH),
+        .IMEM_DEPTH(IMEM_DEPTH),
+        .ROB_DEPTH(ROB_DEPTH),
         .SB_DEPTH(SB_DEPTH),
-        .LSB_DEPTH(LSB_DEPTH),
         .BPB_PC_BITS(BPB_PC_BITS),
         .OPCODE_WIDTH(OPCODE_WIDTH)
     ) issueq (
@@ -307,7 +305,7 @@ module CPU_BACK_END #(
         .INSTR_WIDTH(INSTR_WIDTH),
         .OPCODE_WIDTH(OPCODE_WIDTH),
         .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
-        .DMEM_WIDTH(DMEM_WIDTH),
+        .IMEM_DEPTH(IMEM_DEPTH),
         .BPB_PC_BITS(BPB_PC_BITS),
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),

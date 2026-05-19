@@ -6,11 +6,8 @@ module DIVQ
 import riscv_types_pkg::*;
 #(
     parameter int unsigned DIV_QUEUE_DEPTH = 8,
-    parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
-    parameter int unsigned ARCH_REG_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
-    parameter int unsigned DMEM_WIDTH = 32,
     parameter int unsigned OPCODE_WIDTH = 6
 ) (
     input logic clk,

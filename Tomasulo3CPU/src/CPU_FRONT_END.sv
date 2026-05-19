@@ -83,7 +83,7 @@ module CPU_FRONT_END #(
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  dis_new_rd_phy_addr,
     output logic                                dis_reg_write,
     output logic [15:0]                         dis_imm16,
-    output logic [DMEM_WIDTH-1:0]               dis_branch_other_addr,
+    output logic [IMEM_DEPTH-1:0]               dis_branch_other_addr,
     output logic                                dis_branch_prediction,
     output logic                                dis_branch,
     output logic [BPB_PC_BITS-1:0]              dis_branch_pc_bits,

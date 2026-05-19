@@ -8,11 +8,9 @@ module INTQ
 import riscv_types_pkg::*;
 #(
     parameter int unsigned INT_QUEUE_DEPTH = 8,
-    parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
-    parameter int unsigned ARCH_REG_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
-    parameter int unsigned DMEM_WIDTH = 32,
+    parameter int unsigned IMEM_DEPTH = 64,
     parameter int unsigned BPB_PC_BITS = 3,
     parameter int unsigned OPCODE_WIDTH = 6
 ) (
@@ -52,7 +50,7 @@ import riscv_types_pkg::*;
     output logic                                iss_jr31_inst_alu,
     output logic                                iss_jal_inst_alu,
     output logic [BPB_PC_BITS-1:0]              iss_branch_pc_bits_alu,
-    output logic [DMEM_WIDTH-1:0]               iss_branch_other_addr_alu,
+    output logic [IMEM_DEPTH-1:0]               iss_branch_other_addr_alu,
     output logic                                exe_int_grant,
 
     // ISSUEUNIT interface
@@ -71,7 +69,7 @@ import riscv_types_pkg::*;
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
     input logic [OPCODE_WIDTH-1:0]              dis_opcode,
     input logic [15:0]                          dis_imm16,
-    input logic [DMEM_WIDTH-1:0]                dis_branch_other_addr,
+    input logic [IMEM_DEPTH-1:0]                dis_branch_other_addr,
     input logic                                 dis_branch_prediction,
     input logic                                 dis_branch,
     input logic [BPB_PC_BITS-1:0]               dis_branch_pc_bits,
@@ -104,7 +102,7 @@ import riscv_types_pkg::*;
         logic                               jr31;
         logic                               jal;
         logic [BPB_PC_BITS-1:0]             br_pc;
-        logic [DMEM_WIDTH-1:0]              br_addr;
+        logic [IMEM_DEPTH-1:0]              br_addr;
     } intq_entry_t;
 
     // Queue

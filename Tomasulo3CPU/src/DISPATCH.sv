@@ -66,7 +66,7 @@ import riscv_types_pkg::*;
 
     // CDB interface
     input  logic                                    cdb_valid,
-    input  logic [IMEM_WIDTH_WORD-1:0]              cdb_branch_addr,
+    input  logic [IMEM_WIDTH-1:0]                   cdb_branch_addr,
     input  logic                                    cdb_flush,
     input  logic                                    cdb_jalr_resolved,
 
@@ -234,7 +234,6 @@ import riscv_types_pkg::*;
     assign dis_jmpbr_addr_valid = (stage1_valid && stage1_dis_branch && bpb_branch_prediction) ||
             (stage1_valid && stage1_dis_jr31_inst) ||
             (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) ||
-            cdb_jalr_resolved ||
             (cdb_flush && cdb_valid);
     assign jal_target    = IMEM_WIDTH'(stage1_dis_imm);
     assign branch_target = (ifetch_pc + IMEM_WIDTH'(stage1_dis_imm));
@@ -243,8 +242,8 @@ import riscv_types_pkg::*;
             (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) ? jal_target[IMEM_DEPTH-1:1] :
             (stage1_valid && stage1_dis_branch && bpb_branch_prediction) ?
             branch_target[IMEM_DEPTH-1:1] :
-            (cdb_flush && cdb_valid) ? cdb_branch_addr :
-            cdb_jalr_resolved ? cdb_branch_addr : '0;
+            (cdb_flush && cdb_valid) ? cdb_branch_addr[IMEM_WIDTH_WORD-1:0] :
+            '0;
     assign stage1_branch_taken = stage1_dis_branch && bpb_branch_prediction;
     // Rename source and destination registers.
     // The architectural source register IDs ($rs and $rt) are provided to FRAT and RRAT.
@@ -480,7 +479,8 @@ import riscv_types_pkg::*;
     assign dis_rt_phy_addr = stage2_rt_phy_addr;
     assign dis_new_rd_phy_addr = dis_frl_rd_phy_addr;
     assign dis_opcode = stage2_dis_instr_type;
-    assign dis_imm16 = stage2_dis_imm[15:0];
+    // TODO: Assume now if jalr instruction, the imm is 0 and now it's used as PC+4[15:0]
+    assign dis_imm16 = stage2_dis_jal_inst ? stage2_pc_plus4[15:0] : stage2_dis_imm[15:0];
     assign dis_branch_other_addr = stage2_dis_jr31_inst ? stage2_ras_address :
             stage2_branch_prediction ?
             stage2_pc_plus4 :

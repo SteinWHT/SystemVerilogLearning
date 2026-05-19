@@ -38,7 +38,7 @@ module sync_lifo #(
         if (!rst_n) begin
             top_ptr <= 0;
             top_entry_index <= DEPTH;
-            last_pop_data <= 'hDEAD_BEEF;
+            last_pop_data <= '0;
         end else if (push && !pop) begin
             if (ROUND_ROBIN && full) begin
                 lifo_array[(top_ptr) & (DEPTH - 1)] <= data_in;

@@ -2,10 +2,9 @@ module EXE
 import riscv_types_pkg::*;
 #(
     parameter int unsigned XLEN = 64,
-    parameter int unsigned INSTR_WIDTH  = 32,
     parameter int unsigned OPCODE_WIDTH = 6,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
-    parameter int unsigned DMEM_WIDTH = 32,
+    parameter int unsigned IMEM_DEPTH = 64,
     parameter int unsigned BPB_PC_BITS = 3,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
@@ -35,7 +34,7 @@ import riscv_types_pkg::*;
     output logic                                exe_jr31_inst,
     output logic                                exe_jal_inst,
     output logic [BPB_PC_BITS-1:0]              exe_branch_pc_bits,
-    output logic [DMEM_WIDTH-1:0]               exe_branch_other_addr,
+    output logic [IMEM_DEPTH-1:0]               exe_branch_other_addr,
 
     // Issued instruction metadata (muxed in ISSUEQ)
     input logic [ROB_INDEX_WIDTH-1:0]           iss_rob_tag,
@@ -45,7 +44,7 @@ import riscv_types_pkg::*;
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rd_phy_addr,
     input logic                                 iss_rw,
     input logic [15:0]                          iss_imm16,
-    input logic [DMEM_WIDTH-1:0]                iss_branch_other_addr,
+    input logic [IMEM_DEPTH-1:0]                iss_branch_other_addr,
     input logic                                 iss_branch_prediction,
     input logic                                 iss_branch,
     input logic                                 iss_jr_inst,
@@ -88,7 +87,7 @@ import riscv_types_pkg::*;
     logic                                    alu_exe_jr31_inst;
     logic                                    alu_exe_jal_inst;
     logic [BPB_PC_BITS-1:0]                  alu_exe_branch_pc_bits;
-    logic [DMEM_WIDTH-1:0]                   alu_exe_branch_other_addr;
+    logic [IMEM_DEPTH-1:0]                   alu_exe_branch_other_addr;
 
     logic                                    div_exe_valid;
     logic [ROB_INDEX_WIDTH-1:0]              div_exe_rob_tag;
@@ -104,10 +103,9 @@ import riscv_types_pkg::*;
 
     ALU #(
         .XLEN(XLEN),
-        .INSTR_WIDTH(INSTR_WIDTH),
         .OPCODE_WIDTH(OPCODE_WIDTH),
         .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
-        .DMEM_WIDTH(DMEM_WIDTH),
+        .IMEM_DEPTH(IMEM_DEPTH),
         .BPB_PC_BITS(BPB_PC_BITS),
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH)
@@ -128,7 +126,6 @@ import riscv_types_pkg::*;
         .jr31_inst(iss_jr31_inst),
         .jal_inst(iss_jal_inst),
         .branch_pc_bits(iss_branch_pc_bits),
-        .imm_alu(iss_imm16),
         .valid(issue_int_en),
         .cdb_flush(cdb_flush),
         .exe_valid(alu_exe_valid),
@@ -147,11 +144,8 @@ import riscv_types_pkg::*;
 
     DIV #(
         .XLEN(XLEN),
-        .INSTR_WIDTH(INSTR_WIDTH),
         .OPCODE_WIDTH(OPCODE_WIDTH),
         .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
-        .DMEM_WIDTH(DMEM_WIDTH),
-        .BPB_PC_BITS(BPB_PC_BITS),
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
         .DIV_CYCLES(DIV_CYCLES)
@@ -177,11 +171,8 @@ import riscv_types_pkg::*;
 
     MUL #(
         .XLEN(XLEN),
-        .INSTR_WIDTH(INSTR_WIDTH),
         .OPCODE_WIDTH(OPCODE_WIDTH),
         .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
-        .DMEM_WIDTH(DMEM_WIDTH),
-        .BPB_PC_BITS(BPB_PC_BITS),
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
         .MUL_CYCLES(MUL_CYCLES)

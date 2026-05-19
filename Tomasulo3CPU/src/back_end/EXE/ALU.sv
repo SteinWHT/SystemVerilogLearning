@@ -3,10 +3,9 @@ module ALU
 import riscv_types_pkg::*;
 #(
     parameter int unsigned XLEN = 64,
-    parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned OPCODE_WIDTH = 6,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
-    parameter int unsigned DMEM_WIDTH = 32,
+    parameter int unsigned IMEM_DEPTH = 64,
     parameter int unsigned BPB_PC_BITS = 3,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7
@@ -24,14 +23,13 @@ import riscv_types_pkg::*;
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]       rd_phy_addr,
     input logic                                     rw,
     input logic [15:0]                              imm16,
-    input logic [DMEM_WIDTH-1:0]                    branch_other_addr,
+    input logic [IMEM_DEPTH-1:0]                    branch_other_addr,
     input logic                                     branch_prediction,
     input logic                                     branch,
     input logic                                     jr_inst,
     input logic                                     jr31_inst,
     input logic                                     jal_inst,
     input logic [BPB_PC_BITS-1:0]                   branch_pc_bits,
-    input logic [15:0]                              imm_alu,
     input logic                                     valid,
 
     // CDB interface
@@ -48,11 +46,11 @@ import riscv_types_pkg::*;
     output logic                                    exe_jr31_inst,
     output logic                                    exe_jal_inst,
     output logic [BPB_PC_BITS-1:0]                  exe_branch_pc_bits,
-    output logic [DMEM_WIDTH-1:0]                   exe_branch_other_addr
+    output logic [IMEM_DEPTH-1:0]                   exe_branch_other_addr
 
 );
     logic [REG_FILE_DATA_WIDTH-1:0]     result_alu;
-    logic [DMEM_WIDTH-1:0]              jr31_result;
+    logic [REG_FILE_DATA_WIDTH-1:0]     jr31_result;
     always_comb begin
         jr31_result = '0;
         result_alu = '0;
@@ -69,33 +67,36 @@ import riscv_types_pkg::*;
             INSTR_SRA:      result_alu = rs_data_alu >>> rt_data_alu;
             INSTR_OR:       result_alu = rs_data_alu | rt_data_alu;
             INSTR_AND:      result_alu = rs_data_alu & rt_data_alu;
-            INSTR_ADDI:     result_alu = rs_data_alu + imm_alu;
+            INSTR_ADDI:     result_alu = rs_data_alu + imm16;
 
+            INSTR_JAL:      result_alu = imm16;
             INSTR_JALR:     begin
                 if(jr31_inst) begin
-                    result_alu = rs_data_alu + imm16;
+                    result_alu = imm16;
                     jr31_result = rs_data_alu - branch_other_addr;
                 end else begin
-                    result_alu = rs_data_alu + imm_alu;
+                    result_alu = imm16;
                 end
             end
 
-            INSTR_SLTI:     result_alu = rs_data_alu < imm_alu;
-            INSTR_SLTIU:    result_alu = rs_data_alu < imm_alu;
-            INSTR_XORI:     result_alu = rs_data_alu ^ imm_alu;
-            INSTR_ORI:      result_alu = rs_data_alu | imm_alu;
-            INSTR_ANDI:     result_alu = rs_data_alu & imm_alu;
-            INSTR_SLLI:     result_alu = rs_data_alu << imm_alu;
-            INSTR_SRLI:     result_alu = rs_data_alu >> imm_alu;
-            INSTR_SRAI:     result_alu = rs_data_alu >>> imm_alu;
+            INSTR_SLTI:     result_alu = rs_data_alu < imm16;
+            INSTR_SLTIU:    result_alu = rs_data_alu < imm16;
+            INSTR_XORI:     result_alu = rs_data_alu ^ imm16;
+            INSTR_ORI:      result_alu = rs_data_alu | imm16;
+            INSTR_ANDI:     result_alu = rs_data_alu & imm16;
+            INSTR_SLLI:     result_alu = rs_data_alu << imm16;
+            INSTR_SRLI:     result_alu = rs_data_alu >> imm16;
+            INSTR_SRAI:     result_alu = rs_data_alu >>> imm16;
             INSTR_NONE:     result_alu = '0;
             default   :     result_alu = '0;
         endcase
     end
 
-    logic branch_mispredicted;
+    logic                               branch_mispredicted;
+    logic [IMEM_DEPTH-1:0]              branch_other_addr_in;
     always_comb begin
         branch_mispredicted = 1'b0;
+        branch_other_addr_in = branch_other_addr;
         if (opcode == INSTR_BEQ) begin
             if (branch_prediction && (result_alu != 0)) begin
                 branch_mispredicted = 1'b0;
@@ -114,6 +115,7 @@ import riscv_types_pkg::*;
             end
         end else if (opcode == INSTR_JALR) begin
             branch_mispredicted = jr31_result != 0;
+            branch_other_addr_in = rs_data_alu;
         end
     end
 
@@ -146,7 +148,7 @@ import riscv_types_pkg::*;
                 exe_jr31_inst           <= jr31_inst;
                 exe_jal_inst            <= jal_inst;
                 exe_branch_pc_bits      <= branch_pc_bits;
-                exe_branch_other_addr   <= branch_other_addr;
+                exe_branch_other_addr   <= branch_other_addr_in;
             end else begin
                 exe_valid <= 1'b0;
             end

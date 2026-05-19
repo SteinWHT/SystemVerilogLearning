@@ -5,7 +5,7 @@
 
 module CDB #(
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
-    parameter int unsigned IMEM_DEPTH = 32,
+    parameter int unsigned IMEM_DEPTH = 64,
     parameter int unsigned DMEM_WIDTH = 64,
     parameter int unsigned DMEM_DEPTH = 32,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
@@ -51,7 +51,7 @@ module CDB #(
     input logic                                 exe_jr31_inst,
     input logic                                 exe_jal_inst,
     input logic [BPB_PC_BITS-1:0]               exe_branch_pc_bits,
-    input logic [DMEM_WIDTH-1:0]                exe_branch_other_addr,
+    input logic [IMEM_DEPTH-1:0]                exe_branch_other_addr,
 
     // LSB interface
     input logic [ROB_INDEX_WIDTH-1:0]           lsb_rob_tag,
@@ -99,7 +99,7 @@ module CDB #(
     logic jalr_resolved;
     always_comb begin
         jalr_resolved = 1'b0;
-        if (exe_jr_inst || exe_jal_inst) begin
+        if (exe_jr_inst) begin
             jalr_resolved = 1'b1;
         end
     end
@@ -109,12 +109,9 @@ module CDB #(
     always_comb begin
         flush = 1'b0;
         branch_other_addr = '0;
-        if (exe_branch && exe_branch_mispredicted && !exe_jr31_inst) begin
+        if ((exe_branch || exe_jr31_inst) && exe_branch_mispredicted) begin
             flush = 1'b1;
-            branch_other_addr = {{(IMEM_DEPTH-DMEM_WIDTH){1'b0}}, exe_branch_other_addr};
-        end else if (exe_branch && exe_branch_mispredicted && exe_jr31_inst) begin
-            flush = 1'b1;
-            branch_other_addr = exe_rd_data[IMEM_DEPTH-1:0];
+            branch_other_addr = exe_branch_other_addr;
         end
     end
 
