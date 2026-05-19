@@ -210,7 +210,7 @@ import riscv_types_pkg::*;
         debug_in = 1'b0;
 
 
-        for (int i = 0; i < LSQ_DEPTH; i++) begin
+        for (int i = LSQ_DEPTH - 1; i >= 0; i--) begin
             if (q_ready[i]) begin
                 debug_in = 1'b1;
                 if (q[i].opcode == INSTR_SW) begin

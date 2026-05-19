@@ -18,7 +18,7 @@ module CDB #(
 
     // ROB interface
     input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
-    
+
     output logic                                cdb_valid,
     output logic [ROB_INDEX_WIDTH-1:0]          cdb_rob_tag,
     output logic [DMEM_DEPTH-1:0]               cdb_sw_addr,
@@ -27,7 +27,7 @@ module CDB #(
     // PRF interface
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  cdb_rd_phy_addr,
     output logic [REG_FILE_DATA_WIDTH-1:0]      cdb_rd_data,
-    output logic                                cdb_reg_write,  
+    output logic                                cdb_reg_write,
 
     // RBA interface
     //input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,

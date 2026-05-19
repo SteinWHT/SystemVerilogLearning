@@ -77,6 +77,7 @@ SRC_FILES := \
 	$(SRC_DIR)/back_end/EXE/EXE.sv \
 	$(SRC_DIR)/back_end/CDB.sv \
 	$(SRC_DIR)/back_end/CPU_BACK_END.sv \
+	$(SRC_DIR)/CPU.sv \
 
 
 TB_FILES := \

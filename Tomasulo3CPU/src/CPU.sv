@@ -223,7 +223,7 @@ module CPU #(
         .cdb_branch_addr                 (cdb_branch_addr),
         .cdb_br_updt_addr                (cdb_upd_branch_addr),
         .cdb_branch                      (cdb_upd_branch),
-        .cdb_branch_mispredict           (cdb_branch_outcome),
+        .cdb_branch_outcome              (cdb_branch_outcome),
         .cdb_flush                       (cdb_flush),
         .cdb_jalr_resolved               (cdb_jalr_resolved),
 

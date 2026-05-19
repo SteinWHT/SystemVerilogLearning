@@ -51,6 +51,7 @@ package riscv_funct_pkg;
     localparam logic [6:0] FUNCT7_ZERO   = 7'b0000000; // ADD, SLL, SLT, XOR, SRL, OR, AND ...
     localparam logic [6:0] FUNCT7_ALT    = 7'b0100000; // SUB, SRA, SRAI
     localparam logic [6:0] FUNCT7_MULDIV = 7'b0000001; // M-extension: MUL, DIV, REM ...
+    localparam logic [6:0] FUNCT7_NOP    = 7'b1111111; // NOP only for test
 
 endpackage
 

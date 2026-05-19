@@ -1,4 +1,4 @@
-module ISSUEQ 
+module ISSUEQ
 import riscv_types_pkg::*;
 #(
     parameter int unsigned INSTR_WIDTH = 32,

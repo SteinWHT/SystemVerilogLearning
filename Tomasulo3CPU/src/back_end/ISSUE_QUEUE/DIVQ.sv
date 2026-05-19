@@ -152,7 +152,7 @@ import riscv_types_pkg::*;
         sel_valid = 1'b0;
         sel_idx   = '0;
 
-        for (int i = 0; i < DIV_QUEUE_DEPTH; i++) begin
+        for (int i = DIV_QUEUE_DEPTH - 1; i >= 0; i--) begin
             if (q_ready[i]) begin
                 sel_idx   = i[IdxWidth-1:0];
                 sel_valid = 1'b1;

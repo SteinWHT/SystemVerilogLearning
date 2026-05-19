@@ -16,7 +16,8 @@ package riscv_opcode_pkg;
         OP_BRANCH   = 7'b1100011,
         OP_JALR     = 7'b1100111,
         OP_JAL      = 7'b1101111,
-        OP_SYSTEM   = 7'b1110011
+        OP_SYSTEM   = 7'b1110011,
+        OP_NOP      = 7'b1111111  // Only for test
     } opcode_e;
 
 endpackage

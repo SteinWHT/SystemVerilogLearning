@@ -109,7 +109,7 @@ module CPU_FRONT_END #(
     input logic [IMEM_DEPTH-1:0]                cdb_branch_addr,
     input logic [BPB_PC_BITS-1:0]               cdb_br_updt_addr,
     input logic                                 cdb_branch,
-    input logic                                 cdb_branch_mispredict,
+    input logic                                 cdb_branch_outcome,
     input logic                                 cdb_flush,
     input logic                                 cdb_jalr_resolved,
 
@@ -354,7 +354,7 @@ module CPU_FRONT_END #(
     );
 
     assign dis_cdb_upd_branch_addr = cdb_br_updt_addr;
-    assign dis_cdb_branch_outcome = cdb_branch_mispredict;
+    assign dis_cdb_branch_outcome = cdb_branch_outcome;
     assign dis_branch_other_addr = DMEM_WIDTH'(dis_branch_other_addr_int);
 
     // RAS
@@ -411,7 +411,8 @@ module CPU_FRONT_END #(
         .rd_new_phy_address_in(dis_new_rd_phy_addr),
         .rd_new_arch_address_in(dis_rob_rd_arch_addr),
 
-        .branch_mispredict(cdb_branch_mispredict),
+        .cdb_valid(cdb_valid),
+        .branch_mispredict(cdb_flush),
         .mispredict_rob_tag(cdb_rob_tag),
         .rob_commit(rob_commit),
         .rob_top_ptr(rob_top_ptr),
@@ -472,7 +473,7 @@ module CPU_FRONT_END #(
         .cdb_rob_tag(cdb_rob_tag),
         .cdb_sw_addr(cdb_sw_addr),
         .cdb_sw_data(cdb_sw_data),
-        .cdb_branch_mispredict(cdb_branch_mispredict),
+        .cdb_flush(cdb_flush),
 
         .sb_full(sb_full),
         .rob_sw_addr(rob_sw_addr),

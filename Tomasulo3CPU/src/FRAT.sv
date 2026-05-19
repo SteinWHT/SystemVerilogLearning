@@ -24,6 +24,7 @@ module FRAT #(
     input logic [ARCH_REG_WIDTH-1:0]            rd_new_arch_address_in,
 
     // COMMIT / MISPREDICT
+    input logic                                 cdb_valid,
     input logic                                 branch_mispredict,
     input logic [ROB_INDEX_WIDTH-1:0]           mispredict_rob_tag,
     input logic                                 rob_commit,
@@ -95,7 +96,7 @@ module FRAT #(
             end
 
             // branch mispredict: restore from the mispredicting branch's checkpoint
-            if (branch_mispredict && mispredict_found) begin
+            if (cdb_valid && branch_mispredict && mispredict_found) begin
                 for (int i = 0; i < ARCH_REG_COUNT; i++) begin
                     frat_array[i] <= checkpoint_frat_array[mispredict_slot][i];
                 end

@@ -65,6 +65,8 @@ module CPU_tb;
     logic [DMEM_WIDTH-1:0]   dcache_sw_data;
     logic                    dcache_ready;
 
+    logic imem_busy;
+
     // ----------------------------------------------------------------
     // DUT Instantiation
     // ----------------------------------------------------------------
@@ -209,7 +211,7 @@ module CPU_tb;
 
     // NOP = ADDI x0, x0, 0
     function automatic logic [31:0] nop();
-        return encode_i(12'd0, 5'd0, FUNCT3_ADD_SUB, 5'd0, OP_IMM);
+        return encode_i(12'd0, 5'd0, FUNCT3_ADD_SUB, 5'd0, OP_NOP);
     endfunction
 
     // ----------------------------------------------------------------
@@ -254,7 +256,9 @@ module CPU_tb;
     end
 
     // Write path
-    always_ff @(posedge clk or negedge rst_n) begin
+    // Plain always is intentional: dmem_array is also initialized/preloaded by
+    // testbench tasks, which is illegal for an always_ff-written variable.
+    always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             dcache_valid      <= 1'b0;
             dcache_write_done <= 1'b0;
@@ -334,7 +338,7 @@ module CPU_tb;
     function automatic logic [REG_FILE_DATA_WIDTH-1:0] read_prf(
         input logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_addr
     );
-        return dut.back_end.prf.REG_FILE[phy_addr];
+        return dut.back_end.prf.prf_data_array[phy_addr];
     endfunction
 
     // ----------------------------------------------------------------

@@ -46,7 +46,7 @@ module ROB #(
     input logic                                 cdb_valid,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_tag,
     input logic [DMEM_DEPTH-1:0]                cdb_sw_addr,
-    
+
     input logic                                 cdb_flush,
 
     // PRF interface
