@@ -26,8 +26,8 @@ import riscv_types_pkg::*;
 
     // forwarding logic interface
     // ALU interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rd_phy_addr_alu,
-    input logic                                 iss_rd_reg_valid_alu,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   int_rd_phy_addr,
+    input logic                                 int_exe_ready,
     // MULT interface
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   mul_rd_phy_addr,
     input logic                                 mul_exe_ready,
@@ -83,8 +83,9 @@ import riscv_types_pkg::*;
     } mulq_entry_t;
 
     // Queue Storage
-    mulq_entry_t                       q       [MUL_QUEUE_DEPTH];
-    logic        [MUL_QUEUE_DEPTH-1:0] q_valid;
+    mulq_entry_t                        q       [MUL_QUEUE_DEPTH];
+    logic        [MUL_QUEUE_DEPTH-1:0]  q_valid;
+    logic                               issue_mul;
 
     // Wakeup Logic — snoop CDB, ALU, MUL, DIV, LD/ST forwarding buses
     logic wk_rs_rdy [MUL_QUEUE_DEPTH];
@@ -98,14 +99,14 @@ import riscv_types_pkg::*;
             if (q_valid[i]) begin
                 if (!q[i].rs_rdy) begin
                     if (cdb_valid && cdb_phy_reg_write    && (q[i].rs == cdb_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
-                    if (iss_rd_reg_valid_alu && (q[i].rs == iss_rd_phy_addr_alu)) wk_rs_rdy[i] = 1'b1;
+                    if (int_exe_ready        && (q[i].rs == int_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
                     if (mul_exe_ready        && (q[i].rs == mul_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
                     if (div_exe_ready        && (q[i].rs == div_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
                     if (ls_buf_buf_rd_write  && (q[i].rs == ls_buf_rd_phy_addr))  wk_rs_rdy[i] = 1'b1;
                 end
                 if (!q[i].rt_rdy) begin
                     if (cdb_valid && cdb_phy_reg_write   && (q[i].rt == cdb_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
-                    if (iss_rd_reg_valid_alu && (q[i].rt == iss_rd_phy_addr_alu)) wk_rt_rdy[i] = 1'b1;
+                    if (int_exe_ready        && (q[i].rt == int_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
                     if (mul_exe_ready        && (q[i].rt == mul_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
                     if (div_exe_ready        && (q[i].rt == div_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
                     if (ls_buf_buf_rd_write  && (q[i].rt == ls_buf_rd_phy_addr))  wk_rt_rdy[i] = 1'b1;
@@ -123,14 +124,14 @@ import riscv_types_pkg::*;
 
         if (!dis_rs_data_ready) begin
             if (cdb_valid && cdb_phy_reg_write    && (dis_rs_phy_addr == cdb_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
-            if (iss_rd_reg_valid_alu && (dis_rs_phy_addr == iss_rd_phy_addr_alu)) dis_rs_rdy_eff = 1'b1;
+            if (int_exe_ready        && (dis_rs_phy_addr == int_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
             if (mul_exe_ready        && (dis_rs_phy_addr == mul_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
             if (div_exe_ready        && (dis_rs_phy_addr == div_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
             if (ls_buf_buf_rd_write  && (dis_rs_phy_addr == ls_buf_rd_phy_addr))  dis_rs_rdy_eff = 1'b1;
         end
         if (!dis_rt_data_ready) begin
             if (cdb_valid && cdb_phy_reg_write    && (dis_rt_phy_addr == cdb_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
-            if (iss_rd_reg_valid_alu && (dis_rt_phy_addr == iss_rd_phy_addr_alu)) dis_rt_rdy_eff = 1'b1;
+            if (int_exe_ready        && (dis_rt_phy_addr == int_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
             if (mul_exe_ready        && (dis_rt_phy_addr == mul_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
             if (div_exe_ready        && (dis_rt_phy_addr == div_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
             if (ls_buf_buf_rd_write  && (dis_rt_phy_addr == ls_buf_rd_phy_addr))  dis_rt_rdy_eff = 1'b1;
@@ -192,26 +193,7 @@ import riscv_types_pkg::*;
     assign mulq_full                   = &q_valid;
     assign iss_mulq_two_or_more_vacant = (vacant_count >= 2);
     assign issue_mul_rdy               = sel_valid & ~cdb_flush;
-    assign exe_mul_grant                   = sel_valid & issue_mul_en & ~cdb_flush;
-
-    // Issue Outputs — drive selected entry or zero
-    always_comb begin
-        if (exe_mul_grant) begin
-            iss_rw_mul          = q[sel_idx].rw;
-            iss_rd_phy_addr_mul = q[sel_idx].rd;
-            iss_rob_tag_mul     = q[sel_idx].rob_tag;
-            iss_opcode_mul      = q[sel_idx].op;
-            iss_rs_phy_addr_mul = q[sel_idx].rs;
-            iss_rt_phy_addr_mul = q[sel_idx].rt;
-        end else begin
-            iss_rw_mul          = 1'b0;
-            iss_rd_phy_addr_mul = '0;
-            iss_rob_tag_mul     = '0;
-            iss_opcode_mul      = INSTR_NONE;
-            iss_rs_phy_addr_mul = '0;
-            iss_rt_phy_addr_mul = '0;
-        end
-    end
+    assign issue_mul                   = sel_valid & issue_mul_en & ~cdb_flush;
 
     // State Update
     // Last-write-wins ordering: wakeup -> flush -> issue -> dispatch
@@ -241,8 +223,24 @@ import riscv_types_pkg::*;
                     q_valid[i] <= 1'b0;
             end
 
-            if (exe_mul_grant)
-                q_valid[sel_idx] <= 1'b0;
+            if (issue_mul) begin
+                q_valid[sel_idx]    <= 1'b0;
+                exe_mul_grant       <= 1'b1;
+                iss_rw_mul          <= q[sel_idx].rw;
+                iss_rd_phy_addr_mul <= q[sel_idx].rd;
+                iss_rob_tag_mul     <= q[sel_idx].rob_tag;
+                iss_opcode_mul      <= q[sel_idx].op;
+                iss_rs_phy_addr_mul <= q[sel_idx].rs;
+                iss_rt_phy_addr_mul <= q[sel_idx].rt;
+            end else begin
+                exe_mul_grant       <= '0;
+                iss_rw_mul          <= '0;
+                iss_rd_phy_addr_mul <= '0;
+                iss_rob_tag_mul     <= '0;
+                iss_opcode_mul      <= INSTR_NONE;
+                iss_rs_phy_addr_mul <= '0;
+                iss_rt_phy_addr_mul <= '0;
+            end
 
             if (dis_mul_issq_en && has_free && !cdb_flush) begin
                 q_valid[free_idx] <= 1'b1;

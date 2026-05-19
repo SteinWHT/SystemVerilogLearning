@@ -71,6 +71,8 @@ import riscv_types_pkg::*;
 
 
     // EXE / CDB forwarding into reservation queues
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   int_rd_phy_addr,
+    input logic                                 int_exe_ready,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   mul_rd_phy_addr,
     input logic                                 mul_exe_ready,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   div_rd_phy_addr,
@@ -86,6 +88,8 @@ import riscv_types_pkg::*;
     output logic [ROB_INDEX_WIDTH-1:0]          iss_exe_rob_tag,
     output logic [OPCODE_WIDTH-1:0]             iss_exe_opcode,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rd_phy_addr,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rs_phy_addr,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rt_phy_addr,
     output logic                                iss_exe_rw,
     output logic [15:0]                         iss_exe_imm16,
     output logic [DMEM_WIDTH-1:0]               iss_exe_branch_other_addr,
@@ -246,8 +250,8 @@ import riscv_types_pkg::*;
         .cdb_rd_phy_addr(cdb_rd_phy_addr),
         .cdb_phy_reg_write(cdb_phy_reg_write),
 
-        .iss_rd_phy_addr_alu(iss_rd_phy_addr_alu),
-        .iss_rd_reg_valid_alu(iss_rd_reg_valid_alu),
+        .int_rd_phy_addr(int_rd_phy_addr),
+        .int_exe_ready(int_exe_ready),
         .mul_rd_phy_addr(mul_rd_phy_addr),
         .mul_exe_ready(mul_exe_ready),
         .div_rd_phy_addr(div_rd_phy_addr),
@@ -300,8 +304,8 @@ import riscv_types_pkg::*;
         .cdb_rd_phy_addr(cdb_rd_phy_addr),
         .cdb_phy_reg_write(cdb_phy_reg_write),
 
-        .iss_rd_phy_addr_alu(iss_rd_phy_addr_alu),
-        .iss_rd_reg_valid_alu(iss_rd_reg_valid_alu),
+        .int_rd_phy_addr(int_rd_phy_addr),
+        .int_exe_ready(int_exe_ready),
         .mul_rd_phy_addr(mul_rd_phy_addr),
         .mul_exe_ready(mul_exe_ready),
         .div_rd_phy_addr(div_rd_phy_addr),
@@ -394,6 +398,8 @@ import riscv_types_pkg::*;
         iss_exe_rob_tag             = '0;
         iss_exe_opcode              = '0;
         iss_exe_rd_phy_addr         = '0;
+        iss_exe_rs_phy_addr         = '0;
+        iss_exe_rt_phy_addr         = '0;
         iss_exe_rw                  = 1'b0;
         iss_exe_imm16               = '0;
         iss_exe_branch_other_addr   = '0;
@@ -408,6 +414,8 @@ import riscv_types_pkg::*;
             iss_exe_rob_tag             = iss_rob_tag_alu;
             iss_exe_opcode              = iss_opcode_alu;
             iss_exe_rd_phy_addr         = iss_rd_phy_addr_alu;
+            iss_exe_rs_phy_addr         = iss_rs_phy_addr_alu;
+            iss_exe_rt_phy_addr         = iss_rt_phy_addr_alu;
             iss_exe_rw                  = iss_rw_alu;
             iss_exe_imm16               = iss_imm16_alu;
             iss_exe_branch_other_addr   = iss_branch_other_addr_alu;
@@ -418,15 +426,19 @@ import riscv_types_pkg::*;
             iss_exe_jal_inst            = iss_jal_inst_alu;
             iss_exe_branch_pc_bits      = iss_branch_pc_bits_alu;
         end else if (exe_div_grant) begin
-            iss_exe_rob_tag     = iss_rob_tag_div;
-            iss_exe_opcode      = iss_opcode_div;
-            iss_exe_rd_phy_addr = iss_rd_phy_addr_div;
-            iss_exe_rw          = iss_rw_div;
+            iss_exe_rob_tag             = iss_rob_tag_div;
+            iss_exe_opcode              = iss_opcode_div;
+            iss_exe_rd_phy_addr         = iss_rd_phy_addr_div;
+            iss_exe_rs_phy_addr         = iss_rs_phy_addr_div;
+            iss_exe_rt_phy_addr         = iss_rt_phy_addr_div;
+            iss_exe_rw                  = iss_rw_div;
         end else if (exe_mul_grant) begin
-            iss_exe_rob_tag     = iss_rob_tag_mul;
-            iss_exe_opcode      = iss_opcode_mul;
-            iss_exe_rd_phy_addr = iss_rd_phy_addr_mul;
-            iss_exe_rw          = iss_rw_mul;
+            iss_exe_rob_tag             = iss_rob_tag_mul;
+            iss_exe_opcode              = iss_opcode_mul;
+            iss_exe_rd_phy_addr         = iss_rd_phy_addr_mul;
+            iss_exe_rs_phy_addr         = iss_rs_phy_addr_mul;
+            iss_exe_rt_phy_addr         = iss_rt_phy_addr_mul;
+            iss_exe_rw                  = iss_rw_mul;
         end
     end
 

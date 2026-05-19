@@ -240,6 +240,14 @@ module CPU_tb;
     localparam int unsigned DMEM_SIZE = 256;
     logic [REG_FILE_DATA_WIDTH-1:0] dmem_array [DMEM_SIZE];
 
+    logic cdb_seen_by_rob [ROB_DEPTH];
+    logic cdb_expected_by_rob [ROB_DEPTH];
+    logic cdb_checked_by_rob [ROB_DEPTH];
+    logic cdb_pass_by_rob [ROB_DEPTH];
+    logic cdb_reg_write_by_rob [ROB_DEPTH];
+    logic [REG_FILE_DATA_WIDTH-1:0] cdb_data_by_rob [ROB_DEPTH];
+    logic [REG_FILE_DATA_WIDTH-1:0] cdb_expected_data_by_rob [ROB_DEPTH];
+
     // Read path
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -298,9 +306,50 @@ module CPU_tb;
             imem_array[i] = nop();
         for (int i = 0; i < DMEM_SIZE; i++)
             dmem_array[i] = '0;
+        for (int i = 0; i < ROB_DEPTH; i++) begin
+            cdb_seen_by_rob[i] = 1'b0;
+            cdb_expected_by_rob[i] = 1'b0;
+            cdb_checked_by_rob[i] = 1'b0;
+            cdb_pass_by_rob[i] = 1'b0;
+            cdb_reg_write_by_rob[i] = 1'b0;
+            cdb_data_by_rob[i] = '0;
+            cdb_expected_data_by_rob[i] = '0;
+        end
         repeat (3) @(posedge clk); #1;
         rst_n = 1'b1;
     endtask
+
+    task automatic check_cdb_pool_entry(input int unsigned rob_idx);
+        if (cdb_seen_by_rob[rob_idx] &&
+            cdb_expected_by_rob[rob_idx] &&
+            !cdb_checked_by_rob[rob_idx]) begin
+            cdb_checked_by_rob[rob_idx] = 1'b1;
+            if (cdb_data_by_rob[rob_idx] !== cdb_expected_data_by_rob[rob_idx]) begin
+                $error("[FAIL] CDB ROB tag %0d: got 0x%0h, want 0x%0h @ %0t",
+                       rob_idx, cdb_data_by_rob[rob_idx],
+                       cdb_expected_data_by_rob[rob_idx], $time);
+                fail_cnt++;
+            end else begin
+                cdb_pass_by_rob[rob_idx] = 1'b1;
+                pass_cnt++;
+            end
+        end
+    endtask
+
+    task automatic sample_cdb();
+        if (dut.cdb_valid) begin
+            cdb_seen_by_rob[int'(dut.cdb_rob_tag)] = 1'b1;
+            cdb_reg_write_by_rob[int'(dut.cdb_rob_tag)] = dut.cdb_reg_write;
+            cdb_data_by_rob[int'(dut.cdb_rob_tag)] = dut.cdb_rd_data;
+            check_cdb_pool_entry(int'(dut.cdb_rob_tag));
+        end
+    endtask
+
+    always @(posedge clk) begin
+        #1;
+        if (rst_n)
+            sample_cdb();
+    end
 
     // Wait for CDB valid (instruction completed execution)
     task automatic wait_cdb_valid(input int unsigned max_cycles = 100);
@@ -312,6 +361,50 @@ module CPU_tb;
             cyc++;
         end
         $warning("wait_cdb_valid: timed out after %0d cycles @ %0t", max_cycles, $time);
+    endtask
+
+    task automatic wait_cdb_tag(
+        input logic [ROB_INDEX_WIDTH-1:0] expected_rob_tag,
+        input int unsigned max_cycles = 100
+    );
+        int cyc;
+        cyc = 0;
+        while (!cdb_seen_by_rob[int'(expected_rob_tag)] && (cyc < max_cycles)) begin
+            @(posedge clk); #1;
+            cyc++;
+        end
+
+        if (!cdb_seen_by_rob[int'(expected_rob_tag)])
+            $warning("wait_cdb_tag: ROB tag %0d timed out after %0d cycles @ %0t",
+                     expected_rob_tag, max_cycles, $time);
+    endtask
+
+    task automatic check_cdb_result(
+        input string tag,
+        input logic [ROB_INDEX_WIDTH-1:0] expected_rob_tag,
+        input logic [REG_FILE_DATA_WIDTH-1:0] expected_data,
+        input int unsigned max_cycles = 100
+    );
+        int rob_idx;
+        int cyc;
+        rob_idx = int'(expected_rob_tag);
+        cdb_expected_by_rob[rob_idx] = 1'b1;
+        cdb_expected_data_by_rob[rob_idx] = expected_data;
+        check_cdb_pool_entry(rob_idx);
+
+        cyc = 0;
+        while (!cdb_checked_by_rob[rob_idx] && (cyc < max_cycles)) begin
+            @(posedge clk); #1;
+            cyc++;
+        end
+
+        if (!cdb_checked_by_rob[rob_idx]) begin
+            $error("[FAIL] %s: ROB tag %0d did not appear on CDB within %0d cycles @ %0t",
+                   tag, expected_rob_tag, max_cycles, $time);
+            fail_cnt++;
+        end else if (!cdb_pass_by_rob[rob_idx]) begin
+            $display("  %s failed for ROB tag %0d", tag, expected_rob_tag);
+        end
     endtask
 
     // Wait for dispatch to issue queue
@@ -381,9 +474,8 @@ module CPU_tb;
         check_val("ADDI dispatched to INT", dut.dis_opcode, INSTR_ADDI);
         check_bit("ADDI INT issue", dut.dis_int_issue_en, 1'b1);
 
-        wait_cdb_valid();
-        check_val("ADDI result = 42", dut.cdb_rd_data, 64'd42);
-        check_bit("ADDI reg write", dut.cdb_reg_write, 1'b1);
+        check_cdb_result("ADDI result = 42", 0, 64'd42);
+        check_bit("ADDI reg write", cdb_reg_write_by_rob[0], 1'b1);
 
         // ==============================================================
         // Test 3: ADD two registers
@@ -397,12 +489,9 @@ module CPU_tb;
         load_instr(32'h0000_0008, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_ADD_SUB, 5'd3, OP_REG));
 
         // Wait for all three to complete
-        wait_cdb_valid(); // ADDI x1
-        check_val("ADDI x1 = 10", dut.cdb_rd_data, 64'd10);
-        wait_cdb_valid(); // ADDI x2
-        check_val("ADDI x2 = 20", dut.cdb_rd_data, 64'd20);
-        wait_cdb_valid(); // ADD x3
-        check_val("ADD x3 = 30", dut.cdb_rd_data, 64'd30);
+        check_cdb_result("ADDI x1 = 10", 0, 64'd10);
+        check_cdb_result("ADDI x2 = 20", 1, 64'd20);
+        check_cdb_result("ADD x3 = 30", 2, 64'd30);
 
         // ==============================================================
         // Test 4: SUB instruction
@@ -415,10 +504,9 @@ module CPU_tb;
         load_instr(32'h0000_0004, encode_i(12'd18, 5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));
         load_instr(32'h0000_0008, encode_r(FUNCT7_ALT, 5'd2, 5'd1, FUNCT3_ADD_SUB, 5'd3, OP_REG));
 
-        wait_cdb_valid(); // ADDI x1
-        wait_cdb_valid(); // ADDI x2
-        wait_cdb_valid(); // SUB x3
-        check_val("SUB x3 = 32", dut.cdb_rd_data, 64'd32);
+        wait_cdb_tag(0); // ADDI x1
+        wait_cdb_tag(1); // ADDI x2
+        check_cdb_result("SUB x3 = 32", 2, 64'd32);
 
         // ==============================================================
         // Test 5: AND, OR, XOR instructions
@@ -434,14 +522,11 @@ module CPU_tb;
         load_instr(32'h0000_000C, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_OR, 5'd4, OP_REG));
         load_instr(32'h0000_0010, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_XOR, 5'd5, OP_REG));
 
-        wait_cdb_valid(); // ADDI x1 = 0xFF
-        wait_cdb_valid(); // ADDI x2 = 0x0F
-        wait_cdb_valid(); // AND x3
-        check_val("AND result", dut.cdb_rd_data, 64'h0F);
-        wait_cdb_valid(); // OR x4
-        check_val("OR result", dut.cdb_rd_data, 64'hFF);
-        wait_cdb_valid(); // XOR x5
-        check_val("XOR result", dut.cdb_rd_data, 64'hF0);
+        wait_cdb_tag(0); // ADDI x1 = 0xFF
+        wait_cdb_tag(1); // ADDI x2 = 0x0F
+        check_cdb_result("AND result", 2, 64'h0F);
+        check_cdb_result("OR result", 3, 64'hFF);
+        check_cdb_result("XOR result", 4, 64'hF0);
 
         // ==============================================================
         // Test 6: SLT / SLTU instructions
@@ -456,12 +541,10 @@ module CPU_tb;
         load_instr(32'h0000_0008, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_SLT, 5'd3, OP_REG));
         load_instr(32'h0000_000C, encode_r(FUNCT7_ZERO, 5'd1, 5'd2, FUNCT3_SLT, 5'd4, OP_REG));
 
-        wait_cdb_valid(); // ADDI x1
-        wait_cdb_valid(); // ADDI x2
-        wait_cdb_valid(); // SLT x3
-        check_val("SLT 5<10 = 1", dut.cdb_rd_data, 64'd1);
-        wait_cdb_valid(); // SLT x4
-        check_val("SLT 10<5 = 0", dut.cdb_rd_data, 64'd0);
+        wait_cdb_tag(0); // ADDI x1
+        wait_cdb_tag(1); // ADDI x2
+        check_cdb_result("SLT 5<10 = 1", 2, 64'd1);
+        check_cdb_result("SLT 10<5 = 0", 3, 64'd0);
 
         // ==============================================================
         // Test 7: Shift operations (SLL, SRL, SRA)
@@ -477,12 +560,10 @@ module CPU_tb;
         load_instr(32'h0000_0008, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_SLL, 5'd3, OP_REG));
         load_instr(32'h0000_000C, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_SRL_SRA, 5'd4, OP_REG));
 
-        wait_cdb_valid(); // ADDI x1
-        wait_cdb_valid(); // ADDI x2
-        wait_cdb_valid(); // SLL x3
-        check_val("SLL 8<<2 = 32", dut.cdb_rd_data, 64'd32);
-        wait_cdb_valid(); // SRL x4
-        check_val("SRL 8>>2 = 2", dut.cdb_rd_data, 64'd2);
+        wait_cdb_tag(0); // ADDI x1
+        wait_cdb_tag(1); // ADDI x2
+        check_cdb_result("SLL 8<<2 = 32", 2, 64'd32);
+        check_cdb_result("SRL 8>>2 = 2", 3, 64'd2);
 
         // ==============================================================
         // Test 8: Immediate shift (SLLI, SRLI, SRAI)
@@ -499,11 +580,9 @@ module CPU_tb;
         // SRLI x3, x1, 2: imm[11:0] = {0000000, shamt[4:0]=00010}
         load_instr(32'h0000_0008, encode_i({7'b0000000, 5'd2}, 5'd1, FUNCT3_SRL_SRA, 5'd3, OP_IMM));
 
-        wait_cdb_valid(); // ADDI x1
-        wait_cdb_valid(); // SLLI x2
-        check_val("SLLI 16<<3 = 128", dut.cdb_rd_data, 64'd128);
-        wait_cdb_valid(); // SRLI x3
-        check_val("SRLI 16>>2 = 4", dut.cdb_rd_data, 64'd4);
+        wait_cdb_tag(0); // ADDI x1
+        check_cdb_result("SLLI 16<<3 = 128", 1, 64'd128);
+        check_cdb_result("SRLI 16>>2 = 4", 2, 64'd4);
 
         // ==============================================================
         // Test 9: I-type logic (ANDI, ORI, XORI)
@@ -520,13 +599,10 @@ module CPU_tb;
         load_instr(32'h0000_0008, encode_i(12'h100, 5'd1, FUNCT3_OR,      5'd3, OP_IMM));
         load_instr(32'h0000_000C, encode_i(12'hFF,  5'd1, FUNCT3_XOR,     5'd4, OP_IMM));
 
-        wait_cdb_valid(); // ADDI x1 = 0xAB
-        wait_cdb_valid(); // ANDI x2
-        check_val("ANDI 0xAB & 0x0F = 0x0B", dut.cdb_rd_data, 64'h0B);
-        wait_cdb_valid(); // ORI x3
-        check_val("ORI 0xAB | 0x100 = 0x1AB", dut.cdb_rd_data, 64'h1AB);
-        wait_cdb_valid(); // XORI x4
-        check_val("XORI 0xAB ^ 0xFF = 0x54", dut.cdb_rd_data, 64'h54);
+        wait_cdb_tag(0); // ADDI x1 = 0xAB
+        check_cdb_result("ANDI 0xAB & 0x0F = 0x0B", 1, 64'h0B);
+        check_cdb_result("ORI 0xAB | 0x100 = 0x1AB", 2, 64'h1AB);
+        check_cdb_result("XORI 0xAB ^ 0xFF = 0x54", 3, 64'h54);
 
         // ==============================================================
         // Test 10: SLTI / SLTIU
@@ -541,11 +617,9 @@ module CPU_tb;
         load_instr(32'h0000_0004, encode_i(12'd10, 5'd1, FUNCT3_SLT,     5'd2, OP_IMM));
         load_instr(32'h0000_0008, encode_i(12'd3,  5'd1, FUNCT3_SLT,     5'd3, OP_IMM));
 
-        wait_cdb_valid(); // ADDI x1
-        wait_cdb_valid(); // SLTI x2
-        check_val("SLTI 5<10 = 1", dut.cdb_rd_data, 64'd1);
-        wait_cdb_valid(); // SLTI x3
-        check_val("SLTI 5<3 = 0", dut.cdb_rd_data, 64'd0);
+        wait_cdb_tag(0); // ADDI x1
+        check_cdb_result("SLTI 5<10 = 1", 1, 64'd1);
+        check_cdb_result("SLTI 5<3 = 0", 2, 64'd0);
 
         // ==============================================================
         // Test 11: MUL instruction
@@ -558,10 +632,9 @@ module CPU_tb;
         load_instr(32'h0000_0004, encode_i(12'd7, 5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));
         load_instr(32'h0000_0008, encode_r(FUNCT7_MULDIV, 5'd2, 5'd1, FUNCT3_ADD_SUB, 5'd3, OP_REG));
 
-        wait_cdb_valid(); // ADDI x1
-        wait_cdb_valid(); // ADDI x2
-        wait_cdb_valid(50); // MUL x3 (multi-cycle)
-        check_val("MUL 6*7 = 42", dut.cdb_rd_data, 64'd42);
+        wait_cdb_tag(0); // ADDI x1
+        wait_cdb_tag(1); // ADDI x2
+        check_cdb_result("MUL 6*7 = 42", 2, 64'd42, 50);
 
         // ==============================================================
         // Test 12: DIV instruction
@@ -574,10 +647,9 @@ module CPU_tb;
         load_instr(32'h0000_0004, encode_i(12'd5,   5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));
         load_instr(32'h0000_0008, encode_r(FUNCT7_MULDIV, 5'd2, 5'd1, FUNCT3_XOR, 5'd3, OP_REG));
 
-        wait_cdb_valid(); // ADDI x1
-        wait_cdb_valid(); // ADDI x2
-        wait_cdb_valid(50); // DIV x3 (multi-cycle)
-        check_val("DIV 100/5 = 20", dut.cdb_rd_data, 64'd20);
+        wait_cdb_tag(0); // ADDI x1
+        wait_cdb_tag(1); // ADDI x2
+        check_cdb_result("DIV 100/5 = 20", 2, 64'd20, 50);
 
         // ==============================================================
         // Test 13: REM instruction
@@ -590,10 +662,9 @@ module CPU_tb;
         load_instr(32'h0000_0004, encode_i(12'd7,   5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));
         load_instr(32'h0000_0008, encode_r(FUNCT7_MULDIV, 5'd2, 5'd1, FUNCT3_AND, 5'd3, OP_REG));
 
-        wait_cdb_valid(); // ADDI x1
-        wait_cdb_valid(); // ADDI x2
-        wait_cdb_valid(50); // REM x3 (multi-cycle)
-        check_val("REM 100%%7 = 2", dut.cdb_rd_data, 64'd2);
+        wait_cdb_tag(0); // ADDI x1
+        wait_cdb_tag(1); // ADDI x2
+        check_cdb_result("REM 100%%7 = 2", 2, 64'd2, 50);
 
         // ==============================================================
         // Test 14: LW instruction
@@ -606,8 +677,7 @@ module CPU_tb;
         load_dmem(32'h0000_0000, 64'hDEAD_BEEF_CAFE_BABE);
         load_instr(32'h0000_0000, encode_i(12'd0, 5'd0, FUNCT3_LW, 5'd2, OP_LOAD));
 
-        wait_cdb_valid(50);
-        check_val("LW loaded data", dut.cdb_rd_data, 64'hDEAD_BEEF_CAFE_BABE);
+        check_cdb_result("LW loaded data", 0, 64'hDEAD_BEEF_CAFE_BABE, 50);
 
         // ==============================================================
         // Test 15: LW with non-zero offset
@@ -620,9 +690,8 @@ module CPU_tb;
         load_instr(32'h0000_0000, encode_i(12'd8, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));
         load_instr(32'h0000_0004, encode_i(12'd8, 5'd1, FUNCT3_LW, 5'd2, OP_LOAD));
 
-        wait_cdb_valid(); // ADDI x1
-        wait_cdb_valid(50); // LW x2
-        check_val("LW from addr 16", dut.cdb_rd_data, 64'h1234_5678_ABCD_EF00);
+        wait_cdb_tag(0); // ADDI x1
+        check_cdb_result("LW from addr 16", 1, 64'h1234_5678_ABCD_EF00, 50);
 
         // ==============================================================
         // Test 16: SW instruction (store to memory)
@@ -634,8 +703,8 @@ module CPU_tb;
         load_instr(32'h0000_0000, encode_i(12'd99, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));
         load_instr(32'h0000_0004, encode_s(12'd0, 5'd1, 5'd0, FUNCT3_SW, OP_STORE));
 
-        wait_cdb_valid(); // ADDI x1
-        wait_cdb_valid(50); // SW completes on CDB
+        wait_cdb_tag(0); // ADDI x1
+        wait_cdb_tag(1, 50); // SW completes on CDB
         // Wait for ROB to commit and SB to write
         wait_cycles(20);
         $display("  SW test: store completed (checking commit path)");
@@ -655,9 +724,8 @@ module CPU_tb;
         check_val("JAL dispatched", dut.dis_opcode, INSTR_JAL);
         check_bit("JAL jal_inst", dut.dis_jal_inst, 1'b1);
 
-        wait_cdb_valid(); // JAL link address
-        wait_cdb_valid(50); // ADDI at target
-        check_val("ADDI at JAL target = 77", dut.cdb_rd_data, 64'd77);
+        wait_cdb_tag(0); // JAL link address
+        check_cdb_result("ADDI at JAL target = 77", 1, 64'd77, 50);
 
         // ==============================================================
         // Test 18: BEQ taken — branch when equal
@@ -725,11 +793,10 @@ module CPU_tb;
         load_instr(32'h0000_0004, encode_i(12'd0, 5'd1, 3'b000, 5'd2, OP_JALR));
         load_instr(32'h0000_0020, encode_i(12'd88, 5'd0, FUNCT3_ADD_SUB, 5'd10, OP_IMM));
 
-        wait_cdb_valid(); // ADDI x1
-        wait_cdb_valid(80); // JALR x2 link
+        wait_cdb_tag(0); // ADDI x1
+        wait_cdb_tag(1, 80); // JALR x2 link
         // After JALR resolves, pipeline should redirect to 0x20
-        wait_cdb_valid(80); // ADDI at target
-        check_val("ADDI at JALR target = 88", dut.cdb_rd_data, 64'd88);
+        check_cdb_result("ADDI at JALR target = 88", 2, 64'd88, 80);
 
         // ==============================================================
         // Test 22: JAL/RET pattern (function call and return via RAS)
@@ -764,14 +831,10 @@ module CPU_tb;
         load_instr(32'h0000_0008, encode_i(12'd1, 5'd2, FUNCT3_ADD_SUB, 5'd3, OP_IMM));
         load_instr(32'h0000_000C, encode_i(12'd1, 5'd3, FUNCT3_ADD_SUB, 5'd4, OP_IMM));
 
-        wait_cdb_valid(); // x1 = 1
-        check_val("chain x1 = 1", dut.cdb_rd_data, 64'd1);
-        wait_cdb_valid(); // x2 = 2
-        check_val("chain x2 = 2", dut.cdb_rd_data, 64'd2);
-        wait_cdb_valid(); // x3 = 3
-        check_val("chain x3 = 3", dut.cdb_rd_data, 64'd3);
-        wait_cdb_valid(); // x4 = 4
-        check_val("chain x4 = 4", dut.cdb_rd_data, 64'd4);
+        check_cdb_result("chain x1 = 1", 0, 64'd1);
+        check_cdb_result("chain x2 = 2", 1, 64'd2);
+        check_cdb_result("chain x3 = 3", 2, 64'd3);
+        check_cdb_result("chain x4 = 4", 3, 64'd4);
 
         // ==============================================================
         // Test 24: Multiple different FU types in flight
@@ -788,12 +851,10 @@ module CPU_tb;
         load_instr(32'h0000_0008, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_ADD_SUB, 5'd3, OP_REG));
         load_instr(32'h0000_000C, encode_r(FUNCT7_MULDIV, 5'd2, 5'd1, FUNCT3_ADD_SUB, 5'd4, OP_REG));
 
-        wait_cdb_valid(); // ADDI x1 = 6
-        wait_cdb_valid(); // ADDI x2 = 7
-        wait_cdb_valid(); // ADD x3 = 13 (fast)
-        check_val("ADD x3 = 13", dut.cdb_rd_data, 64'd13);
-        wait_cdb_valid(50); // MUL x4 = 42 (slower)
-        check_val("MUL x4 = 42", dut.cdb_rd_data, 64'd42);
+        wait_cdb_tag(0); // ADDI x1 = 6
+        wait_cdb_tag(1); // ADDI x2 = 7
+        check_cdb_result("ADD x3 = 13", 2, 64'd13);
+        check_cdb_result("MUL x4 = 42", 3, 64'd42, 50);
 
         // ==============================================================
         // Test 25: Pipeline throughput — many independent instructions
@@ -825,10 +886,9 @@ module CPU_tb;
         load_instr(32'h0000_0004, encode_i(12'd20, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));
         load_instr(32'h0000_0008, encode_r(FUNCT7_ZERO, 5'd0, 5'd1, FUNCT3_ADD_SUB, 5'd2, OP_REG));
 
-        wait_cdb_valid(); // ADDI x1 = 10
-        wait_cdb_valid(); // ADDI x1 = 20
-        wait_cdb_valid(); // ADD x2 = x1 + x0 = 20
-        check_val("WAW: ADD uses latest x1 = 20", dut.cdb_rd_data, 64'd20);
+        wait_cdb_tag(0); // ADDI x1 = 10
+        wait_cdb_tag(1); // ADDI x1 = 20
+        check_cdb_result("WAW: ADD uses latest x1 = 20", 2, 64'd20);
 
         // ==============================================================
         // Test 27: Long dependency through MUL then ADD
@@ -844,12 +904,10 @@ module CPU_tb;
         load_instr(32'h0000_0008, encode_r(FUNCT7_MULDIV, 5'd2, 5'd1, FUNCT3_ADD_SUB, 5'd3, OP_REG));
         load_instr(32'h0000_000C, encode_i(12'd1, 5'd3, FUNCT3_ADD_SUB, 5'd4, OP_IMM));
 
-        wait_cdb_valid(); // ADDI x1
-        wait_cdb_valid(); // ADDI x2
-        wait_cdb_valid(50); // MUL x3 = 12
-        check_val("MUL x3 = 12", dut.cdb_rd_data, 64'd12);
-        wait_cdb_valid(); // ADDI x4 = 13
-        check_val("ADDI x4 = 13", dut.cdb_rd_data, 64'd13);
+        wait_cdb_tag(0); // ADDI x1
+        wait_cdb_tag(1); // ADDI x2
+        check_cdb_result("MUL x3 = 12", 2, 64'd12, 50);
+        check_cdb_result("ADDI x4 = 13", 3, 64'd13);
 
         // ==============================================================
         // Test 28: LW followed by dependent ADD
@@ -863,10 +921,8 @@ module CPU_tb;
         load_instr(32'h0000_0000, encode_i(12'd0, 5'd0, FUNCT3_LW, 5'd1, OP_LOAD));
         load_instr(32'h0000_0004, encode_r(FUNCT7_ZERO, 5'd0, 5'd1, FUNCT3_ADD_SUB, 5'd2, OP_REG));
 
-        wait_cdb_valid(50); // LW x1 = 100
-        check_val("LW x1 = 100", dut.cdb_rd_data, 64'd100);
-        wait_cdb_valid(50); // ADD x2 = 100 + 0
-        check_val("ADD after LW = 100", dut.cdb_rd_data, 64'd100);
+        check_cdb_result("LW x1 = 100", 0, 64'd100, 50);
+        check_cdb_result("ADD after LW = 100", 1, 64'd100, 50);
 
         // ==============================================================
         // Test 29: Multiple stores followed by loads (memory ordering)
@@ -927,16 +983,11 @@ module CPU_tb;
         load_instr(32'h0000_000C, encode_r(FUNCT7_ZERO, 5'd3, 5'd2, FUNCT3_ADD_SUB, 5'd4, OP_REG));
         load_instr(32'h0000_0010, encode_r(FUNCT7_ZERO, 5'd4, 5'd3, FUNCT3_ADD_SUB, 5'd5, OP_REG));
 
-        wait_cdb_valid(); // x1 = 1
-        check_val("fib x1 = 1", dut.cdb_rd_data, 64'd1);
-        wait_cdb_valid(); // x2 = 1
-        check_val("fib x2 = 1", dut.cdb_rd_data, 64'd1);
-        wait_cdb_valid(); // x3 = 2
-        check_val("fib x3 = 2", dut.cdb_rd_data, 64'd2);
-        wait_cdb_valid(); // x4 = 3
-        check_val("fib x4 = 3", dut.cdb_rd_data, 64'd3);
-        wait_cdb_valid(); // x5 = 5
-        check_val("fib x5 = 5", dut.cdb_rd_data, 64'd5);
+        check_cdb_result("fib x1 = 1", 0, 64'd1);
+        check_cdb_result("fib x2 = 1", 1, 64'd1);
+        check_cdb_result("fib x3 = 2", 2, 64'd2);
+        check_cdb_result("fib x4 = 3", 3, 64'd3);
+        check_cdb_result("fib x5 = 5", 4, 64'd5);
 
         // ==============================================================
         // Test 33: Compute with all R-type ALU ops in sequence
@@ -955,24 +1006,16 @@ module CPU_tb;
         load_instr(32'h0000_0020, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_SLL,     5'd9, OP_REG));  // SLL x9=100<<3
         load_instr(32'h0000_0024, encode_r(FUNCT7_ZERO, 5'd2, 5'd1, FUNCT3_SRL_SRA, 5'd10, OP_REG)); // SRL x10=100>>3
 
-        wait_cdb_valid(); // x1 = 100
-        wait_cdb_valid(); // x2 = 3
-        wait_cdb_valid(); // ADD x3
-        check_val("ADD 100+3=103", dut.cdb_rd_data, 64'd103);
-        wait_cdb_valid(); // SUB x4
-        check_val("SUB 100-3=97", dut.cdb_rd_data, 64'd97);
-        wait_cdb_valid(); // AND x5
-        check_val("AND 100&3", dut.cdb_rd_data, 64'(100 & 3));
-        wait_cdb_valid(); // OR x6
-        check_val("OR 100|3", dut.cdb_rd_data, 64'(100 | 3));
-        wait_cdb_valid(); // XOR x7
-        check_val("XOR 100^3", dut.cdb_rd_data, 64'(100 ^ 3));
-        wait_cdb_valid(); // SLT x8
-        check_val("SLT 100<3=0", dut.cdb_rd_data, 64'd0);
-        wait_cdb_valid(); // SLL x9
-        check_val("SLL 100<<3=800", dut.cdb_rd_data, 64'd800);
-        wait_cdb_valid(); // SRL x10
-        check_val("SRL 100>>3=12", dut.cdb_rd_data, 64'd12);
+        wait_cdb_tag(0); // x1 = 100
+        wait_cdb_tag(1); // x2 = 3
+        check_cdb_result("ADD 100+3=103", 2, 64'd103);
+        check_cdb_result("SUB 100-3=97", 3, 64'd97);
+        check_cdb_result("AND 100&3", 4, 64'(100 & 3));
+        check_cdb_result("OR 100|3", 5, 64'(100 | 3));
+        check_cdb_result("XOR 100^3", 6, 64'(100 ^ 3));
+        check_cdb_result("SLT 100<3=0", 7, 64'd0);
+        check_cdb_result("SLL 100<<3=800", 8, 64'd800);
+        check_cdb_result("SRL 100>>3=12", 9, 64'd12);
 
         // ==============================================================
         // Test 34: Stress test — rapid interleaved MUL and INT

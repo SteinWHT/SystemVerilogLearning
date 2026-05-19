@@ -16,9 +16,13 @@ import riscv_types_pkg::*;
     input logic rst_n,
 
     // CDB flush / kill in-flight DIV and MUL
+    input logic                                 cdb_valid,
+    input logic                                 cdb_reg_write,
     input logic                                 cdb_flush,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_depth,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_tag,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,
+    input logic [REG_FILE_DATA_WIDTH-1:0]       cdb_rd_data,
 
     output logic                                exe_valid,
     output logic [ROB_INDEX_WIDTH-1:0]          exe_rob_tag,
@@ -36,6 +40,8 @@ import riscv_types_pkg::*;
     // Issued instruction metadata (muxed in ISSUEQ)
     input logic [ROB_INDEX_WIDTH-1:0]           iss_rob_tag,
     input logic [OPCODE_WIDTH-1:0]              iss_opcode,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rs_phy_addr,
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rt_phy_addr,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rd_phy_addr,
     input logic                                 iss_rw,
     input logic [15:0]                          iss_imm16,
@@ -55,6 +61,8 @@ import riscv_types_pkg::*;
     output logic                                div_unit_ready,
 
     // ISSUEQ operand wakeup on DIV/MUL completion
+    output logic                                int_result_valid,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  int_rd_phy_addr,
     output logic                                div_result_valid,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  div_rd_phy_addr,
     output logic                                mul_result_valid,
@@ -196,8 +204,12 @@ import riscv_types_pkg::*;
         .exe_result_valid(mul_exe_valid)
     );
 
+    assign int_result_valid = alu_exe_valid;
+    assign int_rd_phy_addr  = alu_exe_rd_phy_addr;
+
     assign div_result_valid = div_exe_valid;
     assign div_rd_phy_addr  = div_exe_rd_phy_addr;
+
     assign mul_result_valid = mul_exe_valid;
     assign mul_rd_phy_addr  = mul_exe_rd_phy_addr;
 

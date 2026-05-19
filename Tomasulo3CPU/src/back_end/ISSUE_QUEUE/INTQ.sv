@@ -110,6 +110,7 @@ import riscv_types_pkg::*;
     // Queue
     intq_entry_t                        q       [INT_QUEUE_DEPTH];
     logic        [INT_QUEUE_DEPTH-1:0]  q_valid;
+    logic                               issue_int;
 
     // Wakeup Logic — snoop CDB, MUL, DIV, LD/ST forwarding buses
     logic wk_rs_rdy [INT_QUEUE_DEPTH];
@@ -215,42 +216,7 @@ import riscv_types_pkg::*;
     assign iss_intq_two_or_more_vacant = (vacant_count >= 2);
 
     assign issue_int_rdy = sel_valid & ~cdb_flush;
-    assign exe_int_grant = sel_valid & issue_int_en & ~cdb_flush;
-
-    // Issue Outputs — drive selected entry or zero
-    always_comb begin
-        if (exe_int_grant) begin
-            iss_rw_alu                = q[sel_idx].rw;
-            iss_rd_phy_addr_alu       = q[sel_idx].rd;
-            iss_rob_tag_alu           = q[sel_idx].rob_tag;
-            iss_opcode_alu            = q[sel_idx].op;
-            iss_imm16_alu             = q[sel_idx].imm;
-            iss_branch_other_addr_alu = q[sel_idx].br_addr;
-            iss_branch_prediction_alu = q[sel_idx].br_pred;
-            iss_branch_alu            = q[sel_idx].branch;
-            iss_branch_pc_bits_alu    = q[sel_idx].br_pc;
-            iss_jr_inst_alu           = q[sel_idx].jr;
-            iss_jal_inst_alu          = q[sel_idx].jal;
-            iss_jr31_inst_alu         = q[sel_idx].jr31;
-            iss_rs_phy_addr_alu       = q[sel_idx].rs;
-            iss_rt_phy_addr_alu       = q[sel_idx].rt;
-        end else begin
-            iss_rw_alu                = 1'b0;
-            iss_rd_phy_addr_alu       = '0;
-            iss_rob_tag_alu           = '0;
-            iss_opcode_alu            = INSTR_NONE; 
-            iss_imm16_alu             = '0;
-            iss_branch_other_addr_alu = '0;
-            iss_branch_prediction_alu = 1'b0;
-            iss_branch_alu            = 1'b0;
-            iss_branch_pc_bits_alu    = '0;
-            iss_jr_inst_alu           = 1'b0;
-            iss_jal_inst_alu          = 1'b0;
-            iss_jr31_inst_alu         = 1'b0;
-            iss_rs_phy_addr_alu       = '0;
-            iss_rt_phy_addr_alu       = '0;
-        end
-    end
+    assign issue_int     = sel_valid & issue_int_en & ~cdb_flush;
 
     // State Update
     // Last-write-wins ordering: wakeup -> flush -> issue -> dispatch
@@ -291,9 +257,40 @@ import riscv_types_pkg::*;
             end
 
             // Issue: dequeue the selected entry
-            if (exe_int_grant)
-                q_valid[sel_idx] <= 1'b0;
-
+            if (issue_int) begin
+                q_valid[sel_idx]            <= 1'b0;
+                exe_int_grant               <= 1'b1;
+                iss_rw_alu                  <= q[sel_idx].rw;
+                iss_rd_phy_addr_alu         <= q[sel_idx].rd;
+                iss_rob_tag_alu             <= q[sel_idx].rob_tag;
+                iss_opcode_alu              <= q[sel_idx].op;
+                iss_imm16_alu               <= q[sel_idx].imm;
+                iss_branch_other_addr_alu   <= q[sel_idx].br_addr;
+                iss_branch_prediction_alu   <= q[sel_idx].br_pred;
+                iss_branch_alu              <= q[sel_idx].branch;
+                iss_branch_pc_bits_alu      <= q[sel_idx].br_pc;
+                iss_jr_inst_alu             <= q[sel_idx].jr;
+                iss_jal_inst_alu            <= q[sel_idx].jal;
+                iss_jr31_inst_alu           <= q[sel_idx].jr31;
+                iss_rs_phy_addr_alu         <= q[sel_idx].rs;
+                iss_rt_phy_addr_alu         <= q[sel_idx].rt;
+            end else begin
+                exe_int_grant               <= '0;
+                iss_rw_alu                  <= '0;
+                iss_rd_phy_addr_alu         <= '0;
+                iss_rob_tag_alu             <= '0;
+                iss_opcode_alu              <= INSTR_NONE;
+                iss_imm16_alu               <= '0;
+                iss_branch_other_addr_alu   <= '0;
+                iss_branch_prediction_alu   <= '0;
+                iss_branch_alu              <= '0;
+                iss_branch_pc_bits_alu      <= '0;
+                iss_jr_inst_alu             <= '0;
+                iss_jal_inst_alu            <= '0;
+                iss_jr31_inst_alu           <= '0;
+                iss_rs_phy_addr_alu         <= '0;
+                iss_rt_phy_addr_alu         <= '0;
+            end
             // Dispatch: enqueue new entry (suppressed during flush)
             if (dis_int_en && has_free && !cdb_flush) begin
                 q_valid[free_idx] <= 1'b1;

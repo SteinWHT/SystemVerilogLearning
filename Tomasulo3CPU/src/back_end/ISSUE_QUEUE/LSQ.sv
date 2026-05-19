@@ -279,23 +279,6 @@ import riscv_types_pkg::*;
     logic issue_lsq;
     assign issue_lsq = sel_valid & ~cdb_flush & lsb_rdy;
 
-    // Issue Outputs — drive selected entry or zero
-    always_comb begin
-        if (issue_lsq) begin
-            iss_lsq_rob_tag           = q[sel_idx].rob_tag;
-            iss_lsq_opcode            = q[sel_idx].opcode;
-            iss_lsq_addr              = q[sel_idx].addr_offset;
-            iss_lsq_phy_addr          = q[sel_idx].rd_phy_addr;
-            iss_lsq_rdy               = '1;
-        end else begin
-            iss_lsq_rob_tag           = '0;
-            iss_lsq_opcode            =  INSTR_NONE;
-            iss_lsq_addr              = '0;
-            iss_lsq_phy_addr          = '0;
-            iss_lsq_rdy               = '0;
-        end
-    end
-
     // State Update
     // Last-write-wins ordering: wakeup -> flush -> addr_calculating -> issue -> dispatch
     always_ff @(posedge clk or negedge rst_n) begin
@@ -342,7 +325,13 @@ import riscv_types_pkg::*;
 
             // Issue: dequeue into LSB (issue_lsq already requires lsb_rdy)
             if (issue_lsq) begin
-                q_valid[sel_idx] <= 1'b0;
+                q_valid[sel_idx]        <= 1'b0;
+                iss_lsq_rdy             <= '1;
+                iss_lsq_rob_tag         <= q[sel_idx].rob_tag;
+                iss_lsq_opcode          <= q[sel_idx].opcode;
+                iss_lsq_addr            <= q[sel_idx].addr_offset;
+                iss_lsq_phy_addr        <= q[sel_idx].rd_phy_addr;
+
                 if (q[sel_idx].opcode == INSTR_SW) begin
                     for (int i = 0; i < LSQ_DEPTH; i++) begin
                         // when sw is issued, the junior counter of the older lw is incremented
@@ -352,6 +341,12 @@ import riscv_types_pkg::*;
                         end
                     end
                 end
+            end else begin
+                iss_lsq_rdy             <= '0;
+                iss_lsq_rob_tag         <= '0;
+                iss_lsq_opcode          <= INSTR_NONE;
+                iss_lsq_addr            <= '0;
+                iss_lsq_phy_addr        <= '0;
             end
 
             // Dispatch: enqueue new entry (suppressed during flush)

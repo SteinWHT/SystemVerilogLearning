@@ -137,6 +137,8 @@ module CPU_BACK_END #(
     logic [ROB_INDEX_WIDTH-1:0]          iss_exe_rob_tag;
     logic [OPCODE_WIDTH-1:0]             iss_exe_opcode;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rd_phy_addr;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rs_phy_addr;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rt_phy_addr;
     logic                                iss_exe_rw;
     logic [15:0]                         iss_exe_imm16;
     logic [DMEM_WIDTH-1:0]               iss_exe_branch_other_addr;
@@ -172,6 +174,8 @@ module CPU_BACK_END #(
     logic [PHY_REGISTER_FILE_WIDTH-1:0] div_rd_phy_addr_wb;
     logic mul_result_valid;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] mul_rd_phy_addr_wb;
+    logic int_result_valid;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] int_rd_phy_addr_wb;
 
     assign cdb_phy_reg_write = cdb_reg_write & cdb_valid;
 
@@ -224,6 +228,8 @@ module CPU_BACK_END #(
         .dis_jr_inst(dis_jr_inst),
         .dis_jal_inst(dis_jal_inst),
         .dis_jr31_inst(dis_jr31_inst),
+        .int_rd_phy_addr(int_rd_phy_addr_wb),
+        .int_exe_ready(int_result_valid),
         .mul_rd_phy_addr(mul_rd_phy_addr_wb),
         .mul_exe_ready(mul_result_valid),
         .div_rd_phy_addr(div_rd_phy_addr_wb),
@@ -250,6 +256,8 @@ module CPU_BACK_END #(
         .iss_exe_rob_tag(iss_exe_rob_tag),
         .iss_exe_opcode(iss_exe_opcode),
         .iss_exe_rd_phy_addr(iss_exe_rd_phy_addr),
+        .iss_exe_rs_phy_addr(iss_exe_rs_phy_addr),
+        .iss_exe_rt_phy_addr(iss_exe_rt_phy_addr),
         .iss_exe_rw(iss_exe_rw),
         .iss_exe_imm16(iss_exe_imm16),
         .iss_exe_branch_other_addr(iss_exe_branch_other_addr),
@@ -308,9 +316,13 @@ module CPU_BACK_END #(
     ) exe (
         .clk(clk),
         .rst_n(rst_n),
+        .cdb_valid(cdb_valid),
+        .cdb_reg_write(cdb_reg_write),
         .cdb_flush(cdb_flush),
         .cdb_rob_depth(cdb_rob_depth),
         .cdb_rob_tag(cdb_rob_tag),
+        .cdb_rd_phy_addr(cdb_rd_phy_addr),
+        .cdb_rd_data(cdb_rd_data),
         .exe_valid(exe_valid),
         .exe_rob_tag(exe_rob_tag),
         .exe_rd_phy_addr(exe_rd_phy_addr),
@@ -326,6 +338,8 @@ module CPU_BACK_END #(
         .iss_rob_tag(iss_exe_rob_tag),
         .iss_opcode(iss_exe_opcode),
         .iss_rd_phy_addr(iss_exe_rd_phy_addr),
+        .iss_rs_phy_addr(iss_exe_rs_phy_addr),
+        .iss_rt_phy_addr(iss_exe_rt_phy_addr),
         .iss_rw(iss_exe_rw),
         .iss_imm16(iss_exe_imm16),
         .iss_branch_other_addr(iss_exe_branch_other_addr),
@@ -338,6 +352,8 @@ module CPU_BACK_END #(
         .issue_int_en(exe_int_grant),
         .issue_div_en(exe_div_grant),
         .issue_mul_en(exe_mul_grant),
+        .int_result_valid(int_result_valid),
+        .int_rd_phy_addr(int_rd_phy_addr_wb),
         .div_unit_ready(div_unit_ready),
         .div_result_valid(div_result_valid),
         .div_rd_phy_addr(div_rd_phy_addr_wb),

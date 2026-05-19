@@ -52,6 +52,7 @@ module FRL #(
                 // initialize with physical register indices
                 frl_array[i] <= PHY_REGISTER_FILE_WIDTH'(ARCH_REG_COUNT + i);
             end
+            frl_read_phy_addr <= '0;
         end else begin
             if (do_write) begin
                 // On commit, add the freed physical register back to the free list
