@@ -12,7 +12,7 @@ module CPU_tb;
     // Parameters
     // ----------------------------------------------------------------
     parameter int unsigned INSTR_WIDTH             = 32;
-    parameter int unsigned IMEM_DEPTH              = 32;
+    parameter int unsigned IMEM_DEPTH              = 64;
     parameter int unsigned IMEM_WIDTH              = 32;
     parameter int unsigned IMEM_DEPTH_WORD         = IMEM_DEPTH - 1;
     parameter int unsigned ARCH_REG_COUNT          = 32;
@@ -199,6 +199,14 @@ module CPU_tb;
         input logic [6:0]  opcode
     );
         return {imm[12], imm[10:5], rs2, rs1, funct3, imm[4:1], imm[11], opcode};
+    endfunction
+
+    function automatic logic [31:0] encode_u(
+        input logic [19:0] imm,
+        input logic [4:0]  rd,
+        input logic [6:0]  opcode
+    );
+        return {imm, rd, opcode};
     endfunction
 
     function automatic logic [31:0] encode_j(
@@ -1038,6 +1046,89 @@ module CPU_tb;
             $display("  CDB result %0d: data=%0d, phy=%0d", i, dut.cdb_rd_data, dut.cdb_rd_phy_addr);
         end
         $display("  Interleaved MUL/INT stress completed");
+
+        // ==============================================================
+        // Test 35: LUI U-type immediate
+        // LUI x1, 0x12345 → x1 = 0x0000_0000_1234_5000
+        // LUI x2, 0x80000 → x2 = 0xFFFF_FFFF_8000_0000 (RV64 sign-extended)
+        // ==============================================================
+        test_num = 35;
+        $display("\n[Test %0d] LUI U-type immediate", test_num);
+        reset_dut();
+        load_instr(32'h0000_0000, encode_u(20'h12345, 5'd1, OP_LUI));
+        load_instr(32'h0000_0004, encode_u(20'h80000, 5'd2, OP_LUI));
+
+        wait_dispatch();
+        check_val("LUI dispatched", dut.dis_opcode, INSTR_LUI);
+        check_bit("LUI INT issue", dut.dis_int_issue_en, 1'b1);
+
+        check_cdb_result("LUI x1 = 0x12345000", 0, 64'h0000_0000_1234_5000);
+        check_cdb_result("LUI x2 sign-extends bit 31", 1, 64'hFFFF_FFFF_8000_0000);
+
+        // ==============================================================
+        // Test 36: AUIPC U-type immediate plus current PC
+        // AUIPC x3, 0x00010 at PC 0x00 → x3 = 0x0001_0000
+        // AUIPC x4, 0x12345 at PC 0x04 → x4 = 0x1234_5004
+        // AUIPC x5, 0xFFFFF at PC 0x08 → x5 = -0x1000 + 0x08
+        // ==============================================================
+        test_num = 36;
+        $display("\n[Test %0d] AUIPC U-type immediate plus PC", test_num);
+        reset_dut();
+        load_instr(32'h0000_0000, encode_u(20'h00010, 5'd3, OP_AUIPC));
+        load_instr(32'h0000_0004, encode_u(20'h12345, 5'd4, OP_AUIPC));
+        load_instr(32'h0000_0008, encode_u(20'hFFFFF, 5'd5, OP_AUIPC));
+
+        wait_dispatch();
+        check_val("AUIPC dispatched", dut.dis_opcode, INSTR_AUIPC);
+        check_bit("AUIPC INT issue", dut.dis_int_issue_en, 1'b1);
+
+        check_cdb_result("AUIPC x3 = 0x00010000 + PC0", 0, 64'h0000_0000_0001_0000);
+        check_cdb_result("AUIPC x4 = 0x12345000 + PC4", 1, 64'h0000_0000_1234_5004);
+        check_cdb_result("AUIPC x5 sign-extended offset + PC8", 2, 64'hFFFF_FFFF_FFFF_F008);
+
+        // ==============================================================
+        // Test 37: BLT taken — signed comparison
+        // ADDI x1, x0, -1 → ADDI x2, x0, 1
+        // BLT x1, x2, +16 should skip the wrong-path store
+        // ==============================================================
+        test_num = 37;
+        $display("\n[Test %0d] BLT taken signed compare (-1 < 1)", test_num);
+        reset_dut();
+        load_dmem(32'h0000_0000, 64'hCAFE_BABE_0000_0000);
+        load_dmem(32'h0000_0008, 64'h0);
+        load_instr(32'h0000_0000, encode_i(12'hFFF, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));
+        load_instr(32'h0000_0004, encode_i(12'd1,   5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));
+        load_instr(32'h0000_0008, encode_b(13'd16, 5'd2, 5'd1, FUNCT3_BLT, OP_BRANCH));
+        load_instr(32'h0000_000C, encode_i(12'd99, 5'd0, FUNCT3_ADD_SUB, 5'd3, OP_IMM));
+        load_instr(32'h0000_0010, encode_s(12'd0,  5'd3, 5'd0, FUNCT3_SW, OP_STORE));
+        load_instr(32'h0000_0018, encode_i(12'd42, 5'd0, FUNCT3_ADD_SUB, 5'd4, OP_IMM));
+        load_instr(32'h0000_001C, encode_s(12'd8,  5'd4, 5'd0, FUNCT3_SW, OP_STORE));
+
+        wait_cycles(120);
+        check_val("BLT skipped wrong-path store", dmem_array[0], 64'hCAFE_BABE_0000_0000);
+        check_val("BLT reached target store", dmem_array[1], 64'd42);
+
+        // ==============================================================
+        // Test 38: BLTU taken — unsigned comparison
+        // ADDI x1, x0, 1 → ADDI x2, x0, -1
+        // BLTU x1, x2, +16 should skip the wrong-path store
+        // ==============================================================
+        test_num = 38;
+        $display("\n[Test %0d] BLTU taken unsigned compare (1 < 0xffff...)", test_num);
+        reset_dut();
+        load_dmem(32'h0000_0010, 64'hBADC_0FFE_0000_0010);
+        load_dmem(32'h0000_0018, 64'h0);
+        load_instr(32'h0000_0000, encode_i(12'd1,   5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));
+        load_instr(32'h0000_0004, encode_i(12'hFFF, 5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));
+        load_instr(32'h0000_0008, encode_b(13'd16, 5'd2, 5'd1, FUNCT3_BLTU, OP_BRANCH));
+        load_instr(32'h0000_000C, encode_i(12'd77, 5'd0, FUNCT3_ADD_SUB, 5'd3, OP_IMM));
+        load_instr(32'h0000_0010, encode_s(12'd16, 5'd3, 5'd0, FUNCT3_SW, OP_STORE));
+        load_instr(32'h0000_0018, encode_i(12'd33, 5'd0, FUNCT3_ADD_SUB, 5'd4, OP_IMM));
+        load_instr(32'h0000_001C, encode_s(12'd24, 5'd4, 5'd0, FUNCT3_SW, OP_STORE));
+
+        wait_cycles(120);
+        check_val("BLTU skipped wrong-path store", dmem_array[2], 64'hBADC_0FFE_0000_0010);
+        check_val("BLTU reached target store", dmem_array[3], 64'd33);
 
         // ==============================================================
         // Summary

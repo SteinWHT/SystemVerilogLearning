@@ -1,3 +1,4 @@
+// LSB execute an extra stage to align other instructions to execute
 module LSB
 import riscv_types_pkg::*;
 #(
@@ -61,6 +62,8 @@ import riscv_types_pkg::*;
     lsb_entry_t lw_slot;
     logic       lw_slot_valid;
     logic       lw_slot_data_ready;
+
+    logic issue_ld_buf_reg;
 
     //  Buffer status
     logic [LSB_INDEX_WIDTH:0] entry_count;
@@ -193,9 +196,14 @@ import riscv_types_pkg::*;
                     write_ptr <= write_ptr + 1;
                 end
             end
+            if(issue_ld_buf && !lsb_empty) begin
+                issue_ld_buf_reg <= 1'b1;
+            end else begin
+                issue_ld_buf_reg <= 1'b0;
+            end
 
             // Issue head entry to CDB
-            if (issue_ld_buf && !lsb_empty) begin
+            if (issue_ld_buf_reg && !lsb_empty) begin
                 lsb_rob_tag     <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].rob_tag;
                 lsb_rd_phy_addr <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].phy_addr;
                 lsb_data        <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].data;

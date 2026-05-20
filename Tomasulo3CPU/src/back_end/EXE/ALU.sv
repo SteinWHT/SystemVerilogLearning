@@ -1,4 +1,6 @@
 // One-stage ALU
+// Now the ALU is implemented in a naive way.
+// TODO: Implement the ALU in a more efficient way.
 module ALU 
 import riscv_types_pkg::*;
 #(
@@ -60,8 +62,8 @@ import riscv_types_pkg::*;
             INSTR_SUB, INSTR_BEQ, INSTR_BNE:      result_alu = rs_data_alu - rt_data_alu;
 
             INSTR_SLL:      result_alu = rs_data_alu << rt_data_alu;
-            INSTR_SLT:      result_alu = rs_data_alu < rt_data_alu;
-            INSTR_SLTU:     result_alu = rs_data_alu < rt_data_alu;
+            INSTR_SLT, INSTR_BLT:      result_alu = $signed(rs_data_alu) < $signed(rt_data_alu);
+            INSTR_SLTU, INSTR_BLTU:     result_alu = rs_data_alu < rt_data_alu;
             INSTR_XOR:      result_alu = rs_data_alu ^ rt_data_alu;
             INSTR_SRL:      result_alu = rs_data_alu >> rt_data_alu;
             INSTR_SRA:      result_alu = rs_data_alu >>> rt_data_alu;
@@ -69,7 +71,9 @@ import riscv_types_pkg::*;
             INSTR_AND:      result_alu = rs_data_alu & rt_data_alu;
             INSTR_ADDI:     result_alu = rs_data_alu + imm;
 
-            INSTR_JAL:      result_alu = imm;
+            INSTR_JAL, INSTR_LUI:      result_alu = imm;
+            INSTR_AUIPC:    result_alu = branch_other_addr + imm;
+            
             INSTR_JALR:     begin
                 if(jr31_inst) begin
                     result_alu = imm;
@@ -79,7 +83,7 @@ import riscv_types_pkg::*;
                 end
             end
 
-            INSTR_SLTI:     result_alu = rs_data_alu < imm;
+            INSTR_SLTI:     result_alu = $signed(rs_data_alu) < $signed(imm);
             INSTR_SLTIU:    result_alu = rs_data_alu < imm;
             INSTR_XORI:     result_alu = rs_data_alu ^ imm;
             INSTR_ORI:      result_alu = rs_data_alu | imm;
@@ -97,7 +101,7 @@ import riscv_types_pkg::*;
     always_comb begin
         branch_mispredicted = 1'b0;
         branch_other_addr_in = branch_other_addr;
-        if (opcode == INSTR_BEQ) begin
+        if (opcode == INSTR_BEQ || opcode == INSTR_BLT || opcode == INSTR_BLTU) begin
             if (branch_prediction && (result_alu != 0)) begin
                 branch_mispredicted = 1'b0;
             end else if (!branch_prediction && (result_alu == 0)) begin

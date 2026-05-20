@@ -16,9 +16,9 @@ import riscv_types_pkg::*;
 #(
     parameter int unsigned XLEN = 64,
     parameter int unsigned INSTR_WIDTH = 32,
-    parameter int unsigned IMEM_DEPTH = 32,
+    parameter int unsigned IMEM_DEPTH = 64,
     parameter int unsigned IMEM_WIDTH = 32,
-    parameter int unsigned IMEM_WIDTH_WORD = IMEM_DEPTH - 1,
+    parameter int unsigned IMEM_DEPTH_WORD = IMEM_DEPTH - 1,
     parameter int unsigned DMEM_DEPTH = 64,
     parameter int unsigned DMEM_WIDTH = 64,
     parameter int unsigned ARCH_REG_COUNT = 32,
@@ -40,7 +40,7 @@ import riscv_types_pkg::*;
 
     output logic                                    dis_ren,
     output logic                                    dis_jmpbr,
-    output logic [IMEM_WIDTH_WORD-1:0]              dis_jmpbr_addr,
+    output logic [IMEM_DEPTH_WORD-1:0]              dis_jmpbr_addr,
     output logic                                    dis_jmpbr_addr_valid,
 
     // BPB interface
@@ -51,7 +51,7 @@ import riscv_types_pkg::*;
     output logic                                    dis_bpb_branch,
 
     // RAS interface
-    input  logic [IMEM_WIDTH_WORD-1:0]              ras_addr,
+    input  logic [IMEM_DEPTH_WORD-1:0]              ras_addr,
 
     output logic                                    dis_ras_jr31_inst,
     output logic                                    dis_ras_jal_inst,
@@ -66,7 +66,7 @@ import riscv_types_pkg::*;
 
     // CDB interface
     input  logic                                    cdb_valid,
-    input  logic [IMEM_WIDTH-1:0]                   cdb_branch_addr,
+    input  logic [IMEM_DEPTH-1:0]                   cdb_branch_addr,
     input  logic                                    cdb_flush,
     input  logic                                    cdb_jalr_resolved,
 
@@ -175,7 +175,7 @@ import riscv_types_pkg::*;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_rs_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_rt_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_pre_phy_addr;
-    logic [IMEM_WIDTH_WORD-1:0] stage2_ras_address;
+    logic [IMEM_DEPTH_WORD-1:0] stage2_ras_address;
 
 
     // jalr $rd, imm($rs)
@@ -188,7 +188,7 @@ import riscv_types_pkg::*;
     // Decode the instruction (R-Type, Lw/Sw, Div, Mul, Jump,…etc).
     RISC_V_DECODER #(
                    .XLEN(XLEN),
-                   .INSTR_WIDTH(IMEM_WIDTH)
+                   .INSTR_WIDTH(INSTR_WIDTH)
                  ) decoder (
                    .instr(ifetch_instr_in),
                    .rd_arch_addr(stage1_rd_arch_addr),
@@ -223,7 +223,7 @@ import riscv_types_pkg::*;
     assign dis_ras_jal_inst = stage1_dis_jal_inst && stage1_valid;
 
     // IFQ logic
-    logic [IMEM_WIDTH-1:0] jal_target, branch_target;
+    logic [IMEM_DEPTH-1:0] jal_target, branch_target;
     assign dis_ren = (!stall) && !cdb_flush;
     assign jr_fetch_hold = jr_stall;
     assign stage1_redirect = stage1_valid &&
@@ -235,14 +235,14 @@ import riscv_types_pkg::*;
             (stage1_valid && stage1_dis_jr31_inst) ||
             (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) ||
             (cdb_flush && cdb_valid);
-    assign jal_target    = IMEM_WIDTH'(stage1_dis_imm);
-    assign branch_target = (ifetch_pc + IMEM_WIDTH'(stage1_dis_imm));
+    assign jal_target    = IMEM_DEPTH'(stage1_dis_imm);
+    assign branch_target = (ifetch_pc + IMEM_DEPTH'(stage1_dis_imm));
     assign dis_jmpbr_addr =
             (stage1_valid && stage1_dis_jr31_inst) ? ras_addr :
             (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) ? jal_target[IMEM_DEPTH-1:1] :
             (stage1_valid && stage1_dis_branch && bpb_branch_prediction) ?
             branch_target[IMEM_DEPTH-1:1] :
-            (cdb_flush && cdb_valid) ? cdb_branch_addr[IMEM_WIDTH_WORD-1:0] :
+            (cdb_flush && cdb_valid) ? cdb_branch_addr[IMEM_DEPTH-1:1] :
             '0;
     assign stage1_branch_taken = stage1_dis_branch && bpb_branch_prediction;
     // Rename source and destination registers.
@@ -288,7 +288,9 @@ import riscv_types_pkg::*;
             INSTR_ADD, INSTR_SUB, INSTR_SLT, INSTR_SLTU, INSTR_XOR,
             INSTR_SRL, INSTR_SRA, INSTR_OR, INSTR_AND, INSTR_SLL,
             INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
-            INSTR_SLLI, INSTR_SRLI, INSTR_SRAI, INSTR_BEQ, INSTR_BNE, INSTR_JAL, INSTR_JALR: begin
+            INSTR_SLLI, INSTR_SRLI, INSTR_SRAI,
+            INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU,
+            INSTR_JAL, INSTR_JALR, INSTR_LUI, INSTR_AUIPC: begin
                 if (!issue_intq_full) begin
                     stage1_dis_int_issue_en = 1'b1;
                 end
@@ -480,11 +482,14 @@ import riscv_types_pkg::*;
     assign dis_new_rd_phy_addr = dis_frl_rd_phy_addr;
     assign dis_opcode = stage2_dis_instr_type;
     // TODO: Assume now if jalr instruction, the imm is 0 and now it's used as PC+4[15:0]
-    assign dis_imm = stage2_dis_jal_inst ? stage2_pc_plus4 : stage2_dis_imm;
-    assign dis_branch_other_addr = stage2_dis_jr31_inst ? stage2_ras_address :
-            stage2_branch_prediction ?
-            stage2_pc_plus4 :
-            (stage2_pc + IMEM_DEPTH'(stage2_dis_imm));
+    assign dis_imm = stage2_dis_jal_inst ?
+        {{(XLEN-IMEM_DEPTH + 1){stage2_pc_plus4[IMEM_DEPTH-1]}},stage2_pc_plus4[IMEM_DEPTH-2:0]} :
+        stage2_dis_imm;
+    assign dis_branch_other_addr = stage2_dis_jr31_inst ? {stage2_ras_address,1'b0} :
+            stage2_branch_prediction ? stage2_pc_plus4 :
+            // TODO: check if we store the pc_plus4 here for AUIPC (save pc signals) is correct
+            stage2_dis_instr_type == INSTR_AUIPC ? stage2_pc :
+            stage2_pc + IMEM_DEPTH'(stage2_dis_imm);
     assign dis_branch_prediction = stage2_branch_prediction;
     assign dis_branch = stage2_dis_branch;
     assign dis_branch_pc_bits = stage2_pc[BPB_PC_BITS+1:2];

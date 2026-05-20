@@ -2,7 +2,7 @@
 module CPU_FRONT_END #(
     // I-CACHE
     parameter int unsigned INSTR_WIDTH = 32,
-    parameter int unsigned IMEM_DEPTH = 32,
+    parameter int unsigned IMEM_DEPTH = 64,
     parameter int unsigned IMEM_WIDTH = 32,
     parameter int unsigned IMEM_DEPTH_WORD = IMEM_DEPTH - 1,
 
@@ -288,7 +288,7 @@ module CPU_FRONT_END #(
         .dis_frl_read(dis_frl_read),
 
         .cdb_valid(cdb_valid),
-        .cdb_branch_addr(cdb_branch_addr[IMEM_DEPTH-1:1]),
+        .cdb_branch_addr(cdb_branch_addr),
         .cdb_flush(cdb_flush),
         .cdb_jalr_resolved(cdb_jalr_resolved),
 

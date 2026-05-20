@@ -16,9 +16,9 @@ module RISC_V_DECODER
 ) (
     input  logic [INSTR_WIDTH-1:0]      instr,
 
-    output logic [ARCH_REG_COUNT-1:0]   rd_arch_addr,
-    output logic [ARCH_REG_COUNT-1:0]   rs_arch_addr,
-    output logic [ARCH_REG_COUNT-1:0]   rt_arch_addr,
+    output logic [ARCH_REG_WIDTH-1:0]   rd_arch_addr,
+    output logic [ARCH_REG_WIDTH-1:0]   rs_arch_addr,
+    output logic [ARCH_REG_WIDTH-1:0]   rt_arch_addr,
     output logic [XLEN-1:0]             imm,
     output instr_e                      instr_type,
     output logic                        rw,
@@ -127,7 +127,7 @@ module RISC_V_DECODER
                     // FUNCT3_LB:  ; // LB
                     // FUNCT3_LH:  ; // LH
                     FUNCT3_LW:  instr_type = INSTR_LW;
-                    // FUNCT3_LD:  ; // LD  (RV64)
+                    FUNCT3_LD:  instr_type = INSTR_LD; // LD  (RV64)
                     // FUNCT3_LBU: ; // LBU
                     // FUNCT3_LHU: ; // LHU
                     // FUNCT3_LWU: ; // LWU (RV64)
@@ -138,10 +138,10 @@ module RISC_V_DECODER
             // Store
             OP_STORE: begin
                 unique case (funct3)
-                    //FUNCT3_SB: ; // SB
-                    //FUNCT3_SH: ; // SH
+                    FUNCT3_SB: instr_type = INSTR_SB;
+                    FUNCT3_SH: instr_type = INSTR_SH;
                     FUNCT3_SW: instr_type = INSTR_SW;
-                    //FUNCT3_SD: ; // SD (RV64)
+                    FUNCT3_SD: instr_type = INSTR_SD;
                     default:   instr_type = INSTR_NONE;
                 endcase
             end
@@ -151,26 +151,23 @@ module RISC_V_DECODER
                 unique case (funct3)
                     FUNCT3_BEQ: instr_type = INSTR_BEQ;
                     FUNCT3_BNE: instr_type = INSTR_BNE;
-                    // FUNCT3_BLT:  ; // BLT
-                    // FUNCT3_BGE:  ; // BGE
-                    // FUNCT3_BLTU: ; // BLTU
-                    // FUNCT3_BGEU: ; // BGEU
+                    FUNCT3_BLT: instr_type = INSTR_BLT;
+                    // FUNCT3_BGE: instr_type = INSTR_BGE;
+                    FUNCT3_BLTU: instr_type = INSTR_BLTU;
+                    // FUNCT3_BGEU: instr_type = INSTR_BGEU;
                     default:     instr_type = INSTR_NONE;
                 endcase
             end
 
             // Jump
-            OP_JAL:  instr_type = INSTR_JAL; // JAL
-            OP_JALR: instr_type = INSTR_JALR; // JALR
+            OP_JAL:  instr_type = INSTR_JAL;
+            OP_JALR: instr_type = INSTR_JALR;
 
             // Upper immediate
-            // OP_LUI:   begin end // LUI
-            // OP_AUIPC: begin end // AUIPC
+            OP_LUI:   instr_type = INSTR_LUI;
+            OP_AUIPC: instr_type = INSTR_AUIPC;
 
-            // Invalid / unsupported
-            default: begin
-                instr_type = INSTR_NONE;
-            end
+            default: instr_type = INSTR_NONE;
         endcase
     end
 
@@ -203,7 +200,7 @@ module RISC_V_DECODER
                 rt_arch_addr = rt;
                 imm = imm_s;
             end
-            INSTR_BEQ, INSTR_BNE: begin
+            INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU: begin
                 branch = 1;
                 rs_arch_addr = rs;
                 rt_arch_addr = rt;
@@ -235,6 +232,11 @@ module RISC_V_DECODER
                     rw = 1;
                     rd_arch_addr = rd;
                 end
+            end
+            INSTR_LUI, INSTR_AUIPC: begin
+                rw = 1;
+                rd_arch_addr = rd;
+                imm = imm_u;
             end
             default: begin
                 rw = 0;

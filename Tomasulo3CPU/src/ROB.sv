@@ -147,7 +147,7 @@ module ROB #(
 
             if (cdb_flush) begin
                 // flush the ROB
-                write_ptr <= flush_ptr + 1;
+                write_ptr <= flush_ptr + 1'b1;
             end
         end
     end
@@ -168,7 +168,7 @@ module ROB #(
     // SB interface
     assign rob_sw_addr = head.sw_addr;
     assign rob_sw_data = head.sw_data;
-    assign rob_commit_mem_write = head.mw;
+    assign rob_commit_mem_write = head.mw && enable;
 
     // CFC interface
     assign rob_top_ptr = read_ptr[ROB_INDEX_WIDTH-1:0];
@@ -176,7 +176,7 @@ module ROB #(
 
     // RRAT interface
     assign rob_commit_rd_arch_addr = head.rd_addr;
-    assign rob_reg_write = head.rw;
+    assign rob_reg_write = head.rw && enable;
     assign rob_commit_curr_phy_addr = head.curr_phy;
 
     // FRL interface
@@ -195,10 +195,8 @@ module ROB #(
             enable = 1'b1;
         end
 
-        if (cdb_flush) begin
-            flush_ptr = (write_ptr[ROB_INDEX_WIDTH-1:0] > cdb_rob_tag) ?
-            {write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag} : {~write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag};
-        end
+        flush_ptr = ((write_ptr[ROB_INDEX_WIDTH-1:0] > cdb_rob_tag) ?
+        {write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag} : {~write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag});
     end
 
 

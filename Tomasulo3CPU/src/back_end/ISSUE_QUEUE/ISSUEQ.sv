@@ -48,7 +48,7 @@ import riscv_types_pkg::*;
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
     input logic [OPCODE_WIDTH-1:0]              dis_opcode,
-    input logic [15:0]                          dis_imm,
+    input logic [XLEN-1:0]                      dis_imm,
     input logic [IMEM_DEPTH-1:0]                dis_branch_other_addr,
     input logic [BPB_PC_BITS:0]                 dis_branch_pc_bits,
     input logic                                 dis_branch_prediction,

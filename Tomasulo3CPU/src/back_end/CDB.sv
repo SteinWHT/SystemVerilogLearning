@@ -63,7 +63,7 @@ module CDB #(
 
     //output  logic                             cdb_flush,
     //output  logic [ROB_INDEX_WIDTH-1:0]       cdb_rob_depth,
-    
+
     //output logic [ROB_INDEX_WIDTH-1:0]               cdb_rob_depth,
     //output logic [PHY_REGISTER_FILE_WIDTH-1:0]       cdb_rd_phy_addr,
     //output logic                                     cdb_phy_reg_write,

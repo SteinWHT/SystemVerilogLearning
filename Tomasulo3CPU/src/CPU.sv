@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 module CPU #(
     parameter int unsigned INSTR_WIDTH             = 32,
-    parameter int unsigned IMEM_DEPTH              = 32,
+    parameter int unsigned IMEM_DEPTH              = 64,
     parameter int unsigned IMEM_WIDTH              = 32,
     parameter int unsigned IMEM_DEPTH_WORD         = IMEM_DEPTH - 1,
 
