@@ -405,7 +405,7 @@ module CPU_FRONT_END #(
         .clk(clk),
         .rst_n(rst_n),
 
-        .is_branch(dis_inst_valid && dis_branch),
+        .is_branch(dis_inst_valid && (dis_branch || dis_jr31_inst)),
         .rob_bottom_ptr(rob_bottom_ptr),
         .dis_frat_reg_write(dis_reg_write),
         .rd_new_phy_address_in(dis_new_rd_phy_addr),

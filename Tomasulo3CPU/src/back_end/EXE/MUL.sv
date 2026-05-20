@@ -67,7 +67,12 @@ import riscv_types_pkg::*;
                 mul_valid[0]        <= valid;
                 mul_rob_tag[0]      <= rob_tag;
                 mul_rd_phy_addr[0]  <= rd_phy_addr;
+            end else begin
+                mul_valid[0]        <= '0;
+                mul_rob_tag[0]      <= '0;
+                mul_rd_phy_addr[0]  <= '0;
             end
+
             for (int i = 1; i < MUL_CYCLES; i++) begin
                 if (killed[i-1]) begin
                     mul_valid[i]    <= 1'b0;

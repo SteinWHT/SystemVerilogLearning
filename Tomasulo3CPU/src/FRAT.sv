@@ -113,6 +113,10 @@ module FRAT #(
                 for (int i = 0; i < ARCH_REG_COUNT; i++) begin
                     checkpoint_frat_array[checkpoint_head[CHECKPOINT_PTR_WIDTH-1:0]][i] <= frat_array[i];
                 end
+                if (dis_frat_reg_write) begin
+                    checkpoint_frat_array[checkpoint_head[CHECKPOINT_PTR_WIDTH-1:0]][rd_new_arch_address_in] 
+                        <= rd_new_phy_address_in;
+                end
             end
 
             // normal instruction dispatch
@@ -133,9 +137,9 @@ module FRAT #(
                                 checkpoint_frl_head_ptr[checkpoint_tail[CHECKPOINT_PTR_WIDTH-1:0]];
 
     // synthesis translate_off
-    always_ff @(posedge clk) begin
-        FRAT_BRANCH_RW: assert (!(dis_frat_reg_write && is_branch))
-        else $display("FRAT: Branch instructions should not write to FRAT");
-    end
+    // always_ff @(posedge clk) begin
+    //     FRAT_BRANCH_RW: assert (!(dis_frat_reg_write && is_branch))
+    //     else $display("FRAT: Branch instructions should not write to FRAT");
+    // end
     // synthesis translate_on
 endmodule

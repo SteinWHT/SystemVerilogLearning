@@ -786,7 +786,6 @@ module CPU_tb;
         // ADDI x1, x0, 0x20 → JALR x2, 0(x1) → target 0x20
         // ADDI x10, x0, 88 at 0x20
         // ==============================================================
-        $display("time starts at %t", $time);
         test_num = 21;
         $display("\n[Test %0d] JALR x2, 0(x1) indirect jump", test_num);
         reset_dut();
