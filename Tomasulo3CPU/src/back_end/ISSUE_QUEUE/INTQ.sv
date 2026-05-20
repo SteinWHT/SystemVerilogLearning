@@ -1,12 +1,13 @@
 // INT QUEUE DATA STRUCTURE:
 //  robtag      rs      rsrdy       rt      rtrdy       op      rd      valid       rw      IMM     Branch      BrPred
-//  5b          6b      1b          6b      1b          6b      6b      1b          1b      16b     1b          1b
+//  5b          6b      1b          6b      1b          6b      6b      1b          1b      64b     1b          1b
 //  jr          jr31    jal         BrPC    BrAddr
 //  1b          1b      1b          3b      32b
 
 module INTQ 
 import riscv_types_pkg::*;
 #(
+    parameter int unsigned XLEN = 64,
     parameter int unsigned INT_QUEUE_DEPTH = 8,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
@@ -43,7 +44,7 @@ import riscv_types_pkg::*;
     output logic [OPCODE_WIDTH-1:0]             iss_opcode_alu,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rd_phy_addr_alu,
     output logic                                iss_rw_alu,
-    output logic [15:0]                         iss_imm16_alu,
+    output logic [XLEN-1:0]                     iss_imm_alu,
     output logic                                iss_branch_prediction_alu,
     output logic                                iss_branch_alu,
     output logic                                iss_jr_inst_alu,
@@ -68,7 +69,7 @@ import riscv_types_pkg::*;
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
     input logic [OPCODE_WIDTH-1:0]              dis_opcode,
-    input logic [15:0]                          dis_imm16,
+    input logic [XLEN-1:0]                      dis_imm,
     input logic [IMEM_DEPTH-1:0]                dis_branch_other_addr,
     input logic                                 dis_branch_prediction,
     input logic                                 dis_branch,
@@ -95,7 +96,7 @@ import riscv_types_pkg::*;
         logic [OPCODE_WIDTH-1:0]            op;
         logic [PHY_REGISTER_FILE_WIDTH-1:0] rd;
         logic                               rw;
-        logic [15:0]                        imm;
+        logic [XLEN-1:0]                    imm;
         logic                               branch;
         logic                               br_pred;
         logic                               jr;
@@ -262,7 +263,7 @@ import riscv_types_pkg::*;
                 iss_rd_phy_addr_alu         <= q[sel_idx].rd;
                 iss_rob_tag_alu             <= q[sel_idx].rob_tag;
                 iss_opcode_alu              <= q[sel_idx].op;
-                iss_imm16_alu               <= q[sel_idx].imm;
+                iss_imm_alu                 <= q[sel_idx].imm;
                 iss_branch_other_addr_alu   <= q[sel_idx].br_addr;
                 iss_branch_prediction_alu   <= q[sel_idx].br_pred;
                 iss_branch_alu              <= q[sel_idx].branch;
@@ -278,7 +279,7 @@ import riscv_types_pkg::*;
                 iss_rd_phy_addr_alu         <= '0;
                 iss_rob_tag_alu             <= '0;
                 iss_opcode_alu              <= INSTR_NONE;
-                iss_imm16_alu               <= '0;
+                iss_imm_alu                 <= '0;
                 iss_branch_other_addr_alu   <= '0;
                 iss_branch_prediction_alu   <= '0;
                 iss_branch_alu              <= '0;
@@ -301,7 +302,7 @@ import riscv_types_pkg::*;
                     op      : dis_opcode,
                     rd      : dis_new_rd_phy_addr,
                     rw      : dis_reg_write,
-                    imm     : dis_imm16,
+                    imm     : dis_imm,
                     branch  : dis_branch,
                     br_pred : dis_branch_prediction,
                     jr      : dis_jr_inst,

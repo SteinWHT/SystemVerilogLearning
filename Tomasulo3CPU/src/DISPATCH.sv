@@ -95,7 +95,7 @@ import riscv_types_pkg::*;
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      dis_rt_phy_addr,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      dis_new_rd_phy_addr,
     output logic [OPCODE_WIDTH-1:0]                 dis_opcode,
-    output logic [15:0]                             dis_imm16,
+    output logic [XLEN-1:0]                         dis_imm,
     output logic [IMEM_DEPTH-1:0]                   dis_branch_other_addr,
     output logic                                    dis_branch_prediction,
     output logic                                    dis_branch,
@@ -480,7 +480,7 @@ import riscv_types_pkg::*;
     assign dis_new_rd_phy_addr = dis_frl_rd_phy_addr;
     assign dis_opcode = stage2_dis_instr_type;
     // TODO: Assume now if jalr instruction, the imm is 0 and now it's used as PC+4[15:0]
-    assign dis_imm16 = stage2_dis_jal_inst ? stage2_pc_plus4[15:0] : stage2_dis_imm[15:0];
+    assign dis_imm = stage2_dis_jal_inst ? stage2_pc_plus4 : stage2_dis_imm;
     assign dis_branch_other_addr = stage2_dis_jr31_inst ? stage2_ras_address :
             stage2_branch_prediction ?
             stage2_pc_plus4 :

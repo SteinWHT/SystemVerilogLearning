@@ -6,6 +6,7 @@
 module LSQ 
 import riscv_types_pkg::*;
 #(
+    parameter int unsigned XLEN = 8,
     parameter int unsigned LSQ_DEPTH = 8,
     parameter int unsigned LSQ_INDEX_WIDTH = $clog2(LSQ_DEPTH),
     parameter int unsigned SAB_DEPTH = 8,
@@ -46,7 +47,7 @@ import riscv_types_pkg::*;
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
     input logic [OPCODE_WIDTH-1:0]              dis_opcode,
-    input logic [15:0]                          dis_imm16,
+    input logic [XLEN-1:0]                      dis_imm,
 
     output logic                                lsq_ld_st_full,
     output logic                                lsq_ld_st_two_or_more_vacant,
@@ -357,7 +358,7 @@ import riscv_types_pkg::*;
                     rob_tag   : dis_rob_tag,
                     rs_phy_addr : dis_rs_phy_addr,
                     rd_phy_addr : dis_new_rd_phy_addr,
-                    addr_offset : dis_imm16
+                    addr_offset : dis_imm
                 };
                 junior_counter[free_idx] <= '0;
             end

@@ -1,6 +1,7 @@
 module ISSUEQ
 import riscv_types_pkg::*;
 #(
+    parameter int unsigned XLEN = 64,
     parameter int unsigned ISSUE_QUEUE_DEPTH = 16,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
@@ -47,7 +48,7 @@ import riscv_types_pkg::*;
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
     input logic [OPCODE_WIDTH-1:0]              dis_opcode,
-    input logic [15:0]                          dis_imm16,
+    input logic [15:0]                          dis_imm,
     input logic [IMEM_DEPTH-1:0]                dis_branch_other_addr,
     input logic [BPB_PC_BITS:0]                 dis_branch_pc_bits,
     input logic                                 dis_branch_prediction,
@@ -87,7 +88,7 @@ import riscv_types_pkg::*;
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rs_phy_addr,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rt_phy_addr,
     output logic                                iss_exe_rw,
-    output logic [15:0]                         iss_exe_imm16,
+    output logic [XLEN-1:0]                     iss_exe_imm,
     output logic [IMEM_DEPTH-1:0]               iss_exe_branch_other_addr,
     output logic                                iss_exe_branch_prediction,
     output logic                                iss_exe_branch,
@@ -134,7 +135,7 @@ import riscv_types_pkg::*;
     logic [OPCODE_WIDTH-1:0]              iss_opcode_alu;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rd_phy_addr_alu;
     logic                                 iss_rw_alu;
-    logic [15:0]                          iss_imm16_alu;
+    logic [XLEN-1:0]                      iss_imm_alu;
     logic                                 iss_branch_prediction_alu;
     logic                                 iss_branch_alu;
     logic                                 iss_jr_inst_alu;
@@ -159,6 +160,7 @@ import riscv_types_pkg::*;
 
     // INTQ
     INTQ #(
+        .XLEN(XLEN),
         .INT_QUEUE_DEPTH(ISSUE_QUEUE_DEPTH),
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
@@ -189,7 +191,7 @@ import riscv_types_pkg::*;
         .iss_opcode_alu(iss_opcode_alu),
         .iss_rd_phy_addr_alu(iss_rd_phy_addr_alu),
         .iss_rw_alu(iss_rw_alu),
-        .iss_imm16_alu(iss_imm16_alu),
+        .iss_imm_alu(iss_imm_alu),
         .iss_branch_prediction_alu(iss_branch_prediction_alu),
         .iss_branch_alu(iss_branch_alu),
         .iss_jr_inst_alu(iss_jr_inst_alu),
@@ -211,7 +213,7 @@ import riscv_types_pkg::*;
         .dis_new_rd_phy_addr(dis_new_rd_phy_addr),
         .dis_rob_tag(dis_rob_tag),
         .dis_opcode(dis_opcode),
-        .dis_imm16(dis_imm16),
+        .dis_imm(dis_imm),
         .dis_branch_other_addr(dis_branch_other_addr),
         .dis_branch_prediction(dis_branch_prediction),
         .dis_branch(dis_branch),
@@ -328,6 +330,7 @@ import riscv_types_pkg::*;
 
     // LD/STQ
     LSQ #(
+        .XLEN(XLEN),
         .LSQ_DEPTH(ISSUE_QUEUE_DEPTH),
         .SAB_DEPTH(),
         .DMEM_DEPTH(DMEM_DEPTH),
@@ -360,7 +363,7 @@ import riscv_types_pkg::*;
         .dis_rob_tag(dis_rob_tag),
         .dis_opcode(dis_opcode),
         .dis_ld_st_issue_en(dis_ld_st_issq_en),
-        .dis_imm16(dis_imm16),
+        .dis_imm(dis_imm),
 
         .lsq_ld_st_full(issq_ld_stq_full),
         .lsq_ld_st_two_or_more_vacant(issq_ld_stq_two_or_more_vacant),
@@ -392,7 +395,7 @@ import riscv_types_pkg::*;
         iss_exe_rs_phy_addr         = '0;
         iss_exe_rt_phy_addr         = '0;
         iss_exe_rw                  = 1'b0;
-        iss_exe_imm16               = '0;
+        iss_exe_imm                 = '0;
         iss_exe_branch_other_addr   = '0;
         iss_exe_branch_prediction   = 1'b0;
         iss_exe_branch              = 1'b0;
@@ -408,7 +411,7 @@ import riscv_types_pkg::*;
             iss_exe_rs_phy_addr         = iss_rs_phy_addr_alu;
             iss_exe_rt_phy_addr         = iss_rt_phy_addr_alu;
             iss_exe_rw                  = iss_rw_alu;
-            iss_exe_imm16               = iss_imm16_alu;
+            iss_exe_imm                 = iss_imm_alu;
             iss_exe_branch_other_addr   = iss_branch_other_addr_alu;
             iss_exe_branch_prediction   = iss_branch_prediction_alu;
             iss_exe_branch              = iss_branch_alu;

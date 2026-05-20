@@ -39,7 +39,7 @@ module CPU_BACK_END #(
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
     input logic [OPCODE_WIDTH-1:0]              dis_opcode,
-    input logic [15:0]                          dis_imm16,
+    input logic [XLEN-1:0]                      dis_imm,
     input logic [IMEM_DEPTH-1:0]                dis_branch_other_addr,
     input logic [BPB_PC_BITS:0]                 dis_branch_pc_bits,
     input logic                                 dis_branch_prediction,
@@ -141,7 +141,7 @@ module CPU_BACK_END #(
     logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rs_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rt_phy_addr;
     logic                                iss_exe_rw;
-    logic [15:0]                         iss_exe_imm16;
+    logic [XLEN-1:0]                     iss_exe_imm;
     logic [IMEM_DEPTH-1:0]               iss_exe_branch_other_addr;
     logic                                iss_exe_branch_prediction;
     logic                                iss_exe_branch;
@@ -218,7 +218,7 @@ module CPU_BACK_END #(
         .dis_new_rd_phy_addr(dis_new_rd_phy_addr),
         .dis_rob_tag(dis_rob_tag),
         .dis_opcode(dis_opcode),
-        .dis_imm16(dis_imm16),
+        .dis_imm(dis_imm),
         .dis_branch_other_addr(dis_branch_other_addr),
         .dis_branch_pc_bits(dis_branch_pc_bits),
         .dis_branch_prediction(dis_branch_prediction),
@@ -257,7 +257,7 @@ module CPU_BACK_END #(
         .iss_exe_rs_phy_addr(iss_exe_rs_phy_addr),
         .iss_exe_rt_phy_addr(iss_exe_rt_phy_addr),
         .iss_exe_rw(iss_exe_rw),
-        .iss_exe_imm16(iss_exe_imm16),
+        .iss_exe_imm(iss_exe_imm),
         .iss_exe_branch_other_addr(iss_exe_branch_other_addr),
         .iss_exe_branch_prediction(iss_exe_branch_prediction),
         .iss_exe_branch(iss_exe_branch),
@@ -339,7 +339,7 @@ module CPU_BACK_END #(
         .iss_rs_phy_addr(iss_exe_rs_phy_addr),
         .iss_rt_phy_addr(iss_exe_rt_phy_addr),
         .iss_rw(iss_exe_rw),
-        .iss_imm16(iss_exe_imm16),
+        .iss_imm(iss_exe_imm),
         .iss_branch_other_addr(iss_exe_branch_other_addr),
         .iss_branch_prediction(iss_exe_branch_prediction),
         .iss_branch(iss_exe_branch),

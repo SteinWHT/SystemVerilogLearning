@@ -5,6 +5,7 @@ module CPU #(
     parameter int unsigned IMEM_WIDTH              = 32,
     parameter int unsigned IMEM_DEPTH_WORD         = IMEM_DEPTH - 1,
 
+    parameter int unsigned XLEN                    = 64,
     parameter int unsigned ARCH_REG_COUNT          = 32,
     parameter int unsigned ARCH_REG_WIDTH          = $clog2(ARCH_REG_COUNT),
     parameter int unsigned REG_FILE_DATA_WIDTH     = 64,
@@ -87,7 +88,7 @@ module CPU #(
     logic [PHY_REGISTER_FILE_WIDTH-1:0]  dis_rt_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]  dis_new_rd_phy_addr;
     logic                                dis_reg_write;
-    logic [15:0]                         dis_imm16;
+    logic [XLEN-1:0]                     dis_imm;
     logic [DMEM_WIDTH-1:0]               dis_branch_other_addr;
     logic                                dis_branch_prediction;
     logic                                dis_branch;
@@ -199,7 +200,7 @@ module CPU #(
         .dis_rt_phy_addr                 (dis_rt_phy_addr),
         .dis_new_rd_phy_addr             (dis_new_rd_phy_addr),
         .dis_reg_write                   (dis_reg_write),
-        .dis_imm16                       (dis_imm16),
+        .dis_imm                         (dis_imm),
         .dis_branch_other_addr           (dis_branch_other_addr),
         .dis_branch_prediction           (dis_branch_prediction),
         .dis_branch                      (dis_branch),
@@ -283,7 +284,7 @@ module CPU #(
         .dis_new_rd_phy_addr             (dis_new_rd_phy_addr),
         .dis_rob_tag                     (rob_bottom_ptr),
         .dis_opcode                      (dis_opcode),
-        .dis_imm16                       (dis_imm16),
+        .dis_imm                         (dis_imm),
         .dis_branch_other_addr           (dis_branch_other_addr[IMEM_DEPTH-1:0]),
         .dis_branch_pc_bits              ({1'b0, dis_branch_pc_bits}),
         .dis_branch_prediction           (dis_branch_prediction),

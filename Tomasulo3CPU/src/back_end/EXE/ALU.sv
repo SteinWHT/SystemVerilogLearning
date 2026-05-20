@@ -22,7 +22,7 @@ import riscv_types_pkg::*;
     input logic [OPCODE_WIDTH-1:0]                  opcode,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]       rd_phy_addr,
     input logic                                     rw,
-    input logic [15:0]                              imm16,
+    input logic [XLEN-1:0]                          imm,
     input logic [IMEM_DEPTH-1:0]                    branch_other_addr,
     input logic                                     branch_prediction,
     input logic                                     branch,
@@ -67,26 +67,26 @@ import riscv_types_pkg::*;
             INSTR_SRA:      result_alu = rs_data_alu >>> rt_data_alu;
             INSTR_OR:       result_alu = rs_data_alu | rt_data_alu;
             INSTR_AND:      result_alu = rs_data_alu & rt_data_alu;
-            INSTR_ADDI:     result_alu = rs_data_alu + imm16;
+            INSTR_ADDI:     result_alu = rs_data_alu + imm;
 
-            INSTR_JAL:      result_alu = imm16;
+            INSTR_JAL:      result_alu = imm;
             INSTR_JALR:     begin
                 if(jr31_inst) begin
-                    result_alu = imm16;
+                    result_alu = imm;
                     jr31_result = rs_data_alu - branch_other_addr;
                 end else begin
-                    result_alu = imm16;
+                    result_alu = imm;
                 end
             end
 
-            INSTR_SLTI:     result_alu = rs_data_alu < imm16;
-            INSTR_SLTIU:    result_alu = rs_data_alu < imm16;
-            INSTR_XORI:     result_alu = rs_data_alu ^ imm16;
-            INSTR_ORI:      result_alu = rs_data_alu | imm16;
-            INSTR_ANDI:     result_alu = rs_data_alu & imm16;
-            INSTR_SLLI:     result_alu = rs_data_alu << imm16;
-            INSTR_SRLI:     result_alu = rs_data_alu >> imm16;
-            INSTR_SRAI:     result_alu = rs_data_alu >>> imm16;
+            INSTR_SLTI:     result_alu = rs_data_alu < imm;
+            INSTR_SLTIU:    result_alu = rs_data_alu < imm;
+            INSTR_XORI:     result_alu = rs_data_alu ^ imm;
+            INSTR_ORI:      result_alu = rs_data_alu | imm;
+            INSTR_ANDI:     result_alu = rs_data_alu & imm;
+            INSTR_SLLI:     result_alu = rs_data_alu << imm;
+            INSTR_SRLI:     result_alu = rs_data_alu >> imm;
+            INSTR_SRAI:     result_alu = rs_data_alu >>> imm;
             INSTR_NONE:     result_alu = '0;
             default   :     result_alu = '0;
         endcase

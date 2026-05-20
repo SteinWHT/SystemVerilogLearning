@@ -10,23 +10,25 @@ module RISC_V_DECODER
     import riscv_types_pkg::*;
 #(
     parameter int unsigned XLEN           = 64,
-    parameter int unsigned INSTR_WIDTH    = 32
+    parameter int unsigned INSTR_WIDTH    = 32,
+    parameter int unsigned ARCH_REG_COUNT = 32,
+    parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT)
 ) (
-    input  logic [INSTR_WIDTH-1:0] instr,
+    input  logic [INSTR_WIDTH-1:0]      instr,
 
-    output logic [4:0] rd_arch_addr,
-    output logic [4:0] rs_arch_addr,
-    output logic [4:0] rt_arch_addr,
-    output logic [XLEN-1:0] imm,
-    output instr_e instr_type,
-    output logic rw,
-    output logic mw,
-    output logic branch,
-    output logic jr_inst,
-    output logic jal_inst,
+    output logic [ARCH_REG_COUNT-1:0]   rd_arch_addr,
+    output logic [ARCH_REG_COUNT-1:0]   rs_arch_addr,
+    output logic [ARCH_REG_COUNT-1:0]   rt_arch_addr,
+    output logic [XLEN-1:0]             imm,
+    output instr_e                      instr_type,
+    output logic                        rw,
+    output logic                        mw,
+    output logic                        branch,
+    output logic                        jr_inst,
+    output logic                        jal_inst,
     // In risc-v 64, using $1 or $5 as the jump target register is common.
     // I will modify the name later when starting realize more instructions.
-    output logic jr31_inst
+    output logic                        jr31_inst
 );
 
     // Instruction field extraction

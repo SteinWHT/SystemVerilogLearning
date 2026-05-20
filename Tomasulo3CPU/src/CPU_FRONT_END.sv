@@ -7,6 +7,7 @@ module CPU_FRONT_END #(
     parameter int unsigned IMEM_DEPTH_WORD = IMEM_DEPTH - 1,
 
     // ARCH_REG
+    parameter int unsigned XLEN = 64,
     parameter int unsigned ARCH_REG_COUNT = 32,
     parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
@@ -82,7 +83,7 @@ module CPU_FRONT_END #(
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  dis_rt_phy_addr,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  dis_new_rd_phy_addr,
     output logic                                dis_reg_write,
-    output logic [15:0]                         dis_imm16,
+    output logic [XLEN-1:0]                     dis_imm,
     output logic [IMEM_DEPTH-1:0]               dis_branch_other_addr,
     output logic                                dis_branch_prediction,
     output logic                                dis_branch,
@@ -312,7 +313,7 @@ module CPU_FRONT_END #(
         .dis_rt_phy_addr(dis_rt_phy_addr),
         .dis_new_rd_phy_addr(dis_new_rd_phy_addr),
         .dis_opcode(dis_opcode),
-        .dis_imm16(dis_imm16),
+        .dis_imm(dis_imm),
         .dis_branch_other_addr(dis_branch_other_addr_int),
         .dis_branch_prediction(dis_branch_prediction),
         .dis_branch(dis_branch),
