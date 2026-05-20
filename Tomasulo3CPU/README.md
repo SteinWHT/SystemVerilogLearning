@@ -1,176 +1,135 @@
-# Tomasulo3CPU — implementation plan (target modules)
+# Tomasulo3CPU
 
-Roadmap for an **out-of-order CPU** using **physical register renaming**, a **ROB**, **Tomasulo-style scheduling**, and the named blocks below. Build **bottom-up**: rename/commit correctness first, then execute (**CDB**), then memory (**LSB** / **SB** / **SAB**), then fetch polish (**BPB** / **RAS**).
+A 64-bit **out-of-order RISC-V CPU** using physical register renaming, a reorder buffer, and Tomasulo-style scheduling. Targets the RV64IM subset with branch prediction and speculative execution.
 
-## Target modules (your list)
+## Architecture Overview
 
-| Acronym | Name | Role |
-|--------|------|------|
-| **BPB** | Branch Prediction Buffer | Predicts branch direction/target so fetch can run ahead of resolved branches. |
-| **RAS** | Return Address Stack | Predicts return targets for `ret`-style ops (pairs with call sites). |
-| **FRL** | Free Register List | Stack/queue of **free physical register indices**; supplies new `rd` tags on rename; **reclaims** old mappings on ROB commit. |
-| **FRAT** | Front-end Register Alias Table | Per **architectural** register: current **speculative** physical register tag. Read at rename; updated when instructions allocate `rd`; **restored** on flush/mispredict (from checkpoint or rollback scheme). |
-| **ROB** | Reorder Buffer | In-order window: one entry per inflight op; tracks **done**, **exception**, **destination**; **commit** retires in program order and drives **deallocate** into **FRL** + architectural state update. |
-| **SB** | Store Buffer | Holds **store data** (and usually associates with ROB id / age) until store can commit or write memory under your memory model. |
-| **RBA** | Ready Bit Array | One **ready** bit per physical register: cleared on allocate, set when the producing value is known (**CDB** or non-speculative write path you define). Issue logic uses this (and/or bypass) to know operands are valid. |
-| **PRF** | Physical Register File | Wide register file indexed by **physical** tag; holds speculative values; written by **CDB** (and possibly other legal writers). |
-| **CDB** | Common Data Bus | Broadcasts `{phys_dst, value, valid, …}` from completed execution (and sometimes load completion); updates **PRF**, **RBA**, and wakeup dependents. |
-| **SAB** | Store Address Buffer | Tracks **pending store addresses** (often with ROB order) for **load–store disambiguation** and forwarding decisions vs **LSB**/loads. |
-| **LSB** | Load/Store Buffer | Unified structure for **in-flight loads and stores** (or the port where memory ops queue before **dmem**); works with **SB**/**SAB** so loads see the right younger/older stores. |
+![Design Overview](image/design_overview.png)
 
-## Also required (not in the acronym list)
+The CPU is split into a **front-end** (fetch, decode, rename, dispatch, commit) and a **back-end** (issue, execute, writeback).
 
-Tomasulo still needs execution and fetch plumbing; name them however you like:
+### Front-End (`CPU_FRONT_END`)
 
-- **Fetch**: PC, instruction memory (or cache interface), fetch queue.
-- **Decode / rename dispatch**: splits opcode, arch regs, immediates; consumes **FRAT**/**FRL**/**ROB** slots.
-- **Scheduler**: reservation stations or unified issue queues feeding functional units.
-- **Functional units**: ALU, mul/div (optional), AGU (address generation), branch resolution.
-- **Data memory interface**: `dmem` + alignment/misaligned policy.
+| Module | Role |
+|--------|------|
+| **IFQ** | Instruction Fetch Queue — fetches from I-Cache, buffers decoded instructions |
+| **DISPATCH** | Decodes RISC-V instructions, renames registers, dispatches to issue queues |
+| **BPB** | Branch Prediction Buffer — 2-bit saturating counter predictor |
+| **RAS** | Return Address Stack — predicts JALR return targets |
+| **FRL** | Free Register List — supplies physical register tags on rename |
+| **FRAT** | Front-end Register Alias Table — speculative arch→phys mapping with checkpoints |
+| **RRAT** | Retirement Register Alias Table — committed arch→phys mapping |
+| **ROB** | Reorder Buffer — tracks in-flight instructions, commits in program order |
+| **SB** | Store Buffer — holds committed stores for D-Cache write-out |
+| **RBA** | Ready Bit Array — tracks which physical registers have valid data |
 
----
+### Back-End (`CPU_BACK_END`)
 
-## How the pieces fit (high level)
+| Module | Role |
+|--------|------|
+| **ISSUEQ** | Issue Queues — separate queues for INT, MUL, DIV, and LD/ST operations |
+| **ISSUEUNIT** | Issue Unit — arbitrates which ready instructions enter execution |
+| **PRF** | Physical Register File — 128-entry, multi-ported |
+| **EXE** | Execution Units — ALU (1-cycle), MUL (4-cycle), DIV (7-cycle) |
+| **LSB** | Load/Store Buffer — manages memory operations and D-Cache interface |
+| **CDB** | Common Data Bus — broadcasts results, wakes dependents, handles flush |
 
-```mermaid
-flowchart LR
-  subgraph front ["Fetch"]
-    BPB
-    RAS
-  end
-  subgraph rename ["Rename"]
-    FRAT
-    FRL
-    ROB
-  end
-  subgraph state ["Physical state"]
-    PRF
-    RBA
-  end
-  subgraph exec ["Execute"]
-    CDB
-  end
-  subgraph mem ["Memory subsystem"]
-    LSB
-    SB
-    SAB
-  end
-  front --> decode_rename["Decode / allocate"]
-  decode_rename --> FRAT
-  decode_rename --> FRL
-  decode_rename --> ROB
-  rename --> PRF
-  rename --> RBA
-  exec --> PRF
-  exec --> RBA
-  exec --> ROB
-  mem --> exec
-  ROB --> FRL
+### Top-Level (`CPU`)
+
+Combines front-end and back-end with external I-Cache and D-Cache interfaces.
+
+## Supported Instructions (current)
+
+| Type | Instructions |
+|------|-------------|
+| **R-type ALU** | ADD, SUB, AND, OR, XOR, SLT, SLTU, SLL, SRL, SRA |
+| **I-type ALU** | ADDI, ANDI, ORI, XORI, SLTI, SLTIU, SLLI, SRLI, SRAI |
+| **M-extension** | MUL, DIV, REM |
+| **Load/Store** | LW, SW |
+| **Branch** | BEQ, BNE |
+| **Jump** | JAL, JALR |
+
+## Directory Structure
+
+```
+Tomasulo3CPU/
+├── src/
+│   ├── CPU.sv                  # Top-level integration
+│   ├── CPU_FRONT_END.sv        # Front-end pipeline
+│   ├── back_end/
+│   │   └── CPU_BACK_END.sv     # Back-end pipeline
+│   ├── RISC_V_DECODER.sv       # Instruction decoder
+│   ├── riscv_opcode_pkg.sv     # Opcode definitions
+│   ├── riscv_funct_pkg.sv      # Funct3/Funct7 constants
+│   ├── riscv_types_pkg.sv      # Enum types (instr_e, alu_op_e, etc.)
+│   ├── BPB.sv, RAS.sv, FRL.sv, FRAT.sv, RRAT.sv
+│   ├── ROB.sv, SB.sv, RBA.sv, IFQ.sv, DISPATCH.sv
+│   ├── ISSUEQ.sv, ISSUEUNIT.sv, PRF.sv, EXE.sv
+│   ├── LSB.sv, CDB.sv
+│   └── ...
+├── tb/
+│   ├── CPU_tb.sv               # Full CPU integration testbench
+│   ├── CPU_FRONT_END_tb.sv     # Front-end unit test
+│   ├── CPU_BACK_END_tb.sv      # Back-end unit test
+│   └── *_tb.sv                 # Per-module unit tests
+└── image/
+    └── design_overview.png
 ```
 
-- **Rename**: **FRAT** maps arch → phys; **FRL** hands out a fresh phys tag for each writer; **ROB** records order so commit can retire safely and recycle registers.
-- **Operands**: reads come from **PRF** using renamed sources; **RBA** tells you if each operand tag is already valid.
-- **Complete**: **CDB** writes results into **PRF**, sets **RBA**, marks **ROB** entries complete, and wakes scheduler entries waiting on those tags.
-- **Memory**: **LSB** orchestrates loads/stores; **SB**/**SAB** split data vs address tracking as you prefer for forwarding and ordering with **ROB** commit.
+## Key Design Parameters
 
----
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `XLEN` / `REG_FILE_DATA_WIDTH` | 64 | Data path width (RV64) |
+| `PHY_REGISTER_FILE_WIDTH` | 7 | 128 physical registers |
+| `ROB_DEPTH` | 16 | Reorder buffer entries |
+| `ISSUE_QUEUE_DEPTH` | 16 | Entries per issue queue |
+| `FRL_SIZE` | 128 | Free list capacity |
+| `NUM_CHECKPOINT` | 8 | FRAT checkpoint slots for branch recovery |
+| `DIV_CYCLES` | 7 | Division latency |
+| `MUL_CYCLES` | 4 | Multiplication latency |
 
-## Phased build plan (recommended order)
+## Key Microarchitectural Features
 
-### Phase 0 — Contracts
+- **Register renaming** via FRAT + FRL eliminates WAW/WAR hazards
+- **Checkpoint-based recovery** — FRAT snapshots restore on branch mispredict
+- **Speculative execution** — fetches past predicted branches, flushes on mispredict
+- **Out-of-order execution** — instructions issue when operands ready (CDB wakeup)
+- **In-order commit** — ROB retires in program order for precise exceptions
+- **Branch prediction** — 2-bit BPB + RAS for calls/returns
+- **Store buffer** — decouples store commit from D-Cache write latency
 
-Fix in a SystemVerilog `pkg` or header doc:
+## Next Steps — ISA Expansion Roadmap
 
-- ISA, widths: **phys reg index** width, **ROB index** width, **CDB** payload.
-- **Commit rule**: one ROB head commits per cycle vs wider commit.
-- **Flush model**: how **FRAT** is restored on branch mispredict (snapshot FRAT, or rollback using ROB — pick one and stay consistent).
+Priority order to reach GCC-compilable programs (`rv64im`):
 
-### Phase 1 — **PRF** and **RBA**
+1. **LUI + AUIPC** — constant/address materialization (used in nearly every function)
+2. **LD + SD** — native 64-bit memory access
+3. **BLT, BGE, BLTU, BGEU** — remaining branch comparisons
+4. **LB/LBU/LH/LHU/LWU/SB/SH** — byte/halfword memory access
+5. **ADDIW + RV64 word ops** — 32-bit `int` arithmetic (ADDW, SUBW, SLLW, SRLW, SRAW)
+6. **ECALL/EBREAK** — minimal trap handling
+7. **Unsigned M-extension** — MULH, MULHU, DIVU, REMU, MULW, DIVW, etc.
 
-- **PRF**: async/comb read, timed write; enough ports for rename read + issue read + CDB write.
-- **RBA**: same indexing as PRF; set on produce, clear on allocate (when a new writer is renamed to that phys reg — your exact policy ties to **FRL**/ROB).
+After steps 1–6, simple C programs compile with:
+```bash
+riscv64-unknown-elf-gcc -march=rv64im -mabi=lp64 -nostdlib -O2 test.c -o test
+```
 
-**Milestone:** Directed test: write tag *t* via fake CDB, read PRF, see RBA=1.
+## Building / Simulation
 
-### Phase 2 — **FRL**
+The testbench supports both VCS/FSDB and open-source (Icarus/VCD) flows:
 
-- Push free tags at reset; `allocate` pops; `free` pushes on commit-side recycle (driven later by **ROB**).
-- Underflow/overflow checks in sim.
+```bash
+# Example with Icarus Verilog
+iverilog -g2012 -o cpu_tb \
+    src/riscv_opcode_pkg.sv src/riscv_funct_pkg.sv src/riscv_types_pkg.sv \
+    src/*.sv src/back_end/*.sv tb/CPU_tb.sv
+vvp cpu_tb
 
-**Milestone:** Random allocate/free sequence matches reference model.
-
-### Phase 3 — **ROB** (structure first)
-
-- Circular buffer: allocate tail, commit head, mark **done**/`exception` fields.
-- Connect **commit** to `free` of **old phys tag** (the one overwritten for that arch dest) — needs arch dest and **previous** tag stored per ROB entry or derivable from **FRAT** snapshot.
-
-**Milestone:** In-order commit order verified with dummy entries (no real exec yet).
-
-### Phase 4 — **FRAT** + rename smoke test
-
-- On each allocating instruction: read arch src tags from **FRAT**, read **FRL** for new `rd` tag, write **FRAT[rd_arch]** = new tag.
-- Stall when **ROB** or **FRL** full.
-
-**Milestone:** Trace rename of a short sequence; flush clears speculative state per your chosen mechanism.
-
-### Phase 5 — **CDB**
-
-- One or more buses: arbiter picks among FU/load completions.
-- **CDB** → write **PRF[dst]**, **RBA[dst]=1**, **ROB**.done.
-
-**Milestone:** Synthetic “FU” feeds CDB; ROB marks complete in correct order relative to issue.
-
-### Phase 6 — Scheduler + FUs (implementation-specific)
-
-- Reservation stations / issue queues wait on **RBA** for operand tags; wakeup from **CDB** tag match.
-- ALU/AGU produce **CDB** writes.
-
-**Milestone:** OoO arithmetic with no loads/stores yet.
-
-### Phase 7 — **LSB**, **SB**, **SAB**
-
-- Define division of labor (example): **SAB** + **SB** hold pending store address/data by age; **LSB** tracks loads and interfaces to **dmem**; load compares against **SAB** for forwarding/blocked load rules.
-- Store commits to memory when **ROB** commits the store (typical in-order commit to memory with your WAW/WAR rules).
-
-**Milestone:** Load-after-store and aliasing tests pass.
-
-### Phase 8 — **BPB** and **RAS**
-
-- Start with static predict-not-taken if you want; then add **BPB** (PC-indexed table) and **RAS** (push on call, pop on return style).
-- Mispredict: redirect fetch + **FRAT** restore + squash ROB tail + reclaim **FRL** per your rollback design.
-
-**Milestone:** Loop and function-return microbenchmarks; verify flush correctness.
-
----
-
-## Verification checklist
-
-| Layer | What to assert |
-|--------|----------------|
-| **FRL** | No double-free; free count + allocated count = constant after reset burst. |
-| **FRAT** | After flush, matches golden checkpoint for that redirect PC. |
-| **ROB** | Commits match program order; phys recycle matches arch retire semantics. |
-| **CDB** | Every broadcast tag corresponds to an inflight producer; single writer per phys tag lifetime. |
-| **Memory** | Load never takes stale value vs younger committed stores per your rules. |
-
----
-
-## Suggested `src/` naming (optional)
-
-| File | Module |
-|------|--------|
-| `bpb.sv` | `BPB` |
-| `ras.sv` | `RAS` |
-| `frl.sv` | `FRL` |
-| `frat.sv` | `FRAT` |
-| `rob.sv` | `ROB` |
-| `sb.sv` | `SB` |
-| `rba.sv` | `RBA` |
-| `prf.sv` | `PRF` |
-| `cdb.sv` | `CDB` |
-| `sab.sv` | `SAB` |
-| `lsb.sv` | `LSB` |
-
----
-
-**Summary:** Implement **PRF/RBA → FRL → ROB → FRAT**, then **CDB** and execution, then **LSB/SB/SAB**, then **BPB/RAS**. That order maximizes debuggability for a renaming CPU with your module set.
+# Example with VCS
+vcs -sverilog -full64 +v2k \
+    src/riscv_opcode_pkg.sv src/riscv_funct_pkg.sv src/riscv_types_pkg.sv \
+    src/*.sv src/back_end/*.sv tb/CPU_tb.sv \
+    -o simv && ./simv
+```
