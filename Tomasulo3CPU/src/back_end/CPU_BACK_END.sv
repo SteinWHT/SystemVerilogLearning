@@ -19,7 +19,8 @@ module CPU_BACK_END #(
     parameter int unsigned MUL_CYCLES             = 4,
     parameter int unsigned INT_CYCLES             = 1,
     parameter int unsigned LD_ST_CYCLES           = 1,
-    parameter int unsigned OPCODE_WIDTH           = 6
+    parameter int unsigned OPCODE_WIDTH           = 6,
+    parameter int unsigned W_BYTE_NUM             = DMEM_WIDTH / 8
 ) (
     input logic clk,
     input logic rst_n,
@@ -63,10 +64,12 @@ module CPU_BACK_END #(
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   rt_sb_phy_addr,
 
     // D-cache
-    input logic                                 dcache_read_busy,
-    input logic                                 dcache_read_done,
-    input logic [REG_FILE_DATA_WIDTH-1:0]       dcache_rdata,
-    output logic                                dcache_req,
+    input logic                                 dcache_valid,
+    input logic                                 dcache_resp_valid,
+    input logic [DMEM_WIDTH-1:0]                dcache_rdata,
+    output logic                                dcache_ready,
+    output logic                                dcache_resp_ready,
+    output logic                                dcache_write,
     output logic [DMEM_DEPTH-1:0]               dcache_addr,
 
     // Issue queue occupancy (to front-end / DISPATCH)
@@ -88,10 +91,11 @@ module CPU_BACK_END #(
     output logic                                cdb_flush,
     output logic [ROB_INDEX_WIDTH-1:0]          cdb_rob_depth,
     output logic [DMEM_DEPTH-1:0]               cdb_sw_addr,
+    output logic [W_BYTE_NUM-1:0]               cdb_sw_strb,
     output logic                                cdb_upd_branch,
     output logic [BPB_PC_BITS-1:0]              cdb_upd_branch_addr,
     output logic                                cdb_branch_outcome,
-    output logic [31:0]                         cdb_branch_addr,
+    output logic [IMEM_DEPTH-1:0]               cdb_branch_addr,
     output logic                                cdb_jalr_resolved,
 
     // LSB -> ROB / SB (store address sideband)
@@ -278,7 +282,10 @@ module CPU_BACK_END #(
         .iss_lsb_addr(iss_lsb_addr),
         .iss_lsb_phy_addr(iss_lsb_phy_addr),
         .iss_lsb_rdy(iss_lsb_rdy),
-        .dcache_read_busy(dcache_read_busy)
+        .dcache_valid(dcache_valid),
+        .dcache_write(dcache_write),
+        .dcache_ready(dcache_ready),
+        .dcache_addr(dcache_addr)
     );
 
     ISSUEUNIT #(
@@ -403,10 +410,9 @@ module CPU_BACK_END #(
     ) lsb (
         .clk(clk),
         .rst_n(rst_n),
-        .dcache_read_done(dcache_read_done),
         .dcache_data(dcache_rdata),
-        .dcache_ready(dcache_req),
-        .dcache_addr(dcache_addr),
+        .dcache_resp_valid(dcache_resp_valid),
+        .dcache_resp_ready(dcache_resp_ready),
         .iss_lsb_opcode(iss_lsb_opcode),
         .iss_lsb_rob_tag(iss_lsb_rob_tag),
         .iss_lsb_addr(iss_lsb_addr),
@@ -422,6 +428,7 @@ module CPU_BACK_END #(
         .lsb_data(lsb_data),
         .lsb_rw(lsb_rw),
         .lsb_sw_addr(lsb_sw_addr),
+        .lsb_sw_strb(lsb_sw_strb),
         .lsb_ready(lsb_result_valid),
         .rob_top_ptr(rob_top_ptr)
     );
@@ -442,6 +449,7 @@ module CPU_BACK_END #(
         .cdb_valid(cdb_valid),
         .cdb_rob_tag(cdb_rob_tag),
         .cdb_sw_addr(cdb_sw_addr),
+        .cdb_sw_strb(cdb_sw_strb),
         .cdb_flush(cdb_flush),
         .cdb_rd_phy_addr(cdb_rd_phy_addr),
         .cdb_rd_data(cdb_rd_data),
@@ -464,6 +472,7 @@ module CPU_BACK_END #(
         .lsb_data(lsb_data),
         .lsb_rw(lsb_rw),
         .lsb_sw_addr(lsb_sw_addr),
+        .lsb_sw_strb(lsb_sw_strb),
         .lsb_ready(lsb_result_valid),
         .cdb_upd_branch(cdb_upd_branch),
         .cdb_upd_branch_addr(cdb_upd_branch_addr),

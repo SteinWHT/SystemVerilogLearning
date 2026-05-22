@@ -192,7 +192,7 @@ def classify_instruction(addr: int, instr: int) -> DecodedInstr:
         branch_names = {F3_BEQ: "BEQ", F3_BNE: "BNE", F3_BLT: "BLT",
                         F3_BGE: "BGE", F3_BLTU: "BLTU", F3_BGEU: "BGEU"}
         name = branch_names.get(funct3, f"BRANCH(f3={funct3})")
-        supported = funct3 in (F3_BEQ, F3_BNE)
+        supported = funct3 in (F3_BEQ, F3_BNE, F3_BLT, F3_BGE, F3_BLTU, F3_BGEU)
         reason = "" if supported else f"{name} not implemented (only BEQ/BNE supported)"
         return DecodedInstr(addr, instr, name, supported, reason)
 
@@ -206,13 +206,11 @@ def classify_instruction(addr: int, instr: int) -> DecodedInstr:
 
     # --- LUI ---
     elif opcode == OP_LUI:
-        return DecodedInstr(addr, instr, "LUI", False,
-                            "LUI not implemented — needed for large constants/addresses")
+        return DecodedInstr(addr, instr, "LUI", True)
 
     # --- AUIPC ---
     elif opcode == OP_AUIPC:
-        return DecodedInstr(addr, instr, "AUIPC", False,
-                            "AUIPC not implemented — needed for PC-relative addressing")
+        return DecodedInstr(addr, instr, "AUIPC", True)
 
     # --- RV64 I-type word ops (OP_IMM_32) ---
     elif opcode == OP_IMM_32:

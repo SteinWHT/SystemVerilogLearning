@@ -18,6 +18,7 @@ module CPU_FRONT_END #(
     // D-CACHE
     parameter int unsigned DMEM_WIDTH = 64,
     parameter int unsigned DMEM_DEPTH = 32,
+    parameter int unsigned W_BYTE_NUM = DMEM_WIDTH / 8,
 
     // BPB
     parameter int unsigned BPB_PC_BITS = 3,
@@ -60,11 +61,13 @@ module CPU_FRONT_END #(
 
     // D-CACHE interface
     input logic                                 dcache_valid,
-    input logic                                 dcache_write_done,
+    input logic                                 dcache_resp_valid,
 
     output logic [DMEM_DEPTH-1:0]               dcache_sw_addr,
     output logic [DMEM_WIDTH-1:0]               dcache_sw_data,
+    output logic [W_BYTE_NUM-1:0]               dcache_sw_strb,
     output logic                                dcache_ready,
+    output logic                                dcache_resp_ready,
 
     // back-end interface
     // ISSUEQ interface
@@ -107,6 +110,7 @@ module CPU_FRONT_END #(
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_tag,
     input logic [DMEM_DEPTH-1:0]                cdb_sw_addr,
     input logic [DMEM_WIDTH-1:0]                cdb_sw_data,
+    input logic [W_BYTE_NUM-1:0]                cdb_sw_strb,
     input logic [IMEM_DEPTH-1:0]                cdb_branch_addr,
     input logic [BPB_PC_BITS-1:0]               cdb_br_updt_addr,
     input logic                                 cdb_branch,
@@ -474,11 +478,13 @@ module CPU_FRONT_END #(
         .cdb_rob_tag(cdb_rob_tag),
         .cdb_sw_addr(cdb_sw_addr),
         .cdb_sw_data(cdb_sw_data),
+        .cdb_sw_strb(cdb_sw_strb),
         .cdb_flush(cdb_flush),
 
         .sb_full(sb_full),
         .rob_sw_addr(rob_sw_addr),
         .rob_sw_data(rob_sw_data),
+        .rob_sw_strb(rob_sw_strb),
         .rob_commit_mem_write(rob_commit_mem_write),
 
         .rob_top_ptr(rob_top_ptr),
@@ -502,13 +508,15 @@ module CPU_FRONT_END #(
 
         .rob_sw_addr(rob_sw_addr),
         .rob_sw_data(rob_sw_data),
+        .rob_sw_strb(rob_sw_strb),
         .rob_commit_mem_write(rob_commit_mem_write),
 
         .dcache_valid(dcache_valid),
-        .dcache_write_done(dcache_write_done),
+        .dcache_ready(dcache_ready),
+        .dcache_resp_ready(dcache_resp_ready),
         .dcache_sw_addr(dcache_sw_addr),
         .dcache_sw_data(dcache_sw_data),
-        .dcache_ready(dcache_ready),
+        .dcache_sw_strb(dcache_sw_strb),
 
         .sb_flush_sw_tag(sb_flush_sw_tag),
         .sb_flush_sw(sb_flush_sw),

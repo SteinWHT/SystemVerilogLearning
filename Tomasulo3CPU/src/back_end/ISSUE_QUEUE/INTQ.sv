@@ -4,7 +4,7 @@
 //  jr          jr31    jal         BrPC    BrAddr
 //  1b          1b      1b          3b      32b
 
-module INTQ 
+module INTQ
 import riscv_types_pkg::*;
 #(
     parameter int unsigned XLEN = 64,

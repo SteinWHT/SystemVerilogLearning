@@ -127,7 +127,11 @@ import riscv_types_pkg::*;
     output logic                                iss_lsb_rdy,
 
     // D-Cache Interface
-    input logic                                 dcache_read_busy
+    input logic                                 dcache_valid,
+
+    output logic                                dcache_write,
+    output logic                                dcache_ready,
+    output logic [DMEM_DEPTH-1:0]               dcache_addr
 );
 
     // INTQ-only issue bus (also used for DIV/MUL wakeup)
@@ -368,7 +372,10 @@ import riscv_types_pkg::*;
         .lsq_ld_st_full(issq_ld_stq_full),
         .lsq_ld_st_two_or_more_vacant(issq_ld_stq_two_or_more_vacant),
 
-        .dcache_read_busy(dcache_read_busy),
+        .dcache_valid(dcache_valid),
+        .dcache_write(dcache_write),
+        .dcache_ready(dcache_ready),
+        .dcache_addr(dcache_addr),
 
         .cdb_valid(cdb_valid),
         .cdb_flush(cdb_flush),

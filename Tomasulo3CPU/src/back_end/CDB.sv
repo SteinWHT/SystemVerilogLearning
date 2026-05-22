@@ -11,7 +11,8 @@ module CDB #(
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
     parameter int unsigned ROB_DEPTH = 32,
-    parameter int unsigned BPB_PC_BITS = 3
+    parameter int unsigned BPB_PC_BITS = 3,
+    parameter int unsigned W_BYTE_NUM = DMEM_WIDTH / 8
 ) (
     input logic clk,
     input logic rst_n,
@@ -22,6 +23,7 @@ module CDB #(
     output logic                                cdb_valid,
     output logic [ROB_INDEX_WIDTH-1:0]          cdb_rob_tag,
     output logic [DMEM_DEPTH-1:0]               cdb_sw_addr,
+    output logic [W_BYTE_NUM-1:0]               cdb_sw_strb,
     output logic                                cdb_flush,
 
     // PRF interface
@@ -59,6 +61,7 @@ module CDB #(
     input logic [REG_FILE_DATA_WIDTH-1:0]       lsb_data,
     input logic                                 lsb_rw,
     input logic [DMEM_DEPTH-1:0]                lsb_sw_addr,
+    input logic [W_BYTE_NUM-1:0]                lsb_sw_strb,
     input logic                                 lsb_ready,
 
     //output  logic                             cdb_flush,
@@ -92,6 +95,7 @@ module CDB #(
         logic [BPB_PC_BITS-1:0] branch_pc;
         logic [IMEM_DEPTH-1:0] branch_addr;
         logic [DMEM_DEPTH-1:0] sw_addr;
+        logic [W_BYTE_NUM-1:0] sw_strb;
     } cdb_entry_t;
 
     cdb_entry_t cdb_entry;
@@ -128,7 +132,8 @@ module CDB #(
                 branch: 1'b0,
                 branch_pc: '0,
                 branch_addr: '0,
-                sw_addr: '0
+                sw_addr: '0,
+                sw_strb: '0
             };
         end else begin
             if (exe_valid) begin
@@ -142,7 +147,8 @@ module CDB #(
                     branch: exe_branch,
                     branch_pc: exe_branch_pc_bits,
                     branch_addr: branch_other_addr,
-                    sw_addr: '0
+                    sw_addr: '0,
+                    sw_strb: '0
                 };
                 cdb_jalr_resolved <= jalr_resolved;
             end else if (lsb_ready) begin
@@ -156,7 +162,8 @@ module CDB #(
                     branch: 1'b0,
                     branch_pc: '0,
                     branch_addr: '0,
-                    sw_addr: lsb_sw_addr
+                    sw_addr: lsb_sw_addr,
+                    sw_strb: lsb_sw_strb
                 };
             end else begin
                 valid <= 1'b0;
@@ -172,7 +179,8 @@ module CDB #(
                     branch: 1'b0,
                     branch_pc: '0,
                     branch_addr: '0,
-                    sw_addr: '0
+                    sw_addr: '0,
+                    sw_strb: '0
                 };
             end
         end
@@ -186,6 +194,7 @@ module CDB #(
     assign cdb_flush = cdb_entry.flush;
     assign cdb_branch_addr = cdb_entry.branch_addr;
     assign cdb_sw_addr = cdb_entry.sw_addr;
+    assign cdb_sw_strb = cdb_entry.sw_strb;
 
     assign cdb_rob_depth = cdb_rob_tag - rob_top_ptr;
     assign cdb_upd_branch = cdb_entry.branch;

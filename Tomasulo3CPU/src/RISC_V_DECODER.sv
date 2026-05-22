@@ -187,14 +187,14 @@ module RISC_V_DECODER
             INSTR_SRL, INSTR_SRA, INSTR_OR, INSTR_AND, INSTR_SLL,
             INSTR_MUL, INSTR_DIV, INSTR_REM,
             INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
-            INSTR_SLLI, INSTR_SRLI, INSTR_SRAI, INSTR_LW: begin
+            INSTR_SLLI, INSTR_SRLI, INSTR_SRAI, INSTR_LW, INSTR_LD: begin
                 rw = 1;
                 rd_arch_addr = rd;
                 rs_arch_addr = rs;
                 rt_arch_addr = rt;
                 imm = imm_i;
             end
-            INSTR_SW: begin
+            INSTR_SD, INSTR_SW, INSTR_SB, INSTR_SH: begin
                 mw = 1;
                 rs_arch_addr = rs;
                 rt_arch_addr = rt;

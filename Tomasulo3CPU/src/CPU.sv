@@ -14,6 +14,7 @@ module CPU #(
 
     parameter int unsigned DMEM_WIDTH              = 64,
     parameter int unsigned DMEM_DEPTH              = 32,
+    parameter int unsigned W_BYTE_NUM              = DMEM_WIDTH / 8,
 
     parameter int unsigned BPB_PC_BITS             = 3,
 
@@ -53,18 +54,24 @@ module CPU #(
     output logic [IMEM_DEPTH-1:0]   imem_addr,
 
     // D-Cache read interface
-    input  logic                            dcache_read_busy,
-    input  logic                            dcache_read_done,
+    input  logic                            dcache_rvalid,
+    input  logic                            dcache_rresp_valid,
     input  logic [REG_FILE_DATA_WIDTH-1:0]  dcache_rdata,
-    output logic                            dcache_req,
-    output logic [DMEM_DEPTH-1:0]           dcache_addr,
+    
+    output logic [DMEM_DEPTH-1:0]           dcache_raddr,
+    output logic                            dcache_rready,
+    output logic                            dcache_rresp_ready,
 
     // D-Cache write interface
-    input  logic                    dcache_valid,
-    input  logic                    dcache_write_done,
-    output logic [DMEM_DEPTH-1:0]   dcache_sw_addr,
-    output logic [DMEM_WIDTH-1:0]   dcache_sw_data,
-    output logic                    dcache_ready
+    input  logic                            dcache_wvalid,
+    input  logic                            dcache_wresp_valid,
+    
+    output logic                            dcache_write,
+    output logic [DMEM_WIDTH-1:0]           dcache_sw_data,
+    output logic [W_BYTE_NUM-1:0]           dcache_wstrb,
+    output logic [DMEM_DEPTH-1:0]           dcache_sw_addr,
+    output logic                            dcache_wready,
+    output logic                            dcache_wresp_ready,
 );
 
     // ----------------------------------------------------------------
@@ -177,12 +184,16 @@ module CPU #(
         .imem_addr                       (imem_addr),
 
         // D-Cache write (SB → D-Cache)
-        .dcache_valid                    (dcache_valid),
-        .dcache_write_done               (dcache_write_done),
+        .dcache_valid                    (dcache_wvalid),
+        .dcache_resp_valid               (dcache_wresp_valid),
+
         .dcache_sw_addr                  (dcache_sw_addr),
         .dcache_sw_data                  (dcache_sw_data),
-        .dcache_ready                    (dcache_ready),
-
+        .dcache_sw_strb                  (dcache_sw_strb),
+        .dcache_write                    (dcache_write),
+        .dcache_ready                    (dcache_wready),
+        .dcache_resp_ready               (dcache_wresp_ready),
+        
         // Issue queue status from back-end
         .issue_intq_full                 (issq_intq_full),
         .issue_divq_full                 (issq_divq_full),
@@ -220,7 +231,8 @@ module CPU #(
         .cdb_reg_write                   (cdb_reg_write),
         .cdb_rob_tag                     (cdb_rob_tag),
         .cdb_sw_addr                     (cdb_sw_addr),
-        .cdb_sw_data                     (rt_sb_data),
+        .cdb_sw_data                     (cdb_sw_data),
+        .cdb_sw_strb                     (cdb_sw_strb),
         .cdb_branch_addr                 (cdb_branch_addr),
         .cdb_br_updt_addr                (cdb_upd_branch_addr),
         .cdb_branch                      (cdb_upd_branch),
@@ -308,11 +320,12 @@ module CPU #(
         .sb_entry_sw_addr                (sb_entry_sw_addr),
 
         // D-Cache read
-        .dcache_read_busy                (dcache_read_busy),
-        .dcache_read_done                (dcache_read_done),
+        .dcache_valid                    (dcache_rvalid),
+        .dcache_resp_valid               (dcache_rresp_valid),
         .dcache_rdata                    (dcache_rdata),
-        .dcache_req                      (dcache_req),
-        .dcache_addr                     (dcache_addr),
+        .dcache_addr                     (dcache_raddr),
+        .dcache_ready                    (dcache_rready),
+        .dcache_resp_ready               (dcache_rresp_ready),
 
         // Issue queue status to front-end
         .issq_intq_full                  (issq_intq_full),
@@ -333,6 +346,7 @@ module CPU #(
         .cdb_flush                       (cdb_flush),
         .cdb_rob_depth                   (cdb_rob_depth),
         .cdb_sw_addr                     (cdb_sw_addr),
+        .cdb_sw_strb                     (cdb_sw_strb),
         .cdb_upd_branch                  (cdb_upd_branch),
         .cdb_upd_branch_addr             (cdb_upd_branch_addr),
         .cdb_branch_outcome              (cdb_branch_outcome),

@@ -24,7 +24,8 @@ module ROB #(
     parameter int unsigned DMEM_DEPTH = 32,
     parameter int unsigned ARCH_REG_COUNT = 32,
     parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7
+    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned W_BYTE_NUM = DMEM_WIDTH / 8
 ) (
     input logic clk,
     input logic rst_n,
@@ -46,7 +47,7 @@ module ROB #(
     input logic                                 cdb_valid,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_tag,
     input logic [DMEM_DEPTH-1:0]                cdb_sw_addr,
-
+    input logic [W_BYTE_NUM-1:0]                cdb_sw_strb,
     input logic                                 cdb_flush,
 
     // PRF interface
@@ -56,6 +57,7 @@ module ROB #(
     input logic sb_full,
     output logic [DMEM_DEPTH-1:0]               rob_sw_addr,
     output logic [DMEM_WIDTH-1:0]               rob_sw_data,
+    output logic [W_BYTE_NUM-1:0]               rob_sw_strb,
     output logic                                rob_commit_mem_write,
 
     // FRAT interface
@@ -83,6 +85,7 @@ module ROB #(
         logic                               compl;
         logic [DMEM_DEPTH-1:0]              sw_addr;
         logic [DMEM_WIDTH-1:0]              sw_data;
+        logic [W_BYTE_NUM-1:0]              sw_strb;
     } rob_entry_t;
 
     rob_entry_t ROB_array [ROB_DEPTH];
@@ -116,7 +119,8 @@ module ROB #(
                         mw:       1'b1,
                         compl:    1'b0,
                         sw_addr:  '0,
-                        sw_data:  '0
+                        sw_data:  '0,
+                        sw_strb:  '0
                     };
                 end else begin
                     ROB_array[write_ptr[ROB_INDEX_WIDTH-1:0]] <= '{
@@ -127,7 +131,8 @@ module ROB #(
                         mw:       1'b0,
                         compl:    1'b0,
                         sw_addr:  '0,
-                        sw_data:  '0
+                        sw_data:  '0,
+                        sw_strb:  '0
                     };
                 end
                 write_ptr <= write_ptr + 1;
@@ -141,6 +146,7 @@ module ROB #(
                 if (ROB_array[cdb_rob_tag].mw) begin
                     ROB_array[cdb_rob_tag].sw_addr <= cdb_sw_addr;
                     ROB_array[cdb_rob_tag].sw_data <= cdb_sw_data;
+                    ROB_array[cdb_rob_tag].sw_strb <= cdb_sw_strb;
                 end
                 ROB_array[cdb_rob_tag].compl <= 1'b1;
             end
@@ -168,6 +174,7 @@ module ROB #(
     // SB interface
     assign rob_sw_addr = head.sw_addr;
     assign rob_sw_data = head.sw_data;
+    assign rob_sw_strb = head.sw_strb;
     assign rob_commit_mem_write = head.mw && enable;
 
     // CFC interface

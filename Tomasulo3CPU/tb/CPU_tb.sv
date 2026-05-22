@@ -675,47 +675,47 @@ module CPU_tb;
         check_cdb_result("REM 100%%7 = 2", 2, 64'd2, 50);
 
         // ==============================================================
-        // Test 14: LW instruction
-        // Pre-load D-cache with value, then LW to register
-        // ADDI x1, x0, 0 → LW x2, 0(x1) — read from addr 0
+        // Test 14: LD instruction
+        // Pre-load D-cache with value, then LD to register
+        // ADDI x1, x0, 0 → LD x2, 0(x1) — read from addr 0
         // ==============================================================
         test_num = 14;
-        $display("\n[Test %0d] LW x2, 0(x1) from D-cache", test_num);
+        $display("\n[Test %0d] LD x2, 0(x1) from D-cache", test_num);
         reset_dut();
         load_dmem(32'h0000_0000, 64'hDEAD_BEEF_CAFE_BABE);
-        load_instr(32'h0000_0000, encode_i(12'd0, 5'd0, FUNCT3_LW, 5'd2, OP_LOAD));
+        load_instr(32'h0000_0000, encode_i(12'd0, 5'd0, FUNCT3_LD, 5'd2, OP_LOAD));
 
-        check_cdb_result("LW loaded data", 0, 64'hDEAD_BEEF_CAFE_BABE, 50);
+        check_cdb_result("LD loaded data", 0, 64'hDEAD_BEEF_CAFE_BABE, 50);
 
         // ==============================================================
-        // Test 15: LW with non-zero offset
-        // ADDI x1, x0, 8 → LW x2, 8(x1) — read from addr 16
+        // Test 15: LD with non-zero offset
+        // ADDI x1, x0, 8 → LD x2, 8(x1) — read from addr 16
         // ==============================================================
         test_num = 15;
-        $display("\n[Test %0d] LW x2, 8(x1) with offset", test_num);
+        $display("\n[Test %0d] LD x2, 8(x1) with offset", test_num);
         reset_dut();
         load_dmem(32'h0000_0010, 64'h1234_5678_ABCD_EF00);
         load_instr(32'h0000_0000, encode_i(12'd8, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));
-        load_instr(32'h0000_0004, encode_i(12'd8, 5'd1, FUNCT3_LW, 5'd2, OP_LOAD));
+        load_instr(32'h0000_0004, encode_i(12'd8, 5'd1, FUNCT3_LD, 5'd2, OP_LOAD));
 
         wait_cdb_tag(0); // ADDI x1
-        check_cdb_result("LW from addr 16", 1, 64'h1234_5678_ABCD_EF00, 50);
+        check_cdb_result("LD from addr 16", 1, 64'h1234_5678_ABCD_EF00, 50);
 
         // ==============================================================
-        // Test 16: SW instruction (store to memory)
-        // ADDI x1, x0, 99 → SW x1, 0(x0)
+        // Test 16: SD instruction (store to memory)
+        // ADDI x1, x0, 99 → SD x1, 0(x0)
         // ==============================================================
         test_num = 16;
-        $display("\n[Test %0d] SW x1, 0(x0) store to memory", test_num);
+        $display("\n[Test %0d] SD x1, 0(x0) store to memory", test_num);
         reset_dut();
         load_instr(32'h0000_0000, encode_i(12'd99, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));
-        load_instr(32'h0000_0004, encode_s(12'd0, 5'd1, 5'd0, FUNCT3_SW, OP_STORE));
+        load_instr(32'h0000_0004, encode_s(12'd0, 5'd1, 5'd0, FUNCT3_SD, OP_STORE));
 
         wait_cdb_tag(0); // ADDI x1
-        wait_cdb_tag(1, 50); // SW completes on CDB
+        wait_cdb_tag(1, 50); // SD completes on CDB
         // Wait for ROB to commit and SB to write
         wait_cycles(20);
-        $display("  SW test: store completed (checking commit path)");
+        $display("  SD test: store completed (checking commit path)");
 
         // ==============================================================
         // Test 17: JAL instruction — jump and link
@@ -918,31 +918,31 @@ module CPU_tb;
         check_cdb_result("ADDI x4 = 13", 3, 64'd13);
 
         // ==============================================================
-        // Test 28: LW followed by dependent ADD
+        // Test 28: LD followed by dependent ADD
         // pre-load dmem[0] = 100
-        // LW x1, 0(x0) → ADD x2, x1, x0 (x2 = 100)
+        // LD x1, 0(x0) → ADD x2, x1, x0 (x2 = 100)
         // ==============================================================
         test_num = 28;
-        $display("\n[Test %0d] LW → ADD dependency", test_num);
+        $display("\n[Test %0d] LD → ADD dependency", test_num);
         reset_dut();
         load_dmem(32'h0000_0000, 64'd100);
-        load_instr(32'h0000_0000, encode_i(12'd0, 5'd0, FUNCT3_LW, 5'd1, OP_LOAD));
+        load_instr(32'h0000_0000, encode_i(12'd0, 5'd0, FUNCT3_LD, 5'd1, OP_LOAD));
         load_instr(32'h0000_0004, encode_r(FUNCT7_ZERO, 5'd0, 5'd1, FUNCT3_ADD_SUB, 5'd2, OP_REG));
 
-        check_cdb_result("LW x1 = 100", 0, 64'd100, 50);
-        check_cdb_result("ADD after LW = 100", 1, 64'd100, 50);
+        check_cdb_result("LD x1 = 100", 0, 64'd100, 50);
+        check_cdb_result("ADD after LD = 100", 1, 64'd100, 50);
 
         // ==============================================================
         // Test 29: Multiple stores followed by loads (memory ordering)
-        // SW x1, 0(x0) then SW x2, 8(x0)
+        // SD x1, 0(x0) then SD x2, 8(x0)
         // ==============================================================
         test_num = 29;
         $display("\n[Test %0d] Multiple stores", test_num);
         reset_dut();
         load_instr(32'h0000_0000, encode_i(12'd11, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));
         load_instr(32'h0000_0004, encode_i(12'd22, 5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));
-        load_instr(32'h0000_0008, encode_s(12'd0, 5'd1, 5'd0, FUNCT3_SW, OP_STORE));
-        load_instr(32'h0000_000C, encode_s(12'd8, 5'd2, 5'd0, FUNCT3_SW, OP_STORE));
+        load_instr(32'h0000_0008, encode_s(12'd0, 5'd1, 5'd0, FUNCT3_SD, OP_STORE));
+        load_instr(32'h0000_000C, encode_s(12'd8, 5'd2, 5'd0, FUNCT3_SD, OP_STORE));
 
         wait_cycles(80);
         $display("  Multiple stores test completed");
@@ -1100,9 +1100,9 @@ module CPU_tb;
         load_instr(32'h0000_0004, encode_i(12'd1,   5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));
         load_instr(32'h0000_0008, encode_b(13'd16, 5'd2, 5'd1, FUNCT3_BLT, OP_BRANCH));
         load_instr(32'h0000_000C, encode_i(12'd99, 5'd0, FUNCT3_ADD_SUB, 5'd3, OP_IMM));
-        load_instr(32'h0000_0010, encode_s(12'd0,  5'd3, 5'd0, FUNCT3_SW, OP_STORE));
+        load_instr(32'h0000_0010, encode_s(12'd0,  5'd3, 5'd0, FUNCT3_SD, OP_STORE));
         load_instr(32'h0000_0018, encode_i(12'd42, 5'd0, FUNCT3_ADD_SUB, 5'd4, OP_IMM));
-        load_instr(32'h0000_001C, encode_s(12'd8,  5'd4, 5'd0, FUNCT3_SW, OP_STORE));
+        load_instr(32'h0000_001C, encode_s(12'd8,  5'd4, 5'd0, FUNCT3_SD, OP_STORE));
 
         wait_cycles(120);
         check_val("BLT skipped wrong-path store", dmem_array[0], 64'hCAFE_BABE_0000_0000);
@@ -1122,9 +1122,9 @@ module CPU_tb;
         load_instr(32'h0000_0004, encode_i(12'hFFF, 5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));
         load_instr(32'h0000_0008, encode_b(13'd16, 5'd2, 5'd1, FUNCT3_BLTU, OP_BRANCH));
         load_instr(32'h0000_000C, encode_i(12'd77, 5'd0, FUNCT3_ADD_SUB, 5'd3, OP_IMM));
-        load_instr(32'h0000_0010, encode_s(12'd16, 5'd3, 5'd0, FUNCT3_SW, OP_STORE));
+        load_instr(32'h0000_0010, encode_s(12'd16, 5'd3, 5'd0, FUNCT3_SD, OP_STORE));
         load_instr(32'h0000_0018, encode_i(12'd33, 5'd0, FUNCT3_ADD_SUB, 5'd4, OP_IMM));
-        load_instr(32'h0000_001C, encode_s(12'd24, 5'd4, 5'd0, FUNCT3_SW, OP_STORE));
+        load_instr(32'h0000_001C, encode_s(12'd24, 5'd4, 5'd0, FUNCT3_SD, OP_STORE));
 
         wait_cycles(120);
         check_val("BLTU skipped wrong-path store", dmem_array[2], 64'hBADC_0FFE_0000_0010);
