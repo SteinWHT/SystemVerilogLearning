@@ -109,7 +109,6 @@ module CPU_FRONT_END #(
     input logic                                 cdb_reg_write,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_tag,
     input logic [DMEM_DEPTH-1:0]                cdb_sw_addr,
-    input logic [DMEM_WIDTH-1:0]                cdb_sw_data,
     input logic [W_BYTE_NUM-1:0]                cdb_sw_strb,
     input logic [IMEM_DEPTH-1:0]                cdb_branch_addr,
     input logic [BPB_PC_BITS-1:0]               cdb_br_updt_addr,
@@ -119,18 +118,13 @@ module CPU_FRONT_END #(
     input logic                                 cdb_jalr_resolved,
 
     // PRF interface
-    // input logic prf_rs_data_ready,
-    // input logic prf_rt_data_ready,
-    // input logic [PHY_REGISTER_FILE_WIDTH-1:0] prf_rs_phy_addr,
-    // input logic [PHY_REGISTER_FILE_WIDTH-1:0] prf_rt_phy_addr,
-    // input logic [PHY_REGISTER_FILE_WIDTH-1:0] prf_rd_phy_addr,
-    // input logic prf_reg_write,
-    // input logic [ARCH_REG_WIDTH-1:0] prf_rd_arch_addr,
-    // input logic [DMEM_DEPTH-1:0] prf_sw_addr,
+    input  logic [DMEM_WIDTH-1:0]               rt_sb_data,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rt_sb_phy_addr,
 
     // SAB interface
     output logic [SB_INDEX_WIDTH-1:0]           sb_flush_sw_tag,
     output logic                                sb_flush_sw,
+    output logic                                sb_entry_sw,
     output logic [SB_INDEX_WIDTH-1:0]           sb_entry_sw_tag,
     output logic [DMEM_DEPTH-1:0]               sb_entry_sw_addr,
 
@@ -146,8 +140,8 @@ module CPU_FRONT_END #(
     // IFQ interface
     logic [INSTR_WIDTH-1:0] ifq_instr_out;
     logic ifq_empty;
-    logic [IMEM_WIDTH-1:0] ifq_pc;
-    logic [IMEM_WIDTH-1:0] ifq_pc_plus4;
+    logic [IMEM_DEPTH-1:0] ifq_pc;
+    logic [IMEM_DEPTH-1:0] ifq_pc_plus4;
 
     // DISPATCH interface
     // DISPATCH <-> IFQ
@@ -202,7 +196,7 @@ module CPU_FRONT_END #(
     logic rob_full;
     logic rob_two_or_more_vacant;
     logic [DMEM_DEPTH-1:0] rob_sw_addr;
-    logic [DMEM_WIDTH-1:0] rob_sw_data;
+    logic [W_BYTE_NUM-1:0] rob_sw_strb;
     logic rob_commit_mem_write;
     logic [ROB_INDEX_WIDTH-1:0] rob_top_ptr;
     logic rob_commit;
@@ -477,13 +471,13 @@ module CPU_FRONT_END #(
         .cdb_valid(cdb_valid),
         .cdb_rob_tag(cdb_rob_tag),
         .cdb_sw_addr(cdb_sw_addr),
-        .cdb_sw_data(cdb_sw_data),
         .cdb_sw_strb(cdb_sw_strb),
         .cdb_flush(cdb_flush),
 
+        .rt_sb_phy_addr(rt_sb_phy_addr),
+
         .sb_full(sb_full),
         .rob_sw_addr(rob_sw_addr),
-        .rob_sw_data(rob_sw_data),
         .rob_sw_strb(rob_sw_strb),
         .rob_commit_mem_write(rob_commit_mem_write),
 
@@ -507,19 +501,22 @@ module CPU_FRONT_END #(
         .rst_n(rst_n),
 
         .rob_sw_addr(rob_sw_addr),
-        .rob_sw_data(rob_sw_data),
         .rob_sw_strb(rob_sw_strb),
         .rob_commit_mem_write(rob_commit_mem_write),
 
+        .rt_sb_data(rt_sb_data),
+
         .dcache_valid(dcache_valid),
+        .dcache_resp_valid(dcache_resp_valid),
         .dcache_ready(dcache_ready),
         .dcache_resp_ready(dcache_resp_ready),
         .dcache_sw_addr(dcache_sw_addr),
         .dcache_sw_data(dcache_sw_data),
-        .dcache_sw_strb(dcache_sw_strb),
+        .dcache_wstrb(dcache_sw_strb),
 
         .sb_flush_sw_tag(sb_flush_sw_tag),
         .sb_flush_sw(sb_flush_sw),
+        .sb_entry_sw(sb_entry_sw),
         .sb_entry_sw_tag(sb_entry_sw_tag),
         .sb_entry_sw_addr(sb_entry_sw_addr),
 

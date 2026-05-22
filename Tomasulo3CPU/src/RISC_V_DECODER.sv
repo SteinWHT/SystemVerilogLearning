@@ -121,6 +121,22 @@ module RISC_V_DECODER
                 endcase
             end
 
+            // IMM-32
+            OP_IMM_32: begin
+                unique case (funct3)
+                    FUNCT3_ADD_SUB: instr_type = INSTR_ADDIW;
+                    //FUNCT3_SLL:     instr_type = INSTR_SLLIW;
+                    //FUNCT3_SRL_SRA: begin
+                        //unique case (funct7)
+                            //FUNCT7_ZERO: instr_type = INSTR_SRLIW;
+                            //FUNCT7_ALT:  instr_type = INSTR_SRAIW;
+                            //default:     instr_type = INSTR_NONE;
+                        //endcase
+                    //end
+                    default: instr_type = INSTR_NONE;
+                endcase
+            end
+
             // Load
             OP_LOAD: begin
                 unique case (funct3)
@@ -152,9 +168,9 @@ module RISC_V_DECODER
                     FUNCT3_BEQ: instr_type = INSTR_BEQ;
                     FUNCT3_BNE: instr_type = INSTR_BNE;
                     FUNCT3_BLT: instr_type = INSTR_BLT;
-                    // FUNCT3_BGE: instr_type = INSTR_BGE;
+                    FUNCT3_BGE: instr_type = INSTR_BGE;
                     FUNCT3_BLTU: instr_type = INSTR_BLTU;
-                    // FUNCT3_BGEU: instr_type = INSTR_BGEU;
+                    FUNCT3_BGEU: instr_type = INSTR_BGEU;
                     default:     instr_type = INSTR_NONE;
                 endcase
             end
@@ -187,6 +203,7 @@ module RISC_V_DECODER
             INSTR_SRL, INSTR_SRA, INSTR_OR, INSTR_AND, INSTR_SLL,
             INSTR_MUL, INSTR_DIV, INSTR_REM,
             INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
+            INSTR_ADDIW, //INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
             INSTR_SLLI, INSTR_SRLI, INSTR_SRAI, INSTR_LW, INSTR_LD: begin
                 rw = 1;
                 rd_arch_addr = rd;
@@ -200,7 +217,7 @@ module RISC_V_DECODER
                 rt_arch_addr = rt;
                 imm = imm_s;
             end
-            INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU: begin
+            INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU, INSTR_BGE, INSTR_BGEU: begin
                 branch = 1;
                 rs_arch_addr = rs;
                 rt_arch_addr = rt;

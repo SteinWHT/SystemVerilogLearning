@@ -109,6 +109,7 @@ import riscv_types_pkg::*;
     // SB Interface
     input logic [SB_INDEX_WIDTH-1:0]            sb_flush_sw_tag,
     input logic                                 sb_flush_sw,
+    input logic                                 sb_entry_sw,
     input logic [SB_INDEX_WIDTH-1:0]            sb_entry_sw_tag,
     input logic [DMEM_DEPTH-1:0]                sb_entry_sw_addr,
 
@@ -118,7 +119,7 @@ import riscv_types_pkg::*;
     input logic                                 rob_commit_mem_write,
 
     // LSB Interface
-    input logic                                 iss_lsb_ready,
+    input logic                                 lsb_en,
 
     output logic [OPCODE_WIDTH-1:0]             iss_lsb_opcode,
     output logic [ROB_INDEX_WIDTH-1:0]          iss_lsb_rob_tag,
@@ -129,7 +130,6 @@ import riscv_types_pkg::*;
     // D-Cache Interface
     input logic                                 dcache_valid,
 
-    output logic                                dcache_write,
     output logic                                dcache_ready,
     output logic [DMEM_DEPTH-1:0]               dcache_addr
 );
@@ -351,6 +351,7 @@ import riscv_types_pkg::*;
         // --------------------------------------------------------
         .sb_flush_sw_tag(sb_flush_sw_tag),
         .sb_flush_sw(sb_flush_sw),
+        .sb_entry_sw(sb_entry_sw),
         .sb_entry_sw_tag(sb_entry_sw_tag),
         .sb_entry_sw_addr(sb_entry_sw_addr),
 
@@ -373,7 +374,6 @@ import riscv_types_pkg::*;
         .lsq_ld_st_two_or_more_vacant(issq_ld_stq_two_or_more_vacant),
 
         .dcache_valid(dcache_valid),
-        .dcache_write(dcache_write),
         .dcache_ready(dcache_ready),
         .dcache_addr(dcache_addr),
 
@@ -386,7 +386,7 @@ import riscv_types_pkg::*;
         .iss_rs_data_lsq(iss_rs_data_lsq),
         .iss_rs_phy_addr_ls(iss_rs_phy_addr_ls),
 
-        .lsb_rdy(iss_lsb_ready),
+        .lsb_en(lsb_en),
 
         .iss_lsq_opcode(iss_lsb_opcode),
         .iss_lsq_rob_tag(iss_lsb_rob_tag),

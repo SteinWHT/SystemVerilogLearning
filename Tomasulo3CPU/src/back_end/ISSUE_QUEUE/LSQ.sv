@@ -33,6 +33,7 @@ import riscv_types_pkg::*;
     // SB interface
     input logic [SB_INDEX_WIDTH-1:0]            sb_flush_sw_tag,
     input logic                                 sb_flush_sw,
+    input logic                                 sb_entry_sw,
     input logic [SB_INDEX_WIDTH-1:0]            sb_entry_sw_tag,
     input logic [DMEM_DEPTH-1:0]                sb_entry_sw_addr,
 
@@ -59,7 +60,6 @@ import riscv_types_pkg::*;
     // D-Cache interface
     input logic                                 dcache_valid,
 
-    output logic                                dcache_write,
     output logic                                dcache_ready,
     output logic [DMEM_DEPTH-1:0]               dcache_addr,
 
@@ -81,7 +81,7 @@ import riscv_types_pkg::*;
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_ls,
 
     // LSB interface
-    input logic                                 lsb_rdy,
+    input logic                                 lsb_en,
 
     output logic [OPCODE_WIDTH-1:0]             iss_lsq_opcode,
     output logic [ROB_INDEX_WIDTH-1:0]          iss_lsq_rob_tag,
@@ -178,9 +178,10 @@ import riscv_types_pkg::*;
             match_number[i] = '0;
         end
         for (int i = 0; i < LSQ_DEPTH; i++) begin
-            if (q[i].opcode == INSTR_LW || q[i].opcode == INSTR_LD) begin
+            if (q_valid[i] && (q[i].opcode == INSTR_LW || q[i].opcode == INSTR_LD)) begin
                 for (int j = 0; j < SAB_DEPTH; j++) begin
-                    if (sab_array[j].addr == q[i].addr_offset && sab_valid[j] == 1'b1) begin
+                    if (sab_array[j].addr[DMEM_DEPTH-1:3] == q[i].addr_offset[DMEM_DEPTH-1:3] &&
+                        sab_valid[j] == 1'b1) begin
                         match_number[i] = match_number[i] + 1;
                     end
                 end
@@ -199,15 +200,15 @@ import riscv_types_pkg::*;
     // ISSUE LOGIC:
     // 1. for sw: all the older lw addresses are known, so we can check if the sw address is in the LSQ
     // 2. for sw: sab is not full
-    // 3. for lw: junior counter equals to the match number
-    // 4. for lw: dcache is not busy
+    // 3. for lw: older sw should not have the same address
+    // 4. for lw: junior counter equals to the match number
+    // 5. for lw: dcache is not busy
     always_comb begin
         for (int i = 0; i < LSQ_DEPTH; i++) begin
             q_ready[i]     = q_valid[i] & wk_rs_rdy[i] && q[i].addr_rdy;
             entry_depth[i] = q[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_top_ptr;
         end
 
-        sel_valid = 1'b1;
         sw_valid  = 1'b0;
         lw_valid  = 1'b0;
         sel_idx   = '0;
@@ -220,7 +221,9 @@ import riscv_types_pkg::*;
         for (int i = LSQ_DEPTH - 1; i >= 0; i--) begin
             if (q_ready[i]) begin
                 debug_in = 1'b1;
-                if (q[i].opcode == INSTR_SW || q[i].opcode == INSTR_SD) begin
+                sel_valid = 1'b1;
+                if (q[i].opcode == INSTR_SW || q[i].opcode == INSTR_SD ||
+                    q[i].opcode == INSTR_SB || q[i].opcode == INSTR_SH) begin
                     debug_sw = 1'b1;
                     for (int j = 0; j < LSQ_DEPTH; j++) begin
                         // 1. for sw: all the older lw addresses are known
@@ -238,9 +241,21 @@ import riscv_types_pkg::*;
                     end
                 end else begin
                     debug_lw = 1'b1;
-                    // 3. for lw: junior counter equals to the match number
-                    // 4. for lw: dcache is not busy
-                    if (dcache_valid && junior_counter[i] == match_number[i]) begin
+                    for (int j = 0; j < LSQ_DEPTH; j++) begin
+                        // 3. for lw: older sw should not have the same address
+                        if((j != i) && (q[j].opcode == INSTR_SW || q[j].opcode == INSTR_SD ||
+                            q[j].opcode == INSTR_SB || q[j].opcode == INSTR_SH) &&
+                            (entry_depth[j] < entry_depth[i]) &&
+                            ((q[j].addr_rdy == 1'b0) ||
+                            ((q[j].addr_rdy == 1'b1) &&
+                            q[j].addr_offset[DMEM_DEPTH-1:3] == q[i].addr_offset[DMEM_DEPTH-1:3]))) begin
+                            sel_valid = 1'b0;
+                            break;
+                        end
+                    end
+                    // 4. for lw: junior counter equals to the match number
+                    // 5. for lw: dcache is not busy
+                    if (sel_valid && dcache_valid && junior_counter[i] == match_number[i]) begin
                         sel_idx = i[LSQ_INDEX_WIDTH-1:0];
                         lw_valid = 1'b1;
                     end
@@ -284,11 +299,25 @@ import riscv_types_pkg::*;
 
     // LSQ issues to LSB when an entry is ready and LSB can accept (not ISSUEUNIT).
     logic issue_lsq;
-    assign issue_lsq = sel_valid & ~cdb_flush & lsb_rdy;
+    assign issue_lsq = iss_lsq_rdy & lsb_en;
+    assign iss_lsq_rdy = sel_valid & ~cdb_flush;
 
-    assign dcache_ready = issue_lsq && lw_valid;
-    assign dcache_write = issue_lsq && lw_valid;
-    assign dcache_addr  = q[free_idx].dis_imm;
+    assign dcache_ready = iss_lsq_rdy && (q[sel_idx].opcode == INSTR_LW || q[sel_idx].opcode == INSTR_LD);
+    assign dcache_addr  = q[sel_idx].addr_offset;
+
+    always_comb begin
+        iss_lsq_rob_tag         = '0;
+        iss_lsq_opcode          = INSTR_NONE;
+        iss_lsq_addr            = '0;
+        iss_lsq_phy_addr        = '0;
+
+        if (issue_lsq) begin
+            iss_lsq_rob_tag         = q[sel_idx].rob_tag;
+            iss_lsq_opcode          = q[sel_idx].opcode;
+            iss_lsq_addr            = q[sel_idx].addr_offset;
+            iss_lsq_phy_addr        = q[sel_idx].rd_phy_addr;
+        end
+    end
 
     // State Update
     // Last-write-wins ordering: wakeup -> flush -> addr_calculating -> issue -> dispatch
@@ -324,7 +353,8 @@ import riscv_types_pkg::*;
                 if (flush_mask[i] && q_valid[i]) begin
                     if (q[i].opcode == INSTR_LW || q[i].opcode == INSTR_LD) begin
                         for (int j = 0; j < SAB_DEPTH; j++) begin
-                            if (sab_array[j].addr == q[i].addr_offset && sab_valid[j] == 1'b1 &&
+                            if (sab_array[j].addr[DMEM_DEPTH-1:3] == q[i].addr_offset[DMEM_DEPTH-1:3] &&
+                                sab_valid[j] == 1'b1 &&
                                 sab_entry_depth[j] > cdb_rob_depth) begin
                                 junior_counter[i] <= junior_counter[i] - 1;
                             end
@@ -337,27 +367,18 @@ import riscv_types_pkg::*;
             // Issue: dequeue into LSB (issue_lsq already requires lsb_rdy)
             if (issue_lsq) begin
                 q_valid[sel_idx]        <= 1'b0;
-                iss_lsq_rdy             <= '1;
-                iss_lsq_rob_tag         <= q[sel_idx].rob_tag;
-                iss_lsq_opcode          <= q[sel_idx].opcode;
-                iss_lsq_addr            <= q[sel_idx].addr_offset;
-                iss_lsq_phy_addr        <= q[sel_idx].rd_phy_addr;
 
-                if (q[sel_idx].opcode == INSTR_SW || q[sel_idx].opcode == INSTR_SD) begin
+                if (q[sel_idx].opcode == INSTR_SW || q[sel_idx].opcode == INSTR_SD ||
+                    q[sel_idx].opcode == INSTR_SB || q[sel_idx].opcode == INSTR_SH) begin
                     for (int i = 0; i < LSQ_DEPTH; i++) begin
                         // when sw is issued, the junior counter of the older lw is incremented
-                        if ((q[i].opcode == INSTR_LW || q[i].opcode == INSTR_LD) && (entry_depth[i] < entry_depth[sel_idx]) &&
-                            (q[i].addr_offset == q[sel_idx].addr_offset)) begin
+                        if ((q[i].opcode == INSTR_LW || q[i].opcode == INSTR_LD) &&
+                            (entry_depth[i] < entry_depth[sel_idx]) &&
+                            (q[i].addr_offset[DMEM_DEPTH-1:3] == q[sel_idx].addr_offset[DMEM_DEPTH-1:3])) begin
                             junior_counter[i] <= junior_counter[i] + 1;
                         end
                     end
                 end
-            end else begin
-                iss_lsq_rdy             <= '0;
-                iss_lsq_rob_tag         <= '0;
-                iss_lsq_opcode          <= INSTR_NONE;
-                iss_lsq_addr            <= '0;
-                iss_lsq_phy_addr        <= '0;
             end
 
             // Dispatch: enqueue new entry (suppressed during flush)
@@ -422,9 +443,10 @@ import riscv_types_pkg::*;
             end
         end else begin
             // Issue Store
-            if (issue_lsq && (q[sel_idx].opcode == INSTR_SW || q[sel_idx].opcode == INSTR_SD)) begin
-                sab_valid[q[sel_idx].addr_offset] <= 1'b1;
-                sab_array[q[sel_idx].addr_offset] <= '{
+            if (issue_lsq && (q[sel_idx].opcode == INSTR_SW || q[sel_idx].opcode == INSTR_SD ||
+                q[sel_idx].opcode == INSTR_SB || q[sel_idx].opcode == INSTR_SH)) begin
+                sab_valid[sab_free_idx] <= 1'b1;
+                sab_array[sab_free_idx] <= '{
                     addr: q[sel_idx].addr_offset,
                     rob_tag: q[sel_idx].rob_tag,
                     sb_tag: '0,
@@ -433,9 +455,9 @@ import riscv_types_pkg::*;
             end
 
             // SB Entry
-            if (sb_entry_sw_tag) begin
+            if (sb_entry_sw) begin
                 for (int i = 0; i < SAB_DEPTH; i++) begin
-                    if (sab_array[i].addr == sb_entry_sw_addr && sab_valid[i] == 1'b0) begin
+                    if (sab_array[i].addr == sb_entry_sw_addr && sab_valid[i] == 1'b1) begin
                         sab_array[i].tag_sel <= 1'b1;
                         sab_array[i].sb_tag <= sb_entry_sw_tag;
                     end

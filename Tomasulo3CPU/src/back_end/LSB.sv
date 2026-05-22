@@ -28,7 +28,7 @@ import riscv_types_pkg::*;
     input  logic [DMEM_DEPTH-1:0]              iss_lsb_addr,
     input  logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_lsb_phy_addr,
     input  logic                               iss_lsb_rdy,
-    output logic                               iss_lsb_ready,
+    output logic                               lsb_en,
 
     // Issue Unit Interface
     input  logic                               issue_ld_buf,
@@ -80,7 +80,7 @@ import riscv_types_pkg::*;
     // Ready to accept a new instruction when the buffer has space,
     // the lw_slot is free (so a potential load can be serviced), and
     // no flush is in progress.
-    assign iss_lsb_ready = !lsb_full && !lw_slot_valid && !cdb_flush;
+    assign lsb_en = !lsb_full && !lw_slot_valid && !cdb_flush;
     assign ready_ld_buf  = !lsb_empty && !cdb_flush;
 
     // D-Cache request: active while lw_slot awaits data
@@ -122,7 +122,7 @@ import riscv_types_pkg::*;
     logic [W_BYTE_NUM-1:0] store_strb;
     logic [$clog2(W_BYTE_NUM)-1:0] byte_off;
     assign byte_off = iss_lsb_addr[$clog2(W_BYTE_NUM)-1:0];
-    
+
     always_comb begin
         unique case (iss_lsb_opcode)
             INSTR_SB: store_strb = {{(W_BYTE_NUM-1){1'b0}}, 1'b1}    << byte_off;
@@ -130,6 +130,40 @@ import riscv_types_pkg::*;
             INSTR_SW: store_strb = {{(W_BYTE_NUM-4){1'b0}}, 4'b1111} << byte_off;
             INSTR_SD: store_strb = {W_BYTE_NUM{1'b1}}                << byte_off;
             default:  store_strb = {W_BYTE_NUM{1'b1}};
+        endcase
+    end
+
+    logic [REG_FILE_DATA_WIDTH-1:0] load_data_aligned;
+    logic [2:0] r_byte_off;
+    assign r_byte_off = lw_slot.addr[2:0];
+
+    always_comb begin
+        load_data_aligned = dcache_data;
+        unique case (lw_slot_opcode)
+            INSTR_LB: begin
+                load_data_aligned = {{56{dcache_data[r_byte_off*8 + 7]}}, dcache_data[r_byte_off*8 +: 8]};
+            end
+            INSTR_LBU: begin
+                load_data_aligned = {56'b0, dcache_data[r_byte_off*8 +: 8]};
+            end
+            INSTR_LH: begin
+                load_data_aligned = {{48{dcache_data[r_byte_off*8 + 15]}}, dcache_data[r_byte_off*8 +: 16]};
+            end
+            INSTR_LHU: begin
+                load_data_aligned = {48'b0, dcache_data[r_byte_off*8 +: 16]};
+            end
+            INSTR_LW: begin
+                load_data_aligned = {{32{dcache_data[r_byte_off*8 + 31]}}, dcache_data[r_byte_off*8 +: 32]};
+            end
+            INSTR_LWU: begin
+                load_data_aligned = {32'b0, dcache_data[r_byte_off*8 +: 32]};
+            end
+            INSTR_LD: begin
+                load_data_aligned = dcache_data;
+            end
+            default: begin
+                load_data_aligned = dcache_data;
+            end
         endcase
     end
 
@@ -172,14 +206,14 @@ import riscv_types_pkg::*;
                         rw:       lw_slot.rw,
                         addr:     lw_slot.addr,
                         phy_addr: lw_slot.phy_addr,
-                        data:     lw_slot_opcode == INSTR_LW ? dcache_data[31:0] : dcache_data,
+                        data:     load_data_aligned,
                         strb:     lw_slot.strb
                     };
                     write_ptr     <= write_ptr + 1;
                     lw_slot_valid <= 1'b0;
                 end else begin
                     // Buffer full: park data in lw_slot until space opens
-                    lw_slot.data       <= lw_slot_opcode == INSTR_LW ? dcache_data[31:0] : dcache_data;
+                    lw_slot.data       <= load_data_aligned;
                     lw_slot_data_ready <= 1'b1;
                 end
             end
@@ -193,8 +227,11 @@ import riscv_types_pkg::*;
             end
 
             // Accept new instruction from LSQ
-            if (iss_lsb_rdy && iss_lsb_ready) begin
-                if (iss_lsb_opcode == INSTR_LW || iss_lsb_opcode == INSTR_LD) begin
+            if (iss_lsb_rdy && lsb_en) begin
+                if (iss_lsb_opcode == INSTR_LW  || iss_lsb_opcode == INSTR_LD  ||
+                    iss_lsb_opcode == INSTR_LB  || iss_lsb_opcode == INSTR_LH  ||
+                    iss_lsb_opcode == INSTR_LBU || iss_lsb_opcode == INSTR_LHU ||
+                    iss_lsb_opcode == INSTR_LWU) begin
                     lw_slot <= '{
                         rob_tag:  iss_lsb_rob_tag,
                         rw:       1'b1,
@@ -246,6 +283,8 @@ import riscv_types_pkg::*;
         if (rst_n) begin
             LSB_BUFFER_OVERFLOW: assert (entry_count <= LSB_DEPTH)
                 else $error("LSB: buffer overflow, entry_count = %0d", entry_count);
+            LSB_DCACHE_LATENCY: assert (!(!lw_slot_valid && dcache_resp_ready))
+                else $error("LSB: DCACHE is expected to have at least one cycle latency");
         end
     end
     // synthesis translate_on

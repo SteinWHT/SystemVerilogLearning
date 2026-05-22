@@ -57,7 +57,7 @@ module CPU #(
     input  logic                            dcache_rvalid,
     input  logic                            dcache_rresp_valid,
     input  logic [REG_FILE_DATA_WIDTH-1:0]  dcache_rdata,
-    
+
     output logic [DMEM_DEPTH-1:0]           dcache_raddr,
     output logic                            dcache_rready,
     output logic                            dcache_rresp_ready,
@@ -65,13 +65,13 @@ module CPU #(
     // D-Cache write interface
     input  logic                            dcache_wvalid,
     input  logic                            dcache_wresp_valid,
-    
+
     output logic                            dcache_write,
     output logic [DMEM_WIDTH-1:0]           dcache_sw_data,
     output logic [W_BYTE_NUM-1:0]           dcache_wstrb,
     output logic [DMEM_DEPTH-1:0]           dcache_sw_addr,
     output logic                            dcache_wready,
-    output logic                            dcache_wresp_ready,
+    output logic                            dcache_wresp_ready
 );
 
     // ----------------------------------------------------------------
@@ -115,6 +115,7 @@ module CPU #(
     logic                                cdb_reg_write;
     logic [ROB_INDEX_WIDTH-1:0]          cdb_rob_tag;
     logic [DMEM_DEPTH-1:0]               cdb_sw_addr;
+    logic [W_BYTE_NUM-1:0]               cdb_sw_strb;
     logic [IMEM_DEPTH-1:0]               cdb_branch_addr;
     logic [BPB_PC_BITS-1:0]              cdb_upd_branch_addr;
     logic                                cdb_upd_branch;
@@ -129,10 +130,12 @@ module CPU #(
     logic [ROB_INDEX_WIDTH-1:0]          rob_top_ptr;
     logic                                rob_commit_mem_write;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_curr_phy_addr;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0]  rt_sb_phy_addr;
 
     // SB / SAB interface (front-end → back-end)
     logic [SB_INDEX_WIDTH-1:0]           sb_flush_sw_tag;
     logic                                sb_flush_sw;
+    logic                                sb_entry_sw;
     logic [SB_INDEX_WIDTH-1:0]           sb_entry_sw_tag;
     logic [DMEM_DEPTH-1:0]               sb_entry_sw_addr;
 
@@ -189,11 +192,10 @@ module CPU #(
 
         .dcache_sw_addr                  (dcache_sw_addr),
         .dcache_sw_data                  (dcache_sw_data),
-        .dcache_sw_strb                  (dcache_sw_strb),
-        .dcache_write                    (dcache_write),
+        .dcache_sw_strb                  (dcache_wstrb),
         .dcache_ready                    (dcache_wready),
         .dcache_resp_ready               (dcache_wresp_ready),
-        
+
         // Issue queue status from back-end
         .issue_intq_full                 (issq_intq_full),
         .issue_divq_full                 (issq_divq_full),
@@ -231,7 +233,7 @@ module CPU #(
         .cdb_reg_write                   (cdb_reg_write),
         .cdb_rob_tag                     (cdb_rob_tag),
         .cdb_sw_addr                     (cdb_sw_addr),
-        .cdb_sw_data                     (cdb_sw_data),
+
         .cdb_sw_strb                     (cdb_sw_strb),
         .cdb_branch_addr                 (cdb_branch_addr),
         .cdb_br_updt_addr                (cdb_upd_branch_addr),
@@ -240,9 +242,14 @@ module CPU #(
         .cdb_flush                       (cdb_flush),
         .cdb_jalr_resolved               (cdb_jalr_resolved),
 
+        // PRF interface
+        .rt_sb_phy_addr                 (rt_sb_phy_addr),
+        .rt_sb_data                     (rt_sb_data),
+
         // SB / SAB interface to back-end
         .sb_flush_sw_tag                 (sb_flush_sw_tag),
         .sb_flush_sw                     (sb_flush_sw),
+        .sb_entry_sw                     (sb_entry_sw),
         .sb_entry_sw_tag                 (sb_entry_sw_tag),
         .sb_entry_sw_addr                (sb_entry_sw_addr),
 
@@ -310,12 +317,13 @@ module CPU #(
         .rob_commit_mem_write            (rob_commit_mem_write),
 
         // Store data PRF read port
-        .rt_sb_phy_addr                  (lsb_rd_phy_addr),
+        .rt_sb_phy_addr                  (rt_sb_phy_addr),
         .rt_sb_data                      (rt_sb_data),
 
         // SB / SAB
         .sb_flush_sw_tag                 (sb_flush_sw_tag),
         .sb_flush_sw                     (sb_flush_sw),
+        .sb_entry_sw                     (sb_entry_sw),
         .sb_entry_sw_tag                 (sb_entry_sw_tag),
         .sb_entry_sw_addr                (sb_entry_sw_addr),
 

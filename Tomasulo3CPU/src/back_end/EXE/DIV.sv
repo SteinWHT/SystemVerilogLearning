@@ -19,7 +19,6 @@ import riscv_types_pkg::*;
     input logic [ROB_INDEX_WIDTH-1:0]               rob_tag,
     input logic [OPCODE_WIDTH-1:0]                  opcode,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]       rd_phy_addr,
-    input logic [XLEN-1:0]                          imm,
     input logic                                     valid,
 
     // ISSUE UNIT interface

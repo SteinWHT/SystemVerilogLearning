@@ -53,15 +53,15 @@ module CPU_BACK_END #(
     input logic [ROB_INDEX_WIDTH-1:0]           rob_tag,
     input logic                                 rob_commit_mem_write,
 
-    output logic [REG_FILE_DATA_WIDTH-1:0]      rt_sb_data,
-
     // SB -> LSQ integrated store-address buffer
     input logic [$clog2(SB_DEPTH)-1:0]          sb_flush_sw_tag,
     input logic                                 sb_flush_sw,
+    input logic                                 sb_entry_sw,
     input logic [$clog2(SB_DEPTH)-1:0]          sb_entry_sw_tag,
     input logic [DMEM_DEPTH-1:0]                sb_entry_sw_addr,
 
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   rt_sb_phy_addr,
+    output logic [REG_FILE_DATA_WIDTH-1:0]      rt_sb_data,
 
     // D-cache
     input logic                                 dcache_valid,
@@ -69,7 +69,6 @@ module CPU_BACK_END #(
     input logic [DMEM_WIDTH-1:0]                dcache_rdata,
     output logic                                dcache_ready,
     output logic                                dcache_resp_ready,
-    output logic                                dcache_write,
     output logic [DMEM_DEPTH-1:0]               dcache_addr,
 
     // Issue queue occupancy (to front-end / DISPATCH)
@@ -127,10 +126,11 @@ module CPU_BACK_END #(
     logic exe_div_grant;
     logic exe_mul_grant;
 
-    logic iss_lsb_ready;
+    logic lsb_en;
     logic [OPCODE_WIDTH-1:0] iss_lsb_opcode;
     logic [ROB_INDEX_WIDTH-1:0] iss_lsb_rob_tag;
     logic [DMEM_DEPTH-1:0] iss_lsb_addr;
+    logic [W_BYTE_NUM-1:0] lsb_sw_strb;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_lsb_phy_addr;
     logic iss_lsb_rdy;
 
@@ -271,19 +271,19 @@ module CPU_BACK_END #(
         .iss_exe_branch_pc_bits(iss_exe_branch_pc_bits),
         .sb_flush_sw_tag(sb_flush_sw_tag),
         .sb_flush_sw(sb_flush_sw),
+        .sb_entry_sw(sb_entry_sw),
         .sb_entry_sw_tag(sb_entry_sw_tag),
         .sb_entry_sw_addr(sb_entry_sw_addr),
         .rob_tag(rob_tag),
         .rob_top_ptr(rob_top_ptr),
         .rob_commit_mem_write(rob_commit_mem_write),
-        .iss_lsb_ready(iss_lsb_ready),
+        .lsb_en(lsb_en),
         .iss_lsb_opcode(iss_lsb_opcode),
         .iss_lsb_rob_tag(iss_lsb_rob_tag),
         .iss_lsb_addr(iss_lsb_addr),
         .iss_lsb_phy_addr(iss_lsb_phy_addr),
         .iss_lsb_rdy(iss_lsb_rdy),
         .dcache_valid(dcache_valid),
-        .dcache_write(dcache_write),
         .dcache_ready(dcache_ready),
         .dcache_addr(dcache_addr)
     );
@@ -418,7 +418,7 @@ module CPU_BACK_END #(
         .iss_lsb_addr(iss_lsb_addr),
         .iss_lsb_phy_addr(iss_lsb_phy_addr),
         .iss_lsb_rdy(iss_lsb_rdy),
-        .iss_lsb_ready(iss_lsb_ready),
+        .lsb_en(lsb_en),
         .issue_ld_buf(issue_ld_buf),
         .ready_ld_buf(ready_ld_buf),
         .cdb_flush(cdb_flush),

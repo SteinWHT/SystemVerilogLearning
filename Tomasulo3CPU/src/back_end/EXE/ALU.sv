@@ -52,6 +52,7 @@ import riscv_types_pkg::*;
 
 );
     logic [REG_FILE_DATA_WIDTH-1:0]     result_alu;
+    logic [31:0]                        result_alu_32;
     logic [REG_FILE_DATA_WIDTH-1:0]     jr31_result;
     always_comb begin
         jr31_result = '0;
@@ -64,12 +65,18 @@ import riscv_types_pkg::*;
             INSTR_SLL:      result_alu = rs_data_alu << rt_data_alu;
             INSTR_SLT, INSTR_BLT:      result_alu = $signed(rs_data_alu) < $signed(rt_data_alu);
             INSTR_SLTU, INSTR_BLTU:     result_alu = rs_data_alu < rt_data_alu;
+            INSTR_BGE:                  result_alu = $signed(rs_data_alu) >= $signed(rt_data_alu);
+            INSTR_BGEU:                 result_alu = rs_data_alu >= rt_data_alu;
             INSTR_XOR:      result_alu = rs_data_alu ^ rt_data_alu;
             INSTR_SRL:      result_alu = rs_data_alu >> rt_data_alu;
             INSTR_SRA:      result_alu = rs_data_alu >>> rt_data_alu;
             INSTR_OR:       result_alu = rs_data_alu | rt_data_alu;
             INSTR_AND:      result_alu = rs_data_alu & rt_data_alu;
             INSTR_ADDI:     result_alu = rs_data_alu + imm;
+            INSTR_ADDIW:    begin
+                result_alu_32 = rs_data_alu[31:0] + imm[31:0];
+                result_alu = {{32{result_alu_32[31]}}, result_alu_32};
+            end
 
             INSTR_JAL, INSTR_LUI:      result_alu = imm;
             INSTR_AUIPC:    result_alu = branch_other_addr + imm;
@@ -98,25 +105,24 @@ import riscv_types_pkg::*;
 
     logic                               branch_mispredicted;
     logic [IMEM_DEPTH-1:0]              branch_other_addr_in;
+    logic                               branch_taken;
+    always_comb begin
+        branch_taken = 1'b0;
+        unique case (opcode)
+            INSTR_BEQ:  branch_taken = (result_alu == 0);
+            INSTR_BNE:  branch_taken = (result_alu != 0);
+            INSTR_BLT, INSTR_BLTU, INSTR_BGE, INSTR_BGEU: branch_taken = (result_alu != 0);
+            default:    branch_taken = 1'b0;
+        endcase
+    end
+
     always_comb begin
         branch_mispredicted = 1'b0;
         branch_other_addr_in = branch_other_addr;
-        if (opcode == INSTR_BEQ || opcode == INSTR_BLT || opcode == INSTR_BLTU) begin
-            if (branch_prediction && (result_alu != 0)) begin
-                branch_mispredicted = 1'b0;
-            end else if (!branch_prediction && (result_alu == 0)) begin
-                branch_mispredicted = 1'b0;
-            end else begin
-                branch_mispredicted = 1'b1;
-            end
-        end else if (opcode == INSTR_BNE) begin
-            if (branch_prediction && (result_alu == 0)) begin
-                branch_mispredicted = 1'b0;
-            end else if (!branch_prediction && (result_alu != 0)) begin
-                branch_mispredicted = 1'b0;
-            end else begin
-                branch_mispredicted = 1'b1;
-            end
+        if (opcode == INSTR_BEQ || opcode == INSTR_BNE || 
+            opcode == INSTR_BLT || opcode == INSTR_BLTU || 
+            opcode == INSTR_BGE || opcode == INSTR_BGEU) begin
+            branch_mispredicted = (branch_prediction != branch_taken);
         end else if (opcode == INSTR_JALR) begin
             branch_mispredicted = jr31_result != 0;
             branch_other_addr_in = rs_data_alu;

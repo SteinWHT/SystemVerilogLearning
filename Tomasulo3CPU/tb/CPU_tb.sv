@@ -39,6 +39,7 @@ module CPU_tb;
     parameter int unsigned INT_CYCLES              = 1;
     parameter int unsigned LD_ST_CYCLES            = 1;
     parameter int unsigned OPCODE_WIDTH            = 6;
+    parameter int unsigned W_BYTE_NUM              = DMEM_WIDTH / 8;
 
     // ----------------------------------------------------------------
     // DUT Signals
@@ -51,19 +52,23 @@ module CPU_tb;
     logic                    imem_read_rdy;
     logic [IMEM_DEPTH-1:0]   imem_addr;
 
-    // D-Cache read
-    logic                            dcache_read_busy;
-    logic                            dcache_read_done;
+    // D-Cache read interface
+    logic                            dcache_rvalid;
+    logic                            dcache_rresp_valid;
     logic [REG_FILE_DATA_WIDTH-1:0]  dcache_rdata;
-    logic                            dcache_req;
-    logic [DMEM_DEPTH-1:0]           dcache_addr;
+    logic [DMEM_DEPTH-1:0]           dcache_raddr;
+    logic                            dcache_rready;
+    logic                            dcache_rresp_ready;
 
-    // D-Cache write
-    logic                    dcache_valid;
-    logic                    dcache_write_done;
-    logic [DMEM_DEPTH-1:0]   dcache_sw_addr;
-    logic [DMEM_WIDTH-1:0]   dcache_sw_data;
-    logic                    dcache_ready;
+    // D-Cache write interface
+    logic                            dcache_wvalid;
+    logic                            dcache_wresp_valid;
+    logic                            dcache_write;
+    logic [DMEM_WIDTH-1:0]           dcache_sw_data;
+    logic [W_BYTE_NUM-1:0]           dcache_wstrb;
+    logic [DMEM_DEPTH-1:0]           dcache_sw_addr;
+    logic                            dcache_wready;
+    logic                            dcache_wresp_ready;
 
     logic imem_busy;
 
@@ -100,22 +105,26 @@ module CPU_tb;
         .LD_ST_CYCLES            (LD_ST_CYCLES),
         .OPCODE_WIDTH            (OPCODE_WIDTH)
     ) dut (
-        .clk              (clk),
-        .rst_n            (rst_n),
-        .imem_valid       (imem_valid),
-        .imem_data        (imem_data),
-        .imem_read_rdy    (imem_read_rdy),
-        .imem_addr        (imem_addr),
-        .dcache_read_busy (dcache_read_busy),
-        .dcache_read_done (dcache_read_done),
-        .dcache_rdata     (dcache_rdata),
-        .dcache_req       (dcache_req),
-        .dcache_addr      (dcache_addr),
-        .dcache_valid     (dcache_valid),
-        .dcache_write_done(dcache_write_done),
-        .dcache_sw_addr   (dcache_sw_addr),
-        .dcache_sw_data   (dcache_sw_data),
-        .dcache_ready     (dcache_ready)
+        .clk               (clk),
+        .rst_n             (rst_n),
+        .imem_valid        (imem_valid),
+        .imem_data         (imem_data),
+        .imem_read_rdy     (imem_read_rdy),
+        .imem_addr         (imem_addr),
+        .dcache_rvalid     (dcache_rvalid),
+        .dcache_rresp_valid(dcache_rresp_valid),
+        .dcache_rdata      (dcache_rdata),
+        .dcache_raddr      (dcache_raddr),
+        .dcache_rready     (dcache_rready),
+        .dcache_rresp_ready(dcache_rresp_ready),
+        .dcache_wvalid     (dcache_wvalid),
+        .dcache_wresp_valid(dcache_wresp_valid),
+        .dcache_write      (dcache_write),
+        .dcache_sw_data    (dcache_sw_data),
+        .dcache_wstrb      (dcache_wstrb),
+        .dcache_sw_addr    (dcache_sw_addr),
+        .dcache_wready     (dcache_wready),
+        .dcache_wresp_ready(dcache_wresp_ready)
     );
 
     // ----------------------------------------------------------------
@@ -257,16 +266,18 @@ module CPU_tb;
     logic [REG_FILE_DATA_WIDTH-1:0] cdb_expected_data_by_rob [ROB_DEPTH];
 
     // Read path
+    assign dcache_rvalid = rst_n;
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            dcache_read_done <= 1'b0;
-            dcache_rdata     <= '0;
+            dcache_rresp_valid <= 1'b0;
+            dcache_rdata       <= '0;
         end else begin
-            if (dcache_req && !dcache_read_busy) begin
-                dcache_read_done <= 1'b1;
-                dcache_rdata     <= dmem_array[dcache_addr[DMEM_DEPTH-1:3]];
-            end else begin
-                dcache_read_done <= 1'b0;
+            if (dcache_rready && dcache_rvalid) begin
+                dcache_rresp_valid <= 1'b1;
+                dcache_rdata       <= dmem_array[dcache_raddr[DMEM_DEPTH-1:3]];
+            end else if (dcache_rresp_valid && dcache_rresp_ready) begin
+                dcache_rresp_valid <= 1'b0;
             end
         end
     end
@@ -274,18 +285,21 @@ module CPU_tb;
     // Write path
     // Plain always is intentional: dmem_array is also initialized/preloaded by
     // testbench tasks, which is illegal for an always_ff-written variable.
+    assign dcache_wvalid = rst_n;
+
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            dcache_valid      <= 1'b0;
-            dcache_write_done <= 1'b0;
+            dcache_wresp_valid <= 1'b0;
         end else begin
-            if (dcache_ready) begin
-                dmem_array[dcache_sw_addr[DMEM_DEPTH-1:3]] <= dcache_sw_data;
-                dcache_valid      <= 1'b1;
-                dcache_write_done <= 1'b1;
+            if (dcache_wready && dcache_wvalid) begin
+                for (int i = 0; i < W_BYTE_NUM; i++) begin
+                    if (dcache_wstrb[i]) begin
+                        dmem_array[dcache_sw_addr[DMEM_DEPTH-1:3]][i*8 +: 8] <= dcache_sw_data[i*8 +: 8];
+                    end
+                end
+                dcache_wresp_valid <= 1'b1;
             end else begin
-                dcache_valid      <= 1'b0;
-                dcache_write_done <= 1'b0;
+                dcache_wresp_valid <= 1'b0;
             end
         end
     end
@@ -309,7 +323,6 @@ module CPU_tb;
 
     task automatic reset_dut();
         rst_n = 1'b0;
-        dcache_read_busy = 1'b0;
         for (int i = 0; i < IMEM_SIZE; i++)
             imem_array[i] = nop();
         for (int i = 0; i < DMEM_SIZE; i++)
@@ -448,6 +461,7 @@ module CPU_tb;
     initial begin
         `ifdef FSDB_DUMP
             $fsdbDumpfile("CPU.fsdb");
+            $fsdbDumpvars("+all");
             $fsdbDumpvars(0, CPU_tb);
             $fsdbDumpMDA();
         `else
@@ -466,7 +480,7 @@ module CPU_tb;
         $display("\n[Test %0d] Reset state verification", test_num);
         reset_dut();
         check_bit("imem_read_rdy after reset", imem_read_rdy, 1'b1);
-        check_bit("dcache_req after reset", dcache_req, 1'b0);
+        check_bit("dcache_rready after reset", dcache_rready, 1'b0);
         check_bit("no CDB valid", dut.cdb_valid, 1'b0);
 
         // ==============================================================
@@ -1129,6 +1143,211 @@ module CPU_tb;
         wait_cycles(120);
         check_val("BLTU skipped wrong-path store", dmem_array[2], 64'hBADC_0FFE_0000_0010);
         check_val("BLTU reached target store", dmem_array[3], 64'd33);
+
+        // ==============================================================
+        // Test 39: SB (Store Byte) and LD (Load Doubleword)
+        // Verify byte strobe positioning and dependency tracking on the same address.
+        // We write 0xEF to offset 3 of address 8.
+        // ADDI x1, x0, 8 (base addr)
+        // ADDI x2, x0, 0xEF (data to store)
+        // SB x2, 3(x1) -> writes 0xEF to address 11
+        // LD x3, 0(x1) -> reads 64-bit word from address 8
+        // We expect the read word to contain 0xEF at byte 3, other bytes should be 0.
+        // ==============================================================
+        test_num = 39;
+        $display("\n[Test %0d] SB (Store Byte) at offset 3 and LD", test_num);
+        reset_dut();
+        load_instr(32'h0000_0000, encode_i(12'd8,    5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));   // x1 = 8
+        load_instr(32'h0000_0004, encode_i(12'hEF,   5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));   // x2 = 0xEF
+        load_instr(32'h0000_0008, encode_s(12'd3,    5'd2, 5'd1,           FUNCT3_SB, OP_STORE)); // SB x2, 3(x1) -> addr 11
+        load_instr(32'h0000_000c, encode_i(12'd0,    5'd1, FUNCT3_LD,      5'd3, OP_LOAD));  // LD x3, 0(x1) -> read from addr 8
+
+        wait_cycles(150);
+        check_val("SB byte written to dmem", dmem_array[1], 64'h0000_0000_EF00_0000);
+        check_cdb_result("LD x3 read back stored byte", 3, 64'h0000_0000_EF00_0000, 50);
+
+        // ==============================================================
+        // Test 40: SH (Store Halfword) and LD (Load Doubleword)
+        // Verify partial-word write behavior at offset 2.
+        // We write 0xFFFE to offset 2 of address 8.
+        // ADDI x1, x0, 8 (base addr)
+        // ADDI x2, x0, -2 (data to store, lower 16 bits = 0xFFFE)
+        // SH x2, 2(x1) -> writes 0xFFFE to address 10
+        // LD x3, 0(x1) -> reads 64-bit word from address 8
+        // We expect the read word to contain 0xFFFE at bytes 3:2, other bytes should be 0.
+        // ==============================================================
+        test_num = 40;
+        $display("\n[Test %0d] SH (Store Halfword) at offset 2 and LD", test_num);
+        reset_dut();
+        load_instr(32'h0000_0000, encode_i(12'd8,     5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));   // x1 = 8
+        load_instr(32'h0000_0004, encode_i(12'hFFE,   5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));   // x2 = -2
+        load_instr(32'h0000_0008, encode_s(12'd2,     5'd2, 5'd1,           FUNCT3_SH, OP_STORE)); // SH x2, 2(x1) -> addr 10
+        load_instr(32'h0000_00c, encode_i(12'd0,     5'd1, FUNCT3_LD,      5'd3, OP_LOAD));  // LD x3, 0(x1) -> read from addr 8
+
+        wait_cycles(150);
+        check_val("SH halfword written to dmem", dmem_array[1], 64'h0000_0000_FFFE_0000);
+        check_cdb_result("LD x3 read back stored halfword", 3, 64'h0000_0000_FFFE_0000, 50);
+
+        // ==============================================================
+        // Test 41: SW (Store Word) and LD (Load Doubleword)
+        // Verify 32-bit store strobe behavior at offset 4.
+        // We write 0x1234_5678 to offset 4 of address 8.
+        // ADDI x1, x0, 8 (base addr)
+        // LUI x2, 0x12345
+        // ADDI x2, x2, 0x678
+        // SW x2, 4(x1) -> writes 0x1234_5678 to address 12
+        // LD x3, 0(x1) -> reads 64-bit word from address 8
+        // We expect the read word to contain 0x1234_5678 at bytes 7:4.
+        // ==============================================================
+        test_num = 41;
+        $display("\n[Test %0d] SW (Store Word) at offset 4 and LD", test_num);
+        reset_dut();
+        load_instr(32'h0000_0000, encode_i(12'd8,     5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));   // x1 = 8
+        load_instr(32'h0000_0004, encode_u(20'h12345, 5'd2, OP_LUI));                         // x2 = 0x1234_5000
+        load_instr(32'h0000_0008, encode_i(12'h678,   5'd2, FUNCT3_ADD_SUB, 5'd2, OP_IMM));   // x2 = 0x1234_5678
+        load_instr(32'h0000_000C, encode_s(12'd4,     5'd2, 5'd1,           FUNCT3_SW, OP_STORE)); // SW x2, 4(x1) -> addr 12
+        load_instr(32'h0000_0010, encode_i(12'd0,     5'd1, FUNCT3_LD,      5'd3, OP_LOAD));  // LD x3, 0(x1) -> read from addr 8
+        
+        wait_cycles(150);
+        check_val("SW word written to dmem", dmem_array[1], 64'h1234_5678_0000_0000);
+        check_cdb_result("LD x3 read back stored word", 4, 64'h1234_5678_0000_0000, 50);
+
+        // ==============================================================
+        // Test 42: SD (Store Doubleword) and LD (Load Doubleword)
+        // Verify standard 64-bit store and load.
+        // We write 0xFFFF_FFFF_ABCD_E321 to address 8.
+        // ADDI x1, x0, 8 (base addr)
+        // LUI x2, 0xABCDE
+        // ADDI x2, x2, 0x321
+        // SD x2, 0(x1) -> writes 0xFFFF_FFFF_ABCD_E321 to address 8
+        // LD x3, 0(x1) -> reads 64-bit word from address 8
+        // We expect the read word to contain 0xFFFF_FFFF_ABCD_E321.
+        // ==============================================================
+        test_num = 42;
+        $display("\n[Test %0d] SD (Store Doubleword) and LD", test_num);
+        reset_dut();
+        load_instr(32'h0000_0000, encode_i(12'd8,     5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));   // x1 = 8
+        load_instr(32'h0000_0004, encode_u(20'hABCDE, 5'd2, OP_LUI));                         // x2 = 0xABCDE000 (sign-extended)
+        load_instr(32'h0000_0008, encode_i(12'h321,   5'd2, FUNCT3_ADD_SUB, 5'd2, OP_IMM));   // x2 = 0xFFFF_FFFF_ABCD_E321
+        load_instr(32'h0000_000C, encode_s(12'd0,     5'd2, 5'd1,           FUNCT3_SD, OP_STORE)); // SD x2, 0(x1) -> addr 8
+        load_instr(32'h0000_0010, encode_i(12'd0,     5'd1, FUNCT3_LD,      5'd3, OP_LOAD));  // LD x3, 0(x1) -> read from addr 8
+        
+        wait_cycles(150);
+        check_val("SD doubleword written to dmem", dmem_array[1], 64'hFFFF_FFFF_ABCD_E321);
+        check_cdb_result("LD x3 read back stored doubleword", 4, 64'hFFFF_FFFF_ABCD_E321, 50);
+
+        // ==============================================================
+        // Test 43: LW (Load Word) at offset 0
+        // Verify 32-bit load and sign-extension.
+        // We preload dmem[1] (addr 8) with 64'hABCD_EF01_8765_4321.
+        // ADDI x1, x0, 8 (base addr)
+        // LW x3, 0(x1) -> reads 32-bit word from address 8
+        // We expect the word to be sign-extended to 64'hFFFF_FFFF_8765_4321.
+        // ==============================================================
+        test_num = 43;
+        $display("\n[Test %0d] LW (Load Word) at offset 0 with sign-extension", test_num);
+        reset_dut();
+        load_dmem(32'h0000_0008, 64'hABCD_EF01_8765_4321);
+        load_instr(32'h0000_0000, encode_i(12'd8,     5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));   // x1 = 8
+        load_instr(32'h0000_0004, encode_i(12'd0,     5'd1, FUNCT3_LW,      5'd3, OP_LOAD));  // LW x3, 0(x1) -> read from addr 8
+        
+        wait_cycles(50);
+        check_cdb_result("LW x3 sign-extended word", 1, 64'hFFFF_FFFF_8765_4321, 50);
+
+        // ==============================================================
+        // Test 44: LW (Load Word) at offset 4
+        // Verify 32-bit load from offset 4 and sign-extension.
+        // We preload dmem[1] (addr 8) with 64'h8765_4321_ABCD_EF01.
+        // ADDI x1, x0, 8 (base addr)
+        // LW x3, 4(x1) -> reads 32-bit word from address 12
+        // We expect the word to be sign-extended to 64'hFFFF_FFFF_8765_4321.
+        // ==============================================================
+        test_num = 44;
+        $display("\n[Test %0d] LW (Load Word) at offset 4 with sign-extension", test_num);
+        reset_dut();
+        load_dmem(32'h0000_0008, 64'h8765_4321_ABCD_EF01);
+        load_instr(32'h0000_0000, encode_i(12'd8,     5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));   // x1 = 8
+        load_instr(32'h0000_0004, encode_i(12'd4,     5'd1, FUNCT3_LW,      5'd3, OP_LOAD));  // LW x3, 4(x1) -> read from addr 12
+
+        wait_cycles(50);
+        check_cdb_result("LW x3 sign-extended word from offset 4", 1, 64'hFFFF_FFFF_8765_4321, 50);
+
+        // ==============================================================
+        // Test 45: ADDIW (Add Word Immediate)
+        // Verify 32-bit addition with immediate and sign-extension.
+        // We load preloaded values from memory and perform ADDIW.
+        // Preload:
+        // - dmem[1] (addr 8)  = 64'h1234_5678_8000_0000
+        // - dmem[2] (addr 16) = 64'h1234_5678_FFFF_FFFF
+        // Instructions:
+        // 0: LD x1, 8(x0)        -> x1 = 64'h1234_5678_8000_0000
+        // 4: LD x4, 16(x0)       -> x4 = 64'h1234_5678_FFFF_FFFF
+        // 8: ADDIW x2, x1, 3     -> x2 = 64'hFFFF_FFFF_8000_0003 (8000_0000 + 3 = 8000_0003, sign-extended)
+        // C: ADDIW x3, x1, -1    -> x3 = 64'h0000_0000_7FFF_FFFF (8000_0000 - 1 = 7FFF_FFFF, sign-extended)
+        // 10: ADDIW x5, x4, 1    -> x5 = 64'h0000_0000_0000_0000 (FFFF_FFFF + 1 = 0000_0000, sign-extended)
+        // ==============================================================
+        test_num = 45;
+        $display("\n[Test %0d] ADDIW (Add Word Immediate)", test_num);
+        reset_dut();
+        load_dmem(32'h0000_0008, 64'h1234_5678_8000_0000);
+        load_dmem(32'h0000_0010, 64'h1234_5678_FFFF_FFFF);
+
+        load_instr(32'h0000_0000, encode_i(12'd8,     5'd0, FUNCT3_LD,      5'd1, OP_LOAD));   // LD x1, 8(x0)
+        load_instr(32'h0000_0004, encode_i(12'd16,    5'd0, FUNCT3_LD,      5'd4, OP_LOAD));   // LD x4, 16(x0)
+        load_instr(32'h0000_0008, encode_i(12'd3,     5'd1, FUNCT3_ADD_SUB, 5'd2, OP_IMM_32)); // ADDIW x2, x1, 3
+        load_instr(32'h0000_000C, encode_i(12'hFFF,   5'd1, FUNCT3_ADD_SUB, 5'd3, OP_IMM_32)); // ADDIW x3, x1, -1 (imm = 12'hFFF)
+        load_instr(32'h0000_0010, encode_i(12'd1,     5'd4, FUNCT3_ADD_SUB, 5'd5, OP_IMM_32)); // ADDIW x5, x4, 1
+
+        wait_cycles(150);
+        check_cdb_result("LD x1 loaded value", 0, 64'h1234_5678_8000_0000, 50);
+        check_cdb_result("LD x4 loaded value", 1, 64'h1234_5678_FFFF_FFFF, 50);
+        check_cdb_result("ADDIW x2 with positive imm and negative sign bit", 2, 64'hFFFF_FFFF_8000_0003, 50);
+        check_cdb_result("ADDIW x3 with negative imm and positive sign bit", 3, 64'h0000_0000_7FFF_FFFF, 50);
+        check_cdb_result("ADDIW x5 with positive imm causing overflow", 4, 64'h0000_0000_0000_0000, 50);
+
+        // ==============================================================
+        // Test 46: BGE taken — signed comparison
+        // ADDI x1, x0, 5 → ADDI x2, x0, -5
+        // BGE x1, x2, +16 should skip the wrong-path store
+        // ==============================================================
+        test_num = 46;
+        $display("\n[Test %0d] BGE taken signed compare (5 >= -5)", test_num);
+        reset_dut();
+        load_dmem(32'h0000_0000, 64'hCAFE_BABE_0000_0000);
+        load_dmem(32'h0000_0008, 64'h0);
+        load_instr(32'h0000_0000, encode_i(12'd5,   5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));
+        load_instr(32'h0000_0004, encode_i(12'hFFB, 5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM)); // x2 = -5
+        load_instr(32'h0000_0008, encode_b(13'd16,  5'd2, 5'd1, FUNCT3_BGE, OP_BRANCH));
+        load_instr(32'h0000_000C, encode_i(12'd99,  5'd0, FUNCT3_ADD_SUB, 5'd3, OP_IMM));
+        load_instr(32'h0000_0010, encode_s(12'd0,   5'd3, 5'd0, FUNCT3_SD, OP_STORE));
+        load_instr(32'h0000_0018, encode_i(12'd42,  5'd0, FUNCT3_ADD_SUB, 5'd4, OP_IMM));
+        load_instr(32'h0000_001C, encode_s(12'd8,   5'd4, 5'd0, FUNCT3_SD, OP_STORE));
+
+        wait_cycles(120);
+        check_val("BGE skipped wrong-path store", dmem_array[0], 64'hCAFE_BABE_0000_0000);
+        check_val("BGE reached target store", dmem_array[1], 64'd42);
+
+        // ==============================================================
+        // Test 47: BGEU taken — unsigned comparison
+        // ADDI x1, x0, -5 → ADDI x2, x0, 5
+        // BGEU x1, x2, +16 should skip the wrong-path store
+        // ==============================================================
+        test_num = 47;
+        $display("\n[Test %0d] BGEU taken unsigned compare (0xfff... >= 5)", test_num);
+        reset_dut();
+        load_dmem(32'h0000_0010, 64'hBADC_0FFE_0000_0010);
+        load_dmem(32'h0000_0018, 64'h0);
+        load_instr(32'h0000_0000, encode_i(12'hFFB, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM)); // x1 = -5
+        load_instr(32'h0000_0004, encode_i(12'd5,   5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM)); // x2 = 5
+        load_instr(32'h0000_0008, encode_b(13'd16,  5'd2, 5'd1, FUNCT3_BGEU, OP_BRANCH));
+        load_instr(32'h0000_000C, encode_i(12'd77,  5'd0, FUNCT3_ADD_SUB, 5'd3, OP_IMM));
+        load_instr(32'h0000_0010, encode_s(12'd16,  5'd3, 5'd0, FUNCT3_SD, OP_STORE));
+        load_instr(32'h0000_0018, encode_i(12'd33,  5'd0, FUNCT3_ADD_SUB, 5'd4, OP_IMM));
+        load_instr(32'h0000_001C, encode_s(12'd24,  5'd4, 5'd0, FUNCT3_SD, OP_STORE));
+
+        wait_cycles(120);
+        check_val("BGEU skipped wrong-path store", dmem_array[2], 64'hBADC_0FFE_0000_0010);
+        check_val("BGEU reached target store", dmem_array[3], 64'd33);
 
         // ==============================================================
         // Summary

@@ -288,8 +288,9 @@ import riscv_types_pkg::*;
             INSTR_ADD, INSTR_SUB, INSTR_SLT, INSTR_SLTU, INSTR_XOR,
             INSTR_SRL, INSTR_SRA, INSTR_OR, INSTR_AND, INSTR_SLL,
             INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
+            INSTR_ADDIW, //INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
             INSTR_SLLI, INSTR_SRLI, INSTR_SRAI,
-            INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU,
+            INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU, INSTR_BGE, INSTR_BGEU,
             INSTR_JAL, INSTR_JALR, INSTR_LUI, INSTR_AUIPC: begin
                 if (!issue_intq_full) begin
                     stage1_dis_int_issue_en = 1'b1;
@@ -305,7 +306,7 @@ import riscv_types_pkg::*;
                     stage1_dis_div_issue_en = 1'b1;
                 end
             end
-            INSTR_LD, INSTR_LW,INSTR_SD, INSTR_SW: begin
+            INSTR_LD, INSTR_LW,INSTR_SD, INSTR_SW, INSTR_SB, INSTR_SH: begin
                  if (!issue_ld_stq_full) begin
                     stage1_dis_ld_st_issue_en = 1'b1;
                 end

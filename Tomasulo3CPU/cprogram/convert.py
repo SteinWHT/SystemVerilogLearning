@@ -6,12 +6,12 @@ Reads a `riscv64-unknown-elf-objdump -d` output file, decodes each instruction,
 checks if it's in the supported ISA subset, and outputs a hex file suitable for
 loading into the testbench instruction memory.
 
-Supported instructions (Tomasulo3CPU current ISA):
+  Supported instructions (Tomasulo3CPU current ISA):
   R-type: ADD, SUB, AND, OR, XOR, SLT, SLTU, SLL, SRL, SRA, MUL, DIV, REM
-  I-type: ADDI, ANDI, ORI, XORI, SLTI, SLTIU, SLLI, SRLI, SRAI
-  Load:   LW
-  Store:  SW
-  Branch: BEQ, BNE
+  I-type: ADDI, ANDI, ORI, XORI, SLTI, SLTIU, SLLI, SRLI, SRAI, ADDIW
+  Load:   LD, LW
+  Store:  SB, SH, SW, SD
+  Branch: BEQ, BNE, BLT, BGE, BLTU, BGEU
   Jump:   JAL, JALR
 
 Usage:
@@ -175,16 +175,16 @@ def classify_instruction(addr: int, instr: int) -> DecodedInstr:
         load_names = {F3_LB: "LB", F3_LH: "LH", F3_LW: "LW", F3_LD: "LD",
                       F3_LBU: "LBU", F3_LHU: "LHU", F3_LWU: "LWU"}
         name = load_names.get(funct3, f"LOAD(f3={funct3})")
-        supported = (funct3 == F3_LW)
-        reason = "" if supported else f"{name} not implemented (only LW supported)"
+        supported = funct3 in (F3_LW, F3_LD)
+        reason = "" if supported else f"{name} not implemented (only LW/LD supported)"
         return DecodedInstr(addr, instr, name, supported, reason)
 
     # --- Store (OP_STORE) ---
     elif opcode == OP_STORE:
         store_names = {F3_SB: "SB", F3_SH: "SH", F3_SW: "SW", F3_SD: "SD"}
         name = store_names.get(funct3, f"STORE(f3={funct3})")
-        supported = (funct3 == F3_SW)
-        reason = "" if supported else f"{name} not implemented (only SW supported)"
+        supported = funct3 in (F3_SB, F3_SH, F3_SW, F3_SD)
+        reason = "" if supported else f"{name} not implemented"
         return DecodedInstr(addr, instr, name, supported, reason)
 
     # --- Branch (OP_BRANCH) ---
@@ -193,7 +193,7 @@ def classify_instruction(addr: int, instr: int) -> DecodedInstr:
                         F3_BGE: "BGE", F3_BLTU: "BLTU", F3_BGEU: "BGEU"}
         name = branch_names.get(funct3, f"BRANCH(f3={funct3})")
         supported = funct3 in (F3_BEQ, F3_BNE, F3_BLT, F3_BGE, F3_BLTU, F3_BGEU)
-        reason = "" if supported else f"{name} not implemented (only BEQ/BNE supported)"
+        reason = "" if supported else f"{name} not implemented"
         return DecodedInstr(addr, instr, name, supported, reason)
 
     # --- JAL ---
@@ -216,8 +216,9 @@ def classify_instruction(addr: int, instr: int) -> DecodedInstr:
     elif opcode == OP_IMM_32:
         imm32_names = {F3_ADD_SUB: "ADDIW", F3_SLL: "SLLIW", F3_SRL_SRA: "SRLIW/SRAIW"}
         name = imm32_names.get(funct3, f"IMM32(f3={funct3})")
-        return DecodedInstr(addr, instr, name, False,
-                            "RV64 word-size immediate op not implemented")
+        supported = (funct3 == F3_ADD_SUB)
+        reason = "" if supported else f"{name} not implemented"
+        return DecodedInstr(addr, instr, name, supported, reason)
 
     # --- RV64 R-type word ops (OP_REG_32) ---
     elif opcode == OP_REG_32:
