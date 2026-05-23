@@ -137,7 +137,7 @@ module CPU #(
     logic                                sb_flush_sw;
     logic                                sb_entry_sw;
     logic [SB_INDEX_WIDTH-1:0]           sb_entry_sw_tag;
-    logic [DMEM_DEPTH-1:0]               sb_entry_sw_addr;
+    logic [ROB_INDEX_WIDTH-1:0]          sb_entry_sw_rob_tag;
 
     // Store data path (back-end → front-end)
     logic [REG_FILE_DATA_WIDTH-1:0]      rt_sb_data;
@@ -251,7 +251,7 @@ module CPU #(
         .sb_flush_sw                     (sb_flush_sw),
         .sb_entry_sw                     (sb_entry_sw),
         .sb_entry_sw_tag                 (sb_entry_sw_tag),
-        .sb_entry_sw_addr                (sb_entry_sw_addr),
+        .sb_entry_sw_rob_tag             (sb_entry_sw_rob_tag),
 
         // ROB sideband to back-end
         .rob_bottom_ptr_out              (rob_bottom_ptr),
@@ -325,7 +325,7 @@ module CPU #(
         .sb_flush_sw                     (sb_flush_sw),
         .sb_entry_sw                     (sb_entry_sw),
         .sb_entry_sw_tag                 (sb_entry_sw_tag),
-        .sb_entry_sw_addr                (sb_entry_sw_addr),
+        .sb_entry_sw_rob_tag             (sb_entry_sw_rob_tag),
 
         // D-Cache read
         .dcache_valid                    (dcache_rvalid),

@@ -126,7 +126,7 @@ module CPU_FRONT_END #(
     output logic                                sb_flush_sw,
     output logic                                sb_entry_sw,
     output logic [SB_INDEX_WIDTH-1:0]           sb_entry_sw_tag,
-    output logic [DMEM_DEPTH-1:0]               sb_entry_sw_addr,
+    output logic [ROB_INDEX_WIDTH-1:0]          sb_entry_sw_rob_tag,
 
     // Back-end ROB sideband
     output logic [ROB_INDEX_WIDTH-1:0]          rob_bottom_ptr_out,
@@ -495,11 +495,13 @@ module CPU_FRONT_END #(
     SB #(
         .SB_DEPTH(SB_DEPTH),
         .DMEM_WIDTH(DMEM_WIDTH),
-        .DMEM_DEPTH(DMEM_DEPTH)
+        .DMEM_DEPTH(DMEM_DEPTH),
+        .ROB_DEPTH(ROB_DEPTH)
     ) sb (
         .clk(clk),
         .rst_n(rst_n),
 
+        .rob_top_ptr(rob_top_ptr),
         .rob_sw_addr(rob_sw_addr),
         .rob_sw_strb(rob_sw_strb),
         .rob_commit_mem_write(rob_commit_mem_write),
@@ -518,7 +520,7 @@ module CPU_FRONT_END #(
         .sb_flush_sw(sb_flush_sw),
         .sb_entry_sw(sb_entry_sw),
         .sb_entry_sw_tag(sb_entry_sw_tag),
-        .sb_entry_sw_addr(sb_entry_sw_addr),
+        .sb_entry_sw_rob_tag(sb_entry_sw_rob_tag),
 
         .full(sb_full),
         .empty(sb_empty)

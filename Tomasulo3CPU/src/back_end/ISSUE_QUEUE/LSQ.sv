@@ -35,7 +35,7 @@ import riscv_types_pkg::*;
     input logic                                 sb_flush_sw,
     input logic                                 sb_entry_sw,
     input logic [SB_INDEX_WIDTH-1:0]            sb_entry_sw_tag,
-    input logic [DMEM_DEPTH-1:0]                sb_entry_sw_addr,
+    input logic [ROB_INDEX_WIDTH-1:0]           sb_entry_sw_rob_tag,
 
     // ROB interface
     input logic [ROB_INDEX_WIDTH-1:0]           rob_tag,
@@ -206,7 +206,8 @@ import riscv_types_pkg::*;
     always_comb begin
         for (int i = 0; i < LSQ_DEPTH; i++) begin
             q_ready[i]     = q_valid[i] & wk_rs_rdy[i] && q[i].addr_rdy;
-            entry_depth[i] = q[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_top_ptr;
+            entry_depth[i] = q_valid[i] ? (q[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_top_ptr) :
+                            {ROB_INDEX_WIDTH{1'b1}};
         end
 
         sw_valid  = 1'b0;
@@ -228,7 +229,7 @@ import riscv_types_pkg::*;
                     for (int j = 0; j < LSQ_DEPTH; j++) begin
                         // 1. for sw: all the older lw addresses are known
                         // 2. for sw: sab is not full
-                        if(!sab_full && (j != i) && (q[j].opcode == INSTR_LW || q[j].opcode == INSTR_LD) &&
+                        if(!sab_full && (j != i) && q_valid[j] && (q[j].opcode == INSTR_LW || q[j].opcode == INSTR_LD) &&
                         (entry_depth[j] < entry_depth[i])
                             && ((q[j].addr_rdy == 1'b0)) ) begin
                             sel_valid = 1'b0;
@@ -243,7 +244,7 @@ import riscv_types_pkg::*;
                     debug_lw = 1'b1;
                     for (int j = 0; j < LSQ_DEPTH; j++) begin
                         // 3. for lw: older sw should not have the same address
-                        if((j != i) && (q[j].opcode == INSTR_SW || q[j].opcode == INSTR_SD ||
+                        if(q_valid[j] && (j != i) && (q[j].opcode == INSTR_SW || q[j].opcode == INSTR_SD ||
                             q[j].opcode == INSTR_SB || q[j].opcode == INSTR_SH) &&
                             (entry_depth[j] < entry_depth[i]) &&
                             ((q[j].addr_rdy == 1'b0) ||
@@ -457,7 +458,9 @@ import riscv_types_pkg::*;
             // SB Entry
             if (sb_entry_sw) begin
                 for (int i = 0; i < SAB_DEPTH; i++) begin
-                    if (sab_array[i].addr == sb_entry_sw_addr && sab_valid[i] == 1'b1) begin
+                    if ((sab_array[i].tag_sel == 1'b0) &&
+                        (sab_array[i].rob_tag == sb_entry_sw_rob_tag) &&
+                        (sab_valid[i] == 1'b1)) begin
                         sab_array[i].tag_sel <= 1'b1;
                         sab_array[i].sb_tag <= sb_entry_sw_tag;
                     end
@@ -467,8 +470,8 @@ import riscv_types_pkg::*;
             // SB Flush
             if (sb_flush_sw) begin
                 for (int i = 0; i < SAB_DEPTH; i++) begin
-                    if (sab_array[i].sb_tag == sb_flush_sw_tag &&
-                        sab_array[i].tag_sel == 1'b1) begin
+                    if ((sab_array[i].tag_sel == 1'b1) &&
+                        (sab_array[i].sb_tag == sb_flush_sw_tag)) begin
                         sab_valid[i] <= 1'b0;
                     end
                 end

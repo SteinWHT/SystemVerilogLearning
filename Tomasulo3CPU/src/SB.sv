@@ -1,6 +1,8 @@
 module SB #(
     parameter int unsigned SB_DEPTH = 4,
     parameter int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH),
+    parameter int unsigned ROB_DEPTH = 32,
+    parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
     parameter int unsigned DMEM_WIDTH = 64,
     parameter int unsigned DMEM_DEPTH = 32,
     parameter int unsigned W_BYTE_NUM = DMEM_WIDTH / 8
@@ -9,6 +11,7 @@ module SB #(
     input logic rst_n,
 
     // ROB interface
+    input logic [ROB_INDEX_WIDTH-1:0]   rob_top_ptr,
     input logic [DMEM_DEPTH-1:0]        rob_sw_addr,
     input logic [W_BYTE_NUM-1:0]        rob_sw_strb,
     input logic                         rob_commit_mem_write,
@@ -31,8 +34,7 @@ module SB #(
     output logic                        sb_flush_sw,
     output logic                        sb_entry_sw,
     output logic [SB_INDEX_WIDTH-1:0]   sb_entry_sw_tag,
-    // TODO: check if this is needed
-    output logic [DMEM_DEPTH-1:0]       sb_entry_sw_addr,
+    output logic [ROB_INDEX_WIDTH-1:0]  sb_entry_sw_rob_tag,
 
     output logic                        full,
     output logic                        empty
@@ -56,14 +58,15 @@ module SB #(
             end
         end else begin
             if (rob_commit_mem_write && !full) begin
-                sb_array[write_ptr[SB_INDEX_WIDTH-1:0]] <= 
+                sb_array[write_ptr[SB_INDEX_WIDTH-1:0]] <=
                     '{sw_addr: rob_sw_addr,
                       sw_data: rt_sb_data,
                       sw_strb: rob_sw_strb};
-                write_ptr <= write_ptr + 1;
-                sb_entry_sw_tag <= write_ptr[SB_INDEX_WIDTH-1:0];
-                sb_entry_sw     <= 1'b1;
-                sb_entry_sw_addr <= rob_sw_addr;
+
+                write_ptr           <= write_ptr + 1;
+                sb_entry_sw_tag     <= write_ptr[SB_INDEX_WIDTH-1:0];
+                sb_entry_sw         <= 1'b1;
+                sb_entry_sw_rob_tag <= rob_top_ptr;
             end else begin
                 sb_entry_sw <= 1'b0;
             end
@@ -87,7 +90,7 @@ module SB #(
 
     assign dcache_sw_addr = sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]].sw_addr;
     assign dcache_sw_data = sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]].sw_data <<
-                            (sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]].sw_addr[2:0] * 8);
+                            {sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]].sw_addr[2:0], 3'b000};
     assign dcache_wstrb = sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]].sw_strb;
     assign dcache_ready = !empty;
     assign dcache_resp_ready = (read_ptr_lead != read_ptr_trail);

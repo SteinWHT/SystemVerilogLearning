@@ -235,14 +235,14 @@ import riscv_types_pkg::*;
             (stage1_valid && stage1_dis_jr31_inst) ||
             (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) ||
             (cdb_flush && cdb_valid);
-    assign jal_target    = IMEM_DEPTH'(stage1_dis_imm);
+    assign jal_target    = IMEM_DEPTH'(stage1_dis_imm + ifetch_pc);
     assign branch_target = (ifetch_pc + IMEM_DEPTH'(stage1_dis_imm));
     assign dis_jmpbr_addr =
+            (cdb_flush && cdb_valid) ? cdb_branch_addr[IMEM_DEPTH-1:1] :
             (stage1_valid && stage1_dis_jr31_inst) ? ras_addr :
             (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) ? jal_target[IMEM_DEPTH-1:1] :
             (stage1_valid && stage1_dis_branch && bpb_branch_prediction) ?
             branch_target[IMEM_DEPTH-1:1] :
-            (cdb_flush && cdb_valid) ? cdb_branch_addr[IMEM_DEPTH-1:1] :
             '0;
     assign stage1_branch_taken = stage1_dis_branch && bpb_branch_prediction;
     // Rename source and destination registers.

@@ -111,7 +111,7 @@ import riscv_types_pkg::*;
     input logic                                 sb_flush_sw,
     input logic                                 sb_entry_sw,
     input logic [SB_INDEX_WIDTH-1:0]            sb_entry_sw_tag,
-    input logic [DMEM_DEPTH-1:0]                sb_entry_sw_addr,
+    input logic [ROB_INDEX_WIDTH-1:0]           sb_entry_sw_rob_tag,
 
     // ROB Interface
     input logic [ROB_INDEX_WIDTH-1:0]           rob_tag,
@@ -353,7 +353,7 @@ import riscv_types_pkg::*;
         .sb_flush_sw(sb_flush_sw),
         .sb_entry_sw(sb_entry_sw),
         .sb_entry_sw_tag(sb_entry_sw_tag),
-        .sb_entry_sw_addr(sb_entry_sw_addr),
+        .sb_entry_sw_rob_tag(sb_entry_sw_rob_tag),
 
         .rob_tag(rob_tag),
         .rob_top_ptr(rob_top_ptr),

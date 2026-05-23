@@ -56,6 +56,8 @@ module FRAT #(
     // round robin pointer
     logic [CHECKPOINT_PTR_WIDTH:0] checkpoint_head, checkpoint_tail;
 
+    logic empty;
+
     // Parallel compare to find the checkpoint matching the mispredicting branch
     logic [CHECKPOINT_PTR_WIDTH-1:0] mispredict_slot;
     logic mispredict_found;
@@ -63,18 +65,29 @@ module FRAT #(
     always_comb begin
         mispredict_slot  = '0;
         mispredict_found = 1'b0;
+        mispredict_wrap  = 1'b0;
         for (int i = 0; i < NUM_CHECKPOINT; i++) begin
-            if (checkpoint_tag_array[i] == mispredict_rob_tag) begin
+            logic [CHECKPOINT_PTR_WIDTH:0] ptr1, ptr2;
+            logic [CHECKPOINT_PTR_WIDTH:0] dist1, dist2;
+            logic [CHECKPOINT_PTR_WIDTH:0] max_dist;
+            logic is_active1, is_active2;
+
+            ptr1 = {checkpoint_tail[CHECKPOINT_PTR_WIDTH], CHECKPOINT_PTR_WIDTH'(i)};
+            ptr2 = {~checkpoint_tail[CHECKPOINT_PTR_WIDTH], CHECKPOINT_PTR_WIDTH'(i)};
+
+            dist1 = ptr1 - checkpoint_tail;
+            dist2 = ptr2 - checkpoint_tail;
+            max_dist = checkpoint_head - checkpoint_tail;
+
+            is_active1 = (dist1 < max_dist);
+            is_active2 = (dist2 < max_dist);
+
+            if ((is_active1 || is_active2) && (checkpoint_tag_array[i] == mispredict_rob_tag)) begin
                 mispredict_slot  = CHECKPOINT_PTR_WIDTH'(i);
                 mispredict_found = 1'b1;
+                mispredict_wrap  = is_active1 ? ptr1[CHECKPOINT_PTR_WIDTH] : ptr2[CHECKPOINT_PTR_WIDTH];
             end
         end
-        // Reconstruct the correct wrap bit for the full pointer:
-        // if mispredict_slot >= tail index, it's in the same "lap" as tail;
-        // if mispredict_slot < tail index, it's in the next "lap".
-        mispredict_wrap = (mispredict_slot >= checkpoint_tail[CHECKPOINT_PTR_WIDTH-1:0]) ?
-                           checkpoint_tail[CHECKPOINT_PTR_WIDTH] :
-                           ~checkpoint_tail[CHECKPOINT_PTR_WIDTH];
     end
 
     always_ff @(posedge clk or negedge rst_n) begin
@@ -90,7 +103,7 @@ module FRAT #(
             end
         end else begin
             // branch commit: free the oldest checkpoint when its branch commits
-            if (rob_commit && rob_top_ptr ==
+            if (!empty && rob_commit && rob_top_ptr ==
                 checkpoint_tag_array[checkpoint_tail[CHECKPOINT_PTR_WIDTH-1:0]]) begin
                 checkpoint_tail <= checkpoint_tail + 1;
             end
@@ -132,9 +145,10 @@ module FRAT #(
 
     assign full = (checkpoint_head[CHECKPOINT_PTR_WIDTH] != checkpoint_tail[CHECKPOINT_PTR_WIDTH])
         && (checkpoint_head[CHECKPOINT_PTR_WIDTH-1:0] == checkpoint_tail[CHECKPOINT_PTR_WIDTH-1:0]);
+    assign empty = (checkpoint_head == checkpoint_tail);
     assign frat_frl_head_ptr = (branch_mispredict && mispredict_found) ?
                                 checkpoint_frl_head_ptr[mispredict_slot] :
-                                checkpoint_frl_head_ptr[checkpoint_tail[CHECKPOINT_PTR_WIDTH-1:0]];
+                                frl_head_ptr;
 
     // synthesis translate_off
     // always_ff @(posedge clk) begin

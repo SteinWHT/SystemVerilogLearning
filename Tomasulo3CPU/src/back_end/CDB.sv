@@ -119,11 +119,40 @@ module CDB #(
         end
     end
 
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            valid <= 1'b0;
-            cdb_jalr_resolved <= 1'b0;
-            cdb_entry <= '{
+    always_comb begin
+        if (exe_valid) begin
+            valid = 1'b1;
+            cdb_entry = '{
+                rob_tag: exe_rob_tag,
+                addr: exe_rd_phy_addr,
+                data: exe_rd_data,
+                rw: exe_reg_write,
+                flush: flush,
+                branch: exe_branch,
+                branch_pc: exe_branch_pc_bits,
+                branch_addr: branch_other_addr,
+                sw_addr: '0,
+                sw_strb: '0
+            };
+            cdb_jalr_resolved = jalr_resolved;
+        end else if (lsb_ready) begin
+            valid = 1'b1;
+            cdb_entry = '{
+                rob_tag: lsb_rob_tag,
+                addr: lsb_rd_phy_addr,
+                data: lsb_data,
+                rw: lsb_rw,
+                flush: 1'b0,
+                branch: 1'b0,
+                branch_pc: '0,
+                branch_addr: '0,
+                sw_addr: lsb_sw_addr,
+                sw_strb: lsb_sw_strb
+            };
+            cdb_jalr_resolved = 1'b0;
+        end else begin
+            valid = 1'b0;
+            cdb_entry = '{
                 rob_tag: '0,
                 addr: '0,
                 data: '0,
@@ -135,54 +164,7 @@ module CDB #(
                 sw_addr: '0,
                 sw_strb: '0
             };
-        end else begin
-            if (exe_valid) begin
-                valid <= 1'b1;
-                cdb_entry <= '{
-                    rob_tag: exe_rob_tag,
-                    addr: exe_rd_phy_addr,
-                    data: exe_rd_data,
-                    rw: exe_reg_write,
-                    flush: flush,
-                    branch: exe_branch,
-                    branch_pc: exe_branch_pc_bits,
-                    branch_addr: branch_other_addr,
-                    sw_addr: '0,
-                    sw_strb: '0
-                };
-                cdb_jalr_resolved <= jalr_resolved;
-            end else if (lsb_ready) begin
-                valid <= 1'b1;
-                cdb_entry <= '{
-                    rob_tag: lsb_rob_tag,
-                    addr: lsb_rd_phy_addr,
-                    data: lsb_data,
-                    rw: lsb_rw,
-                    flush: 1'b0,
-                    branch: 1'b0,
-                    branch_pc: '0,
-                    branch_addr: '0,
-                    sw_addr: lsb_sw_addr,
-                    sw_strb: lsb_sw_strb
-                };
-            end else begin
-                valid <= 1'b0;
-                // Robust design
-                // Previous some designs didn't detect valid first.
-                // TODO: correct those designs.
-                cdb_entry <= '{
-                    rob_tag: '0,
-                    addr: '0,
-                    data: '0,
-                    rw: 1'b0,
-                    flush: 1'b0,
-                    branch: 1'b0,
-                    branch_pc: '0,
-                    branch_addr: '0,
-                    sw_addr: '0,
-                    sw_strb: '0
-                };
-            end
+            cdb_jalr_resolved = 1'b0;
         end
     end
 

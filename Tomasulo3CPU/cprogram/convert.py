@@ -305,22 +305,25 @@ def generate_verilog_hex(instructions: List[Tuple[int, int, str]],
     Generate a Verilog $readmemh compatible hex file.
     Format: one 32-bit hex word per line, optionally with @address prefix.
     """
-    # Build a memory image (word-addressed)
+    # Build a memory image (word-addressed) and comments dictionary
     mem = [0] * (mem_size // 4)
+    comments = {}
 
     for addr, instr, asm in instructions:
         word_idx = addr // 4
         if word_idx < len(mem):
             mem[word_idx] = instr
+            comments[word_idx] = f"0x{addr:04x}: {asm}"
 
     with open(output_file, 'w') as f:
         f.write(f"// Auto-generated from RISC-V objdump\n")
         f.write(f"// Total instructions: {len(instructions)}\n")
         for i, word in enumerate(mem):
+            comment = f"  // {comments[i]}" if i in comments else ""
             if word != 0:
-                f.write(f"@{i:04X} {word:08X}\n")
+                f.write(f"@{i:04X} {word:08X}{comment}\n")
             elif i < len(instructions):
-                f.write(f"@{i:04X} {word:08X}\n")
+                f.write(f"@{i:04X} {word:08X}{comment}\n")
 
     print(f"  Verilog hex written to: {output_file}")
     print(f"  Memory size: {mem_size} bytes ({mem_size // 4} words)")
@@ -426,9 +429,9 @@ def main():
     for (addr, instr, asm), d in zip(instructions, decoded):
         if d.supported or args.force:
             out_instr = instr if d.supported else nop
-            out_instrs.append((addr, out_instr, asm if d.supported else f"NOP (was: {d.name})"))
+            output_instrs.append((addr, out_instr, asm if d.supported else f"NOP (was: {d.name})"))
         else:
-            out_instrs.append((addr, instr, asm))
+            output_instrs.append((addr, instr, asm))
 
     if args.format == "verilog":
         generate_verilog_hex(output_instrs, args.output, args.mem_size)

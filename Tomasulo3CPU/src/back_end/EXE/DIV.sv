@@ -27,7 +27,9 @@ import riscv_types_pkg::*;
     // CDB interface
     input logic [ROB_INDEX_WIDTH-1:0]               cdb_flush,
     input logic [ROB_INDEX_WIDTH-1:0]               cdb_rob_depth,
-    input logic [ROB_INDEX_WIDTH-1:0]               cdb_rob_tag,
+
+    // ROB interface
+    input logic [ROB_INDEX_WIDTH-1:0]               rob_top_ptr,
 
     output logic [ROB_INDEX_WIDTH-1:0]              exe_rob_tag,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      exe_rd_phy_addr,
@@ -68,7 +70,7 @@ import riscv_types_pkg::*;
     always_comb begin
         killed = 1'b0;
         if (cdb_flush)
-            killed = (cdb_rob_depth < (div_rob_tag - cdb_rob_tag));
+            killed = (cdb_rob_depth < (div_rob_tag - rob_top_ptr));
     end
 
     always_ff @(posedge clk or negedge rst_n) begin

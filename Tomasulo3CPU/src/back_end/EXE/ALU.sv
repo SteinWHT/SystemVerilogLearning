@@ -35,7 +35,9 @@ import riscv_types_pkg::*;
     input logic                                     valid,
 
     // CDB interface
-    input logic [ROB_INDEX_WIDTH-1:0]               cdb_flush,
+    input logic                                     cdb_flush,
+    input logic [ROB_INDEX_WIDTH-1:0]               cdb_rob_depth,
+    input logic [ROB_INDEX_WIDTH-1:0]               rob_top_ptr,
 
     output logic                                    exe_valid,
     output logic [ROB_INDEX_WIDTH-1:0]              exe_rob_tag,
@@ -63,10 +65,12 @@ import riscv_types_pkg::*;
             INSTR_SUB, INSTR_BEQ, INSTR_BNE:      result_alu = rs_data_alu - rt_data_alu;
 
             INSTR_SLL:      result_alu = rs_data_alu << rt_data_alu;
-            INSTR_SLT, INSTR_BLT:      result_alu = $signed(rs_data_alu) < $signed(rt_data_alu);
+
+            INSTR_SLT,  INSTR_BLT:      result_alu = $signed(rs_data_alu) < $signed(rt_data_alu);
             INSTR_SLTU, INSTR_BLTU:     result_alu = rs_data_alu < rt_data_alu;
             INSTR_BGE:                  result_alu = $signed(rs_data_alu) >= $signed(rt_data_alu);
             INSTR_BGEU:                 result_alu = rs_data_alu >= rt_data_alu;
+
             INSTR_XOR:      result_alu = rs_data_alu ^ rt_data_alu;
             INSTR_SRL:      result_alu = rs_data_alu >> rt_data_alu;
             INSTR_SRA:      result_alu = rs_data_alu >>> rt_data_alu;
@@ -80,7 +84,7 @@ import riscv_types_pkg::*;
 
             INSTR_JAL, INSTR_LUI:      result_alu = imm;
             INSTR_AUIPC:    result_alu = branch_other_addr + imm;
-            
+
             INSTR_JALR:     begin
                 if(jr31_inst) begin
                     result_alu = imm;
@@ -116,11 +120,22 @@ import riscv_types_pkg::*;
         endcase
     end
 
+    logic flush_issue;
+
+    always_comb begin
+        flush_issue = 1'b0;
+        if (cdb_flush) begin
+            if (cdb_rob_depth < (rob_tag - rob_top_ptr)) begin
+                flush_issue = 1'b1;
+            end
+        end
+    end
+
     always_comb begin
         branch_mispredicted = 1'b0;
         branch_other_addr_in = branch_other_addr;
-        if (opcode == INSTR_BEQ || opcode == INSTR_BNE || 
-            opcode == INSTR_BLT || opcode == INSTR_BLTU || 
+        if (opcode == INSTR_BEQ || opcode == INSTR_BNE ||
+            opcode == INSTR_BLT || opcode == INSTR_BLTU ||
             opcode == INSTR_BGE || opcode == INSTR_BGEU) begin
             branch_mispredicted = (branch_prediction != branch_taken);
         end else if (opcode == INSTR_JALR) begin
@@ -144,7 +159,7 @@ import riscv_types_pkg::*;
             exe_branch_pc_bits      <= '0;
             exe_branch_other_addr   <= '0;
         end else begin
-            if (cdb_flush) begin
+            if (flush_issue) begin
                 exe_valid <= 1'b0;
             end else if (valid) begin
                 exe_valid               <= valid;
