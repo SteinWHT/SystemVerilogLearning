@@ -1,27 +1,34 @@
 // 32 entries
-// ROB Entry Format for non-SW instruction:
-// curr_phy         prev_phy        rd_addr         rw          mw          compl       sw_addr(unused)     total
-// 6bits            6bits           5bits           1bit        1bit        1bit        21bits              41bits
-// ROB Entry Format for SW instruction:
-// curr_phy         sw_addr1        rw              mw          compl       sw_addr2    total
-// 6bits            11bits          1bit            1bit        1bit        21bits      41bits
+// ROB Entry Format for instruction:
+// curr_phy         prev_phy        rd_addr         rw          mw          compl       sw_addr     total
+// 6bits            6bits           5bits           1bit        1bit        1bit        32bits      64bits
 // curr_phy: the current physical register index with stored data
 // prev_phy: the previous physical register index with stored data
 // rd_addr: the architectural address of the destination register
 // rw: 1: register write for load instruction, integer and JAL instructions
 // mw: 1: memory write for store instruction
 // compl: 1 for completed, 0 for not completed
-// sw_addr1: the 11 bits of the store address part1
-// sw_addr2: the 21 bits of the store address part2
+// sw_addr: the 32 bits of the store address
+// pc: the program counter of the instruction
+// trap_occur: 1 for trap occurred, 0 for not occurred
+// trap_cause: the cause of the trap
+// is_csr: 1 for CSR instruction, 0 for non-CSR instruction
+// csr_addr: the address of the CSR
+// csr_cmd: the command of the CSR
 
 // read ptr = top ptr -> commit from the top
 // write ptr = bottom ptr -> dispatch from the bottom
 
-module ROB #(
+module ROB (
+    import riscv_types_pkg::*;
+)
+#(
     parameter int unsigned ROB_DEPTH = 32,
     parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
     parameter int unsigned DMEM_WIDTH = 64,
     parameter int unsigned DMEM_DEPTH = 32,
+    parameter int unsigned IMEM_DEPTH = 64,
+    parameter int unsigned CSR_CAUSE_WIDTH = 5,
     parameter int unsigned ARCH_REG_COUNT = 32,
     parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
@@ -38,6 +45,12 @@ module ROB #(
     input logic                                 dis_inst_valid,
     input logic [ARCH_REG_WIDTH-1:0]            dis_rob_rd_arch_addr,
     input logic                                 dis_reg_write,
+    input logic [IMEM_DEPTH-1:0]                dis_pc,
+    input logic                                 dis_csr_inst,
+    input csr_cmd_e                             dis_csr_cmd,
+    input csr_addr_t                            dis_csr_addr,
+    input logic                                 dis_trap_inst,
+    input logic                                 dis_mret_inst,
 
     output logic [ROB_INDEX_WIDTH-1:0]          rob_bottom_ptr,
     output logic                                rob_full,
@@ -69,10 +82,18 @@ module ROB #(
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_curr_phy_addr,
 
     // FRL interface
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_pre_phy_addr
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_pre_phy_addr,
     // shared with other interfaces
     // output logic rob_commit,
     // output logic rob_reg_write,
+    output logic                                trap_commit_flush,
+
+    // CSR interface
+    output logic [IMEM_DEPTH-1:0]               trap_commit_pc,
+    output logic [CSR_CAUSE_WIDTH-1:0]          trap_commit_cause,
+    output logic                                is_csr,
+    output csr_addr_t                           csr_addr,
+    output csr_cmd_e                            csr_cmd
 );
 
     typedef struct packed {
@@ -84,6 +105,12 @@ module ROB #(
         logic                               compl;
         logic [DMEM_DEPTH-1:0]              sw_addr;
         logic [W_BYTE_NUM-1:0]              sw_strb;
+        logic [IMEM_DEPTH-1:0]              pc;
+        logic                               trap_occur;
+        logic [CSR_CAUSE_WIDTH-1:0]         trap_cause;
+        logic                               is_csr;
+        csr_addr_t                          csr_addr;
+        csr_cmd_e                           csr_cmd;
     } rob_entry_t;
 
     rob_entry_t ROB_array [ROB_DEPTH];

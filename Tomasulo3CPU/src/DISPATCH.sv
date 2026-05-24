@@ -118,6 +118,12 @@ import riscv_types_pkg::*;
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      dis_new_phy_addr,
     output logic [ARCH_REG_WIDTH-1:0]               dis_rob_rd_arch_addr,
     output logic                                    dis_inst_valid,
+    output logic [IMEM_DEPTH-1:0]                   dis_pc,
+    output logic                                    dis_csr_inst,
+    output logic [CSR_CMD_WIDTH-1:0]                dis_csr_cmd,
+    output logic [CSR_ADDR_WIDTH-1:0]               dis_csr_addr,
+    output logic                                    dis_trap_inst,
+    output logic                                    dis_mret_inst,
     // output logic dis_reg_write,
     output logic                                    dis_inst_sw,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      dis_sw_rt_phy_addr,
@@ -135,7 +141,10 @@ import riscv_types_pkg::*;
     // ------------------------------------------------------
     logic [XLEN-1:0] stage1_dis_imm;
     logic stage1_dis_mem_write, stage1_dis_reg_write, stage1_dis_branch,
-            stage1_dis_jr_inst, stage1_dis_jal_inst, stage1_dis_jr31_inst;
+          stage1_dis_jr_inst, stage1_dis_jal_inst, stage1_dis_jr31_inst,
+          stage1_dis_csr_inst, stage1_dis_trap_inst, stage1_dis_mret_inst;
+    csr_cmd_e stage1_dis_csr_cmd;
+    csr_addr_t stage1_dis_csr_addr;
     instr_e stage1_dis_instr_type;
     logic [ARCH_REG_WIDTH-1:0] stage1_rd_arch_addr;
     logic [ARCH_REG_WIDTH-1:0] stage1_rs_arch_addr;
@@ -149,9 +158,7 @@ import riscv_types_pkg::*;
     logic stage1_needs_issue_entry;
     logic stage1_issue_entry_available;
     logic stage1_dis_int_issue_en, stage1_dis_div_issue_en,
-            stage1_dis_mul_issue_en, stage1_dis_ld_st_issue_en;
-    logic stage1_redirect;
-    logic jr_fetch_hold;
+          stage1_dis_mul_issue_en, stage1_dis_ld_st_issue_en;
     // only stage1 will be stalled
     logic stall;
     // if last cycle stalls, it means dispatch didn't fetch data.
@@ -163,24 +170,27 @@ import riscv_types_pkg::*;
     // ------------------------------------------------------
     logic [XLEN-1:0] stage2_dis_imm;
     logic stage2_dis_mem_write, stage2_dis_reg_write, stage2_dis_branch,
-            stage2_dis_jr_inst, stage2_dis_jal_inst, stage2_dis_jr31_inst;
+          stage2_dis_jr_inst, stage2_dis_jal_inst, stage2_dis_jr31_inst,
+          stage2_dis_csr_inst, stage2_dis_trap_inst, stage2_dis_mret_inst;
+    csr_cmd_e stage2_dis_csr_cmd;
+    csr_addr_t stage2_dis_csr_addr;
     instr_e stage2_dis_instr_type;
     logic [ARCH_REG_WIDTH-1:0] stage2_rd_arch_addr;
     logic [IMEM_DEPTH-1:0] stage2_pc_plus4, stage2_pc;
     logic stage2_valid;
     logic stage2_fire;
     logic stage2_dis_int_issue_en, stage2_dis_div_issue_en,
-            stage2_dis_mul_issue_en, stage2_dis_ld_st_issue_en;
+          stage2_dis_mul_issue_en, stage2_dis_ld_st_issue_en;
     logic stage2_branch_prediction;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_rs_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_rt_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_pre_phy_addr;
     logic [IMEM_DEPTH_WORD-1:0] stage2_ras_address;
 
-
     // jalr $rd, imm($rs)
     logic jr_stall;
-    // logic [ROB_INDEX_WIDTH-1:0] jr_rob_tag;
+    // csr stall
+    logic csr_stall;
     // ------------------------------------------------------
     // Stage 1: Decode and read from FRAT and FRL
     // ------------------------------------------------------
@@ -201,7 +211,12 @@ import riscv_types_pkg::*;
                    .branch(stage1_dis_branch),
                    .jr_inst(stage1_dis_jr_inst),
                    .jal_inst(stage1_dis_jal_inst),
-                   .jr31_inst(stage1_dis_jr31_inst)
+                   .jr31_inst(stage1_dis_jr31_inst),
+                   .csr_inst(stage1_dis_csr_inst),
+                   .csr_cmd(stage1_dis_csr_cmd),
+                   .csr_addr(stage1_dis_csr_addr),
+                   .trap_inst(stage1_dis_trap_inst),
+                   .mret_inst(stage1_dis_mret_inst)
                  );
 
     assign stage1_valid = (!stall) && !cdb_flush && !last_cycle_stall;
@@ -211,7 +226,6 @@ import riscv_types_pkg::*;
             stage1_dis_div_issue_en ||
             stage1_dis_mul_issue_en ||
             stage1_dis_ld_st_issue_en;
-
 
     // BPB logic
     assign dis_bpb_branch_pc_bits = ifetch_pc[BPB_PC_BITS+1:2];
@@ -223,28 +237,37 @@ import riscv_types_pkg::*;
     assign dis_ras_jal_inst = stage1_dis_jal_inst && stage1_valid;
 
     // IFQ logic
-    logic [IMEM_DEPTH-1:0] jal_target, branch_target;
     assign dis_ren = (!stall) && !cdb_flush;
-    assign jr_fetch_hold = jr_stall;
-    assign stage1_redirect = stage1_valid &&
-            (stage1_dis_jr31_inst ||
-            (stage1_dis_jal_inst && !stage1_dis_jr_inst) ||
-            (stage1_dis_branch && bpb_branch_prediction));
-    assign dis_jmpbr = jr_fetch_hold || stage1_redirect || (cdb_flush && cdb_valid);
-    assign dis_jmpbr_addr_valid = (stage1_valid && stage1_dis_branch && bpb_branch_prediction) ||
-            (stage1_valid && stage1_dis_jr31_inst) ||
-            (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) ||
-            (cdb_flush && cdb_valid);
-    assign jal_target    = IMEM_DEPTH'(stage1_dis_imm + ifetch_pc);
-    assign branch_target = (ifetch_pc + IMEM_DEPTH'(stage1_dis_imm));
-    assign dis_jmpbr_addr =
-            (cdb_flush && cdb_valid) ? cdb_branch_addr[IMEM_DEPTH-1:1] :
-            (stage1_valid && stage1_dis_jr31_inst) ? ras_addr :
-            (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) ? jal_target[IMEM_DEPTH-1:1] :
-            (stage1_valid && stage1_dis_branch && bpb_branch_prediction) ?
-            branch_target[IMEM_DEPTH-1:1] :
-            '0;
     assign stage1_branch_taken = stage1_dis_branch && bpb_branch_prediction;
+    // redirect logic
+    always_comb begin
+        dis_jmpbr = '0;
+        dis_jmpbr_addr_valid = '0;
+        dis_jmpbr_addr = '0;
+        if (cdb_flush && cdb_valid) begin
+            dis_jmpbr = 1'b1;
+            dis_jmpbr_addr_valid = 1'b1;
+            dis_jmpbr_addr = cdb_branch_addr[IMEM_DEPTH-1:1];
+        end else if (stage1_valid && stage1_dis_jr31_inst) begin
+            dis_jmpbr = 1'b1;
+            dis_jmpbr_addr_valid = 1'b1;
+            dis_jmpbr_addr = ras_addr;
+        end else if (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) begin
+            dis_jmpbr = 1'b1;
+            dis_jmpbr_addr_valid = 1'b1;
+            dis_jmpbr_addr = {IMEM_DEPTH'(stage1_dis_imm + ifetch_pc)}[IMEM_DEPTH-1:1];
+        end else if (stage1_valid && stage1_dis_branch) begin
+            dis_jmpbr = 1'b1;
+            dis_jmpbr_addr_valid = 1'b1;
+            if (bpb_branch_prediction) begin
+                dis_jmpbr_addr = {IMEM_DEPTH'(stage1_dis_imm + ifetch_pc)}[IMEM_DEPTH-1:1];
+            end else begin
+                dis_jmpbr_addr = ifetch_pc[IMEM_DEPTH-1:1];
+            end
+        end else if (jr_stall) begin
+            dis_jmpbr = 1'b1;
+        end
+    end
     // Rename source and destination registers.
     // The architectural source register IDs ($rs and $rt) are provided to FRAT and RRAT.
     // For register writing instructions, free register list (FRL) provides a free physical register
@@ -416,6 +439,13 @@ import riscv_types_pkg::*;
             stage2_pre_phy_addr         <= '0;
             stage2_ras_address          <= '0;
 
+            stage2_dis_csr_inst        <= '0;
+            stage2_dis_csr_cmd         <= CSR_CMD_NONE;
+            stage2_dis_csr_addr        <= '0;
+
+            stage2_dis_trap_inst       <= '0;
+            stage2_dis_mret_inst       <= '0;
+
             last_cycle_stall            <= 1'b1;
         end else begin
             last_cycle_stall            <= stall;
@@ -454,6 +484,12 @@ import riscv_types_pkg::*;
                 stage2_rt_phy_addr          <= stage1_rt_phy_addr;
                 stage2_pre_phy_addr         <= stage1_pre_phy_addr;
                 stage2_ras_address          <= ras_addr;
+
+                stage2_dis_csr_inst         <= stage1_dis_csr_inst;
+                stage2_dis_csr_cmd          <= stage1_dis_csr_cmd;
+                stage2_dis_csr_addr         <= stage1_dis_csr_addr;
+                stage2_dis_trap_inst        <= stage1_dis_trap_inst;
+                stage2_dis_mret_inst        <= stage1_dis_mret_inst;
             end
         end
     end

@@ -29,7 +29,6 @@ module RISC_V_DECODER
     output logic                        csr_inst,
     output csr_cmd_e                    csr_cmd,
     output csr_addr_t                   csr_addr,
-    output logic [4:0]                  csr_zimm,
     output logic                        trap_inst,
     output logic                        mret_inst,
     // In risc-v 64, using $1 or $5 as the jump target register is common.
@@ -43,7 +42,6 @@ module RISC_V_DECODER
     logic [2:0] funct3;
     logic [6:0] funct7;
     csr_addr_t csr;
-    logic [4:0] zimm;
 
     assign opcode = instr[6:0];
     assign rd     = instr[11:7];
@@ -51,17 +49,17 @@ module RISC_V_DECODER
     assign rs    = instr[19:15];
     assign rt    = instr[24:20];
     assign funct7 = instr[31:25];
-    assign zimm   = instr[19:15];
     assign csr    = instr[31:20];
 
     // Immediate generation (sign-extended to XLEN)
-    logic [XLEN-1:0] imm_i, imm_s, imm_b, imm_u, imm_j;
+    logic [XLEN-1:0] imm_i, imm_s, imm_b, imm_u, imm_j, imm_zimm;
 
     assign imm_i = {{(XLEN-12){instr[31]}}, instr[31:20]};
     assign imm_s = {{(XLEN-12){instr[31]}}, instr[31:25], instr[11:7]};
     assign imm_b = {{(XLEN-13){instr[31]}}, instr[31], instr[7], instr[30:25], instr[11:8], 1'b0};
     assign imm_u = {{(XLEN-32){instr[31]}}, instr[31:12], 12'b0};
     assign imm_j = {{(XLEN-21){instr[31]}}, instr[31], instr[19:12], instr[20], instr[30:21], 1'b0};
+    assign imm_zimm = {59'b0,instr[19:15]};
 
 
     always_comb begin
@@ -230,7 +228,6 @@ module RISC_V_DECODER
         csr_inst = 0;
         csr_cmd = CSR_CMD_NONE;
         csr_addr = '0;
-        csr_zimm = '0;
         trap_inst = 0;
         mret_inst = 0;
         rd_arch_addr = 0;
@@ -313,7 +310,7 @@ module RISC_V_DECODER
                 rw = 1;
                 csr_inst = 1;
                 csr_addr = csr;
-                csr_zimm = zimm;
+                imm = imm_zimm;
                 rd_arch_addr = rd;
                 imm = XLEN'(csr);
 
@@ -340,7 +337,6 @@ module RISC_V_DECODER
                 csr_inst = 0;
                 csr_cmd = CSR_CMD_NONE;
                 csr_addr = '0;
-                csr_zimm = '0;
                 trap_inst = 0;
                 mret_inst = 0;
                 rd_arch_addr = 0;
