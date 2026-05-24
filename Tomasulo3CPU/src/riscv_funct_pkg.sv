@@ -46,6 +46,24 @@ package riscv_funct_pkg;
     localparam logic [2:0] FUNCT3_BGEU = 3'b111;
 
     // ================================================================
+    // Funct3 — SYSTEM / CSR
+    // ================================================================
+    localparam logic [2:0] FUNCT3_PRIV   = 3'b000; // ECALL, EBREAK, xRET
+    localparam logic [2:0] FUNCT3_CSRRW  = 3'b001;
+    localparam logic [2:0] FUNCT3_CSRRS  = 3'b010;
+    localparam logic [2:0] FUNCT3_CSRRC  = 3'b011;
+    localparam logic [2:0] FUNCT3_CSRRWI = 3'b101;
+    localparam logic [2:0] FUNCT3_CSRRSI = 3'b110;
+    localparam logic [2:0] FUNCT3_CSRRCI = 3'b111;
+
+    // ================================================================
+    // Funct12 — SYSTEM privilege instructions
+    // ================================================================
+    localparam logic [11:0] FUNCT12_ECALL  = 12'h000;
+    localparam logic [11:0] FUNCT12_EBREAK = 12'h001;
+    localparam logic [11:0] FUNCT12_MRET   = 12'h302;
+
+    // ================================================================
     // Funct7
     // ================================================================
     localparam logic [6:0] FUNCT7_ZERO   = 7'b0000000; // ADD, SLL, SLT, XOR, SRL, OR, AND ...

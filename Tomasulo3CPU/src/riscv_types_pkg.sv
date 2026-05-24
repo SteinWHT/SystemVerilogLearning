@@ -12,7 +12,8 @@ package riscv_types_pkg;
         FMT_S,
         FMT_B,
         FMT_U,
-        FMT_J
+        FMT_J,
+        FMT_SYS
     } instr_format_e;
 
 
@@ -70,6 +71,15 @@ package riscv_types_pkg;
         INSTR_JALR,
         INSTR_LUI,
         INSTR_AUIPC,
+        INSTR_ECALL,
+        INSTR_EBREAK,
+        INSTR_CSRRW,
+        INSTR_CSRRS,
+        INSTR_CSRRC,
+        INSTR_CSRRWI,
+        INSTR_CSRRSI,
+        INSTR_CSRRCI,
+        INSTR_MRET,
         INSTR_NONE
     } instr_e;
 
@@ -120,6 +130,25 @@ package riscv_types_pkg;
         SW,
         LD_ST_NONE
     } ld_st_op_e;
+
+    typedef enum logic [2:0] {
+        CSR_CMD_NONE,
+        CSR_CMD_RW,
+        CSR_CMD_RS,
+        CSR_CMD_RC,
+        CSR_CMD_RWI,
+        CSR_CMD_RSI,
+        CSR_CMD_RCI
+    } csr_cmd_e;
+
+    typedef logic [11:0] csr_addr_t;
+
+    localparam csr_addr_t CSR_ADDR_MSTATUS = 12'h300;
+    localparam csr_addr_t CSR_ADDR_MTVEC   = 12'h305;
+    localparam csr_addr_t CSR_ADDR_MSCRATCH = 12'h340;
+    localparam csr_addr_t CSR_ADDR_MEPC    = 12'h341;
+    localparam csr_addr_t CSR_ADDR_MCAUSE  = 12'h342;
+    localparam csr_addr_t CSR_ADDR_MTVAL   = 12'h343;
 endpackage
 
 `endif

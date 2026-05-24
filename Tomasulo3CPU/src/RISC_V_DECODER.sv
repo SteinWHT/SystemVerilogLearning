@@ -26,6 +26,12 @@ module RISC_V_DECODER
     output logic                        branch,
     output logic                        jr_inst,
     output logic                        jal_inst,
+    output logic                        csr_inst,
+    output csr_cmd_e                    csr_cmd,
+    output csr_addr_t                   csr_addr,
+    output logic [4:0]                  csr_zimm,
+    output logic                        trap_inst,
+    output logic                        mret_inst,
     // In risc-v 64, using $1 or $5 as the jump target register is common.
     // I will modify the name later when starting realize more instructions.
     output logic                        jr31_inst
@@ -36,6 +42,8 @@ module RISC_V_DECODER
     logic [4:0] rd, rs, rt;
     logic [2:0] funct3;
     logic [6:0] funct7;
+    csr_addr_t csr;
+    logic [4:0] zimm;
 
     assign opcode = instr[6:0];
     assign rd     = instr[11:7];
@@ -43,6 +51,8 @@ module RISC_V_DECODER
     assign rs    = instr[19:15];
     assign rt    = instr[24:20];
     assign funct7 = instr[31:25];
+    assign zimm   = instr[19:15];
+    assign csr    = instr[31:20];
 
     // Immediate generation (sign-extended to XLEN)
     logic [XLEN-1:0] imm_i, imm_s, imm_b, imm_u, imm_j;
@@ -183,6 +193,29 @@ module RISC_V_DECODER
             OP_LUI:   instr_type = INSTR_LUI;
             OP_AUIPC: instr_type = INSTR_AUIPC;
 
+            // SYSTEM / CSR
+            OP_SYSTEM: begin
+                unique case (funct3)
+                    FUNCT3_PRIV: begin
+                        if ((rd == '0) && (rs == '0)) begin
+                            unique case (csr)
+                                FUNCT12_ECALL:  instr_type = INSTR_ECALL;
+                                FUNCT12_EBREAK: instr_type = INSTR_EBREAK;
+                                FUNCT12_MRET:   instr_type = INSTR_MRET;
+                                default:        instr_type = INSTR_NONE;
+                            endcase
+                        end
+                    end
+                    FUNCT3_CSRRW:  instr_type = INSTR_CSRRW;
+                    FUNCT3_CSRRS:  instr_type = INSTR_CSRRS;
+                    FUNCT3_CSRRC:  instr_type = INSTR_CSRRC;
+                    FUNCT3_CSRRWI: instr_type = INSTR_CSRRWI;
+                    FUNCT3_CSRRSI: instr_type = INSTR_CSRRSI;
+                    FUNCT3_CSRRCI: instr_type = INSTR_CSRRCI;
+                    default:       instr_type = INSTR_NONE;
+                endcase
+            end
+
             default: instr_type = INSTR_NONE;
         endcase
     end
@@ -194,6 +227,12 @@ module RISC_V_DECODER
         jr_inst = 0;
         jal_inst = 0;
         jr31_inst = 0;
+        csr_inst = 0;
+        csr_cmd = CSR_CMD_NONE;
+        csr_addr = '0;
+        csr_zimm = '0;
+        trap_inst = 0;
+        mret_inst = 0;
         rd_arch_addr = 0;
         rs_arch_addr = 0;
         rt_arch_addr = 0;
@@ -255,6 +294,42 @@ module RISC_V_DECODER
                 rd_arch_addr = rd;
                 imm = imm_u;
             end
+            INSTR_CSRRW, INSTR_CSRRS, INSTR_CSRRC: begin
+                rw = 1;
+                csr_inst = 1;
+                csr_addr = csr;
+                rd_arch_addr = rd;
+                rs_arch_addr = rs;
+                imm = XLEN'(csr);
+
+                unique case (instr_type)
+                    INSTR_CSRRW: csr_cmd = CSR_CMD_RW;
+                    INSTR_CSRRS: csr_cmd = CSR_CMD_RS;
+                    INSTR_CSRRC: csr_cmd = CSR_CMD_RC;
+                    default:     csr_cmd = CSR_CMD_NONE;
+                endcase
+            end
+            INSTR_CSRRWI, INSTR_CSRRSI, INSTR_CSRRCI: begin
+                rw = 1;
+                csr_inst = 1;
+                csr_addr = csr;
+                csr_zimm = zimm;
+                rd_arch_addr = rd;
+                imm = XLEN'(csr);
+
+                unique case (instr_type)
+                    INSTR_CSRRWI: csr_cmd = CSR_CMD_RWI;
+                    INSTR_CSRRSI: csr_cmd = CSR_CMD_RSI;
+                    INSTR_CSRRCI: csr_cmd = CSR_CMD_RCI;
+                    default:      csr_cmd = CSR_CMD_NONE;
+                endcase
+            end
+            INSTR_ECALL, INSTR_EBREAK: begin
+                trap_inst = 1;
+            end
+            INSTR_MRET: begin
+                mret_inst = 1;
+            end
             default: begin
                 rw = 0;
                 mw = 0;
@@ -262,6 +337,12 @@ module RISC_V_DECODER
                 jr_inst = 0;
                 jal_inst = 0;
                 jr31_inst = 0;
+                csr_inst = 0;
+                csr_cmd = CSR_CMD_NONE;
+                csr_addr = '0;
+                csr_zimm = '0;
+                trap_inst = 0;
+                mret_inst = 0;
                 rd_arch_addr = 0;
                 rs_arch_addr = 0;
                 rt_arch_addr = 0;
