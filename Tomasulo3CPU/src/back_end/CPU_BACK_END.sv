@@ -63,6 +63,11 @@ module CPU_BACK_END #(
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   rt_sb_phy_addr,
     output logic [REG_FILE_DATA_WIDTH-1:0]      rt_sb_data,
 
+    // CSR commit write port (from front-end ROB commit path)
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   csr_wr_phy_addr,
+    input logic [REG_FILE_DATA_WIDTH-1:0]       csr_wr_data,
+    input logic                                 csr_wr_en,
+
     // D-cache
     input logic                                 dcache_valid,
     input logic                                 dcache_resp_valid,
@@ -309,7 +314,6 @@ module CPU_BACK_END #(
 
     EXE #(
         .XLEN(XLEN),
-        .INSTR_WIDTH(INSTR_WIDTH),
         .OPCODE_WIDTH(OPCODE_WIDTH),
         .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
         .IMEM_DEPTH(IMEM_DEPTH),
@@ -383,6 +387,9 @@ module CPU_BACK_END #(
         .cdb_rd_phy_addr(cdb_rd_phy_addr),
         .cdb_rd_data(cdb_rd_data),
         .cdb_reg_write(cdb_reg_write),
+        .csr_wr_phy_addr(csr_wr_phy_addr),
+        .csr_wr_data(csr_wr_data),
+        .csr_wr_en(csr_wr_en),
         .issue_rs_phy_addr_alu(prf_issue_rs_alu),
         .issue_rt_phy_addr_alu(prf_issue_rt_alu),
         .issue_rs_phy_addr_div(prf_issue_rs_div),

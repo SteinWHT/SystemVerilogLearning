@@ -77,8 +77,11 @@ SRC_FILES := \
 	$(SRC_DIR)/back_end/EXE/EXE.sv \
 	$(SRC_DIR)/back_end/CDB.sv \
 	$(SRC_DIR)/back_end/CPU_BACK_END.sv \
+	$(SRC_DIR)/CSR.sv \
 	$(SRC_DIR)/CPU.sv \
 
+# DW IP behavioral stubs for simulators without Synopsys DesignWare
+DW_STUB_FILE := $(TB_DIR)/dw_ip_stubs.sv
 
 TB_FILES := \
 	$(TB_DIR)/$(PROJECT)_tb.sv
@@ -186,3 +189,52 @@ clean:
 clean-all:
 	@echo "[clean-all] Removing $(PROJ_DIR)/build"
 	rm -rf $(PROJ_DIR)/build
+
+# ============================================================
+#  QuestaSim / ModelSim targets  (USE_DW=0 by default, uses stubs)
+# ============================================================
+
+QUESTA_BUILD := $(PROJ_DIR)/build/questa_$(PROJECT)
+QUESTA_WORK  := $(QUESTA_BUILD)/work
+
+PKG_FILES := \
+	$(SRC_DIR)/riscv_funct_pkg.sv \
+	$(SRC_DIR)/riscv_opcode_pkg.sv \
+	$(SRC_DIR)/riscv_types_pkg.sv
+
+NON_PKG_SRC_FILES := $(filter-out $(PKG_FILES),$(SRC_FILES))
+
+.PHONY: sim-questa
+sim-questa: check
+	@mkdir -p $(QUESTA_BUILD)
+	@echo "============================================"
+	@echo "  QuestaSim: $(PROJECT)"
+	@echo "  Top:       $(TOP_MODULE)"
+	@echo "  Build:     $(QUESTA_BUILD)"
+	@echo "============================================"
+	cd $(QUESTA_BUILD) && vlib work 2>/dev/null; true
+	cd $(QUESTA_BUILD) && vlog -sv -timescale "1ns/1ps" \
+		$(PKG_FILES) \
+		$(DW_STUB_FILE) \
+		$(NON_PKG_SRC_FILES) \
+		$(TB_FILES) \
+		2>&1 | tee compile.log
+	cd $(QUESTA_BUILD) && vsim -c -do "run -all; quit -f" \
+		$(TOP_MODULE) \
+		2>&1 | tee sim.log
+	@echo ""
+	@echo "============================================"
+	@echo "  QuestaSim simulation finished"
+	@echo "  See $(QUESTA_BUILD)/sim.log"
+	@echo "============================================"
+
+.PHONY: gui-questa
+gui-questa: check
+	@mkdir -p $(QUESTA_BUILD)
+	cd $(QUESTA_BUILD) && vlib work 2>/dev/null; true
+	cd $(QUESTA_BUILD) && vlog -sv -timescale "1ns/1ps" \
+		$(PKG_FILES) \
+		$(DW_STUB_FILE) \
+		$(NON_PKG_SRC_FILES) \
+		$(TB_FILES)
+	cd $(QUESTA_BUILD) && vsim -gui $(TOP_MODULE) &

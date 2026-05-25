@@ -142,6 +142,11 @@ module CPU #(
     // Store data path (back-end → front-end)
     logic [REG_FILE_DATA_WIDTH-1:0]      rt_sb_data;
 
+    // CSR write-back to PRF (front-end → back-end)
+    logic [PHY_REGISTER_FILE_WIDTH-1:0]  csr_wr_phy_addr;
+    logic [REG_FILE_DATA_WIDTH-1:0]      csr_wr_data;
+    logic                                csr_wr_en;
+
     // LSB sideband (back-end outputs, partially used)
     logic [ROB_INDEX_WIDTH-1:0]          lsb_rob_tag;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]  lsb_rd_phy_addr;
@@ -246,6 +251,11 @@ module CPU #(
         .rt_sb_phy_addr                 (rt_sb_phy_addr),
         .rt_sb_data                     (rt_sb_data),
 
+        // CSR write-back to PRF
+        .csr_wr_phy_addr                (csr_wr_phy_addr),
+        .csr_wr_data                    (csr_wr_data),
+        .csr_wr_en                      (csr_wr_en),
+
         // SB / SAB interface to back-end
         .sb_flush_sw_tag                 (sb_flush_sw_tag),
         .sb_flush_sw                     (sb_flush_sw),
@@ -319,6 +329,11 @@ module CPU #(
         // Store data PRF read port
         .rt_sb_phy_addr                  (rt_sb_phy_addr),
         .rt_sb_data                      (rt_sb_data),
+
+        // CSR write-back to PRF
+        .csr_wr_phy_addr                 (csr_wr_phy_addr),
+        .csr_wr_data                     (csr_wr_data),
+        .csr_wr_en                       (csr_wr_en),
 
         // SB / SAB
         .sb_flush_sw_tag                 (sb_flush_sw_tag),

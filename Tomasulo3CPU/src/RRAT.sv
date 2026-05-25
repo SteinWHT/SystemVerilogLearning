@@ -18,9 +18,11 @@ module RRAT #(
     input logic [ARCH_REG_WIDTH-1:0] rob_commit_rd_arch_addr,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0] rob_commit_curr_phy_addr,
     input logic rob_commit,
-    input logic rob_commit_reg_write
+    input logic rob_commit_reg_write,
 
-    // Output
+    // CSR rs1 read port
+    input  logic [ARCH_REG_WIDTH-1:0]            csr_rs1_arch_addr,
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]   csr_rs1_phy_addr
 );
     // Maybe later we need to send the whole array to the FRAT or other modules for recovery
     // So we use a register array instead of a dual port RAM
@@ -38,4 +40,6 @@ module RRAT #(
             end
         end
     end
+
+    assign csr_rs1_phy_addr = rrat_array[csr_rs1_arch_addr];
 endmodule

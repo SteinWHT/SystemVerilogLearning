@@ -1,5 +1,7 @@
 `timescale 1ns/1ps
-module CPU_FRONT_END #(
+module CPU_FRONT_END
+    import riscv_types_pkg::*;
+#(
     // I-CACHE
     parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned IMEM_DEPTH = 64,
@@ -103,9 +105,7 @@ module CPU_FRONT_END #(
 
     // CDB interface
     input logic                                 cdb_valid,
-    //input logic [ROB_INDEX_WIDTH-1:0] cdb_rob_depth,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,
-    //input logic [REG_FILE_DATA_WIDTH-1:0] cdb_rd_data,
     input logic                                 cdb_reg_write,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_tag,
     input logic [DMEM_DEPTH-1:0]                cdb_sw_addr,
@@ -117,9 +117,14 @@ module CPU_FRONT_END #(
     input logic                                 cdb_flush,
     input logic                                 cdb_jalr_resolved,
 
-    // PRF interface
+    // PRF interface (store-data / CSR rs1 read)
     input  logic [DMEM_WIDTH-1:0]               rt_sb_data,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rt_sb_phy_addr,
+
+    // CSR write-back to PRF (new port from commit path)
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  csr_wr_phy_addr,
+    output logic [REG_FILE_DATA_WIDTH-1:0]      csr_wr_data,
+    output logic                                csr_wr_en,
 
     // SAB interface
     output logic [SB_INDEX_WIDTH-1:0]           sb_flush_sw_tag,
@@ -163,6 +168,16 @@ module CPU_FRONT_END #(
     logic dis_inst_valid;
     logic [ARCH_REG_WIDTH-1:0] dis_rob_rd_arch_addr;
 
+    // DISPATCH CSR/trap -> ROB
+    logic [IMEM_DEPTH-1:0] dis_pc;
+    logic dis_csr_inst;
+    csr_cmd_e dis_csr_cmd;
+    csr_addr_t dis_csr_addr;
+    logic dis_trap_inst;
+    trap_cause_t dis_trap_cause;
+    logic dis_mret_inst;
+    logic [ARCH_REG_WIDTH-1:0] dis_csr_rs1_arch_addr;
+
     // BPB interface
     logic bpb_branch_prediction;
     logic [BPB_PC_BITS-1:0] dis_bpb_branch_pc_bits;
@@ -189,7 +204,6 @@ module CPU_FRONT_END #(
     logic [PHY_REGISTER_FILE_WIDTH-1:0] frat_rs_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] frat_rt_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] frat_rd_phy_addr;
-    //logic [5:0] dis_opcode;
 
     // ROB interface
     logic [ROB_INDEX_WIDTH-1:0] rob_bottom_ptr;
@@ -204,15 +218,42 @@ module CPU_FRONT_END #(
     logic rob_reg_write;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] rob_commit_curr_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] rob_commit_pre_phy_addr;
+    logic rob_csr_committed;
+
+    // ROB -> CSR interface
+    logic csr_commit_valid;
+    csr_addr_t csr_commit_addr;
+    csr_cmd_e csr_commit_cmd;
+    logic csr_commit_rs1_is_x0;
+    logic [4:0] csr_commit_zimm;
+    logic ecall_commit;
+    logic ebreak_commit;
+    logic mret_commit;
+    logic [IMEM_DEPTH-1:0] trap_commit_pc;
+
+    // CSR -> ROB results
+    logic [REG_FILE_DATA_WIDTH-1:0] csr_rdata;
+    logic csr_redirect_valid;
+    logic [REG_FILE_DATA_WIDTH-1:0] csr_redirect_pc;
+
+    // RRAT -> ROB: committed phy reg for CSR rs1 (read at commit time)
+    logic [PHY_REGISTER_FILE_WIDTH-1:0] rrat_csr_rs1_phy;
+
+    // ROB trap flush
+    logic trap_commit_flush;
+    logic [IMEM_DEPTH-1:0] trap_redirect_pc;
 
     // SB interface
     logic sb_full;
-    //logic sb_empty;
-    //logic [DMEM_DEPTH-1:0] sb_entry_sw_addr;
 
     // RBA
     logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rba_new_rd_phy_addr;
 
+    // Combined flush: CDB branch mispredict OR trap commit flush
+    logic combined_flush;
+    logic [IMEM_DEPTH-1:0] combined_flush_addr;
+    assign combined_flush = cdb_flush || trap_commit_flush;
+    assign combined_flush_addr = trap_commit_flush ? trap_redirect_pc : cdb_branch_addr;
 
     // ------------------------------------------------------------
     // SUB MODULES
@@ -285,9 +326,9 @@ module CPU_FRONT_END #(
         .dis_frl_rd_phy_addr(dis_frl_rd_phy_addr),
         .dis_frl_read(dis_frl_read),
 
-        .cdb_valid(cdb_valid),
-        .cdb_branch_addr(cdb_branch_addr),
-        .cdb_flush(cdb_flush),
+        .cdb_valid(cdb_valid || trap_commit_flush),
+        .cdb_branch_addr(combined_flush_addr),
+        .cdb_flush(combined_flush),
         .cdb_jalr_resolved(cdb_jalr_resolved),
 
         .frat_full(frat_full),
@@ -326,10 +367,19 @@ module CPU_FRONT_END #(
 
         .rob_full(rob_full),
         .rob_two_or_more_vacant(rob_two_or_more_vacant),
+        .rob_csr_committed(rob_csr_committed),
         .dis_pre_phy_addr(dis_pre_phy_addr),
         .dis_new_phy_addr(dis_new_phy_addr),
         .dis_rob_rd_arch_addr(dis_rob_rd_arch_addr),
         .dis_inst_valid(dis_inst_valid),
+        .dis_pc(dis_pc),
+        .dis_csr_inst(dis_csr_inst),
+        .dis_csr_cmd(dis_csr_cmd),
+        .dis_csr_addr(dis_csr_addr),
+        .dis_trap_inst(dis_trap_inst),
+        .dis_trap_cause(dis_trap_cause),
+        .dis_mret_inst(dis_mret_inst),
+        .dis_csr_rs1_arch_addr(dis_csr_rs1_arch_addr),
         .dis_inst_sw(dis_inst_sw),
         .dis_sw_rt_phy_addr(dis_sw_rt_phy_addr),
         .dis_rba_new_rd_phy_addr(dis_rba_new_rd_phy_addr),
@@ -385,7 +435,7 @@ module CPU_FRONT_END #(
 
         .frat_frl_head_ptr(frat_frl_head_ptr),
 
-        .cdb_flush(cdb_flush),
+        .cdb_flush(combined_flush),
 
         .dis_frl_read(dis_frl_read),
         .frl_read_phy_addr(dis_frl_rd_phy_addr),
@@ -411,7 +461,7 @@ module CPU_FRONT_END #(
         .rd_new_arch_address_in(dis_rob_rd_arch_addr),
 
         .cdb_valid(cdb_valid),
-        .branch_mispredict(cdb_flush),
+        .branch_mispredict(combined_flush),
         .mispredict_rob_tag(cdb_rob_tag),
         .rob_commit(rob_commit),
         .rob_top_ptr(rob_top_ptr),
@@ -442,7 +492,10 @@ module CPU_FRONT_END #(
         .rob_commit_rd_arch_addr(rob_commit_rd_arch_addr),
         .rob_commit_curr_phy_addr(rob_commit_curr_phy_addr),
         .rob_commit(rob_commit),
-        .rob_commit_reg_write(rob_reg_write)
+        .rob_commit_reg_write(rob_reg_write),
+
+        .csr_rs1_arch_addr(csr_commit_zimm),
+        .csr_rs1_phy_addr(rrat_csr_rs1_phy)
     );
 
     // ROB
@@ -450,6 +503,8 @@ module CPU_FRONT_END #(
         .ROB_DEPTH(ROB_DEPTH),
         .DMEM_WIDTH(DMEM_WIDTH),
         .DMEM_DEPTH(DMEM_DEPTH),
+        .IMEM_DEPTH(IMEM_DEPTH),
+        .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
         .ARCH_REG_COUNT(ARCH_REG_COUNT),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH)
     ) rob (
@@ -463,6 +518,16 @@ module CPU_FRONT_END #(
         .dis_inst_valid(dis_inst_valid),
         .dis_rob_rd_arch_addr(dis_rob_rd_arch_addr),
         .dis_reg_write(dis_reg_write),
+        .dis_pc(dis_pc),
+        .dis_csr_inst(dis_csr_inst),
+        .dis_csr_cmd(dis_csr_cmd),
+        .dis_csr_addr(dis_csr_addr),
+        .dis_trap_inst(dis_trap_inst),
+        .dis_trap_cause(dis_trap_cause),
+        .dis_mret_inst(dis_mret_inst),
+        .dis_csr_rs1_arch_addr(dis_csr_rs1_arch_addr),
+
+        .rrat_csr_rs1_phy(rrat_csr_rs1_phy),
 
         .rob_bottom_ptr(rob_bottom_ptr),
         .rob_full(rob_full),
@@ -488,7 +553,64 @@ module CPU_FRONT_END #(
         .rob_reg_write(rob_reg_write),
         .rob_commit_curr_phy_addr(rob_commit_curr_phy_addr),
 
-        .rob_commit_pre_phy_addr(rob_commit_pre_phy_addr)
+        .rob_commit_pre_phy_addr(rob_commit_pre_phy_addr),
+        .rob_csr_committed(rob_csr_committed),
+
+        .csr_commit_valid(csr_commit_valid),
+        .csr_commit_addr(csr_commit_addr),
+        .csr_commit_cmd(csr_commit_cmd),
+        .csr_commit_rs1_is_x0(csr_commit_rs1_is_x0),
+        .csr_commit_zimm(csr_commit_zimm),
+        .ecall_commit(ecall_commit),
+        .ebreak_commit(ebreak_commit),
+        .mret_commit(mret_commit),
+        .trap_commit_pc(trap_commit_pc),
+
+        .csr_rdata(csr_rdata),
+        .csr_redirect_valid(csr_redirect_valid),
+        .csr_redirect_pc(csr_redirect_pc),
+
+        .csr_wr_phy_addr(csr_wr_phy_addr),
+        .csr_wr_data(csr_wr_data),
+        .csr_wr_en(csr_wr_en),
+
+        .trap_commit_flush(trap_commit_flush),
+        .trap_redirect_pc(trap_redirect_pc)
+    );
+
+    // CSR
+    CSR #(
+        .REG_FILE_WIDTH(REG_FILE_DATA_WIDTH)
+    ) csr_unit (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .csr_valid(csr_commit_valid),
+        .csr_cmd(csr_commit_cmd),
+        .csr_addr(csr_commit_addr),
+        .csr_rs1_data(rt_sb_data),
+        .csr_rs1_is_x0(csr_commit_rs1_is_x0),
+        .csr_zimm(csr_commit_zimm),
+
+        .csr_rdata(csr_rdata),
+        .csr_result_valid(),
+        .csr_illegal_access(),
+
+        .ecall_valid(ecall_commit),
+        .ebreak_valid(ebreak_commit),
+        .mret_valid(mret_commit),
+        .current_pc(REG_FILE_DATA_WIDTH'(trap_commit_pc)),
+        .trap_value('0),
+
+        .redirect_valid(csr_redirect_valid),
+        .redirect_pc(csr_redirect_pc),
+
+        .mstatus(),
+        .mtvec(),
+        .mscratch(),
+        .mepc(),
+        .mcause(),
+        .mtval()
     );
 
     // SB

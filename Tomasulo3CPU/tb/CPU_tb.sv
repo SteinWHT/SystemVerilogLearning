@@ -231,6 +231,28 @@ module CPU_tb;
         return encode_i(12'd0, 5'd0, FUNCT3_ADD_SUB, 5'd0, OP_NOP);
     endfunction
 
+    // CSR instruction: CSRRW/CSRRS/CSRRC/CSRRWI/CSRRSI/CSRRCI
+    function automatic logic [31:0] encode_csr(
+        input logic [11:0] csr_addr,
+        input logic [4:0]  rs1_or_zimm,
+        input logic [2:0]  funct3,
+        input logic [4:0]  rd
+    );
+        return {csr_addr, rs1_or_zimm, funct3, rd, OP_SYSTEM};
+    endfunction
+
+    function automatic logic [31:0] encode_ecall();
+        return {12'b0000_0000_0000, 5'd0, 3'b000, 5'd0, OP_SYSTEM};
+    endfunction
+
+    function automatic logic [31:0] encode_ebreak();
+        return {12'b0000_0000_0001, 5'd0, 3'b000, 5'd0, OP_SYSTEM};
+    endfunction
+
+    function automatic logic [31:0] encode_mret();
+        return {12'b0011_0000_0010, 5'd0, 3'b000, 5'd0, OP_SYSTEM};
+    endfunction
+
     // ----------------------------------------------------------------
     // I-Cache model (1-cycle latency)
     // ----------------------------------------------------------------
@@ -453,6 +475,32 @@ module CPU_tb;
         input logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_addr
     );
         return dut.back_end.prf.prf_data_array[phy_addr];
+    endfunction
+
+    // Read architectural register via RRAT → PRF
+    function automatic logic [REG_FILE_DATA_WIDTH-1:0] read_arch_reg(
+        input logic [ARCH_REG_WIDTH-1:0] arch_addr
+    );
+        logic [PHY_REGISTER_FILE_WIDTH-1:0] phy;
+        phy = dut.front_end.rrat.rrat_array[arch_addr];
+        return dut.back_end.prf.prf_data_array[phy];
+    endfunction
+
+    // Read CSR value directly from the CSR module
+    function automatic logic [REG_FILE_DATA_WIDTH-1:0] read_csr_mscratch();
+        return dut.front_end.csr_unit.mscratch_q;
+    endfunction
+    function automatic logic [REG_FILE_DATA_WIDTH-1:0] read_csr_mtvec();
+        return dut.front_end.csr_unit.mtvec_q;
+    endfunction
+    function automatic logic [REG_FILE_DATA_WIDTH-1:0] read_csr_mepc();
+        return dut.front_end.csr_unit.mepc_q;
+    endfunction
+    function automatic logic [REG_FILE_DATA_WIDTH-1:0] read_csr_mcause();
+        return dut.front_end.csr_unit.mcause_q;
+    endfunction
+    function automatic logic [REG_FILE_DATA_WIDTH-1:0] read_csr_mstatus();
+        return dut.front_end.csr_unit.mstatus_q;
     endfunction
 
     // ----------------------------------------------------------------
@@ -1348,6 +1396,163 @@ module CPU_tb;
         wait_cycles(120);
         check_val("BGEU skipped wrong-path store", dmem_array[2], 64'hBADC_0FFE_0000_0010);
         check_val("BGEU reached target store", dmem_array[3], 64'd33);
+
+        // ==============================================================
+        // Test 48: CSRRW — write mscratch, read old value to rd
+        // ADDI x1, x0, 0xAB → CSRRW x2, mscratch, x1
+        // rd=x2 gets old mscratch (0), mscratch becomes 0xAB
+        // ==============================================================
+        test_num = 48;
+        $display("\n[Test %0d] CSRRW write mscratch, read old value", test_num);
+        reset_dut();
+        load_instr(32'h0000_0000, encode_i(12'hAB, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));  // x1 = 0xAB
+        load_instr(32'h0000_0004, encode_csr(12'h340, 5'd1, FUNCT3_CSRRW, 5'd2));          // CSRRW x2, mscratch, x1
+        load_instr(32'h0000_0008, encode_i(12'd1, 5'd0, FUNCT3_ADD_SUB, 5'd3, OP_IMM));    // x3 = 1 (sentinel)
+
+        wait_cycles(80);
+        check_val("CSRRW old mscratch in x2", read_arch_reg(5'd2), 64'd0);
+        check_val("mscratch updated", read_csr_mscratch(), 64'hAB);
+        check_val("Sentinel x3", read_arch_reg(5'd3), 64'd1);
+
+        // ==============================================================
+        // Test 49: CSRRS — set bits in mtvec
+        // CSRRW x0, mtvec, x0 (clear mtvec) → ADDI x1, x0, 0x100
+        // CSRRW x0, mtvec, x1 (mtvec=0x100)
+        // ADDI x2, x0, 0x44 → CSRRS x3, mtvec, x2
+        // x3 = old mtvec (0x100), mtvec = 0x100 | 0x44 = 0x144
+        // ==============================================================
+        test_num = 49;
+        $display("\n[Test %0d] CSRRS set bits in mtvec", test_num);
+        reset_dut();
+        load_instr(32'h0000_0000, encode_i(12'h100, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM)); // x1 = 0x100
+        load_instr(32'h0000_0004, encode_csr(12'h305, 5'd1, FUNCT3_CSRRW, 5'd0));          // CSRRW x0, mtvec, x1
+        load_instr(32'h0000_0008, encode_i(12'h44, 5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));   // x2 = 0x44
+        load_instr(32'h0000_000C, encode_csr(12'h305, 5'd2, FUNCT3_CSRRS, 5'd3));          // CSRRS x3, mtvec, x2
+        load_instr(32'h0000_0010, encode_i(12'd1, 5'd0, FUNCT3_ADD_SUB, 5'd4, OP_IMM));    // x4 = 1 sentinel
+
+        wait_cycles(120);
+        check_val("CSRRS old mtvec in x3", read_arch_reg(5'd3), 64'h100);
+        check_val("mtvec after CSRRS", read_csr_mtvec(), 64'h144);
+        check_val("Sentinel x4", read_arch_reg(5'd4), 64'd1);
+
+        // ==============================================================
+        // Test 50: CSRRC — clear bits in mscratch
+        // Set mscratch=0xFF, then CSRRC with mask 0x0F → 0xF0
+        // ==============================================================
+        test_num = 50;
+        $display("\n[Test %0d] CSRRC clear bits in mscratch", test_num);
+        reset_dut();
+        load_instr(32'h0000_0000, encode_i(12'hFF, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));  // x1 = 0xFF
+        load_instr(32'h0000_0004, encode_csr(12'h340, 5'd1, FUNCT3_CSRRW, 5'd0));          // CSRRW x0, mscratch, x1
+        load_instr(32'h0000_0008, encode_i(12'h0F, 5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));   // x2 = 0x0F
+        load_instr(32'h0000_000C, encode_csr(12'h340, 5'd2, FUNCT3_CSRRC, 5'd3));          // CSRRC x3, mscratch, x2
+        load_instr(32'h0000_0010, encode_i(12'd1, 5'd0, FUNCT3_ADD_SUB, 5'd4, OP_IMM));    // sentinel
+
+        wait_cycles(120);
+        check_val("CSRRC old mscratch in x3", read_arch_reg(5'd3), 64'hFF);
+        check_val("mscratch after CSRRC", read_csr_mscratch(), 64'hF0);
+
+        // ==============================================================
+        // Test 51: CSRRWI — immediate write to mscratch
+        // CSRRWI x1, mscratch, zimm=0x1F
+        // ==============================================================
+        test_num = 51;
+        $display("\n[Test %0d] CSRRWI immediate write to mscratch", test_num);
+        reset_dut();
+        load_instr(32'h0000_0000, encode_csr(12'h340, 5'd31, FUNCT3_CSRRWI, 5'd1));        // CSRRWI x1, mscratch, 0x1F
+        load_instr(32'h0000_0004, encode_i(12'd1, 5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));    // sentinel
+
+        wait_cycles(80);
+        check_val("CSRRWI old mscratch in x1", read_arch_reg(5'd1), 64'd0);
+        check_val("mscratch after CSRRWI", read_csr_mscratch(), 64'h1F);
+
+        // ==============================================================
+        // Test 52: ECALL — trap entry
+        // Set mtvec=0x100, then ECALL at PC=0x08
+        // Verify: PC redirects to 0x100, mepc=0x08, mcause=11
+        // ==============================================================
+        test_num = 52;
+        $display("\n[Test %0d] ECALL trap entry", test_num);
+        reset_dut();
+        // Set up mtvec to point to handler at 0x100
+        load_instr(32'h0000_0000, encode_i(12'h100, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM)); // x1 = 0x100
+        load_instr(32'h0000_0004, encode_csr(12'h305, 5'd1, FUNCT3_CSRRW, 5'd0));          // CSRRW x0, mtvec, x1
+        load_instr(32'h0000_0008, encode_ecall());                                          // ECALL at PC=0x08
+        load_instr(32'h0000_000C, encode_i(12'hDE, 5'd0, FUNCT3_ADD_SUB, 5'd5, OP_IMM));   // should NOT execute
+        // Handler at 0x100: ADDI x6, x0, 0x42
+        load_instr(32'h0000_0100, encode_i(12'h42, 5'd0, FUNCT3_ADD_SUB, 5'd6, OP_IMM));   // handler: x6=0x42
+        load_instr(32'h0000_0104, encode_i(12'd1, 5'd0, FUNCT3_ADD_SUB, 5'd7, OP_IMM));    // sentinel
+
+        wait_cycles(150);
+        check_val("mepc saved ECALL PC", read_csr_mepc(), 64'h08);
+        check_val("mcause = 11 (M-mode ecall)", read_csr_mcause(), 64'd11);
+        check_val("Handler executed (x6=0x42)", read_arch_reg(5'd6), 64'h42);
+        check_val("Sentinel at handler (x7=1)", read_arch_reg(5'd7), 64'd1);
+
+        // ==============================================================
+        // Test 53: EBREAK — trap entry with mcause=3
+        // ==============================================================
+        test_num = 53;
+        $display("\n[Test %0d] EBREAK trap entry", test_num);
+        reset_dut();
+        load_instr(32'h0000_0000, encode_i(12'h200, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM)); // x1 = 0x200
+        load_instr(32'h0000_0004, encode_csr(12'h305, 5'd1, FUNCT3_CSRRW, 5'd0));          // CSRRW x0, mtvec, x1
+        load_instr(32'h0000_0008, encode_ebreak());                                         // EBREAK at PC=0x08
+        // Handler at 0x200: ADDI x2, x0, 0x55
+        load_instr(32'h0000_0200, encode_i(12'h55, 5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));
+
+        wait_cycles(150);
+        check_val("mepc saved EBREAK PC", read_csr_mepc(), 64'h08);
+        check_val("mcause = 3 (ebreak)", read_csr_mcause(), 64'd3);
+        check_val("Handler executed (x2=0x55)", read_arch_reg(5'd2), 64'h55);
+
+        // ==============================================================
+        // Test 54: MRET — return from trap
+        // Set mepc=0x20 via CSRRW, then MRET → PC goes to 0x20
+        // ==============================================================
+        test_num = 54;
+        $display("\n[Test %0d] MRET return from trap", test_num);
+        reset_dut();
+        load_instr(32'h0000_0000, encode_i(12'h20, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));  // x1 = 0x20
+        load_instr(32'h0000_0004, encode_csr(12'h341, 5'd1, FUNCT3_CSRRW, 5'd0));          // CSRRW x0, mepc, x1
+        load_instr(32'h0000_0008, encode_mret());                                           // MRET → PC=0x20
+        load_instr(32'h0000_000C, encode_i(12'hBB, 5'd0, FUNCT3_ADD_SUB, 5'd5, OP_IMM));   // should NOT execute
+        // Target at 0x20: ADDI x3, x0, 0x77
+        load_instr(32'h0000_0020, encode_i(12'h77, 5'd0, FUNCT3_ADD_SUB, 5'd3, OP_IMM));
+        load_instr(32'h0000_0024, encode_i(12'd1, 5'd0, FUNCT3_ADD_SUB, 5'd4, OP_IMM));    // sentinel
+
+        wait_cycles(150);
+        check_val("MRET target executed (x3=0x77)", read_arch_reg(5'd3), 64'h77);
+        check_val("MRET sentinel (x4=1)", read_arch_reg(5'd4), 64'd1);
+
+        // ==============================================================
+        // Test 55: ECALL + MRET round-trip
+        // Set mtvec=0x100, ECALL at 0x08, handler does MRET
+        // After MRET, PC returns to 0x0C (instruction after ECALL)
+        // ==============================================================
+        test_num = 55;
+        $display("\n[Test %0d] ECALL + MRET round-trip", test_num);
+        reset_dut();
+        // Main code
+        load_instr(32'h0000_0000, encode_i(12'h100, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM)); // x1 = 0x100
+        load_instr(32'h0000_0004, encode_csr(12'h305, 5'd1, FUNCT3_CSRRW, 5'd0));          // CSRRW x0, mtvec, x1
+        load_instr(32'h0000_0008, encode_ecall());                                          // ECALL at PC=0x08
+        // Return point at 0x0C: after MRET from handler
+        load_instr(32'h0000_000C, encode_i(12'h99, 5'd0, FUNCT3_ADD_SUB, 5'd8, OP_IMM));   // x8 = 0x99
+        load_instr(32'h0000_0010, encode_i(12'd1, 5'd0, FUNCT3_ADD_SUB, 5'd9, OP_IMM));    // x9 = 1 sentinel
+
+        // Handler at 0x100: set x6=0x42, then adjust mepc to next instr and MRET
+        load_instr(32'h0000_0100, encode_i(12'h42, 5'd0, FUNCT3_ADD_SUB, 5'd6, OP_IMM));   // x6 = 0x42
+        // Read mepc into x10, add 4, write back (skip past ECALL)
+        load_instr(32'h0000_0104, encode_csr(12'h341, 5'd0, FUNCT3_CSRRS, 5'd10));         // CSRRS x10, mepc, x0 (read mepc)
+        load_instr(32'h0000_0108, encode_i(12'd4, 5'd10, FUNCT3_ADD_SUB, 5'd10, OP_IMM));  // x10 = mepc + 4
+        load_instr(32'h0000_010C, encode_csr(12'h341, 5'd10, FUNCT3_CSRRW, 5'd0));         // CSRRW x0, mepc, x10
+        load_instr(32'h0000_0110, encode_mret());                                           // MRET → PC=0x0C
+
+        wait_cycles(250);
+        check_val("Handler ran (x6=0x42)", read_arch_reg(5'd6), 64'h42);
+        check_val("Returned from trap (x8=0x99)", read_arch_reg(5'd8), 64'h99);
+        check_val("Round-trip sentinel (x9=1)", read_arch_reg(5'd9), 64'd1);
 
         // ==============================================================
         // Summary

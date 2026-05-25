@@ -310,8 +310,8 @@ module RISC_V_DECODER
                 rw = 1;
                 csr_inst = 1;
                 csr_addr = csr;
-                imm = imm_zimm;
                 rd_arch_addr = rd;
+                rs_arch_addr = rs;
                 imm = XLEN'(csr);
 
                 unique case (instr_type)

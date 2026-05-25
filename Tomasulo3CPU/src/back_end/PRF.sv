@@ -16,6 +16,11 @@ module PRF #(
     input logic [REG_FILE_DATA_WIDTH-1:0]       cdb_rd_data,
     input logic                                 cdb_reg_write,
 
+    // CSR commit write port (from ROB commit path)
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   csr_wr_phy_addr,
+    input logic [REG_FILE_DATA_WIDTH-1:0]       csr_wr_data,
+    input logic                                 csr_wr_en,
+
     // ISSUE interface
     // 7 read ports for issue
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   issue_rs_phy_addr_alu,

@@ -113,6 +113,7 @@ import riscv_types_pkg::*;
     // input logic [ROB_INDEX_WIDTH-1:0]               rob_bottom_ptr,
     input logic                                     rob_full,
     input logic                                     rob_two_or_more_vacant,
+    input logic                                     rob_csr_committed,
 
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      dis_pre_phy_addr,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      dis_new_phy_addr,
@@ -120,10 +121,12 @@ import riscv_types_pkg::*;
     output logic                                    dis_inst_valid,
     output logic [IMEM_DEPTH-1:0]                   dis_pc,
     output logic                                    dis_csr_inst,
-    output logic [CSR_CMD_WIDTH-1:0]                dis_csr_cmd,
-    output logic [CSR_ADDR_WIDTH-1:0]               dis_csr_addr,
+    output csr_cmd_e                                dis_csr_cmd,
+    output csr_addr_t                               dis_csr_addr,
     output logic                                    dis_trap_inst,
+    output trap_cause_t                             dis_trap_cause,
     output logic                                    dis_mret_inst,
+    output logic [ARCH_REG_WIDTH-1:0]               dis_csr_rs1_arch_addr,
     // output logic dis_reg_write,
     output logic                                    dis_inst_sw,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      dis_sw_rt_phy_addr,
@@ -142,7 +145,9 @@ import riscv_types_pkg::*;
     logic [XLEN-1:0] stage1_dis_imm;
     logic stage1_dis_mem_write, stage1_dis_reg_write, stage1_dis_branch,
           stage1_dis_jr_inst, stage1_dis_jal_inst, stage1_dis_jr31_inst,
-          stage1_dis_csr_inst, stage1_dis_trap_inst, stage1_dis_mret_inst;
+          stage1_dis_csr_inst, stage1_dis_trap_inst,
+          stage1_dis_mret_inst;
+    trap_cause_t stage1_dis_trap_cause;
     csr_cmd_e stage1_dis_csr_cmd;
     csr_addr_t stage1_dis_csr_addr;
     instr_e stage1_dis_instr_type;
@@ -159,6 +164,7 @@ import riscv_types_pkg::*;
     logic stage1_issue_entry_available;
     logic stage1_dis_int_issue_en, stage1_dis_div_issue_en,
           stage1_dis_mul_issue_en, stage1_dis_ld_st_issue_en;
+    logic stage1_dis_rob_only;
     // only stage1 will be stalled
     logic stall;
     // if last cycle stalls, it means dispatch didn't fetch data.
@@ -171,7 +177,9 @@ import riscv_types_pkg::*;
     logic [XLEN-1:0] stage2_dis_imm;
     logic stage2_dis_mem_write, stage2_dis_reg_write, stage2_dis_branch,
           stage2_dis_jr_inst, stage2_dis_jal_inst, stage2_dis_jr31_inst,
-          stage2_dis_csr_inst, stage2_dis_trap_inst, stage2_dis_mret_inst;
+          stage2_dis_csr_inst, stage2_dis_trap_inst,
+          stage2_dis_mret_inst;
+    trap_cause_t stage2_dis_trap_cause;
     csr_cmd_e stage2_dis_csr_cmd;
     csr_addr_t stage2_dis_csr_addr;
     instr_e stage2_dis_instr_type;
@@ -186,6 +194,7 @@ import riscv_types_pkg::*;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_rt_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] stage2_pre_phy_addr;
     logic [IMEM_DEPTH_WORD-1:0] stage2_ras_address;
+    logic [ARCH_REG_WIDTH-1:0] stage2_rs_arch_addr;
 
     // jalr $rd, imm($rs)
     logic jr_stall;
@@ -219,9 +228,17 @@ import riscv_types_pkg::*;
                    .mret_inst(stage1_dis_mret_inst)
                  );
 
+    always_comb begin
+        unique case (stage1_dis_instr_type)
+            INSTR_ECALL:  stage1_dis_trap_cause = TRAP_CAUSE_ECALL_M;
+            INSTR_EBREAK: stage1_dis_trap_cause = TRAP_CAUSE_EBREAK;
+            default:      stage1_dis_trap_cause = TRAP_CAUSE_NONE;
+        endcase
+    end
     assign stage1_valid = (!stall) && !cdb_flush && !last_cycle_stall;
     assign stage1_reg_write = stage1_dis_reg_write && (stage1_rd_arch_addr != '0);
-    assign stage1_needs_issue_entry = stage1_dis_instr_type != INSTR_NONE;
+    assign stage1_needs_issue_entry = (stage1_dis_instr_type != INSTR_NONE) &&
+                                      !stage1_dis_rob_only;
     assign stage1_issue_entry_available = stage1_dis_int_issue_en ||
             stage1_dis_div_issue_en ||
             stage1_dis_mul_issue_en ||
@@ -301,11 +318,28 @@ import riscv_types_pkg::*;
         end
     end
 
+    // CSR/trap/mret serialization: stall dispatch after dispatching one
+    // until the ROB commits it. Cleared by rob_csr_committed or flush.
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            csr_stall <= 1'b0;
+        end else begin
+            if (stage2_fire && (stage2_dis_csr_inst || stage2_dis_trap_inst ||
+                                stage2_dis_mret_inst)) begin
+                csr_stall <= 1'b1;
+            end
+            if (rob_csr_committed || (cdb_valid && cdb_flush)) begin
+                csr_stall <= 1'b0;
+            end
+        end
+    end
+
     always_comb begin
         stage1_dis_int_issue_en = 1'b0;
         stage1_dis_div_issue_en = 1'b0;
         stage1_dis_mul_issue_en = 1'b0;
         stage1_dis_ld_st_issue_en = 1'b0;
+        stage1_dis_rob_only = 1'b0;
 
         unique case (stage1_dis_instr_type)
             INSTR_ADD, INSTR_SUB, INSTR_SLT, INSTR_SLTU, INSTR_XOR,
@@ -334,11 +368,17 @@ import riscv_types_pkg::*;
                     stage1_dis_ld_st_issue_en = 1'b1;
                 end
             end
+            INSTR_CSRRW, INSTR_CSRRS, INSTR_CSRRC,
+            INSTR_CSRRWI, INSTR_CSRRSI, INSTR_CSRRCI,
+            INSTR_ECALL, INSTR_EBREAK, INSTR_MRET: begin
+                stage1_dis_rob_only = 1'b1;
+            end
             default: begin
                 stage1_dis_int_issue_en = 1'b0;
                 stage1_dis_div_issue_en = 1'b0;
                 stage1_dis_mul_issue_en = 1'b0;
                 stage1_dis_ld_st_issue_en = 1'b0;
+                stage1_dis_rob_only = 1'b0;
             end
         endcase
     end
@@ -389,9 +429,8 @@ import riscv_types_pkg::*;
             stall = 1'b1;
         end else if (jr_stall) begin
             stall = 1'b1;
-
-        // if (stage1_dis_jr_inst && !jr_stall)
-        //     jr_two_stage_one_extra_instr = 1'b1;
+        end else if (csr_stall) begin
+            stall = 1'b1;
         end
     end
 
@@ -438,12 +477,14 @@ import riscv_types_pkg::*;
             stage2_rt_phy_addr          <= '0;
             stage2_pre_phy_addr         <= '0;
             stage2_ras_address          <= '0;
+            stage2_rs_arch_addr         <= '0;
 
             stage2_dis_csr_inst        <= '0;
             stage2_dis_csr_cmd         <= CSR_CMD_NONE;
             stage2_dis_csr_addr        <= '0;
 
             stage2_dis_trap_inst       <= '0;
+            stage2_dis_trap_cause      <= TRAP_CAUSE_NONE;
             stage2_dis_mret_inst       <= '0;
 
             last_cycle_stall            <= 1'b1;
@@ -484,11 +525,13 @@ import riscv_types_pkg::*;
                 stage2_rt_phy_addr          <= stage1_rt_phy_addr;
                 stage2_pre_phy_addr         <= stage1_pre_phy_addr;
                 stage2_ras_address          <= ras_addr;
+                stage2_rs_arch_addr         <= stage1_rs_arch_addr;
 
                 stage2_dis_csr_inst         <= stage1_dis_csr_inst;
                 stage2_dis_csr_cmd          <= stage1_dis_csr_cmd;
                 stage2_dis_csr_addr         <= stage1_dis_csr_addr;
                 stage2_dis_trap_inst        <= stage1_dis_trap_inst;
+                stage2_dis_trap_cause       <= stage1_dis_trap_cause;
                 stage2_dis_mret_inst        <= stage1_dis_mret_inst;
             end
         end
@@ -537,6 +580,15 @@ import riscv_types_pkg::*;
     assign dis_div_issue_en = stage2_fire && stage2_dis_div_issue_en;
     assign dis_mul_issue_en = stage2_fire && stage2_dis_mul_issue_en;
     assign dis_ld_st_issue_en = stage2_fire && stage2_dis_ld_st_issue_en;
+    // CSR / trap outputs to ROB
+    assign dis_pc = stage2_pc;
+    assign dis_csr_inst = stage2_dis_csr_inst;
+    assign dis_csr_cmd = stage2_dis_csr_cmd;
+    assign dis_csr_addr = stage2_dis_csr_addr;
+    assign dis_trap_inst = stage2_dis_trap_inst;
+    assign dis_trap_cause = stage2_dis_trap_cause;
+    assign dis_mret_inst = stage2_dis_mret_inst;
+    assign dis_csr_rs1_arch_addr = stage2_rs_arch_addr;
     // RBA
     assign dis_rba_new_rd_phy_addr = dis_frl_rd_phy_addr;
     assign dis_rba_reg_write = stage2_fire && stage2_dis_reg_write;

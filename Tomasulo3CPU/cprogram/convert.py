@@ -235,11 +235,9 @@ def classify_instruction(addr: int, instr: int) -> DecodedInstr:
         imm = (instr >> 20) & 0xFFF
         if funct3 == 0:
             if imm == 0:
-                return DecodedInstr(addr, instr, "ECALL", False,
-                                    "ECALL not implemented")
+                return DecodedInstr(addr, instr, "ECALL", True, "")
             elif imm == 1:
-                return DecodedInstr(addr, instr, "EBREAK", False,
-                                    "EBREAK not implemented")
+                return DecodedInstr(addr, instr, "EBREAK", True, "")
         return DecodedInstr(addr, instr, "SYSTEM/CSR", False,
                             "System/CSR instructions not implemented")
 

@@ -149,6 +149,13 @@ package riscv_types_pkg;
     localparam csr_addr_t CSR_ADDR_MEPC    = 12'h341;
     localparam csr_addr_t CSR_ADDR_MCAUSE  = 12'h342;
     localparam csr_addr_t CSR_ADDR_MTVAL   = 12'h343;
+
+    // Synchronous trap cause codes
+    localparam int unsigned TRAP_CAUSE_WIDTH = 4;
+    typedef logic [TRAP_CAUSE_WIDTH-1:0] trap_cause_t;
+    localparam trap_cause_t TRAP_CAUSE_NONE    = 4'd0;
+    localparam trap_cause_t TRAP_CAUSE_EBREAK  = 4'd3;
+    localparam trap_cause_t TRAP_CAUSE_ECALL_M = 4'd11;
 endpackage
 
 `endif
