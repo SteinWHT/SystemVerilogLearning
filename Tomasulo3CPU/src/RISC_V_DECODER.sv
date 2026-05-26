@@ -52,14 +52,15 @@ module RISC_V_DECODER
     assign csr    = instr[31:20];
 
     // Immediate generation (sign-extended to XLEN)
-    logic [XLEN-1:0] imm_i, imm_s, imm_b, imm_u, imm_j, imm_zimm;
+    logic [XLEN-1:0] imm_i, imm_s, imm_b, imm_u, imm_j;
+    logic [4:0] imm_zimm;
 
     assign imm_i = {{(XLEN-12){instr[31]}}, instr[31:20]};
     assign imm_s = {{(XLEN-12){instr[31]}}, instr[31:25], instr[11:7]};
     assign imm_b = {{(XLEN-13){instr[31]}}, instr[31], instr[7], instr[30:25], instr[11:8], 1'b0};
     assign imm_u = {{(XLEN-32){instr[31]}}, instr[31:12], 12'b0};
     assign imm_j = {{(XLEN-21){instr[31]}}, instr[31], instr[19:12], instr[20], instr[30:21], 1'b0};
-    assign imm_zimm = {59'b0,instr[19:15]};
+    assign imm_zimm = instr[19:15];
 
 
     always_comb begin
@@ -311,7 +312,7 @@ module RISC_V_DECODER
                 csr_inst = 1;
                 csr_addr = csr;
                 rd_arch_addr = rd;
-                rs_arch_addr = rs;
+                rs_arch_addr = imm_zimm;
                 imm = XLEN'(csr);
 
                 unique case (instr_type)

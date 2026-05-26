@@ -45,6 +45,9 @@ FSDB_FILE  := $(PROJECT).fsdb
 # ============================================================
 
 SRC_FILES := \
+	$(SRC_DIR)/riscv_funct_pkg.sv \
+	$(SRC_DIR)/riscv_opcode_pkg.sv \
+	$(SRC_DIR)/riscv_types_pkg.sv \
 	$(SRC_DIR)/simple_module/sync_fifo.sv \
 	$(SRC_DIR)/simple_module/dual_port_memory.sv \
 	$(SRC_DIR)/simple_module/sync_lifo.sv \
@@ -57,9 +60,6 @@ SRC_FILES := \
 	$(SRC_DIR)/RBA.sv \
 	$(SRC_DIR)/RRAT.sv \
 	$(SRC_DIR)/SB.sv \
-	$(SRC_DIR)/riscv_funct_pkg.sv \
-	$(SRC_DIR)/riscv_opcode_pkg.sv \
-	$(SRC_DIR)/riscv_types_pkg.sv \
 	$(SRC_DIR)/RISC_V_DECODER.sv \
 	$(SRC_DIR)/DISPATCH.sv \
 	$(SRC_DIR)/CPU_FRONT_END.sv \

@@ -1298,7 +1298,7 @@ module CPU_tb;
         load_dmem(32'h0000_0008, 64'hABCD_EF01_8765_4321);
         load_instr(32'h0000_0000, encode_i(12'd8,     5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));   // x1 = 8
         load_instr(32'h0000_0004, encode_i(12'd0,     5'd1, FUNCT3_LW,      5'd3, OP_LOAD));  // LW x3, 0(x1) -> read from addr 8
-        
+
         wait_cycles(50);
         check_cdb_result("LW x3 sign-extended word", 1, 64'hFFFF_FFFF_8765_4321, 50);
 
@@ -1405,7 +1405,7 @@ module CPU_tb;
         test_num = 48;
         $display("\n[Test %0d] CSRRW write mscratch, read old value", test_num);
         reset_dut();
-        load_instr(32'h0000_0000, encode_i(12'hAB, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));  // x1 = 0xAB
+        load_instr(32'h0000_0000, encode_i(12'hAB, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));   // x1 = 0xAB
         load_instr(32'h0000_0004, encode_csr(12'h340, 5'd1, FUNCT3_CSRRW, 5'd2));          // CSRRW x2, mscratch, x1
         load_instr(32'h0000_0008, encode_i(12'd1, 5'd0, FUNCT3_ADD_SUB, 5'd3, OP_IMM));    // x3 = 1 (sentinel)
 

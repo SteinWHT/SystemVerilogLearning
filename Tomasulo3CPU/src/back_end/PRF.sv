@@ -51,7 +51,10 @@ module PRF #(
                 prf_data_array[i] <= '0;
             end
         end else begin
-            if (cdb_reg_write) begin
+            // CSR should have the highest priority
+            if (csr_wr_en) begin
+                prf_data_array[csr_wr_phy_addr] <= csr_wr_data;
+            end else if (cdb_reg_write) begin
                 prf_data_array[cdb_rd_phy_addr] <= cdb_rd_data;
             end
         end
@@ -69,4 +72,10 @@ module PRF #(
         rt_sb_data = ((rt_sb_phy_addr == cdb_rd_phy_addr) && cdb_reg_write) ? cdb_rd_data : prf_data_array[rt_sb_phy_addr];
     end
 
-endmodule 
+    // synthesis translate_off
+    CSR_PRIORITY: assert property(@(posedge clk) disable iff (!rst_n)
+        !(csr_wr_en && cdb_reg_write))
+        else $error("cdb reg write can not be asserted when csr is being executed");
+    // synthesis translate_on
+
+endmodule

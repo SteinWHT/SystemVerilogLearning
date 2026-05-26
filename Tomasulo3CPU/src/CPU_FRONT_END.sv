@@ -665,7 +665,10 @@ module CPU_FRONT_END
         .rt_data_ready(dis_rt_data_ready),
 
         .rd_phy_addr(cdb_rd_phy_addr),
-        .cdb_reg_write(cdb_reg_write)
+        .cdb_reg_write(cdb_reg_write),
+
+        .csr_wr_phy_addr(csr_wr_phy_addr),
+        .csr_wr_en(csr_wr_en)
     );
 
     assign rob_bottom_ptr_out          = rob_bottom_ptr;

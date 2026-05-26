@@ -109,12 +109,13 @@ module ROB
     input  logic                                csr_redirect_valid,
     input  logic [REG_FILE_DATA_WIDTH-1:0]      csr_redirect_pc,
 
-    // PRF write port for CSR result (old CSR value -> rd)
+    // PRF/RBA write port for CSR result (old CSR value -> rd)
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  csr_wr_phy_addr,
     output logic [REG_FILE_DATA_WIDTH-1:0]      csr_wr_data,
     output logic                                csr_wr_en,
 
     // Trap flush: redirect front-end after ECALL/EBREAK/MRET commit
+    // TODO: flush other parts, not only dispatch
     output logic                                trap_commit_flush,
     output logic [IMEM_DEPTH-1:0]               trap_redirect_pc
 );
@@ -352,28 +353,5 @@ module ROB
         flush_ptr = ((write_ptr[ROB_INDEX_WIDTH-1:0] > cdb_rob_tag) ?
         {write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag} : {~write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag});
     end
-
-    // synthesis translate_off
-    always @(posedge clk) begin
-        if (enable && head_is_csr_or_trap) begin
-            $display("[ROB-CSR-DBG] t=%0t commit ptr=%0d is_csr=%b trap_cause=%0d mret=%b rw=%b pc=0x%h",
-                     $time, read_ptr[ROB_INDEX_WIDTH-1:0],
-                     head.is_csr, head.trap_cause, head.mret_occur, head.rw, head.pc);
-            if (head.is_csr) begin
-                $display("  csr_addr=0x%h cmd=%0d rs1_arch=%0d rrat_phy=%0d",
-                         head.csr_addr, head.csr_cmd, head.rs1_arch, rrat_csr_rs1_phy);
-                $display("  csr_commit_valid=%b csr_rdata=0x%h csr_wr_en=%b wr_phy=%0d",
-                         csr_commit_valid, csr_rdata, csr_wr_en, csr_wr_phy_addr);
-            end
-        end
-        if (dis_inst_valid && !full && dis_csr_inst) begin
-            $display("[ROB-CSR-DBG] t=%0t dispatch CSR at wptr=%0d csr_addr=0x%h cmd=%0d rw=%b rd=%0d rs1_arch=%0d",
-                     $time, write_ptr[ROB_INDEX_WIDTH-1:0],
-                     dis_csr_addr, dis_csr_cmd, dis_reg_write,
-                     dis_rob_rd_arch_addr, dis_csr_rs1_arch_addr);
-        end
-    end
-    // synthesis translate_on
-
 
 endmodule

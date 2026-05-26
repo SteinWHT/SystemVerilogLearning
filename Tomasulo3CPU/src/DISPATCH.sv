@@ -197,9 +197,9 @@ import riscv_types_pkg::*;
     logic [ARCH_REG_WIDTH-1:0] stage2_rs_arch_addr;
 
     // jalr $rd, imm($rs)
-    logic jr_stall;
+    logic jr_stall, jr_stall_next;
     // csr stall
-    logic csr_stall;
+    logic csr_stall, csr_stall_next;
     // ------------------------------------------------------
     // Stage 1: Decode and read from FRAT and FRL
     // ------------------------------------------------------
@@ -254,13 +254,17 @@ import riscv_types_pkg::*;
     assign dis_ras_jal_inst = stage1_dis_jal_inst && stage1_valid;
 
     // IFQ logic
-    assign dis_ren = (!stall) && !cdb_flush;
+    // We allow the jr and csr instruction to be passed through stage1
+    // But block the ifq
+    assign dis_ren = (!stall) && !cdb_flush && !(jr_stall || csr_stall);
     assign stage1_branch_taken = stage1_dis_branch && bpb_branch_prediction;
     // redirect logic
+    logic [IMEM_DEPTH-1:0] jmpbr_byte_addr;
     always_comb begin
         dis_jmpbr = '0;
         dis_jmpbr_addr_valid = '0;
         dis_jmpbr_addr = '0;
+        jmpbr_byte_addr = stage1_dis_imm + ifetch_pc;
         if (cdb_flush && cdb_valid) begin
             dis_jmpbr = 1'b1;
             dis_jmpbr_addr_valid = 1'b1;
@@ -272,12 +276,12 @@ import riscv_types_pkg::*;
         end else if (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) begin
             dis_jmpbr = 1'b1;
             dis_jmpbr_addr_valid = 1'b1;
-            dis_jmpbr_addr = {IMEM_DEPTH'(stage1_dis_imm + ifetch_pc)}[IMEM_DEPTH-1:1];
+            dis_jmpbr_addr = jmpbr_byte_addr[IMEM_DEPTH-1:1];
         end else if (stage1_valid && stage1_dis_branch) begin
             dis_jmpbr = 1'b1;
             dis_jmpbr_addr_valid = 1'b1;
             if (bpb_branch_prediction) begin
-                dis_jmpbr_addr = {IMEM_DEPTH'(stage1_dis_imm + ifetch_pc)}[IMEM_DEPTH-1:1];
+                dis_jmpbr_addr = jmpbr_byte_addr[IMEM_DEPTH-1:1];
             end else begin
                 dis_jmpbr_addr = ifetch_pc[IMEM_DEPTH-1:1];
             end
@@ -301,36 +305,36 @@ import riscv_types_pkg::*;
     // jalr $rs1 ($rs1 != $31) until the value of $rs1 is ready in CDB
     // jr -> 1 bit flag register(jr_stall) + 5-bit internal register(jr_rob_tag)
     // if jr_rob_tag is on the CDB and valid, then we can clear the jr_stall flag and proceed with dispatching the jr instruction
+    // CSR/trap/mret serialization: stall dispatch after dispatching one
+    // until the ROB commits it. Cleared by rob_csr_committed or flush.
+    always_comb begin
+        jr_stall_next = jr_stall;
+        csr_stall_next = csr_stall;
+
+        if (cdb_jalr_resolved || (cdb_valid && cdb_flush))
+            jr_stall_next = 1'b0;
+        else if (stage1_valid && stage1_dis_jr_inst && !jr_stall)
+            jr_stall_next = 1'b1;
+
+        if (rob_csr_committed || (cdb_valid && cdb_flush))
+            csr_stall_next = 1'b0;
+        else if (stage1_dis_csr_inst || stage1_dis_trap_inst || stage1_dis_mret_inst)
+            csr_stall_next = 1'b1;
+
+    end
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             jr_stall <= 1'b0;
-            //jr_rob_tag <= '0;
-            end else begin
-            // when a jr instruction is in stage 1 and it's stalled, we set the jr_stall flag and record its ROB tag and target address
-            if (stage1_valid && stage1_dis_jr_inst && !jr_stall) begin
-                jr_stall <= 1'b1;
-                //jr_rob_tag <= rob_bottom_ptr;
-            end
-
-            if (cdb_jalr_resolved || (cdb_valid && cdb_flush)) begin
-                jr_stall <= 1'b0;
-            end
-        end
-    end
-
-    // CSR/trap/mret serialization: stall dispatch after dispatching one
-    // until the ROB commits it. Cleared by rob_csr_committed or flush.
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
             csr_stall <= 1'b0;
-        end else begin
-            if (stage2_fire && (stage2_dis_csr_inst || stage2_dis_trap_inst ||
-                                stage2_dis_mret_inst)) begin
-                csr_stall <= 1'b1;
-            end
-            if (rob_csr_committed || (cdb_valid && cdb_flush)) begin
-                csr_stall <= 1'b0;
-            end
+            end else begin
+                // when stage1 is valid, the stall can be asserted
+                // or when stage1 is invalid, stall can be deasserted
+                if ((stage1_valid || !jr_stall_next))
+                    jr_stall <= jr_stall_next;
+
+                if(stage1_valid || !csr_stall_next)
+                    csr_stall <= csr_stall_next;
         end
     end
 
@@ -427,9 +431,9 @@ import riscv_types_pkg::*;
                 !issue_ld_stq_two_or_more_vacant) || (stage2_dis_ld_st_issue_en &&
                                                         issue_ld_stq_full)) begin
             stall = 1'b1;
-        end else if (jr_stall) begin
+        end else if (jr_stall && jr_stall_next) begin
             stall = 1'b1;
-        end else if (csr_stall) begin
+        end else if (csr_stall && csr_stall_next) begin
             stall = 1'b1;
         end
     end

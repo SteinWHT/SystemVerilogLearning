@@ -17,7 +17,11 @@ module RBA #(
 
     // CDB interface
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   rd_phy_addr,
-    input logic                                 cdb_reg_write
+    input logic                                 cdb_reg_write,
+
+    // ROB/CSR interface
+    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   csr_wr_phy_addr,
+    input logic                                 csr_wr_en
 );
     // 2 read ports for dispatch
     // and 2 write ports: 1 for dispatch and new rd phy register rdy should be cleared
@@ -34,7 +38,9 @@ module RBA #(
                 prf_rdy_array[dis_new_rd_phy_addr] <= 1'b0;
             end
 
-            if (cdb_reg_write) begin
+            if (csr_wr_en)
+                prf_rdy_array[csr_wr_phy_addr] <= 1'b1;
+            else if (cdb_reg_write) begin
                 prf_rdy_array[rd_phy_addr] <= 1'b1;
             end
         end
