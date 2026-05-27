@@ -97,11 +97,16 @@ module RISC_V_DECODER
                             default:     instr_type = INSTR_NONE;
                         endcase
                     end
-                    FUNCT3_OR:  instr_type = INSTR_OR;
+                    FUNCT3_OR: begin
+                        unique case (funct7)
+                            FUNCT7_ZERO: instr_type = INSTR_OR;
+                            FUNCT7_MULDIV:  instr_type = INSTR_REM;
+                            default:     instr_type = INSTR_NONE;
+                        endcase
+                    end
                     FUNCT3_AND: begin
                         unique case (funct7)
                             FUNCT7_ZERO: instr_type = INSTR_AND;
-                            FUNCT7_MULDIV:  instr_type = INSTR_REM;
                             default:     instr_type = INSTR_NONE;
                         endcase
                     end

@@ -264,20 +264,20 @@ import riscv_types_pkg::*;
         dis_jmpbr = '0;
         dis_jmpbr_addr_valid = '0;
         dis_jmpbr_addr = '0;
-        jmpbr_byte_addr = stage1_dis_imm + ifetch_pc;
+        jmpbr_byte_addr = stage2_dis_imm + stage2_pc;
         if (cdb_flush && cdb_valid) begin
             dis_jmpbr = 1'b1;
             dis_jmpbr_addr_valid = 1'b1;
             dis_jmpbr_addr = cdb_branch_addr[IMEM_DEPTH-1:1];
-        end else if (stage1_valid && stage1_dis_jr31_inst) begin
+        end else if (stage2_valid && stage2_dis_jr31_inst) begin
             dis_jmpbr = 1'b1;
             dis_jmpbr_addr_valid = 1'b1;
             dis_jmpbr_addr = ras_addr;
-        end else if (stage1_valid && stage1_dis_jal_inst && !stage1_dis_jr_inst) begin
+        end else if (stage2_valid && stage2_dis_jal_inst && !stage2_dis_jr_inst) begin
             dis_jmpbr = 1'b1;
             dis_jmpbr_addr_valid = 1'b1;
             dis_jmpbr_addr = jmpbr_byte_addr[IMEM_DEPTH-1:1];
-        end else if (stage1_valid && stage1_dis_branch && bpb_branch_prediction) begin
+        end else if (stage2_valid && stage2_dis_branch && stage2_branch_prediction) begin
             dis_jmpbr = 1'b1;
             dis_jmpbr_addr_valid = 1'b1;
             dis_jmpbr_addr = jmpbr_byte_addr[IMEM_DEPTH-1:1];
@@ -400,21 +400,21 @@ import riscv_types_pkg::*;
             stall = 1'b1;
         end else if ((stage2_dis_int_issue_en && stage1_dis_int_issue_en &&
                 !issue_intq_two_or_more_vacant) || (stage2_dis_int_issue_en &&
-                                                    issue_intq_full)) begin
+                issue_intq_full)) begin
             stall = 1'b1;
         end else if ((stage2_dis_div_issue_en && stage1_dis_div_issue_en &&
                 !issue_divq_two_or_more_vacant) || (stage2_dis_div_issue_en &&
-                                                    issue_divq_full)) begin
+                issue_divq_full)) begin
             stall = 1'b1;
         end else if ((stage2_dis_mul_issue_en && stage1_dis_mul_issue_en &&
                 !issue_mulq_two_or_more_vacant) || (stage2_dis_mul_issue_en &&
-                                                    issue_mulq_full)) begin
+                issue_mulq_full)) begin
             stall = 1'b1;
         end else if ((stage2_dis_ld_st_issue_en && stage1_dis_ld_st_issue_en &&
                 !issue_ld_stq_two_or_more_vacant) || (stage2_dis_ld_st_issue_en &&
-                                                        issue_ld_stq_full)) begin
+                issue_ld_stq_full)) begin
             stall = 1'b1;
-        end else if (jr_stall) begin
+        end else if (dis_jmpbr) begin
             stall = 1'b1;
         end else if (csr_stall) begin
             stall = 1'b1;

@@ -32,9 +32,13 @@ module ISSUEUNIT #(
     output logic issue_ld_buf
 );
 
-    logic                       priority_int_ld_st, priority_int_ld_st_next;
-    logic [2:0]                 div_complete_counter;
-    logic [MUL_CYCLES - 1:0]    mul_complete_counter;
+    localparam int unsigned DIV_COUNTER_WIDTH = $clog2(DIV_CYCLES + 1) + 1;
+    localparam logic [DIV_COUNTER_WIDTH - 1:0] DIV_MUL_CONFLICT_COUNT = DIV_COUNTER_WIDTH'(MUL_CYCLES);
+    localparam logic [DIV_COUNTER_WIDTH - 1:0] DIV_NEXT_CONFLICT_COUNT = DIV_COUNTER_WIDTH'(1);
+
+    logic                                 priority_int_ld_st, priority_int_ld_st_next;
+    logic [DIV_COUNTER_WIDTH - 1:0]       div_complete_counter;
+    logic [MUL_CYCLES - 1:0]              mul_complete_counter;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -42,30 +46,24 @@ module ISSUEUNIT #(
             div_complete_counter    <= '0;
             mul_complete_counter    <= '0;
         end else begin
-            // There is no conflict between issue_div and div_complete_counter
-            // Namely, issue_div will never be asserted when div_complete_counter is not 0
+            // There is no conflict between issue_div and div_complete_counter:
+            // issue_div is asserted only when div_complete_counter is 0.
             if (issue_div) begin
-                div_complete_counter <= DIV_CYCLES - 1;
-            end
-            // Since issue_mul is pipelined, it will be asserted for MUL_CYCLES cycles
-            // And mul_complete_counter is a right shift register, so it will be asserted for MUL_CYCLES cycles
-            if (issue_mul) begin
-                mul_complete_counter [MUL_CYCLES - 1]   <= 1'b1;
-                mul_complete_counter [MUL_CYCLES - 2:0] <= mul_complete_counter [MUL_CYCLES - 1:1];
-            end else begin
-                mul_complete_counter <= mul_complete_counter >> 1;
-            end
-
-            if (div_complete_counter > 0) begin
+                div_complete_counter <= DIV_COUNTER_WIDTH'(DIV_CYCLES + 1);
+            end else if (div_complete_counter > 0) begin
                 div_complete_counter <= div_complete_counter - 1;
             end
+
+            // MUL is pipelined, so each issue is inserted into a completion shift register.
+            // Bit 1 marks a MUL that will complete in the same slot as a 1-cycle issue now.
+            mul_complete_counter <= {issue_mul, mul_complete_counter[MUL_CYCLES - 1:1]};
 
             priority_int_ld_st <= priority_int_ld_st_next;
         end
     end
     // Issue logic / priority logic:
     // 1. Issue the div: non-pipelined, 7 cycles
-    // 2. Issue the mul: pipelined, 3 cycles
+    // 2. Issue the mul: pipelined, 4 cycles
     // 3. Issue the int: 1 cycle or Issue the ld/st: 1 cycle
     // an LRU to track the priority of the int and ld/st
 
@@ -85,9 +83,9 @@ module ISSUEUNIT #(
 
         if (ready_div && div_exe_ready && div_complete_counter == 0) begin
             issue_div = 1;
-        end else if (ready_mul && (div_complete_counter != 3'd3)) begin
+        end else if (ready_mul && (div_complete_counter != DIV_MUL_CONFLICT_COUNT)) begin
             issue_mul = 1;
-        end else if ((div_complete_counter != 1'b1 && !mul_complete_counter[0])) begin
+        end else if ((div_complete_counter != DIV_NEXT_CONFLICT_COUNT && !mul_complete_counter[1])) begin
             if(ready_int && ready_ld_buf) begin
                 if (priority_int_ld_st == 1'b1) begin
                     issue_int = 1;
@@ -109,5 +107,7 @@ module ISSUEUNIT #(
     // synthesis translate_off
     ISSUE_PRIORITY_RULE:assert property (@(posedge clk) disable iff (!rst_n) DIV_CYCLES > MUL_CYCLES)
     else $error("DIV_CYCLES must be greater than MUL_CYCLES to ensure correct priority logic");
+    MUL_CYCLES_RULE:assert property (@(posedge clk) disable iff (!rst_n) MUL_CYCLES > 1)
+    else $error("MUL_CYCLES must be greater than 1 for the MUL completion shift register");
     // synthesis translate_on
 endmodule

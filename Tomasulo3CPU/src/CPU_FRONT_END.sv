@@ -183,7 +183,6 @@ module CPU_FRONT_END
     logic dis_bpb_branch;
     logic [BPB_PC_BITS-1:0] dis_cdb_upd_branch_addr;
     logic dis_cdb_branch_outcome;
-    logic [IMEM_DEPTH-1:0] dis_branch_other_addr_int;
 
     // RAS interface
     logic [IMEM_DEPTH_WORD-1:0] ras_addr;
@@ -351,7 +350,7 @@ module CPU_FRONT_END
         .dis_new_rd_phy_addr(dis_new_rd_phy_addr),
         .dis_opcode(dis_opcode),
         .dis_imm(dis_imm),
-        .dis_branch_other_addr(dis_branch_other_addr_int),
+        .dis_branch_other_addr(dis_branch_other_addr),
         .dis_branch_prediction(dis_branch_prediction),
         .dis_branch(dis_branch),
         .dis_branch_pc_bits(dis_branch_pc_bits),
@@ -402,7 +401,6 @@ module CPU_FRONT_END
 
     assign dis_cdb_upd_branch_addr = cdb_br_updt_addr;
     assign dis_cdb_branch_outcome = cdb_branch_outcome;
-    assign dis_branch_other_addr = DMEM_WIDTH'(dis_branch_other_addr_int);
 
     // RAS
     RAS #(

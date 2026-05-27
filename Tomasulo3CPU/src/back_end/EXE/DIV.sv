@@ -45,10 +45,12 @@ import riscv_types_pkg::*;
     logic [XLEN-1:0] remainder;
     logic busy;
     logic [XLEN-1:0] dw_divisor;
+    logic [XLEN-1:0] dw_dividend;
 
     assign dw_divisor = (valid && (rt_data_div != '0)) ?
         rt_data_div : {{(XLEN-1){1'b0}}, 1'b1};
 
+    logic zero_divisor;
     logic killed;
     logic                                     div_valid;
     logic [OPCODE_WIDTH-1:0]                  div_opcode;
@@ -58,9 +60,15 @@ import riscv_types_pkg::*;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             busy <= 1'b0;
+            zero_divisor <= 1'b0;
+            dw_dividend <= '0;
         end else begin
             if (start) begin
                 busy <= 1'b1;
+                dw_dividend <= rs_data_div;
+                if (rt_data_div == '0)
+                    zero_divisor <= 1'b1;
+                else zero_divisor <= 1'b0;
             end else if (complete && busy) begin
                 busy <= 1'b0;
             end
@@ -81,7 +89,8 @@ import riscv_types_pkg::*;
             div_rd_phy_addr <= '0;
             exe_rd_data     <= '0;
         end else begin
-            exe_rd_data         <= div_opcode == INSTR_DIV ? quotient : div_opcode == INSTR_REM ? remainder : '0;
+            exe_rd_data         <=  (div_opcode == INSTR_DIV) ? (zero_divisor ? {REG_FILE_DATA_WIDTH{1'b1}} : quotient) :
+                                    (div_opcode == INSTR_REM) ? (zero_divisor ?  dw_dividend : remainder) : '0;
             exe_result_valid    <= complete && div_valid && !killed;
             if (killed) begin
                 div_valid       <= 1'b0;
@@ -101,7 +110,7 @@ import riscv_types_pkg::*;
     DW_div_seq #(
         .a_width     (XLEN),
         .b_width     (XLEN),
-        .tc_mode     (0),        // 0 unsigned, 1 signed; check your local doc
+        .tc_mode     (1),        // 0 unsigned, 1 signed; check your local doc
         .num_cyc     (DIV_CYCLES),
         .rst_mode    (1),
         .input_mode  (1),

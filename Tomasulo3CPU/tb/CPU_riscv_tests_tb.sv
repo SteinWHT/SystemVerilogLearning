@@ -132,13 +132,17 @@ module CPU_riscv_tests_tb;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            imem_valid <= 1'b0;
-            imem_data  <= '0;
-        end else if (imem_read_rdy) begin
             imem_valid <= 1'b1;
-            imem_data  <= imem_array[imem_addr[15:2]];
+            imem_data  <= '0;
         end else begin
-            imem_valid <= 1'b0;
+            if (imem_read_rdy) begin
+                imem_valid <= 1'b1;
+            end else
+                imem_valid <= 1'b0;
+
+            if (imem_read_rdy && imem_valid) begin
+                imem_data  <= imem_array[imem_addr[15:2]];
+            end
         end
     end
 

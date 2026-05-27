@@ -36,8 +36,6 @@ import riscv_types_pkg::*;
     output logic                                    exe_reg_write,
     output logic                                    exe_result_valid
 );
-    localparam int unsigned MulXLen = XLEN / 2;
-
     logic [ROB_INDEX_WIDTH-1:0]               mul_rob_tag[MUL_CYCLES];
     logic [PHY_REGISTER_FILE_WIDTH-1:0]       mul_rd_phy_addr[MUL_CYCLES];
     logic                                     mul_valid[MUL_CYCLES];
@@ -87,13 +85,13 @@ import riscv_types_pkg::*;
     end
 
     DW02_mult_4_stage #(
-        .A_width    (MulXLen),
-        .B_width    (MulXLen)
+        .A_width    (XLEN),
+        .B_width    (XLEN)
     ) u_mul (
         .CLK     (clk),
-        .TC      (1'b0),
-        .A       (rs_data_mul[MulXLen-1:0]),
-        .B       (rt_data_mul[MulXLen-1:0]),
+        .TC      (1'b1),
+        .A       (rs_data_mul),
+        .B       (rt_data_mul),
         .PRODUCT (product)
     );
 

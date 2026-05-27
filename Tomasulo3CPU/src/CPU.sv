@@ -314,7 +314,7 @@ module CPU #(
         .dis_rob_tag                     (rob_bottom_ptr),
         .dis_opcode                      (dis_opcode),
         .dis_imm                         (dis_imm),
-        .dis_branch_other_addr           (dis_branch_other_addr[IMEM_DEPTH-1:0]),
+        .dis_branch_other_addr           (dis_branch_other_addr),
         .dis_branch_pc_bits              ({1'b0, dis_branch_pc_bits}),
         .dis_branch_prediction           (dis_branch_prediction),
         .dis_branch                      (dis_branch),
