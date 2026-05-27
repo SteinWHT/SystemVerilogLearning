@@ -1,0 +1,4 @@
+# rv64um tests (M extension) — only ops implemented in Tomasulo3CPU
+mul
+div
+rem

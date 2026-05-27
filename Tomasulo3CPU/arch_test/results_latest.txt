@@ -1,0 +1,31 @@
+# riscv-tests regression — 2026-05-26 (QuestaSim, 47 tests in manifest)
+# 27/47 PASSED
+
+## PASSED (27)
+rv64ui-add rv64ui-addi rv64ui-addiw rv64ui-and rv64ui-andi rv64ui-auipc
+rv64ui-beq rv64ui-bge rv64ui-bgeu rv64ui-blt rv64ui-bltu rv64ui-bne
+rv64ui-jal rv64ui-ld rv64ui-lw rv64ui-or rv64ui-ori rv64ui-simple
+rv64ui-slli rv64ui-slt rv64ui-slti rv64ui-sltiu rv64ui-sltu rv64ui-srli
+rv64ui-sub rv64ui-xor rv64ui-xori
+
+## FAILED (20)
+rv64ui-jalr       tohost=0x5 (test failure code)
+rv64ui-lb         timeout
+rv64ui-lbu        timeout
+rv64ui-ld_st      timeout
+rv64ui-lh         timeout
+rv64ui-lhu        timeout
+rv64ui-lui        (see sim log)
+rv64ui-lwu        timeout
+rv64ui-sb         timeout
+rv64ui-sd         timeout
+rv64ui-sh         timeout
+rv64ui-sll        timeout
+rv64ui-sra        timeout
+rv64ui-srai       timeout
+rv64ui-srl        tohost=0x23
+rv64ui-st_ld      timeout
+rv64ui-sw         timeout
+rv64um-div        tohost=0x5
+rv64um-mul        tohost=0x41
+rv64um-rem        tohost=0x5

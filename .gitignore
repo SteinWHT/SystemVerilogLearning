@@ -62,6 +62,7 @@ INTERVIEW_GUIDE.md
 /Tomasulo3CPU/script/Dockerfile.synopsys
 /Tomasulo3CPU/script/novas.*
 /Tomasulo3CPU/build
+/Tomasulo3CPU/arch_test/build
 /obj_dir
 /Tomasulo3CPU/src/temp.sv
 /Tomasulo3CPU/teroshdl.project.windows.json

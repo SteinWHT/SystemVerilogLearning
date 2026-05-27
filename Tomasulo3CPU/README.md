@@ -116,6 +116,22 @@ After steps 1–6, simple C programs compile with:
 riscv64-unknown-elf-gcc -march=rv64im -mabi=lp64 -nostdlib -O2 test.c -o test
 ```
 
+## Documentation
+
+- [Verification status](doc/VERIFICATION_STATUS.md) — methodology, results, known limitations, planned work
+
+## RISC-V architecture tests (riscv-tests)
+
+Official ISA tests from `third_party/riscv-tests` can be built and run against the full CPU:
+
+```bash
+cd arch_test
+python build_tests.py add
+python run_tests.py add
+```
+
+See [arch_test/README.md](arch_test/README.md) for setup, manifests, and resume wording.
+
 ## Building / Simulation
 
 The testbench supports both VCS/FSDB and open-source (Icarus/VCD) flows:
