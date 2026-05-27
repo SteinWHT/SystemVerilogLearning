@@ -48,6 +48,7 @@ module CPU_BACK_END #(
     input logic                                 dis_jr_inst,
     input logic                                 dis_jal_inst,
     input logic                                 dis_jr31_inst,
+    input logic [IMEM_DEPTH-1:0]                dis_pc,
 
     // ROB / LSQ tag sideband
     input logic [ROB_INDEX_WIDTH-1:0]           rob_tag,
@@ -100,7 +101,6 @@ module CPU_BACK_END #(
     output logic [BPB_PC_BITS-1:0]              cdb_upd_branch_addr,
     output logic                                cdb_branch_outcome,
     output logic [IMEM_DEPTH-1:0]               cdb_branch_addr,
-    output logic                                cdb_jalr_resolved,
 
     // LSB -> ROB / SB (store address sideband)
     output logic [ROB_INDEX_WIDTH-1:0]          lsb_rob_tag,
@@ -158,6 +158,7 @@ module CPU_BACK_END #(
     logic                                iss_exe_jr31_inst;
     logic                                iss_exe_jal_inst;
     logic [BPB_PC_BITS-1:0]              iss_exe_branch_pc_bits;
+    logic [IMEM_DEPTH-1:0]               iss_exe_pc;
 
     logic                                exe_valid;
     logic [ROB_INDEX_WIDTH-1:0]          exe_rob_tag;
@@ -235,6 +236,7 @@ module CPU_BACK_END #(
         .dis_jr_inst(dis_jr_inst),
         .dis_jal_inst(dis_jal_inst),
         .dis_jr31_inst(dis_jr31_inst),
+        .dis_pc(dis_pc),
         .int_rd_phy_addr(int_rd_phy_addr_wb),
         .int_exe_ready(int_result_valid),
         .mul_rd_phy_addr(mul_rd_phy_addr_wb),
@@ -274,6 +276,7 @@ module CPU_BACK_END #(
         .iss_exe_jr31_inst(iss_exe_jr31_inst),
         .iss_exe_jal_inst(iss_exe_jal_inst),
         .iss_exe_branch_pc_bits(iss_exe_branch_pc_bits),
+        .iss_exe_pc(iss_exe_pc),
         .sb_flush_sw_tag(sb_flush_sw_tag),
         .sb_flush_sw(sb_flush_sw),
         .sb_entry_sw(sb_entry_sw),
@@ -358,6 +361,7 @@ module CPU_BACK_END #(
         .iss_jr31_inst(iss_exe_jr31_inst),
         .iss_jal_inst(iss_exe_jal_inst),
         .iss_branch_pc_bits(iss_exe_branch_pc_bits),
+        .iss_pc(iss_exe_pc),
         .issue_int_en(exe_int_grant),
         .issue_div_en(exe_div_grant),
         .issue_mul_en(exe_mul_grant),
@@ -484,8 +488,7 @@ module CPU_BACK_END #(
         .cdb_upd_branch(cdb_upd_branch),
         .cdb_upd_branch_addr(cdb_upd_branch_addr),
         .cdb_branch_outcome(cdb_branch_outcome),
-        .cdb_branch_addr(cdb_branch_addr),
-        .cdb_jalr_resolved(cdb_jalr_resolved)
+        .cdb_branch_addr(cdb_branch_addr)
     );
 
 endmodule

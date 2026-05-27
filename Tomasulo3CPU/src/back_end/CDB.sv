@@ -80,9 +80,8 @@ module CDB #(
 
     // DISPATCH interface
     //output  logic                                    cdb_valid,
-    output  logic [IMEM_DEPTH-1:0]              cdb_branch_addr,
+    output  logic [IMEM_DEPTH-1:0]              cdb_branch_addr
     //output  logic                                    cdb_flush,
-    output  logic                               cdb_jalr_resolved
 );
     logic valid;
     typedef struct packed {
@@ -100,20 +99,12 @@ module CDB #(
 
     cdb_entry_t cdb_entry;
 
-    logic jalr_resolved;
-    always_comb begin
-        jalr_resolved = 1'b0;
-        if (exe_jr_inst) begin
-            jalr_resolved = 1'b1;
-        end
-    end
-
     logic flush;
     logic [IMEM_DEPTH-1:0] branch_other_addr;
     always_comb begin
         flush = 1'b0;
         branch_other_addr = '0;
-        if ((exe_branch || exe_jr31_inst) && exe_branch_mispredicted) begin
+        if (((exe_branch || exe_jr31_inst) && exe_branch_mispredicted) || exe_jr_inst) begin
             flush = 1'b1;
             branch_other_addr = exe_branch_other_addr;
         end
@@ -134,7 +125,6 @@ module CDB #(
                 sw_addr: '0,
                 sw_strb: '0
             };
-            cdb_jalr_resolved = jalr_resolved;
         end else if (lsb_ready) begin
             valid = 1'b1;
             cdb_entry = '{
@@ -149,7 +139,6 @@ module CDB #(
                 sw_addr: lsb_sw_addr,
                 sw_strb: lsb_sw_strb
             };
-            cdb_jalr_resolved = 1'b0;
         end else begin
             valid = 1'b0;
             cdb_entry = '{
@@ -164,7 +153,6 @@ module CDB #(
                 sw_addr: '0,
                 sw_strb: '0
             };
-            cdb_jalr_resolved = 1'b0;
         end
     end
 

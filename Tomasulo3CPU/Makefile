@@ -164,6 +164,7 @@ sim: compile
 	@test -x "$(BUILD_DIR)/simv" || \
 		(echo "[ERROR] Missing simulator executable: $(BUILD_DIR)/simv"; exit 1)
 	cd $(BUILD_DIR) && ./simv -l sim.log +fsdbfile+$(FSDB_FILE) \
+		$(PLUSARGS) \
 		2>&1 | tee sim_screen.log
 	@echo ""
 	@echo "============================================"
@@ -221,6 +222,7 @@ sim-questa: check
 		2>&1 | tee compile.log
 	cd $(QUESTA_BUILD) && vsim -c -do "run -all; quit -f" \
 		$(TOP_MODULE) \
+		$(PLUSARGS) \
 		2>&1 | tee sim.log
 	@echo ""
 	@echo "============================================"

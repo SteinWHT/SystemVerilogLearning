@@ -68,7 +68,6 @@ import riscv_types_pkg::*;
     input  logic                                    cdb_valid,
     input  logic [IMEM_DEPTH-1:0]                   cdb_branch_addr,
     input  logic                                    cdb_flush,
-    input  logic                                    cdb_jalr_resolved,
 
     // FRAT interface
     input  logic                                    frat_full,
@@ -277,14 +276,10 @@ import riscv_types_pkg::*;
             dis_jmpbr = 1'b1;
             dis_jmpbr_addr_valid = 1'b1;
             dis_jmpbr_addr = jmpbr_byte_addr[IMEM_DEPTH-1:1];
-        end else if (stage1_valid && stage1_dis_branch) begin
+        end else if (stage1_valid && stage1_dis_branch && bpb_branch_prediction) begin
             dis_jmpbr = 1'b1;
             dis_jmpbr_addr_valid = 1'b1;
-            if (bpb_branch_prediction) begin
-                dis_jmpbr_addr = jmpbr_byte_addr[IMEM_DEPTH-1:1];
-            end else begin
-                dis_jmpbr_addr = ifetch_pc[IMEM_DEPTH-1:1];
-            end
+            dis_jmpbr_addr = jmpbr_byte_addr[IMEM_DEPTH-1:1];
         end else if (jr_stall) begin
             dis_jmpbr = 1'b1;
         end
@@ -311,7 +306,7 @@ import riscv_types_pkg::*;
         jr_stall_next = jr_stall;
         csr_stall_next = csr_stall;
 
-        if (cdb_jalr_resolved || (cdb_valid && cdb_flush))
+        if (cdb_valid && cdb_flush)
             jr_stall_next = 1'b0;
         else if (stage1_valid && stage1_dis_jr_inst && !jr_stall)
             jr_stall_next = 1'b1;
@@ -565,15 +560,9 @@ import riscv_types_pkg::*;
     assign dis_rt_phy_addr = stage2_rt_phy_addr;
     assign dis_new_rd_phy_addr = dis_frl_rd_phy_addr;
     assign dis_opcode = stage2_dis_instr_type;
-    // TODO: Assume now if jalr instruction, the imm is 0 and now it's used as PC+4[15:0]
-    assign dis_imm = stage2_dis_jal_inst ?
-        {{(XLEN-IMEM_DEPTH + 1){stage2_pc_plus4[IMEM_DEPTH-1]}},stage2_pc_plus4[IMEM_DEPTH-2:0]} :
-        stage2_dis_imm;
+    assign dis_imm = stage2_dis_imm;
     assign dis_branch_other_addr = stage2_dis_jr31_inst ? {stage2_ras_address,1'b0} :
-            stage2_branch_prediction ? stage2_pc_plus4 :
-            // TODO: check if we store the pc_plus4 here for AUIPC (save pc signals) is correct
-            stage2_dis_instr_type == INSTR_AUIPC ? stage2_pc :
-            stage2_pc + IMEM_DEPTH'(stage2_dis_imm);
+            stage2_branch_prediction ? stage2_pc_plus4 : stage2_pc + IMEM_DEPTH'(stage2_dis_imm);
     assign dis_branch_prediction = stage2_branch_prediction;
     assign dis_branch = stage2_dis_branch;
     assign dis_branch_pc_bits = stage2_pc[BPB_PC_BITS+1:2];

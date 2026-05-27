@@ -56,6 +56,7 @@ import riscv_types_pkg::*;
     input logic                                 dis_jr_inst,
     input logic                                 dis_jal_inst,
     input logic                                 dis_jr31_inst,
+    input logic [IMEM_DEPTH-1:0]                dis_pc,
 
     output logic                                issq_intq_full,
     output logic                                issq_divq_full,
@@ -96,6 +97,7 @@ import riscv_types_pkg::*;
     output logic                                iss_exe_jr31_inst,
     output logic                                iss_exe_jal_inst,
     output logic [BPB_PC_BITS-1:0]              iss_exe_branch_pc_bits,
+    output logic [IMEM_DEPTH-1:0]               iss_exe_pc,
 
     // ISSUEUNIT interface
     input logic                                 issue_int_en,
@@ -147,6 +149,7 @@ import riscv_types_pkg::*;
     logic                                 iss_jal_inst_alu;
     logic [BPB_PC_BITS-1:0]               iss_branch_pc_bits_alu;
     logic [IMEM_DEPTH-1:0]                iss_branch_other_addr_alu;
+    logic [IMEM_DEPTH-1:0]                iss_pc;
 
     // DIV / MUL issue metadata (internal until EXE is wired)
     logic [ROB_INDEX_WIDTH-1:0]           iss_rob_tag_div;
@@ -203,6 +206,7 @@ import riscv_types_pkg::*;
         .iss_jal_inst_alu(iss_jal_inst_alu),
         .iss_branch_pc_bits_alu(iss_branch_pc_bits_alu),
         .iss_branch_other_addr_alu(iss_branch_other_addr_alu),
+        .iss_pc(iss_pc),
 
         .issue_int_en(issue_int_en),
         .issue_int_rdy(issue_int_rdy),
@@ -225,6 +229,7 @@ import riscv_types_pkg::*;
         .dis_jr_inst(dis_jr_inst),
         .dis_jal_inst(dis_jal_inst),
         .dis_jr31_inst(dis_jr31_inst),
+        .dis_pc(dis_pc),
 
         .iss_intq_full(issq_intq_full),
         .iss_intq_two_or_more_vacant(issq_intq_two_or_more_vacant)
@@ -410,6 +415,7 @@ import riscv_types_pkg::*;
         iss_exe_jr31_inst           = 1'b0;
         iss_exe_jal_inst            = 1'b0;
         iss_exe_branch_pc_bits      = '0;
+        iss_exe_pc                  = '0;
 
         if (exe_int_grant) begin
             iss_exe_rob_tag             = iss_rob_tag_alu;
@@ -426,6 +432,7 @@ import riscv_types_pkg::*;
             iss_exe_jr31_inst           = iss_jr31_inst_alu;
             iss_exe_jal_inst            = iss_jal_inst_alu;
             iss_exe_branch_pc_bits      = iss_branch_pc_bits_alu;
+            iss_exe_pc                  = iss_pc;
         end else if (exe_div_grant) begin
             iss_exe_rob_tag             = iss_rob_tag_div;
             iss_exe_opcode              = iss_opcode_div;

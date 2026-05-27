@@ -96,13 +96,14 @@ module CPU #(
     logic [PHY_REGISTER_FILE_WIDTH-1:0]  dis_new_rd_phy_addr;
     logic                                dis_reg_write;
     logic [XLEN-1:0]                     dis_imm;
-    logic [DMEM_WIDTH-1:0]               dis_branch_other_addr;
+    logic [IMEM_DEPTH-1:0]               dis_branch_other_addr;
     logic                                dis_branch_prediction;
     logic                                dis_branch;
     logic [BPB_PC_BITS-1:0]              dis_branch_pc_bits;
     logic                                dis_jr_inst;
     logic                                dis_jal_inst;
     logic                                dis_jr31_inst;
+    logic [IMEM_DEPTH-1:0]               dis_pc;
     logic [OPCODE_WIDTH-1:0]             dis_opcode;
     logic                                dis_int_issue_en;
     logic                                dis_div_issue_en;
@@ -121,7 +122,6 @@ module CPU #(
     logic                                cdb_upd_branch;
     logic                                cdb_branch_outcome;
     logic                                cdb_flush;
-    logic                                cdb_jalr_resolved;
     logic [REG_FILE_DATA_WIDTH-1:0]      cdb_rd_data;
     logic [ROB_INDEX_WIDTH-1:0]          cdb_rob_depth;
 
@@ -226,6 +226,7 @@ module CPU #(
         .dis_jr_inst                     (dis_jr_inst),
         .dis_jal_inst                    (dis_jal_inst),
         .dis_jr31_inst                   (dis_jr31_inst),
+        .dis_pc                          (dis_pc),
         .dis_opcode                      (dis_opcode),
         .dis_int_issue_en                (dis_int_issue_en),
         .dis_div_issue_en                (dis_div_issue_en),
@@ -245,7 +246,6 @@ module CPU #(
         .cdb_branch                      (cdb_upd_branch),
         .cdb_branch_outcome              (cdb_branch_outcome),
         .cdb_flush                       (cdb_flush),
-        .cdb_jalr_resolved               (cdb_jalr_resolved),
 
         // PRF interface
         .rt_sb_phy_addr                 (rt_sb_phy_addr),
@@ -321,6 +321,7 @@ module CPU #(
         .dis_jr_inst                     (dis_jr_inst),
         .dis_jal_inst                    (dis_jal_inst),
         .dis_jr31_inst                   (dis_jr31_inst),
+        .dis_pc                          (dis_pc),
 
         // ROB sideband
         .rob_tag                         (rob_bottom_ptr),
@@ -374,7 +375,6 @@ module CPU #(
         .cdb_upd_branch_addr             (cdb_upd_branch_addr),
         .cdb_branch_outcome              (cdb_branch_outcome),
         .cdb_branch_addr                 (cdb_branch_addr),
-        .cdb_jalr_resolved               (cdb_jalr_resolved),
 
         // LSB sideband
         .lsb_rob_tag                     (lsb_rob_tag),

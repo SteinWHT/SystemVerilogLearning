@@ -53,6 +53,7 @@ import riscv_types_pkg::*;
     input logic                                 iss_jr31_inst,
     input logic                                 iss_jal_inst,
     input logic [BPB_PC_BITS-1:0]               iss_branch_pc_bits,
+    input logic [IMEM_DEPTH-1:0]                iss_pc,
 
     input logic                                 issue_int_en,
     input logic                                 issue_div_en,
@@ -128,6 +129,7 @@ import riscv_types_pkg::*;
         .jr31_inst(iss_jr31_inst),
         .jal_inst(iss_jal_inst),
         .branch_pc_bits(iss_branch_pc_bits),
+        .pc(iss_pc),
         .valid(issue_int_en),
         .cdb_flush(cdb_flush),
         .cdb_rob_depth(cdb_rob_depth),

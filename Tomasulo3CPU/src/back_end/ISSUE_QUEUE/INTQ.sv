@@ -52,6 +52,7 @@ import riscv_types_pkg::*;
     output logic                                iss_jal_inst_alu,
     output logic [BPB_PC_BITS-1:0]              iss_branch_pc_bits_alu,
     output logic [IMEM_DEPTH-1:0]               iss_branch_other_addr_alu,
+    output logic [IMEM_DEPTH-1:0]               iss_pc,
     output logic                                exe_int_grant,
 
     // ISSUEUNIT interface
@@ -77,6 +78,7 @@ import riscv_types_pkg::*;
     input logic                                 dis_jr_inst,
     input logic                                 dis_jal_inst,
     input logic                                 dis_jr31_inst,
+    input logic [IMEM_DEPTH-1:0]                dis_pc,
 
     // ISSUEQ interface
     output logic                                iss_intq_full,
@@ -104,6 +106,7 @@ import riscv_types_pkg::*;
         logic                               jal;
         logic [BPB_PC_BITS-1:0]             br_pc;
         logic [IMEM_DEPTH-1:0]              br_addr;
+        logic [IMEM_DEPTH-1:0]              pc;
     } intq_entry_t;
 
     // Queue
@@ -238,7 +241,8 @@ import riscv_types_pkg::*;
                     jr31    : 1'b0,
                     jal     : 1'b0,
                     br_pc   : '0,
-                    br_addr : '0
+                    br_addr : '0,
+                    pc      : '0
                 };
                 q_valid[i] <= 1'b0;
             end
@@ -271,6 +275,7 @@ import riscv_types_pkg::*;
                 iss_jr_inst_alu             <= q[sel_idx].jr;
                 iss_jal_inst_alu            <= q[sel_idx].jal;
                 iss_jr31_inst_alu           <= q[sel_idx].jr31;
+                iss_pc                      <= q[sel_idx].pc;
                 iss_rs_phy_addr_alu         <= q[sel_idx].rs;
                 iss_rt_phy_addr_alu         <= q[sel_idx].rt;
             end else begin
@@ -287,6 +292,7 @@ import riscv_types_pkg::*;
                 iss_jr_inst_alu             <= '0;
                 iss_jal_inst_alu            <= '0;
                 iss_jr31_inst_alu           <= '0;
+                iss_pc                      <= '0;
                 iss_rs_phy_addr_alu         <= '0;
                 iss_rt_phy_addr_alu         <= '0;
             end
@@ -309,7 +315,8 @@ import riscv_types_pkg::*;
                     jr31    : dis_jr31_inst,
                     jal     : dis_jal_inst,
                     br_pc   : dis_branch_pc_bits,
-                    br_addr : dis_branch_other_addr
+                    br_addr : dis_branch_other_addr,
+                    pc      : dis_pc
                 };
             end
         end

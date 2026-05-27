@@ -97,6 +97,7 @@ module CPU_FRONT_END
     output logic                                dis_jal_inst,
     output logic                                dis_jr31_inst,
     output logic [OPCODE_WIDTH-1:0]             dis_opcode,
+    output logic [IMEM_DEPTH-1:0]               dis_pc,
 
     output logic                                dis_int_issue_en,
     output logic                                dis_div_issue_en,
@@ -115,7 +116,6 @@ module CPU_FRONT_END
     input logic                                 cdb_branch,
     input logic                                 cdb_branch_outcome,
     input logic                                 cdb_flush,
-    input logic                                 cdb_jalr_resolved,
 
     // PRF interface (store-data / CSR rs1 read)
     input  logic [DMEM_WIDTH-1:0]               rt_sb_data,
@@ -169,7 +169,6 @@ module CPU_FRONT_END
     logic [ARCH_REG_WIDTH-1:0] dis_rob_rd_arch_addr;
 
     // DISPATCH CSR/trap -> ROB
-    logic [IMEM_DEPTH-1:0] dis_pc;
     logic dis_csr_inst;
     csr_cmd_e dis_csr_cmd;
     csr_addr_t dis_csr_addr;
@@ -329,7 +328,6 @@ module CPU_FRONT_END
         .cdb_valid(cdb_valid || trap_commit_flush),
         .cdb_branch_addr(combined_flush_addr),
         .cdb_flush(combined_flush),
-        .cdb_jalr_resolved(cdb_jalr_resolved),
 
         .frat_full(frat_full),
         .frat_rs_phy_addr(frat_rs_phy_addr),

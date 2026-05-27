@@ -32,6 +32,7 @@ import riscv_types_pkg::*;
     input logic                                     jr31_inst,
     input logic                                     jal_inst,
     input logic [BPB_PC_BITS-1:0]                   branch_pc_bits,
+    input logic [IMEM_DEPTH-1:0]                    pc,
     input logic                                     valid,
 
     // CDB interface
@@ -56,6 +57,10 @@ import riscv_types_pkg::*;
     logic [REG_FILE_DATA_WIDTH-1:0]     result_alu;
     logic [31:0]                        result_alu_32;
     logic [REG_FILE_DATA_WIDTH-1:0]     jr31_result;
+    logic [IMEM_DEPTH-1:0]              pc_plus_4;
+
+    assign pc_plus_4 = pc + 4;
+
     always_comb begin
         jr31_result = '0;
         result_alu = '0;
@@ -81,16 +86,16 @@ import riscv_types_pkg::*;
                 result_alu_32 = rs_data_alu[31:0] + imm[31:0];
                 result_alu = {{32{result_alu_32[31]}}, result_alu_32};
             end
-
-            INSTR_JAL, INSTR_LUI:      result_alu = imm;
-            INSTR_AUIPC:    result_alu = branch_other_addr + imm;
+            INSTR_JAL:      result_alu = pc_plus_4;
+            INSTR_LUI:      result_alu = imm;
+            INSTR_AUIPC:    result_alu = pc + imm;
 
             INSTR_JALR:     begin
                 if(jr31_inst) begin
-                    result_alu = imm;
-                    jr31_result = rs_data_alu - branch_other_addr;
+                    result_alu = pc_plus_4;
+                    jr31_result = rs_data_alu + imm - branch_other_addr;
                 end else begin
-                    result_alu = imm;
+                    result_alu = pc_plus_4;
                 end
             end
 
@@ -139,8 +144,8 @@ import riscv_types_pkg::*;
             opcode == INSTR_BGE || opcode == INSTR_BGEU) begin
             branch_mispredicted = (branch_prediction != branch_taken);
         end else if (opcode == INSTR_JALR) begin
-            branch_mispredicted = jr31_result != 0;
-            branch_other_addr_in = rs_data_alu;
+            branch_mispredicted = (jr31_result != 0) || (exe_jr_inst);
+            branch_other_addr_in = rs_data_alu + imm;
         end
     end
 

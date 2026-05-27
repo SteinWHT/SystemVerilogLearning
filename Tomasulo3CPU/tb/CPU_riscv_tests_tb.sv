@@ -213,6 +213,15 @@ module CPU_riscv_tests_tb;
     endfunction
 
     initial begin
+`ifdef FSDB_DUMP
+        $fsdbDumpfile("CPU_riscv_tests.fsdb");
+        $fsdbDumpvars("+all");
+        $fsdbDumpvars(0, CPU_riscv_tests_tb);
+        $fsdbDumpMDA();
+`endif
+    end
+
+    initial begin
         string imem_file;
         string dmem_file;
         string test_name;
