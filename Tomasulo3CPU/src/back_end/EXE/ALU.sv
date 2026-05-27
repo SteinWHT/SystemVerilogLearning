@@ -58,6 +58,7 @@ import riscv_types_pkg::*;
     logic [31:0]                        result_alu_32;
     logic [REG_FILE_DATA_WIDTH-1:0]     jr31_result;
     logic [IMEM_DEPTH-1:0]              pc_plus_4;
+    localparam int unsigned SHAMT_WIDTH = $clog2(XLEN);
 
     assign pc_plus_4 = pc + 4;
 
@@ -69,7 +70,7 @@ import riscv_types_pkg::*;
 
             INSTR_SUB, INSTR_BEQ, INSTR_BNE:      result_alu = rs_data_alu - rt_data_alu;
 
-            INSTR_SLL:      result_alu = rs_data_alu << rt_data_alu;
+            INSTR_SLL:      result_alu = rs_data_alu << rt_data_alu[SHAMT_WIDTH-1:0];
 
             INSTR_SLT,  INSTR_BLT:      result_alu = $signed(rs_data_alu) < $signed(rt_data_alu);
             INSTR_SLTU, INSTR_BLTU:     result_alu = rs_data_alu < rt_data_alu;
@@ -77,8 +78,8 @@ import riscv_types_pkg::*;
             INSTR_BGEU:                 result_alu = rs_data_alu >= rt_data_alu;
 
             INSTR_XOR:      result_alu = rs_data_alu ^ rt_data_alu;
-            INSTR_SRL:      result_alu = rs_data_alu >> rt_data_alu;
-            INSTR_SRA:      result_alu = rs_data_alu >>> rt_data_alu;
+            INSTR_SRL:      result_alu = rs_data_alu >> rt_data_alu[SHAMT_WIDTH-1:0];
+            INSTR_SRA:      result_alu = $signed(rs_data_alu) >>> rt_data_alu[SHAMT_WIDTH-1:0];
             INSTR_OR:       result_alu = rs_data_alu | rt_data_alu;
             INSTR_AND:      result_alu = rs_data_alu & rt_data_alu;
             INSTR_ADDI:     result_alu = rs_data_alu + imm;
@@ -104,9 +105,9 @@ import riscv_types_pkg::*;
             INSTR_XORI:     result_alu = rs_data_alu ^ imm;
             INSTR_ORI:      result_alu = rs_data_alu | imm;
             INSTR_ANDI:     result_alu = rs_data_alu & imm;
-            INSTR_SLLI:     result_alu = rs_data_alu << imm;
-            INSTR_SRLI:     result_alu = rs_data_alu >> imm;
-            INSTR_SRAI:     result_alu = rs_data_alu >>> imm;
+            INSTR_SLLI:     result_alu = rs_data_alu << imm[SHAMT_WIDTH-1:0];
+            INSTR_SRLI:     result_alu = rs_data_alu >> imm[SHAMT_WIDTH-1:0];
+            INSTR_SRAI:     result_alu = $signed(rs_data_alu) >>> imm[SHAMT_WIDTH-1:0];
             INSTR_NONE:     result_alu = '0;
             default   :     result_alu = '0;
         endcase
