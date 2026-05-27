@@ -166,9 +166,9 @@ import riscv_types_pkg::*;
     logic stage1_dis_rob_only;
     // only stage1 will be stalled
     logic stall;
-    // if last cycle stalls, it means dispatch didn't fetch data.
+    // if last cycle ifq is empty, it means dispatch didn't fetch data.
     // it needs one extra cycle to have the data ready.
-    logic last_cycle_stall;
+    logic ifq_wait_after_empty;
 
     // ------------------------------------------------------
     // Stage 2: write to ROB and issue queues
@@ -196,9 +196,9 @@ import riscv_types_pkg::*;
     logic [ARCH_REG_WIDTH-1:0] stage2_rs_arch_addr;
 
     // jalr $rd, imm($rs)
-    logic jr_stall, jr_stall_next;
+    logic jr_stall;
     // csr stall
-    logic csr_stall, csr_stall_next;
+    logic csr_stall;
     // ------------------------------------------------------
     // Stage 1: Decode and read from FRAT and FRL
     // ------------------------------------------------------
@@ -209,6 +209,7 @@ import riscv_types_pkg::*;
                    .INSTR_WIDTH(INSTR_WIDTH)
                  ) decoder (
                    .instr(ifetch_instr_in),
+                   .enable(dis_ren),
                    .rd_arch_addr(stage1_rd_arch_addr),
                    .rs_arch_addr(stage1_rs_arch_addr),
                    .rt_arch_addr(stage1_rt_arch_addr),
@@ -234,7 +235,7 @@ import riscv_types_pkg::*;
             default:      stage1_dis_trap_cause = TRAP_CAUSE_NONE;
         endcase
     end
-    assign stage1_valid = (!stall) && !cdb_flush && !last_cycle_stall;
+    assign stage1_valid = (!stall) && !cdb_flush && !ifq_wait_after_empty;
     assign stage1_reg_write = stage1_dis_reg_write && (stage1_rd_arch_addr != '0);
     assign stage1_needs_issue_entry = (stage1_dis_instr_type != INSTR_NONE) &&
                                       !stage1_dis_rob_only;
@@ -255,7 +256,7 @@ import riscv_types_pkg::*;
     // IFQ logic
     // We allow the jr and csr instruction to be passed through stage1
     // But block the ifq
-    assign dis_ren = (!stall) && !cdb_flush && !(jr_stall || csr_stall);
+    assign dis_ren = (!stall) && !cdb_flush;
     assign stage1_branch_taken = stage1_dis_branch && bpb_branch_prediction;
     // redirect logic
     logic [IMEM_DEPTH-1:0] jmpbr_byte_addr;
@@ -302,34 +303,21 @@ import riscv_types_pkg::*;
     // if jr_rob_tag is on the CDB and valid, then we can clear the jr_stall flag and proceed with dispatching the jr instruction
     // CSR/trap/mret serialization: stall dispatch after dispatching one
     // until the ROB commits it. Cleared by rob_csr_committed or flush.
-    always_comb begin
-        jr_stall_next = jr_stall;
-        csr_stall_next = csr_stall;
-
-        if (cdb_valid && cdb_flush)
-            jr_stall_next = 1'b0;
-        else if (stage1_valid && stage1_dis_jr_inst && !jr_stall)
-            jr_stall_next = 1'b1;
-
-        if (rob_csr_committed || (cdb_valid && cdb_flush))
-            csr_stall_next = 1'b0;
-        else if (stage1_dis_csr_inst || stage1_dis_trap_inst || stage1_dis_mret_inst)
-            csr_stall_next = 1'b1;
-
-    end
-
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             jr_stall <= 1'b0;
             csr_stall <= 1'b0;
             end else begin
-                // when stage1 is valid, the stall can be asserted
-                // or when stage1 is invalid, stall can be deasserted
-                if ((stage1_valid || !jr_stall_next))
-                    jr_stall <= jr_stall_next;
+                if (cdb_valid && cdb_flush)
+                    jr_stall <= 1'b0;
+                else if ((stage1_valid && stage1_dis_jr_inst && !jr_stall))
+                    jr_stall <= 1'b1;
 
-                if(stage1_valid || !csr_stall_next)
-                    csr_stall <= csr_stall_next;
+                if (rob_csr_committed || (cdb_valid && cdb_flush))
+                    csr_stall <= 1'b0;
+                else if (stage1_valid && !csr_stall &&
+                        (stage1_dis_csr_inst || stage1_dis_trap_inst || stage1_dis_mret_inst))
+                    csr_stall <= 1'b1;
         end
     end
 
@@ -426,9 +414,9 @@ import riscv_types_pkg::*;
                 !issue_ld_stq_two_or_more_vacant) || (stage2_dis_ld_st_issue_en &&
                                                         issue_ld_stq_full)) begin
             stall = 1'b1;
-        end else if (jr_stall && jr_stall_next) begin
+        end else if (jr_stall) begin
             stall = 1'b1;
-        end else if (csr_stall && csr_stall_next) begin
+        end else if (csr_stall) begin
             stall = 1'b1;
         end
     end
@@ -486,9 +474,9 @@ import riscv_types_pkg::*;
             stage2_dis_trap_cause      <= TRAP_CAUSE_NONE;
             stage2_dis_mret_inst       <= '0;
 
-            last_cycle_stall            <= 1'b1;
+            ifq_wait_after_empty       <= 1'b1;
         end else begin
-            last_cycle_stall            <= stall;
+            ifq_wait_after_empty        <= ifetch_empty;
             if (!stage1_valid) begin
                 // On flush, we need to invalidate the instruction in stage 2
                 stage2_valid                <= 1'b0;
