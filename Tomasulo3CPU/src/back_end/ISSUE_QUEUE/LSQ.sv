@@ -168,7 +168,7 @@ import riscv_types_pkg::*;
         addr_calculating_valid = 1'b0;
         addr_calculating_idx = '0;
         for (int i = 0; i < LSQ_DEPTH; i++) begin
-            if (wk_rs_rdy[i] && !q[i].addr_rdy) begin
+            if (q_valid[i] && wk_rs_rdy[i] && !q[i].addr_rdy) begin
                 addr_calculating_valid = 1'b1;
                 addr_calculating_idx = i;
             end
@@ -417,7 +417,7 @@ import riscv_types_pkg::*;
     // --------------------------------------------------------
     // SAB part
     // --------------------------------------------------------
-    logic [LSQ_INDEX_WIDTH-1:0]           sab_free_idx;
+    logic [SAB_INDEX_WIDTH-1:0]           sab_free_idx;
     logic                                 sab_has_free;
     logic [$clog2(SAB_DEPTH+1)-1:0]   sab_vacant_count;
 
@@ -482,7 +482,7 @@ import riscv_types_pkg::*;
             // SB Flush
             if (sb_flush_sw) begin
                 for (int i = 0; i < SAB_DEPTH; i++) begin
-                    if ((sab_array[i].tag_sel == 1'b1) &&
+                    if (sab_valid[i] && (sab_array[i].tag_sel == 1'b1) &&
                         (sab_array[i].sb_tag == sb_flush_sw_tag)) begin
                         sab_valid[i] <= 1'b0;
                     end

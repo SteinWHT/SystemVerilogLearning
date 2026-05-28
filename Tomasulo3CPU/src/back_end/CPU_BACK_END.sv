@@ -244,7 +244,7 @@ module CPU_BACK_END #(
         .div_rd_phy_addr(div_rd_phy_addr_wb),
         .div_exe_ready(div_result_valid),
         .ls_buf_rd_phy_addr(lsb_rd_phy_addr),
-        .ls_buf_buf_rd_write(lsb_result_valid),
+        .ls_buf_buf_rd_write(lsb_result_valid && lsb_rw),
         .issq_intq_full(issq_intq_full),
         .issq_divq_full(issq_divq_full),
         .issq_mulq_full(issq_mulq_full),
