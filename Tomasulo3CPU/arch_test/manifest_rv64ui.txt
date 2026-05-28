@@ -1,9 +1,9 @@
 # rv64ui tests supported by Tomasulo3CPU (one name per line, without rv64ui-p- prefix)
-# Excluded: fence_i (self-modifying code), ma_data (misaligned focus),
-#           *w word ops except addiw (not implemented)
+# Excluded: fence_i (self-modifying code), ma_data (misaligned focus)
 add
 addi
 addiw
+addw
 and
 andi
 auipc
@@ -34,14 +34,21 @@ sd
 st_ld
 sll
 slli
+slliw
+sllw
 slt
 slti
 sltiu
 sltu
 sra
 srai
+sraiw
+sraw
 srl
 srli
+srliw
+srlw
 sub
+subw
 xor
 xori

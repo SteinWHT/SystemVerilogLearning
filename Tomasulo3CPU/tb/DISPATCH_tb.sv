@@ -24,7 +24,7 @@ module DISPATCH_tb;
     parameter int unsigned ROB_DEPTH               = 32;
     parameter int unsigned ROB_INDEX_WIDTH         = $clog2(ROB_DEPTH);
     parameter int unsigned BPB_PC_BITS             = 3;
-    parameter int unsigned OPCODE_WIDTH            = 6;
+    parameter int unsigned OPCODE_WIDTH            = 7;
 
     // ----------------------------------------------------------------
     // DUT signals

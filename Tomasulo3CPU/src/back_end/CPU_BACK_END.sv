@@ -19,7 +19,7 @@ module CPU_BACK_END #(
     parameter int unsigned MUL_CYCLES             = 4,
     parameter int unsigned INT_CYCLES             = 1,
     parameter int unsigned LD_ST_CYCLES           = 1,
-    parameter int unsigned OPCODE_WIDTH           = 6,
+    parameter int unsigned OPCODE_WIDTH           = 7,
     parameter int unsigned W_BYTE_NUM             = DMEM_WIDTH / 8
 ) (
     input logic clk,

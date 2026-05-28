@@ -20,7 +20,7 @@ import riscv_types_pkg::*;
     localparam  int unsigned SB_INDEX_WIDTH        = $clog2(SB_DEPTH);
     parameter int unsigned LSB_DEPTH               = 4;
     parameter int unsigned BPB_PC_BITS             = 3;
-    parameter int unsigned OPCODE_WIDTH            = 6;
+    parameter int unsigned OPCODE_WIDTH            = 7;
     parameter int unsigned DIV_CYCLES              = 7;
     parameter int unsigned MUL_CYCLES              = 3;
 

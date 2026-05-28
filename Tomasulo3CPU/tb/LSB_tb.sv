@@ -14,7 +14,7 @@ import riscv_types_pkg::*;
     parameter int unsigned ARCH_REG_WIDTH          = 5;
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7;
     parameter int unsigned REG_FILE_DATA_WIDTH     = 64;
-    parameter int unsigned OPCODE_WIDTH            = 6;
+    parameter int unsigned OPCODE_WIDTH            = 7;
 
     logic clk;
     logic rst_n;

@@ -42,7 +42,7 @@ module CPU #(
     parameter int unsigned INT_CYCLES              = 1,
     parameter int unsigned LD_ST_CYCLES            = 1,
 
-    parameter int unsigned OPCODE_WIDTH            = 6
+    parameter int unsigned OPCODE_WIDTH            = 7
 ) (
     input  logic clk,
     input  logic rst_n,

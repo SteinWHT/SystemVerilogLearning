@@ -2,7 +2,7 @@
 
 This directory runs the official **[riscv-software-src/riscv-tests](https://github.com/riscv-software-src/riscv-tests)** ISA suite on the full CPU in simulation.
 
-**Status (manifest regression):** **47 / 47 passing** (44× `rv64ui` + 3× `rv64um`, QuestaSim, May 2026). See [doc/VERIFICATION_STATUS.md](../doc/VERIFICATION_STATUS.md) for the full verification picture.
+**Status (manifest regression):** See [doc/VERIFICATION_STATUS.md](../doc/VERIFICATION_STATUS.md) for the full verification picture. Manifests: 52× `rv64ui` + 13× `rv64um` = 65 tests.
 
 ## One-time setup
 
@@ -81,10 +81,10 @@ Use forward slashes in hex paths on Windows. Read `TOHOST_ADDR` from each test�
 
 | File | Suite |
 |------|--------|
-| `manifest_rv64ui.txt` | Integer user ISA (44 tests) |
-| `manifest_rv64um.txt` | MUL / DIV / REM (3 tests) |
+| `manifest_rv64ui.txt` | Integer user ISA (52 tests) |
+| `manifest_rv64um.txt` | M extension: MUL / DIV / REM + variants (13 tests) |
 
-Excluded from manifest (not implemented or out of scope): `fence_i`, `ma_data`, RV64 `*w` word ops except `addiw`.
+Excluded from manifest (not implemented or out of scope): `fence_i`, `ma_data`.
 
 ## Utilities
 

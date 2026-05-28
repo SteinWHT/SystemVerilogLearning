@@ -5,7 +5,7 @@ module ALU
 import riscv_types_pkg::*;
 #(
     parameter int unsigned XLEN = 64,
-    parameter int unsigned OPCODE_WIDTH = 6,
+    parameter int unsigned OPCODE_WIDTH = 7,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
     parameter int unsigned IMEM_DEPTH = 64,
     parameter int unsigned BPB_PC_BITS = 3,
@@ -83,8 +83,40 @@ import riscv_types_pkg::*;
             INSTR_OR:       result_alu = rs_data_alu | rt_data_alu;
             INSTR_AND:      result_alu = rs_data_alu & rt_data_alu;
             INSTR_ADDI:     result_alu = rs_data_alu + imm;
-            INSTR_ADDIW:    begin
+            INSTR_ADDIW: begin
                 result_alu_32 = rs_data_alu[31:0] + imm[31:0];
+                result_alu = {{32{result_alu_32[31]}}, result_alu_32};
+            end
+            INSTR_ADDW: begin
+                result_alu_32 = rs_data_alu[31:0] + rt_data_alu[31:0];
+                result_alu = {{32{result_alu_32[31]}}, result_alu_32};
+            end
+            INSTR_SUBW: begin
+                result_alu_32 = rs_data_alu[31:0] - rt_data_alu[31:0];
+                result_alu = {{32{result_alu_32[31]}}, result_alu_32};
+            end
+            INSTR_SLLW: begin
+                result_alu_32 = rs_data_alu[31:0] << rt_data_alu[4:0];
+                result_alu = {{32{result_alu_32[31]}}, result_alu_32};
+            end
+            INSTR_SRLW: begin
+                result_alu_32 = rs_data_alu[31:0] >> rt_data_alu[4:0];
+                result_alu = {{32{result_alu_32[31]}}, result_alu_32};
+            end
+            INSTR_SRAW: begin
+                result_alu_32 = $signed(rs_data_alu[31:0]) >>> rt_data_alu[4:0];
+                result_alu = {{32{result_alu_32[31]}}, result_alu_32};
+            end
+            INSTR_SLLIW: begin
+                result_alu_32 = rs_data_alu[31:0] << imm[4:0];
+                result_alu = {{32{result_alu_32[31]}}, result_alu_32};
+            end
+            INSTR_SRLIW: begin
+                result_alu_32 = rs_data_alu[31:0] >> imm[4:0];
+                result_alu = {{32{result_alu_32[31]}}, result_alu_32};
+            end
+            INSTR_SRAIW: begin
+                result_alu_32 = $signed(rs_data_alu[31:0]) >>> imm[4:0];
                 result_alu = {{32{result_alu_32[31]}}, result_alu_32};
             end
             INSTR_JAL:      result_alu = pc_plus_4;

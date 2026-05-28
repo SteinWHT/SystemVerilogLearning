@@ -41,7 +41,7 @@ module CPU_riscv_tests_tb;
     parameter int unsigned MUL_CYCLES              = 4;
     parameter int unsigned INT_CYCLES              = 1;
     parameter int unsigned LD_ST_CYCLES            = 1;
-    parameter int unsigned OPCODE_WIDTH            = 6;
+    parameter int unsigned OPCODE_WIDTH            = 7;
     parameter int unsigned W_BYTE_NUM              = DMEM_WIDTH / 8;
 
     // Preload capacity for riscv-tests linked at 0x0 (must cover tohost + code)

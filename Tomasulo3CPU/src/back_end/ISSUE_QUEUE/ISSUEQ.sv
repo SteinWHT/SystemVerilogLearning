@@ -12,7 +12,7 @@ import riscv_types_pkg::*;
     parameter int unsigned SB_DEPTH = 4,
     parameter int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH),
     parameter int unsigned BPB_PC_BITS = 2,
-    parameter int unsigned OPCODE_WIDTH = 6
+    parameter int unsigned OPCODE_WIDTH = 7
 ) (
     input logic clk,
     input logic rst_n,

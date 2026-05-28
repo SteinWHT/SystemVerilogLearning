@@ -2,7 +2,7 @@ module EXE
 import riscv_types_pkg::*;
 #(
     parameter int unsigned XLEN = 64,
-    parameter int unsigned OPCODE_WIDTH = 6,
+    parameter int unsigned OPCODE_WIDTH = 7,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
     parameter int unsigned IMEM_DEPTH = 64,
     parameter int unsigned BPB_PC_BITS = 3,

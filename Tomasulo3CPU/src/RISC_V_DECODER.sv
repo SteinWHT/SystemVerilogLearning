@@ -80,9 +80,27 @@ module RISC_V_DECODER
                             default:       instr_type = INSTR_NONE;
                         endcase
                     end
-                    FUNCT3_SLL:     instr_type = INSTR_SLL;
-                    FUNCT3_SLT:     instr_type = INSTR_SLT;
-                    FUNCT3_SLTU:    instr_type = INSTR_SLTU;
+                    FUNCT3_SLL: begin
+                        unique case (funct7)
+                            FUNCT7_ZERO:   instr_type = INSTR_SLL;
+                            FUNCT7_MULDIV: instr_type = INSTR_MULH;
+                            default:       instr_type = INSTR_NONE;
+                        endcase
+                    end
+                    FUNCT3_SLT: begin
+                        unique case (funct7)
+                            FUNCT7_ZERO:   instr_type = INSTR_SLT;
+                            FUNCT7_MULDIV: instr_type = INSTR_MULHSU;
+                            default:       instr_type = INSTR_NONE;
+                        endcase
+                    end
+                    FUNCT3_SLTU: begin
+                        unique case (funct7)
+                            FUNCT7_ZERO:   instr_type = INSTR_SLTU;
+                            FUNCT7_MULDIV: instr_type = INSTR_MULHU;
+                            default:       instr_type = INSTR_NONE;
+                        endcase
+                    end
                     FUNCT3_XOR: begin
                         unique case (funct7)
                             FUNCT7_ZERO: instr_type = INSTR_XOR;
@@ -92,22 +110,24 @@ module RISC_V_DECODER
                     end
                     FUNCT3_SRL_SRA: begin
                         unique case (funct7)
-                            FUNCT7_ZERO: instr_type = INSTR_SRL;
-                            FUNCT7_ALT:  instr_type = INSTR_SRA;
-                            default:     instr_type = INSTR_NONE;
+                            FUNCT7_ZERO:   instr_type = INSTR_SRL;
+                            FUNCT7_ALT:    instr_type = INSTR_SRA;
+                            FUNCT7_MULDIV: instr_type = INSTR_DIVU;
+                            default:       instr_type = INSTR_NONE;
                         endcase
                     end
                     FUNCT3_OR: begin
                         unique case (funct7)
-                            FUNCT7_ZERO: instr_type = INSTR_OR;
-                            FUNCT7_MULDIV:  instr_type = INSTR_REM;
-                            default:     instr_type = INSTR_NONE;
+                            FUNCT7_ZERO:   instr_type = INSTR_OR;
+                            FUNCT7_MULDIV: instr_type = INSTR_REM;
+                            default:       instr_type = INSTR_NONE;
                         endcase
                     end
                     FUNCT3_AND: begin
                         unique case (funct7)
-                            FUNCT7_ZERO: instr_type = INSTR_AND;
-                            default:     instr_type = INSTR_NONE;
+                            FUNCT7_ZERO:   instr_type = INSTR_AND;
+                            FUNCT7_MULDIV: instr_type = INSTR_REMU;
+                            default:       instr_type = INSTR_NONE;
                         endcase
                     end
                     default:    instr_type = INSTR_NONE;
@@ -139,14 +159,61 @@ module RISC_V_DECODER
             OP_IMM_32: begin
                 unique case (funct3)
                     FUNCT3_ADD_SUB: instr_type = INSTR_ADDIW;
-                    //FUNCT3_SLL:     instr_type = INSTR_SLLIW;
-                    //FUNCT3_SRL_SRA: begin
-                        //unique case (funct7)
-                            //FUNCT7_ZERO: instr_type = INSTR_SRLIW;
-                            //FUNCT7_ALT:  instr_type = INSTR_SRAIW;
-                            //default:     instr_type = INSTR_NONE;
-                        //endcase
-                    //end
+                    FUNCT3_SLL:     instr_type = INSTR_SLLIW;
+                    FUNCT3_SRL_SRA: begin
+                        unique case (funct7)
+                            FUNCT7_ZERO: instr_type = INSTR_SRLIW;
+                            FUNCT7_ALT:  instr_type = INSTR_SRAIW;
+                            default:     instr_type = INSTR_NONE;
+                        endcase
+                    end
+                    default: instr_type = INSTR_NONE;
+                endcase
+            end
+
+            // REG-32 (RV64: word-width R-type)
+            OP_REG_32: begin
+                case (funct3)
+                    FUNCT3_ADD_SUB: begin
+                        unique case (funct7)
+                            FUNCT7_ZERO:   instr_type = INSTR_ADDW;
+                            FUNCT7_ALT:    instr_type = INSTR_SUBW;
+                            FUNCT7_MULDIV: instr_type = INSTR_MULW;
+                            default:       instr_type = INSTR_NONE;
+                        endcase
+                    end
+                    FUNCT3_SLL: begin
+                        unique case (funct7)
+                            FUNCT7_ZERO: instr_type = INSTR_SLLW;
+                            default:     instr_type = INSTR_NONE;
+                        endcase
+                    end
+                    FUNCT3_XOR: begin
+                        unique case (funct7)
+                            FUNCT7_MULDIV: instr_type = INSTR_DIVW;
+                            default:       instr_type = INSTR_NONE;
+                        endcase
+                    end
+                    FUNCT3_SRL_SRA: begin
+                        unique case (funct7)
+                            FUNCT7_ZERO:   instr_type = INSTR_SRLW;
+                            FUNCT7_ALT:    instr_type = INSTR_SRAW;
+                            FUNCT7_MULDIV: instr_type = INSTR_DIVUW;
+                            default:       instr_type = INSTR_NONE;
+                        endcase
+                    end
+                    FUNCT3_OR: begin
+                        unique case (funct7)
+                            FUNCT7_MULDIV: instr_type = INSTR_REMW;
+                            default:       instr_type = INSTR_NONE;
+                        endcase
+                    end
+                    FUNCT3_AND: begin
+                        unique case (funct7)
+                            FUNCT7_MULDIV: instr_type = INSTR_REMUW;
+                            default:       instr_type = INSTR_NONE;
+                        endcase
+                    end
                     default: instr_type = INSTR_NONE;
                 endcase
             end
@@ -244,9 +311,12 @@ module RISC_V_DECODER
             unique case (instr_type)
                 INSTR_ADD, INSTR_SUB, INSTR_SLT, INSTR_SLTU, INSTR_XOR,
                 INSTR_SRL, INSTR_SRA, INSTR_OR, INSTR_AND, INSTR_SLL,
-                INSTR_MUL, INSTR_DIV, INSTR_REM,
+                INSTR_ADDW, INSTR_SUBW, INSTR_SLLW, INSTR_SRLW, INSTR_SRAW,
+                INSTR_MUL, INSTR_MULH, INSTR_MULHU, INSTR_MULHSU, INSTR_MULW,
+                INSTR_DIV, INSTR_DIVU, INSTR_REM, INSTR_REMU,
+                INSTR_DIVW, INSTR_DIVUW, INSTR_REMW, INSTR_REMUW,
                 INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
-                INSTR_ADDIW, //INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
+                INSTR_ADDIW, INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
                 INSTR_SLLI, INSTR_SRLI, INSTR_SRAI,
                 INSTR_LW, INSTR_LD, INSTR_LB, INSTR_LH, INSTR_LBU, INSTR_LHU, INSTR_LWU: begin
                     rw = 1;

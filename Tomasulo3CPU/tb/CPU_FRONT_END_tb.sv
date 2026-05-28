@@ -32,7 +32,7 @@ module CPU_FRONT_END_tb;
     parameter int unsigned ROB_INDEX_WIDTH         = $clog2(ROB_DEPTH);
     parameter int unsigned SB_DEPTH                = 4;
     parameter int unsigned SB_INDEX_WIDTH          = $clog2(SB_DEPTH);
-    parameter int unsigned OPCODE_WIDTH            = 6;
+    parameter int unsigned OPCODE_WIDTH            = 7;
 
     // ----------------------------------------------------------------
     // DUT Signals

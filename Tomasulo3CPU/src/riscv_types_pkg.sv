@@ -20,7 +20,7 @@ package riscv_types_pkg;
     // ================================================================
     // All supported instructions
     // ================================================================
-    typedef enum logic [5:0] {
+    typedef enum logic [6:0] {
         INSTR_ADD,
         INSTR_SUB,
         INSTR_SLL,
@@ -41,15 +41,27 @@ package riscv_types_pkg;
         INSTR_SLLI,
         INSTR_SRLI,
         INSTR_SRAI,
+        INSTR_ADDW,
+        INSTR_SUBW,
+        INSTR_SLLW,
+        INSTR_SRLW,
+        INSTR_SRAW,
+        INSTR_SLLIW,
+        INSTR_SRLIW,
+        INSTR_SRAIW,
         INSTR_MUL,
+        INSTR_MULH,
+        INSTR_MULHU,
+        INSTR_MULHSU,
+        INSTR_MULW,
         INSTR_DIV,
+        INSTR_DIVU,
         INSTR_REM,
-        //INSTR_MULH,
-        //INSTR_MULHU,
-        //INSTR_DIVH,
-        //INSTR_DIVHU,
-        //INSTR_REMH,
-        //INSTR_REMHU,
+        INSTR_REMU,
+        INSTR_DIVW,
+        INSTR_DIVUW,
+        INSTR_REMW,
+        INSTR_REMUW,
         INSTR_LD,
         INSTR_LW,
         INSTR_LB,
@@ -111,17 +123,23 @@ package riscv_types_pkg;
     } alu_op_e;
 
     typedef enum logic [2:0] {
-        MUL,
+        MUL_OP,
         MUL_H,
         MUL_HU,
+        MUL_HSU,
+        MUL_W,
         MUL_NONE
     } mul_op_e;
 
-    typedef enum logic [2:0] {
-        DIV,
-        REM,
-        // DIV_H,
-        // DIV_HU,
+    typedef enum logic [3:0] {
+        DIV_OP,
+        DIV_U,
+        REM_OP,
+        REM_U,
+        DIV_W,
+        DIV_UW,
+        REM_W,
+        REM_UW,
         DIV_NONE
     } div_op_e;
 

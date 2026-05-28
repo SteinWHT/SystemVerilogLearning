@@ -27,7 +27,7 @@ import riscv_types_pkg::*;
     parameter int unsigned ROB_DEPTH = 32,
     parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
     parameter int unsigned BPB_PC_BITS = 3,
-    parameter int unsigned OPCODE_WIDTH = 6
+    parameter int unsigned OPCODE_WIDTH = 7
    ) (
     input  logic clk,
     input  logic rst_n,
@@ -331,8 +331,9 @@ import riscv_types_pkg::*;
         unique case (stage1_dis_instr_type)
             INSTR_ADD, INSTR_SUB, INSTR_SLT, INSTR_SLTU, INSTR_XOR,
             INSTR_SRL, INSTR_SRA, INSTR_OR, INSTR_AND, INSTR_SLL,
+            INSTR_ADDW, INSTR_SUBW, INSTR_SLLW, INSTR_SRLW, INSTR_SRAW,
             INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
-            INSTR_ADDIW, //INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
+            INSTR_ADDIW, INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
             INSTR_SLLI, INSTR_SRLI, INSTR_SRAI,
             INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU, INSTR_BGE, INSTR_BGEU,
             INSTR_JAL, INSTR_JALR, INSTR_LUI, INSTR_AUIPC: begin
@@ -340,12 +341,13 @@ import riscv_types_pkg::*;
                     stage1_dis_int_issue_en = 1'b1;
                 end
             end
-            INSTR_MUL: begin
+            INSTR_MUL, INSTR_MULH, INSTR_MULHU, INSTR_MULHSU, INSTR_MULW: begin
                 if (!issue_mulq_full) begin
                     stage1_dis_mul_issue_en = 1'b1;
                 end
             end
-            INSTR_DIV, INSTR_REM: begin
+            INSTR_DIV, INSTR_DIVU, INSTR_REM, INSTR_REMU,
+            INSTR_DIVW, INSTR_DIVUW, INSTR_REMW, INSTR_REMUW: begin
                 if (!issue_divq_full) begin
                     stage1_dis_div_issue_en = 1'b1;
                 end

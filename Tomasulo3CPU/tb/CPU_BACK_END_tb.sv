@@ -26,7 +26,7 @@ import riscv_types_pkg::*;
     parameter int unsigned MUL_CYCLES              = 4;
     parameter int unsigned INT_CYCLES              = 1;
     parameter int unsigned LD_ST_CYCLES            = 1;
-    parameter int unsigned OPCODE_WIDTH            = 6;
+    parameter int unsigned OPCODE_WIDTH            = 7;
 
     logic clk;
     logic rst_n;

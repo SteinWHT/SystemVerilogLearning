@@ -7,7 +7,7 @@ module EXE_tb;
 import riscv_types_pkg::*;
 
     parameter int unsigned XLEN                   = 64;
-    parameter int unsigned OPCODE_WIDTH             = 6;
+    parameter int unsigned OPCODE_WIDTH             = 7;
     parameter int unsigned REG_FILE_DATA_WIDTH      = 64;
     parameter int unsigned DMEM_WIDTH               = 32;
     parameter int unsigned BPB_PC_BITS                = 3;
