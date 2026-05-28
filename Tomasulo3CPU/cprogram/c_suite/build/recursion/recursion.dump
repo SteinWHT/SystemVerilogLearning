@@ -1,0 +1,163 @@
+
+D:\SystemVerilogLearning\SystemVerilogLearning\Tomasulo3CPU\cprogram\c_suite\build\recursion\recursion.elf:     file format elf64-littleriscv
+
+
+Disassembly of section .text:
+
+0000000000000000 <_start>:
+   0:	40000113          	addi	sp,zero,1024
+   4:	08c000ef          	jal	ra,90 <main>
+   8:	0000006f          	jal	zero,8 <_start+0x8>
+
+000000000000000c <factorial>:
+   c:	00100793          	addi	a5,zero,1
+  10:	02a7d863          	bge	a5,a0,40 <factorial+0x34>
+  14:	ff010113          	addi	sp,sp,-16
+  18:	00113423          	sd	ra,8(sp)
+  1c:	00813023          	sd	s0,0(sp)
+  20:	00050413          	addi	s0,a0,0
+  24:	fff50513          	addi	a0,a0,-1
+  28:	fe5ff0ef          	jal	ra,c <factorial>
+  2c:	02850533          	mul	a0,a0,s0
+  30:	00813083          	ld	ra,8(sp)
+  34:	00013403          	ld	s0,0(sp)
+  38:	01010113          	addi	sp,sp,16
+  3c:	00008067          	jalr	zero,0(ra)
+  40:	00100513          	addi	a0,zero,1
+  44:	00008067          	jalr	zero,0(ra)
+
+0000000000000048 <fib>:
+  48:	fe010113          	addi	sp,sp,-32
+  4c:	00113c23          	sd	ra,24(sp)
+  50:	00813823          	sd	s0,16(sp)
+  54:	00050413          	addi	s0,a0,0
+  58:	00100793          	addi	a5,zero,1
+  5c:	02a7d263          	bge	a5,a0,80 <fib+0x38>
+  60:	00913423          	sd	s1,8(sp)
+  64:	fff50513          	addi	a0,a0,-1
+  68:	fe1ff0ef          	jal	ra,48 <fib>
+  6c:	00050493          	addi	s1,a0,0
+  70:	ffe40513          	addi	a0,s0,-2
+  74:	fd5ff0ef          	jal	ra,48 <fib>
+  78:	00a48533          	add	a0,s1,a0
+  7c:	00813483          	ld	s1,8(sp)
+  80:	01813083          	ld	ra,24(sp)
+  84:	01013403          	ld	s0,16(sp)
+  88:	02010113          	addi	sp,sp,32
+  8c:	00008067          	jalr	zero,0(ra)
+
+0000000000000090 <main>:
+  90:	fd010113          	addi	sp,sp,-48
+  94:	02113423          	sd	ra,40(sp)
+  98:	02813023          	sd	s0,32(sp)
+  9c:	00600513          	addi	a0,zero,6
+  a0:	f6dff0ef          	jal	ra,c <factorial>
+  a4:	00050413          	addi	s0,a0,0
+  a8:	00700513          	addi	a0,zero,7
+  ac:	f9dff0ef          	jal	ra,48 <fib>
+  b0:	2d000793          	addi	a5,zero,720
+  b4:	00f40863          	beq	s0,a5,c4 <main+0x34>
+  b8:	70100713          	addi	a4,zero,1793
+  bc:	40e03423          	sd	a4,1032(zero) # 408 <tohost>
+  c0:	0000006f          	jal	zero,c0 <main+0x30>
+  c4:	00d00793          	addi	a5,zero,13
+  c8:	00f50863          	beq	a0,a5,d8 <main+0x48>
+  cc:	70200713          	addi	a4,zero,1794
+  d0:	40e03423          	sd	a4,1032(zero) # 408 <tohost>
+  d4:	0000006f          	jal	zero,d4 <main+0x44>
+  d8:	ff900793          	addi	a5,zero,-7
+  dc:	00f10523          	sb	a5,10(sp)
+  e0:	ff200793          	addi	a5,zero,-14
+  e4:	00f105a3          	sb	a5,11(sp)
+  e8:	b2e00793          	addi	a5,zero,-1234
+  ec:	00f11623          	sh	a5,12(sp)
+  f0:	fffff7b7          	lui	a5,0xfffff
+  f4:	0e178793          	addi	a5,a5,225 # fffffffffffff0e1 <_stack_top+0xffffffffffffe4e1>
+  f8:	00f11723          	sh	a5,14(sp)
+  fc:	fff867b7          	lui	a5,0xfff86
+ 100:	ee078793          	addi	a5,a5,-288 # fffffffffff85ee0 <_stack_top+0xfffffffffff852e0>
+ 104:	00f12823          	sw	a5,16(sp)
+ 108:	fedcc7b7          	lui	a5,0xfedcc
+ 10c:	a9878793          	addi	a5,a5,-1384 # fffffffffedcba98 <_stack_top+0xfffffffffedcae98>
+ 110:	00f12a23          	sw	a5,20(sp)
+ 114:	fedcc7b7          	lui	a5,0xfedcc
+ 118:	a9978793          	addi	a5,a5,-1383 # fffffffffedcba99 <_stack_top+0xfffffffffedcae99>
+ 11c:	00f13c23          	sd	a5,24(sp)
+ 120:	00a14783          	lbu	a5,10(sp)
+ 124:	0187979b          	slliw	a5,a5,0x18
+ 128:	4187d79b          	sraiw	a5,a5,0x18
+ 12c:	32d78793          	addi	a5,a5,813
+ 130:	00b14703          	lbu	a4,11(sp)
+ 134:	00f70733          	add	a4,a4,a5
+ 138:	00c15783          	lhu	a5,12(sp)
+ 13c:	0107979b          	slliw	a5,a5,0x10
+ 140:	4107d79b          	sraiw	a5,a5,0x10
+ 144:	00e787b3          	add	a5,a5,a4
+ 148:	00e15703          	lhu	a4,14(sp)
+ 14c:	00f707b3          	add	a5,a4,a5
+ 150:	01012703          	lw	a4,16(sp)
+ 154:	00f70733          	add	a4,a4,a5
+ 158:	01412783          	lw	a5,20(sp)
+ 15c:	02079793          	slli	a5,a5,0x20
+ 160:	0207d793          	srli	a5,a5,0x20
+ 164:	00e787b3          	add	a5,a5,a4
+ 168:	01813703          	ld	a4,24(sp)
+ 16c:	00e787b3          	add	a5,a5,a4
+ 170:	00379713          	slli	a4,a5,0x3
+ 174:	4057d793          	srai	a5,a5,0x5
+ 178:	00f747b3          	xor	a5,a4,a5
+ 17c:	dabd06b7          	lui	a3,0xdabd0
+ 180:	c2268693          	addi	a3,a3,-990 # ffffffffdabcfc22 <_stack_top+0xffffffffdabcf022>
+ 184:	052d3737          	lui	a4,0x52d3
+ 188:	bdc70713          	addi	a4,a4,-1060 # 52d2bdc <_stack_top+0x52d1fdc>
+ 18c:	02071713          	slli	a4,a4,0x20
+ 190:	00d70733          	add	a4,a4,a3
+ 194:	00e7c7b3          	xor	a5,a5,a4
+ 198:	01178693          	addi	a3,a5,17
+ 19c:	0a07c463          	blt	a5,zero,244 <main+0x1b4>
+ 1a0:	00012737          	lui	a4,0x12
+ 1a4:	34570713          	addi	a4,a4,837 # 12345 <_stack_top+0x11745>
+ 1a8:	02e69733          	mulh	a4,a3,a4
+ 1ac:	00d70733          	add	a4,a4,a3
+ 1b0:	000237b7          	lui	a5,0x23
+ 1b4:	45678793          	addi	a5,a5,1110 # 23456 <_stack_top+0x22856>
+ 1b8:	02f737b3          	mulhu	a5,a4,a5
+ 1bc:	00e787b3          	add	a5,a5,a4
+ 1c0:	00092737          	lui	a4,0x92
+ 1c4:	a2b70713          	addi	a4,a4,-1493 # 91a2b <_stack_top+0x90e2b>
+ 1c8:	00d71713          	slli	a4,a4,0xd
+ 1cc:	78970713          	addi	a4,a4,1929
+ 1d0:	ffed36b7          	lui	a3,0xffed3
+ 1d4:	97968693          	addi	a3,a3,-1671 # ffffffffffed2979 <_stack_top+0xffffffffffed1d79>
+ 1d8:	02e6a733          	mulhsu	a4,a3,a4
+ 1dc:	00e787b3          	add	a5,a5,a4
+ 1e0:	00b00713          	addi	a4,zero,11
+ 1e4:	02e7873b          	mulw	a4,a5,a4
+ 1e8:	00e787b3          	add	a5,a5,a4
+ 1ec:	06378713          	addi	a4,a5,99
+ 1f0:	00700693          	addi	a3,zero,7
+ 1f4:	02d7473b          	divw	a4,a4,a3
+ 1f8:	00e787b3          	add	a5,a5,a4
+ 1fc:	07b78713          	addi	a4,a5,123
+ 200:	00900693          	addi	a3,zero,9
+ 204:	02d7573b          	divuw	a4,a4,a3
+ 208:	00f70733          	add	a4,a4,a5
+ 20c:	0c770793          	addi	a5,a4,199
+ 210:	00d00693          	addi	a3,zero,13
+ 214:	02d7e7bb          	remw	a5,a5,a3
+ 218:	00f70733          	add	a4,a4,a5
+ 21c:	01170793          	addi	a5,a4,17
+ 220:	00500693          	addi	a3,zero,5
+ 224:	02d7f7bb          	remuw	a5,a5,a3
+ 228:	00e787b3          	add	a5,a5,a4
+ 22c:	0077f793          	andi	a5,a5,7
+ 230:	0067c793          	xori	a5,a5,6
+ 234:	00079c63          	bne	a5,zero,24c <main+0x1bc>
+ 238:	7ee00713          	addi	a4,zero,2030
+ 23c:	40e03423          	sd	a4,1032(zero) # 408 <tohost>
+ 240:	0000006f          	jal	zero,240 <main+0x1b0>
+ 244:	40f006b3          	sub	a3,zero,a5
+ 248:	f59ff06f          	jal	zero,1a0 <main+0x110>
+ 24c:	00100713          	addi	a4,zero,1
+ 250:	40e03423          	sd	a4,1032(zero) # 408 <tohost>
+ 254:	0000006f          	jal	zero,254 <main+0x1c4>
