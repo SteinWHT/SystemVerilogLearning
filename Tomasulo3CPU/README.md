@@ -40,14 +40,18 @@ Combines front-end and back-end with external I-Cache and D-Cache interfaces.
 
 ## Supported Instructions (current)
 
+RV64IM-oriented subset verified with directed `CPU_tb` tests and the [riscv-tests](arch_test/) manifest (47 tests). See [doc/VERIFICATION_STATUS.md](doc/VERIFICATION_STATUS.md).
+
 | Type | Instructions |
 |------|-------------|
 | **R-type ALU** | ADD, SUB, AND, OR, XOR, SLT, SLTU, SLL, SRL, SRA |
-| **I-type ALU** | ADDI, ANDI, ORI, XORI, SLTI, SLTIU, SLLI, SRLI, SRAI |
+| **I-type ALU** | ADDI, ADDIW, ANDI, ORI, XORI, SLTI, SLTIU, SLLI, SRLI, SRAI |
 | **M-extension** | MUL, DIV, REM |
-| **Load/Store** | LW, SW |
-| **Branch** | BEQ, BNE |
+| **Load/Store** | LD, LW, LWU, SD, SW, SB, SH, LB, LBU, LH, LHU |
+| **Branch** | BEQ, BNE, BLT, BGE, BLTU, BGEU |
 | **Jump** | JAL, JALR |
+| **U-type** | LUI, AUIPC |
+| **CSR / traps** | CSRRW/S/C, CSRRWI, ECALL, EBREAK, MRET (directed TB) |
 
 ## Directory Structure
 
@@ -99,22 +103,14 @@ Tomasulo3CPU/
 - **Branch prediction** — 2-bit BPB + RAS for calls/returns
 - **Store buffer** — decouples store commit from D-Cache write latency
 
-## Next Steps — ISA Expansion Roadmap
+## Verification summary
 
-Priority order to reach GCC-compilable programs (`rv64im`):
-
-1. **LUI + AUIPC** — constant/address materialization (used in nearly every function)
-2. **LD + SD** — native 64-bit memory access
-3. **BLT, BGE, BLTU, BGEU** — remaining branch comparisons
-4. **LB/LBU/LH/LHU/LWU/SB/SH** — byte/halfword memory access
-5. **ADDIW + RV64 word ops** — 32-bit `int` arithmetic (ADDW, SUBW, SLLW, SRLW, SRAW)
-6. **ECALL/EBREAK** — minimal trap handling
-7. **Unsigned M-extension** — MULH, MULHU, DIVU, REMU, MULW, DIVW, etc.
-
-After steps 1–6, simple C programs compile with:
-```bash
-riscv64-unknown-elf-gcc -march=rv64im -mabi=lp64 -nostdlib -O2 test.c -o test
-```
+| Layer | Status |
+|-------|--------|
+| Module TBs (`tb/*_tb.sv`) | Per-block (Makefile) |
+| Full CPU directed (`CPU_tb.sv`) | **55 / 55** |
+| Official riscv-tests (`arch_test/`) | **47 / 47** |
+| Bare-metal C (`bubble_sort`) | Pass |
 
 ## Documentation
 
@@ -122,15 +118,16 @@ riscv64-unknown-elf-gcc -march=rv64im -mabi=lp64 -nostdlib -O2 test.c -o test
 
 ## RISC-V architecture tests (riscv-tests)
 
-Official ISA tests from `third_party/riscv-tests` can be built and run against the full CPU:
+Official ISA tests from `third_party/riscv-tests` are built and run against the full CPU:
 
 ```bash
 cd arch_test
-python build_tests.py add
-python run_tests.py add
+python build_tests.py              # build manifest
+# Recompile Questa model after RTL changes — see arch_test/README.md
+python run_tests.py                # run all built tests
 ```
 
-See [arch_test/README.md](arch_test/README.md) for setup, manifests, and resume wording.
+See [arch_test/README.md](arch_test/README.md) for toolchain setup, Questa compile, and manifests.
 
 ## Building / Simulation
 
