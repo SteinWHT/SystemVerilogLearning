@@ -350,7 +350,8 @@ import riscv_types_pkg::*;
                     stage1_dis_div_issue_en = 1'b1;
                 end
             end
-            INSTR_LD, INSTR_LW,INSTR_SD, INSTR_SW, INSTR_SB, INSTR_SH: begin
+            INSTR_LD, INSTR_LW, INSTR_LB, INSTR_LH, INSTR_LBU, INSTR_LHU, INSTR_LWU,
+            INSTR_SD, INSTR_SW, INSTR_SB, INSTR_SH: begin
                  if (!issue_ld_stq_full) begin
                     stage1_dis_ld_st_issue_en = 1'b1;
                 end

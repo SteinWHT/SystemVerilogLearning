@@ -730,7 +730,7 @@ module CPU_tb;
         reset_dut();
         load_instr(32'h0000_0000, encode_i(12'd100, 5'd0, FUNCT3_ADD_SUB, 5'd1, OP_IMM));
         load_instr(32'h0000_0004, encode_i(12'd7,   5'd0, FUNCT3_ADD_SUB, 5'd2, OP_IMM));
-        load_instr(32'h0000_0008, encode_r(FUNCT7_MULDIV, 5'd2, 5'd1, FUNCT3_AND, 5'd3, OP_REG));
+        load_instr(32'h0000_0008, encode_r(FUNCT7_MULDIV, 5'd2, 5'd1, FUNCT3_OR, 5'd3, OP_REG));
 
         wait_cdb_tag(0); // ADDI x1
         wait_cdb_tag(1); // ADDI x2

@@ -119,6 +119,15 @@ import riscv_types_pkg::*;
     end
 
 
+    function automatic logic is_load(logic [OPCODE_WIDTH-1:0] op);
+        instr_e instr_op;
+        instr_op = instr_e'(op);
+        return (instr_op == INSTR_LW  || instr_op == INSTR_LD  ||
+                instr_op == INSTR_LB  || instr_op == INSTR_LH  ||
+                instr_op == INSTR_LBU || instr_op == INSTR_LHU ||
+                instr_op == INSTR_LWU);
+    endfunction
+
     logic [W_BYTE_NUM-1:0] store_strb;
     logic [$clog2(W_BYTE_NUM)-1:0] byte_off;
     assign byte_off = iss_lsb_addr[$clog2(W_BYTE_NUM)-1:0];
@@ -193,6 +202,9 @@ import riscv_types_pkg::*;
             if (flush_lw_slot) begin
                 lw_slot_valid      <= 1'b0;
                 lw_slot_data_ready <= 1'b0;
+            end else if (dcache_resp_valid && lw_slot_valid && !lw_slot_data_ready) begin
+                lw_slot.data       <= load_data_aligned;
+                lw_slot_data_ready <= 1'b1;
             end
             lsb_ready <= 1'b0;
 
@@ -228,11 +240,8 @@ import riscv_types_pkg::*;
 
             // Accept new instruction from LSQ
             if (iss_lsb_rdy && lsb_en) begin
-                if (iss_lsb_opcode == INSTR_LW  || iss_lsb_opcode == INSTR_LD  ||
-                    iss_lsb_opcode == INSTR_LB  || iss_lsb_opcode == INSTR_LH  ||
-                    iss_lsb_opcode == INSTR_LBU || iss_lsb_opcode == INSTR_LHU ||
-                    iss_lsb_opcode == INSTR_LWU) begin
-                    lw_slot <= '{
+                if (is_load(iss_lsb_opcode)) begin
+                   lw_slot <= '{
                         rob_tag:  iss_lsb_rob_tag,
                         rw:       1'b1,
                         addr:     iss_lsb_addr,

@@ -154,13 +154,13 @@ module RISC_V_DECODER
             // Load
             OP_LOAD: begin
                 unique case (funct3)
-                    // FUNCT3_LB:  ; // LB
-                    // FUNCT3_LH:  ; // LH
+                    FUNCT3_LB:  instr_type = INSTR_LB;  // LB
+                    FUNCT3_LH:  instr_type = INSTR_LH;  // LH
                     FUNCT3_LW:  instr_type = INSTR_LW;
-                    FUNCT3_LD:  instr_type = INSTR_LD; // LD  (RV64)
-                    // FUNCT3_LBU: ; // LBU
-                    // FUNCT3_LHU: ; // LHU
-                    // FUNCT3_LWU: ; // LWU (RV64)
+                    FUNCT3_LD:  instr_type = INSTR_LD;  // LD  (RV64)
+                    FUNCT3_LBU: instr_type = INSTR_LBU; // LBU
+                    FUNCT3_LHU: instr_type = INSTR_LHU; // LHU
+                    FUNCT3_LWU: instr_type = INSTR_LWU; // LWU (RV64)
                     default:    instr_type = INSTR_NONE;
                 endcase
             end
@@ -247,7 +247,8 @@ module RISC_V_DECODER
                 INSTR_MUL, INSTR_DIV, INSTR_REM,
                 INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
                 INSTR_ADDIW, //INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
-                INSTR_SLLI, INSTR_SRLI, INSTR_SRAI, INSTR_LW, INSTR_LD: begin
+                INSTR_SLLI, INSTR_SRLI, INSTR_SRAI,
+                INSTR_LW, INSTR_LD, INSTR_LB, INSTR_LH, INSTR_LBU, INSTR_LHU, INSTR_LWU: begin
                     rw = 1;
                     rd_arch_addr = rd;
                     rs_arch_addr = rs;
