@@ -22,9 +22,6 @@ import riscv_types_pkg::*;
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,
     input logic [REG_FILE_DATA_WIDTH-1:0]       cdb_rd_data,
 
-    // ROB 
-    input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
-
     output logic                                exe_valid,
     output logic [ROB_INDEX_WIDTH-1:0]          exe_rob_tag,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  exe_rd_phy_addr,
@@ -37,6 +34,9 @@ import riscv_types_pkg::*;
     output logic                                exe_jal_inst,
     output logic [BPB_PC_BITS-1:0]              exe_branch_pc_bits,
     output logic [IMEM_DEPTH-1:0]               exe_branch_other_addr,
+
+    // ROB
+    input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
 
     // Issued instruction metadata (muxed in ISSUEQ)
     input logic [ROB_INDEX_WIDTH-1:0]           iss_rob_tag,

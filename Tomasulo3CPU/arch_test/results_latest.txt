@@ -1,15 +1,17 @@
-# riscv-tests regression — 2026-05-27 (QuestaSim, 47 tests in manifest)
-# 47/47 PASSED
+# riscv-tests regression - 2026-05-28 (VCS, 65 tests in manifest)
+# 65/65 PASSED
 
-## PASSED (47)
-rv64ui-add rv64ui-addi rv64ui-addiw rv64ui-and rv64ui-andi rv64ui-auipc
-rv64ui-beq rv64ui-bge rv64ui-bgeu rv64ui-blt rv64ui-bltu rv64ui-bne
-rv64ui-jal rv64ui-jalr rv64ui-lb rv64ui-lbu rv64ui-ld rv64ui-ld_st
-rv64ui-lh rv64ui-lhu rv64ui-lui rv64ui-lwu rv64ui-lw
+## PASSED (65)
+rv64ui-add rv64ui-addi rv64ui-addiw rv64ui-addw rv64ui-and rv64ui-andi
+rv64ui-auipc rv64ui-beq rv64ui-bge rv64ui-bgeu rv64ui-blt rv64ui-bltu
+rv64ui-bne rv64ui-jal rv64ui-jalr rv64ui-lb rv64ui-lbu rv64ui-ld
+rv64ui-ld_st rv64ui-lh rv64ui-lhu rv64ui-lui rv64ui-lw rv64ui-lwu
 rv64ui-or rv64ui-ori rv64ui-sb rv64ui-sd rv64ui-sh rv64ui-simple
-rv64ui-sll rv64ui-slli rv64ui-slt rv64ui-slti rv64ui-sltiu rv64ui-sltu
-rv64ui-sra rv64ui-srai rv64ui-srl rv64ui-srli rv64ui-st_ld rv64ui-sub
-rv64ui-sw rv64ui-xor rv64ui-xori
-rv64um-div rv64um-mul rv64um-rem
+rv64ui-sll rv64ui-slli rv64ui-slliw rv64ui-sllw rv64ui-slt rv64ui-slti
+rv64ui-sltiu rv64ui-sltu rv64ui-sra rv64ui-srai rv64ui-sraiw rv64ui-sraw
+rv64ui-srl rv64ui-srli rv64ui-srliw rv64ui-srlw rv64ui-st_ld rv64ui-sub
+rv64ui-subw rv64ui-sw rv64ui-xor rv64ui-xori rv64um-div rv64um-divu
+rv64um-divuw rv64um-divw rv64um-mul rv64um-mulh rv64um-mulhsu rv64um-mulhu
+rv64um-mulw rv64um-rem rv64um-remu rv64um-remuw rv64um-remw
 
 ## FAILED (0)

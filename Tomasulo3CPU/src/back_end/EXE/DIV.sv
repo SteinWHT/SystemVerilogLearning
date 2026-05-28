@@ -41,6 +41,15 @@ import riscv_types_pkg::*;
     logic is_unsigned_op;
     logic is_word_op;
 
+    logic zero_divisor;
+    logic killed;
+    logic                                     div_valid;
+    logic [OPCODE_WIDTH-1:0]                  div_opcode;
+    logic [ROB_INDEX_WIDTH-1:0]               div_rob_tag;
+    logic [PHY_REGISTER_FILE_WIDTH-1:0]       div_rd_phy_addr;
+    logic [XLEN-1:0]                          dw_dividend;
+    logic                                     is_unsigned_lat;
+
     always_comb begin
         unique case (instr_e'(opcode))
             INSTR_DIVU, INSTR_REMU, INSTR_DIVUW, INSTR_REMUW: is_unsigned_op = 1'b1;
@@ -80,15 +89,6 @@ import riscv_types_pkg::*;
     assign start_s = valid && !is_unsigned_op;
     assign start_u = valid && is_unsigned_op;
     assign complete = is_unsigned_lat ? complete_u : complete_s;
-
-    logic zero_divisor;
-    logic killed;
-    logic                                     div_valid;
-    logic [OPCODE_WIDTH-1:0]                  div_opcode;
-    logic [ROB_INDEX_WIDTH-1:0]               div_rob_tag;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]       div_rd_phy_addr;
-    logic [XLEN-1:0]                          dw_dividend;
-    logic                                     is_unsigned_lat;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin

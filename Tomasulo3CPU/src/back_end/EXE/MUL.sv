@@ -51,6 +51,7 @@ import riscv_types_pkg::*;
     logic [OPCODE_WIDTH-1:0]                  mul_opcode[MUL_CYCLES];
     logic                                     mul_valid[MUL_CYCLES];
     logic                                     killed[MUL_CYCLES];
+    logic [2*MUL_WIDTH-1:0]                   product_reg;
     logic [2*MUL_WIDTH-1:0]                   product; // 130-bit full product
 
     // Conditioned 65-bit operands
@@ -81,15 +82,15 @@ import riscv_types_pkg::*;
     logic [OPCODE_WIDTH-1:0] out_opcode;
     assign out_opcode = mul_opcode[MUL_CYCLES-1];
 
-    logic [REG_FILE_DATA_WIDTH-1:0] result_sel;
+    //logic [REG_FILE_DATA_WIDTH-1:0] result_sel;
     always_comb begin
         unique case (instr_e'(out_opcode))
             INSTR_MULH, INSTR_MULHU, INSTR_MULHSU:
-                result_sel = product[2*XLEN-1:XLEN]; // upper 64 bits
+                exe_rd_data = product_reg[2*XLEN-1:XLEN]; // upper 64 bits
             INSTR_MULW:
-                result_sel = {{32{product[31]}}, product[31:0]};
+                exe_rd_data = {{32{product_reg[31]}}, product_reg[31:0]};
             default: // INSTR_MUL
-                result_sel = product[XLEN-1:0]; // lower 64 bits
+                exe_rd_data = product_reg[XLEN-1:0]; // lower 64 bits
         endcase
     end
 
@@ -111,9 +112,9 @@ import riscv_types_pkg::*;
                 mul_rd_phy_addr[i]  <= '0;
                 mul_opcode[i]       <= '0;
             end
-            exe_rd_data             <= '0;
+            product_reg             <= '0;
         end else begin
-            exe_rd_data         <= result_sel;
+            product_reg             <= product;
             if (valid) begin
                 mul_valid[0]        <= valid;
                 mul_rob_tag[0]      <= rob_tag;
