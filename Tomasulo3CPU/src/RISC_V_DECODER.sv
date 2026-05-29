@@ -145,10 +145,10 @@ module RISC_V_DECODER
                     FUNCT3_AND:     instr_type = INSTR_ANDI;
                     FUNCT3_SLL:     instr_type = INSTR_SLLI;
                     FUNCT3_SRL_SRA: begin
-                        unique case (funct7)
-                            FUNCT7_ZERO: instr_type = INSTR_SRLI;
-                            FUNCT7_ALT:  instr_type = INSTR_SRAI;
-                            default:     instr_type = INSTR_NONE;
+                        unique case (funct7[6:1])
+                            FUNCT7_ZERO[6:1]: instr_type = INSTR_SRLI;
+                            FUNCT7_ALT[6:1]:  instr_type = INSTR_SRAI;
+                            default:          instr_type = INSTR_NONE;
                         endcase
                     end
                     default: instr_type = INSTR_NONE;

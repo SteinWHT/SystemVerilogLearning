@@ -205,6 +205,15 @@ module CPU_c_suite_tb;
     endfunction
 
     initial begin
+        `ifdef FSDB_DUMP
+            $fsdbDumpfile("CPU_c_suite.fsdb");
+            $fsdbDumpvars("+all");
+            $fsdbDumpvars(0, CPU_c_suite_tb);
+            $fsdbDumpMDA();
+        `endif
+    end
+
+    initial begin
         string imem_file;
         string dmem_file;
         string test_name;

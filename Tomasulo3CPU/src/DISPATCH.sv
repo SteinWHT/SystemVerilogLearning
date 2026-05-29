@@ -272,7 +272,7 @@ import riscv_types_pkg::*;
         end else if (stage2_valid && stage2_dis_jr31_inst) begin
             dis_jmpbr = 1'b1;
             dis_jmpbr_addr_valid = 1'b1;
-            dis_jmpbr_addr = ras_addr;
+            dis_jmpbr_addr = dis_branch_other_addr[IMEM_DEPTH-1:1];
         end else if (stage2_valid && stage2_dis_jal_inst && !stage2_dis_jr_inst) begin
             dis_jmpbr = 1'b1;
             dis_jmpbr_addr_valid = 1'b1;
