@@ -1,12 +1,49 @@
-# SystemVerilogLearning
+# RTL Design & Verification Portfolio
 
-| # | Module                                      | Key Concepts                      | What to Implement                                 | Verification Focus                                  | Interview Value     |
-| - | ------------------------------------------- | --------------------------------- | ------------------------------------------------- | --------------------------------------------------- | ------------------- |
-| 1 | **Arbiter (Fixed + Round-Robin)**           | Priority, fairness, starvation    | Parametrized N-request arbiter, RR pointer logic  | One-hot grant, no lost requests, fairness over time | ⭐⭐⭐⭐⭐ (very common) |
-| 2 | **Valid-Ready Pipeline + Skid Buffer**      | Backpressure, throughput, latency | 1-stage + multi-stage pipeline, skid buffer       | No data loss, proper stall/flow behavior            | ⭐⭐⭐⭐⭐               |
-| 3 | **Synchronizers (CDC basics)**              | Metastability, CDC safety         | 2-flop sync, pulse sync, toggle sync              | No glitches, correct pulse transfer                 | ⭐⭐⭐⭐                |
-| 4 | **Synchronous FIFO (Enhanced)**             | Queues, flow control              | Param depth/width, almost_full/empty              | Overflow/underflow protection                       | ⭐⭐⭐⭐                |
-| 5 | **FSM-Based Design (e.g., UART RX/TX)**     | State machines, timing            | Clean enum-based FSM, datapath separation         | State coverage, edge cases                          | ⭐⭐⭐⭐                |
-| 6 | **Simple Cache (Direct-Mapped)**            | Memory hierarchy                  | Tag compare, valid bits, hit/miss logic           | Correct hits/misses, write behavior                 | ⭐⭐⭐⭐                |
-| 7 | **Assertions Layer (applied to all above)** | Formal thinking                   | Add SVA to each module                            | Protocol correctness, invariants                    | ⭐⭐⭐⭐⭐               |
-| 8 | **Mini Integration (Optional)**             | System thinking                   | Connect modules (e.g., pipeline + FIFO + arbiter) | End-to-end data correctness                         | ⭐⭐⭐⭐                |
+SystemVerilog projects covering out-of-order CPU microarchitecture, digital design fundamentals, and verification methodology.
+
+---
+
+## Tomasulo3CPU — Out-of-Order RISC-V Processor (RV64IM)
+
+The main project in this repository. A 64-bit out-of-order RISC-V CPU with Tomasulo-style dynamic scheduling, physical register renaming, checkpoint-based speculative execution, and in-order commit.
+
+| Metric | Result |
+|--------|--------|
+| RTL modules | 20+ (FRAT, RRAT, ROB, FRL, PRF, issue queues, CDB, LSB, BPB, RAS, ...) |
+| Directed integration tests | 55 / 55 |
+| Official riscv-tests (rv64ui + rv64um) | 65 / 65 |
+| Bare-metal C programs | 8 / 8 (bubble sort, matrix multiply, linked list, recursion, string ops) |
+| Synthesis (ASAP7 7nm, Design Compiler) | 250 MHz, 188K cells, timing met |
+
+Key microarchitectural features:
+- 128-entry physical register file with 7-bit tags
+- FRAT/RRAT register alias tables with 8-slot checkpoint array for single-cycle branch recovery
+- 4 parallel issue queues (INT / MUL / DIV / LD-ST) with CDB operand wakeup
+- Multi-cycle pipelined execution (4-cycle MUL, 7-cycle DIV)
+- Load-store buffer with store-to-load forwarding
+- 2-bit saturating-counter branch predictor with return address stack
+- Machine-mode CSR access and trap handling (ECALL / EBREAK / MRET)
+
+See [`Tomasulo3CPU/`](Tomasulo3CPU/) for full architecture documentation, build instructions, and [verification status](Tomasulo3CPU/doc/VERIFICATION_STATUS.md).
+
+---
+
+## BasicModules — Digital Design Building Blocks
+
+Standalone parameterized modules with self-checking testbenches and SVA assertions.
+
+| Module | Description |
+|--------|-------------|
+| [`arbiter`](BasicModules/arbiter/) | Fixed-priority and round-robin arbiters |
+| [`asyncFIFO`](BasicModules/asyncFIFO/) | Asynchronous FIFO with Gray-code CDC and dual-FF synchronizers |
+
+---
+
+## Tools & Flows
+
+| Category | Tools |
+|----------|-------|
+| Simulation | Synopsys VCS, Siemens QuestaSim |
+| Synthesis | Synopsys Design Compiler (ASAP7 7nm) |
+| Cross-compilation | RISC-V GCC (`rv64im_zicsr`, bare-metal) |

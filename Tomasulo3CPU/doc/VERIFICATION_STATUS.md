@@ -1,6 +1,6 @@
 # Tomasulo3CPU — Verification Status
 
-**Last updated:** 2026-05-27
+**Last updated:** 2026-05-28
 
 This document describes the verification methodology, current results, known gaps, and planned work for the Tomasulo3CPU project. It is intended for design review and technical evaluation of the implementation.
 
@@ -14,8 +14,9 @@ Tomasulo3CPU is a 64-bit out-of-order RISC-V processor (RV64IM-oriented) impleme
 |--------|--------|
 | Module testbenches | 20+ blocks (`tb/*_tb.sv`) |
 | Full-CPU directed tests (`CPU_tb.sv`) | 55 / 55 passing |
-| Bare-metal program (`bubble_sort`) | Passing |
-| riscv-tests manifest (rv64ui + rv64um) | **47 / 47 passing** |
+| Bare-metal C programs (bubble sort + c\_suite) | **8 / 8 passing** |
+| riscv-tests manifest (rv64ui + rv64um) | **65 / 65 passing** |
+| Synthesis (ASAP7 7nm, Design Compiler) | 250 MHz, 188K cells, timing met |
 
 ---
 
@@ -101,6 +102,13 @@ Programs are built with a RISC-V cross-compiler (`rv64im_zicsr`, `lp64`, `-nostd
 | Program | Status | Testbench |
 |---------|--------|-----------|
 | `cprogram/bubble_sort.c` | Pass | `CPU_bubble_sort_tb` |
+| `cprogram/c_suite/memcpy` | Pass | `CPU_c_suite` (tohost) |
+| `cprogram/c_suite/memset` | Pass | `CPU_c_suite` (tohost) |
+| `cprogram/c_suite/strlen` | Pass | `CPU_c_suite` (tohost) |
+| `cprogram/c_suite/strcmp` | Pass | `CPU_c_suite` (tohost) |
+| `cprogram/c_suite/matrix_multiply` | Pass | `CPU_c_suite` (tohost) |
+| `cprogram/c_suite/linked_list` | Pass | `CPU_c_suite` (tohost) |
+| `cprogram/c_suite/recursion` | Pass | `CPU_c_suite` (tohost) |
 | `cprogram/trap_demo.c` + `trap_handler.S` | Not in regression | — |
 
 ### Official riscv-tests
@@ -109,12 +117,12 @@ The project integrates the `riscv-software-src/riscv-tests` repository under `th
 
 | Item | Value |
 |------|-------|
-| Manifest | `arch_test/manifest_rv64ui.txt` (44 tests), `arch_test/manifest_rv64um.txt` (3 tests) |
-| Excluded from manifest | `fence_i`, `ma_data`, RV64 word ops except `addiw` |
+| Manifest | `arch_test/manifest_rv64ui.txt` (52 tests), `arch_test/manifest_rv64um.txt` (13 tests) |
+| Excluded from manifest | `fence_i`, `ma_data` |
 | Build / run | [arch_test/README.md](../arch_test/README.md) |
-| Latest regression | **47 / 47 passed** |
+| Latest regression | **65 / 65 passed** |
 
-All manifest tests pass, including integer memory (LB/LH/SB/SH/SW/SD), shifts, `lui`, `jalr`, and M-extension (`mul`, `div`, `rem`).
+All manifest tests pass, including integer memory (LB/LH/SB/SH/SW/SD), shifts, `lui`, `jalr`, W-type word ops, and full M-extension (`mul`, `mulh`, `mulhu`, `mulhsu`, `mulw`, `div`, `divu`, `divw`, `divuw`, `rem`, `remu`, `remw`, `remuw`).
 
 Detailed pass list: [arch_test/results_latest.txt](../arch_test/results_latest.txt).
 
@@ -126,9 +134,21 @@ Selected RTL blocks include SystemVerilog concurrent assertions (e.g. FRL underf
 
 ---
 
-## Synthesis verification
+## Synthesis results
 
-RTL synthesis (Design Compiler) and post-synthesis timing reports are not yet part of the documented regression. Scripts exist under `script/` for environments with Synopsys tool access.
+RTL synthesized with Synopsys Design Compiler (V-2023.12-SP3) using ASAP7 7nm predictive PDK (RVT, TT corner, 0.7V, 25°C).
+
+| Metric | Value |
+|--------|-------|
+| Target clock period | 4.0 ns (250 MHz) |
+| Worst slack | 4.81 ps (MET) |
+| Total cells | 187,539 (162,996 combinational + 24,478 sequential) |
+| Total cell area | 23,382 μm² |
+| Buf/Inv count | 41,609 |
+| Critical path | MUL valid → CDB → PRF read → ALU adder → branch compare |
+
+Reports: `report/CPU_asap7_area.txt`, `report/CPU_asap7_timing.txt`.
+Synthesis script: `script/synth_asap7.tcl`.
 
 ---
 
@@ -159,10 +179,11 @@ RTL synthesis (Design Compiler) and post-synthesis timing reports are not yet pa
 
 ## Regression history
 
-| Date | CPU_tb | bubble_sort | riscv-tests | Notes |
-|------|--------|-------------|-------------|-------|
-| 2026-05-26 | 55/55 | Pass | 27/47 | Initial manifest regression (QuestaSim) |
-| 2026-05-27 | 55/55 | Pass | **47/47** | Full manifest pass after RTL fixes (QuestaSim) |
+| Date | CPU_tb | C programs | riscv-tests | Synthesis | Notes |
+|------|--------|------------|-------------|-----------|-------|
+| 2026-05-26 | 55/55 | 1/1 | 27/47 | — | Initial manifest regression (QuestaSim) |
+| 2026-05-27 | 55/55 | 1/1 | 47/47 | — | Full manifest pass after RTL fixes (QuestaSim) |
+| 2026-05-28 | 55/55 | 8/8 | 65/65 | 250 MHz | Expanded manifests, C suite pass, synthesis complete |
 
 ---
 

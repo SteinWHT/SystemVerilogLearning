@@ -40,7 +40,7 @@ Combines front-end and back-end with external I-Cache and D-Cache interfaces.
 
 ## Supported Instructions (current)
 
-RV64IM-oriented subset verified with directed `CPU_tb` tests and the [riscv-tests](arch_test/) manifest (47 tests). See [doc/VERIFICATION_STATUS.md](doc/VERIFICATION_STATUS.md).
+RV64IM-oriented subset verified with directed `CPU_tb` tests and the [riscv-tests](arch_test/) manifest (65 tests). See [doc/VERIFICATION_STATUS.md](doc/VERIFICATION_STATUS.md).
 
 | Type | Instructions |
 |------|-------------|
@@ -103,14 +103,15 @@ Tomasulo3CPU/
 - **Branch prediction** — 2-bit BPB + RAS for calls/returns
 - **Store buffer** — decouples store commit from D-Cache write latency
 
-## Verification summary
+## Verification & Synthesis summary
 
 | Layer | Status |
 |-------|--------|
 | Module TBs (`tb/*_tb.sv`) | Per-block (Makefile) |
 | Full CPU directed (`CPU_tb.sv`) | **55 / 55** |
-| Official riscv-tests (`arch_test/`) | **47 / 47** |
-| Bare-metal C (`bubble_sort`) | Pass |
+| Official riscv-tests (`arch_test/`) | **65 / 65** |
+| Bare-metal C (bubble sort + c\_suite) | **8 / 8** |
+| Synthesis (ASAP7 7nm, DC) | **250 MHz**, 188K cells, timing met |
 
 ## Documentation
 
