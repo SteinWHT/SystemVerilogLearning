@@ -1,0 +1,66 @@
+Loading db file '/data/asap7_lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.db'
+Loading db file '/data/asap7_lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.db'
+Loading db file '/data/asap7_lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.db'
+Loading db file '/data/asap7_lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_211120.db'
+Loading db file '/data/asap7_lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.db'
+Information: Propagating switching activity (low effort zero delay simulation). (PWR-6)
+Warning: Design has unannotated primary inputs. (PWR-414)
+Warning: Design has unannotated sequential cell outputs. (PWR-415)
+ 
+****************************************
+Report : power
+        -analysis_effort low
+Design : CPU
+Version: V-2023.12-SP3
+Date   : Fri May 29 06:03:42 2026
+****************************************
+
+
+Library(s) Used:
+
+    asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120 (File: /data/asap7_lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.db)
+    asap7sc7p5t_INVBUF_RVT_TT_nldm_211120 (File: /data/asap7_lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_211120.db)
+    asap7sc7p5t_AO_RVT_TT_nldm_211120 (File: /data/asap7_lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.db)
+    asap7sc7p5t_OA_RVT_TT_nldm_211120 (File: /data/asap7_lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.db)
+    asap7sc7p5t_SEQ_RVT_TT_nldm_220123 (File: /data/asap7_lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.db)
+
+
+Operating Conditions: PVT_0P7V_25C   Library: asap7sc7p5t_OA_RVT_TT_nldm_211120
+Wire Load Model Mode: top
+
+
+Global Operating Voltage = 0.7  
+Power-specific unit information :
+    Voltage Units = 1V
+    Capacitance Units = 1.000000ff
+    Time Units = 1ps
+    Dynamic Power Units = 1mW    (derived from V,C,T units)
+    Leakage Power Units = 1pW
+
+
+Attributes
+----------
+i - Including register clock pin internal power
+
+
+  Cell Internal Power  =   7.7776 mW  (100%)
+  Net Switching Power  =  29.1177 uW    (0%)
+                         ---------
+Total Dynamic Power    =   7.8067 mW  (100%)
+
+Cell Leakage Power     =  19.0354 uW
+
+
+                 Internal         Switching           Leakage            Total
+Power Group      Power            Power               Power              Power   (   %    )  Attrs
+--------------------------------------------------------------------------------------------------
+io_pad             0.0000            0.0000            0.0000            0.0000  (   0.00%)
+memory             0.0000            0.0000            0.0000            0.0000  (   0.00%)
+black_box          0.0000            0.0000            0.0000            0.0000  (   0.00%)
+clock_network      7.7581            0.0000            0.0000            7.7581  (  99.14%)  i
+register       7.2970e-03        2.2652e-03        6.4954e+06        1.6065e-02  (   0.21%)
+sequential         0.0000            0.0000            0.0000            0.0000  (   0.00%)
+combinational  1.1466e-02        2.6852e-02        1.2540e+07        5.0853e-02  (   0.65%)
+--------------------------------------------------------------------------------------------------
+Total              7.7769 mW     2.9117e-02 mW     1.9035e+07 pW         7.8250 mW
+1

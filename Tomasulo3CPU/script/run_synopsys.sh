@@ -55,12 +55,16 @@ fi
 echo "Synopsys license server is up:"
 "$LMUTIL" lmstat -c "$SYNOPSYS_LICENSE_FILE" | grep -E "license server UP|snpslmd: UP" || true
 
-# 3. Build the Docker container (This only takes a few minutes the very first time you run it. After that, it is instant)
+# 3. Get script and project directories
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+PROJ_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
+
+# 4. Build the Docker container (This only takes a few minutes the very first time you run it. After that, it is instant)
 echo "Building Synopsys Docker environment (CentOS 7)..."
 docker build -t synopsys-env \
   --build-arg USER_ID=$(id -u) \
   --build-arg GROUP_ID=$(id -g) \
-  -f Dockerfile.synopsys .
+  -f "$SCRIPT_DIR/Dockerfile.synopsys" "$SCRIPT_DIR"
 
 echo ""
 echo "=================================================="
@@ -70,12 +74,12 @@ echo "Type 'exit' to leave the environment."
 echo "=================================================="
 echo ""
 
-# 4. Run the container
+# 5. Run the container
 # --net=host : Shares Ubuntu's network (so the license server works perfectly)
 # --uts=host : Shares Ubuntu's hostname, matching the SERVER line in the license
 # -e DISPLAY : Forwards the GUI to your screen
 # -v /home/synopsys : Mounts your tools directly into the container
-# -v $(pwd) : Mounts your current project directory into the container
+# -v $PROJ_DIR : Mounts your current project directory into the container
 docker run -it --rm \
   --net=host \
   --uts=host \
@@ -84,5 +88,5 @@ docker run -it --rm \
   -v /home/synopsys:/home/synopsys:rw \
   -v /data:/data:rw \
   -v /data/synopsys_project/synop.bashrc:/home/synopsys/synop.bashrc:ro \
-  -v $(pwd):/workspace \
+  -v "$PROJ_DIR":/workspace \
   synopsys-env bash -c "source /home/synopsys/synop.bashrc && lmutil lmstat -c /home/synopsys/scl/2024.06/admin/license/synopsys.lic || true; bash"

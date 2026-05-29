@@ -209,7 +209,7 @@ import riscv_types_pkg::*;
                    .INSTR_WIDTH(INSTR_WIDTH)
                  ) decoder (
                    .instr(ifetch_instr_in),
-                   .enable(dis_ren),
+
                    .rd_arch_addr(stage1_rd_arch_addr),
                    .rs_arch_addr(stage1_rs_arch_addr),
                    .rt_arch_addr(stage1_rt_arch_addr),

@@ -15,7 +15,6 @@ module RISC_V_DECODER
     parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT)
 ) (
     input  logic [INSTR_WIDTH-1:0]      instr,
-    input  logic                        enable,
     output logic [ARCH_REG_WIDTH-1:0]   rd_arch_addr,
     output logic [ARCH_REG_WIDTH-1:0]   rs_arch_addr,
     output logic [ARCH_REG_WIDTH-1:0]   rt_arch_addr,
@@ -307,123 +306,121 @@ module RISC_V_DECODER
         rs_arch_addr = 0;
         rt_arch_addr = 0;
         imm = 0;
-        if(enable) begin
-            unique case (instr_type)
-                INSTR_ADD, INSTR_SUB, INSTR_SLT, INSTR_SLTU, INSTR_XOR,
-                INSTR_SRL, INSTR_SRA, INSTR_OR, INSTR_AND, INSTR_SLL,
-                INSTR_ADDW, INSTR_SUBW, INSTR_SLLW, INSTR_SRLW, INSTR_SRAW,
-                INSTR_MUL, INSTR_MULH, INSTR_MULHU, INSTR_MULHSU, INSTR_MULW,
-                INSTR_DIV, INSTR_DIVU, INSTR_REM, INSTR_REMU,
-                INSTR_DIVW, INSTR_DIVUW, INSTR_REMW, INSTR_REMUW,
-                INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
-                INSTR_ADDIW, INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
-                INSTR_SLLI, INSTR_SRLI, INSTR_SRAI,
-                INSTR_LW, INSTR_LD, INSTR_LB, INSTR_LH, INSTR_LBU, INSTR_LHU, INSTR_LWU: begin
-                    rw = 1;
-                    rd_arch_addr = rd;
-                    rs_arch_addr = rs;
-                    rt_arch_addr = rt;
+        unique case (instr_type)
+            INSTR_ADD, INSTR_SUB, INSTR_SLT, INSTR_SLTU, INSTR_XOR,
+            INSTR_SRL, INSTR_SRA, INSTR_OR, INSTR_AND, INSTR_SLL,
+            INSTR_ADDW, INSTR_SUBW, INSTR_SLLW, INSTR_SRLW, INSTR_SRAW,
+            INSTR_MUL, INSTR_MULH, INSTR_MULHU, INSTR_MULHSU, INSTR_MULW,
+            INSTR_DIV, INSTR_DIVU, INSTR_REM, INSTR_REMU,
+            INSTR_DIVW, INSTR_DIVUW, INSTR_REMW, INSTR_REMUW,
+            INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
+            INSTR_ADDIW, INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
+            INSTR_SLLI, INSTR_SRLI, INSTR_SRAI,
+            INSTR_LW, INSTR_LD, INSTR_LB, INSTR_LH, INSTR_LBU, INSTR_LHU, INSTR_LWU: begin
+                rw = 1;
+                rd_arch_addr = rd;
+                rs_arch_addr = rs;
+                rt_arch_addr = rt;
+                imm = imm_i;
+            end
+            INSTR_SD, INSTR_SW, INSTR_SB, INSTR_SH: begin
+                mw = 1;
+                rs_arch_addr = rs;
+                rt_arch_addr = rt;
+                imm = imm_s;
+            end
+            INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU, INSTR_BGE, INSTR_BGEU: begin
+                branch = 1;
+                rs_arch_addr = rs;
+                rt_arch_addr = rt;
+                imm = imm_b;
+            end
+            INSTR_JAL: begin
+                jal_inst = 1;
+                imm = imm_j;
+                rw = 1;
+                rd_arch_addr = rd;
+            end
+            INSTR_JALR: begin
+                if (rs == 5'd1) begin
+                    jr31_inst = 1;
                     imm = imm_i;
-                end
-                INSTR_SD, INSTR_SW, INSTR_SB, INSTR_SH: begin
-                    mw = 1;
+                    rw = 1;
                     rs_arch_addr = rs;
-                    rt_arch_addr = rt;
-                    imm = imm_s;
-                end
-                INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU, INSTR_BGE, INSTR_BGEU: begin
-                    branch = 1;
+                    rd_arch_addr = rd;
+                end else if (rd == 5'd0) begin
+                    // This is a JR instruction (JALR with rd = x0)
+                    jr_inst = 1;
                     rs_arch_addr = rs;
-                    rt_arch_addr = rt;
-                    imm = imm_b;
-                end
-                INSTR_JAL: begin
+                    imm = imm_i;
+                end else begin
                     jal_inst = 1;
-                    imm = imm_j;
-                    rw = 1;
-                    rd_arch_addr = rd;
-                end
-                INSTR_JALR: begin
-                    if (rs == 5'd1) begin
-                        jr31_inst = 1;
-                        imm = imm_i;
-                        rw = 1;
-                        rs_arch_addr = rs;
-                        rd_arch_addr = rd;
-                    end else if (rd == 5'd0) begin
-                        // This is a JR instruction (JALR with rd = x0)
-                        jr_inst = 1;
-                        rs_arch_addr = rs;
-                        imm = imm_i;
-                    end else begin
-                        jal_inst = 1;
-                        jr_inst = 1;
-                        rs_arch_addr = rs;
-                        imm = imm_i;
-                        rw = 1;
-                        rd_arch_addr = rd;
-                    end
-                end
-                INSTR_LUI, INSTR_AUIPC: begin
-                    rw = 1;
-                    rd_arch_addr = rd;
-                    imm = imm_u;
-                end
-                INSTR_CSRRW, INSTR_CSRRS, INSTR_CSRRC: begin
-                    rw = 1;
-                    csr_inst = 1;
-                    csr_addr = csr;
-                    rd_arch_addr = rd;
+                    jr_inst = 1;
                     rs_arch_addr = rs;
-                    imm = XLEN'(csr);
-
-                    unique case (instr_type)
-                        INSTR_CSRRW: csr_cmd = CSR_CMD_RW;
-                        INSTR_CSRRS: csr_cmd = CSR_CMD_RS;
-                        INSTR_CSRRC: csr_cmd = CSR_CMD_RC;
-                        default:     csr_cmd = CSR_CMD_NONE;
-                    endcase
-                end
-                INSTR_CSRRWI, INSTR_CSRRSI, INSTR_CSRRCI: begin
+                    imm = imm_i;
                     rw = 1;
-                    csr_inst = 1;
-                    csr_addr = csr;
                     rd_arch_addr = rd;
-                    rs_arch_addr = imm_zimm;
-                    imm = XLEN'(csr);
+                end
+            end
+            INSTR_LUI, INSTR_AUIPC: begin
+                rw = 1;
+                rd_arch_addr = rd;
+                imm = imm_u;
+            end
+            INSTR_CSRRW, INSTR_CSRRS, INSTR_CSRRC: begin
+                rw = 1;
+                csr_inst = 1;
+                csr_addr = csr;
+                rd_arch_addr = rd;
+                rs_arch_addr = rs;
+                imm = XLEN'(csr);
 
-                    unique case (instr_type)
-                        INSTR_CSRRWI: csr_cmd = CSR_CMD_RWI;
-                        INSTR_CSRRSI: csr_cmd = CSR_CMD_RSI;
-                        INSTR_CSRRCI: csr_cmd = CSR_CMD_RCI;
-                        default:      csr_cmd = CSR_CMD_NONE;
-                    endcase
-                end
-                INSTR_ECALL, INSTR_EBREAK: begin
-                    trap_inst = 1;
-                end
-                INSTR_MRET: begin
-                    mret_inst = 1;
-                end
-                default: begin
-                    rw = 0;
-                    mw = 0;
-                    branch = 0;
-                    jr_inst = 0;
-                    jal_inst = 0;
-                    jr31_inst = 0;
-                    csr_inst = 0;
-                    csr_cmd = CSR_CMD_NONE;
-                    csr_addr = '0;
-                    trap_inst = 0;
-                    mret_inst = 0;
-                    rd_arch_addr = 0;
-                    rs_arch_addr = 0;
-                    rt_arch_addr = 0;
-                    imm = 0;
-                end
-            endcase
-        end
+                unique case (instr_type)
+                    INSTR_CSRRW: csr_cmd = CSR_CMD_RW;
+                    INSTR_CSRRS: csr_cmd = CSR_CMD_RS;
+                    INSTR_CSRRC: csr_cmd = CSR_CMD_RC;
+                    default:     csr_cmd = CSR_CMD_NONE;
+                endcase
+            end
+            INSTR_CSRRWI, INSTR_CSRRSI, INSTR_CSRRCI: begin
+                rw = 1;
+                csr_inst = 1;
+                csr_addr = csr;
+                rd_arch_addr = rd;
+                rs_arch_addr = imm_zimm;
+                imm = XLEN'(csr);
+
+                unique case (instr_type)
+                    INSTR_CSRRWI: csr_cmd = CSR_CMD_RWI;
+                    INSTR_CSRRSI: csr_cmd = CSR_CMD_RSI;
+                    INSTR_CSRRCI: csr_cmd = CSR_CMD_RCI;
+                    default:      csr_cmd = CSR_CMD_NONE;
+                endcase
+            end
+            INSTR_ECALL, INSTR_EBREAK: begin
+                trap_inst = 1;
+            end
+            INSTR_MRET: begin
+                mret_inst = 1;
+            end
+            default: begin
+                rw = 0;
+                mw = 0;
+                branch = 0;
+                jr_inst = 0;
+                jal_inst = 0;
+                jr31_inst = 0;
+                csr_inst = 0;
+                csr_cmd = CSR_CMD_NONE;
+                csr_addr = '0;
+                trap_inst = 0;
+                mret_inst = 0;
+                rd_arch_addr = 0;
+                rs_arch_addr = 0;
+                rt_arch_addr = 0;
+                imm = 0;
+            end
+        endcase
     end
 
 endmodule

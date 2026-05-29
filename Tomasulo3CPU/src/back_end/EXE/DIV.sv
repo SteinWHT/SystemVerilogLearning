@@ -6,7 +6,7 @@ import riscv_types_pkg::*;
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
-    parameter int unsigned DIV_CYCLES = 7
+    parameter int unsigned DIV_CYCLES = 64
 ) (
     input logic clk,
     input logic rst_n,
@@ -25,7 +25,7 @@ import riscv_types_pkg::*;
     output logic                                    div_exe_ready,
 
     // CDB interface
-    input logic [ROB_INDEX_WIDTH-1:0]               cdb_flush,
+    input logic                                     cdb_flush,
     input logic [ROB_INDEX_WIDTH-1:0]               cdb_rob_depth,
 
     // ROB interface

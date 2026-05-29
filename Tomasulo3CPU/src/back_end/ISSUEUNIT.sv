@@ -5,7 +5,7 @@
 // We don't introduce the flush here
 // Namely, even if the exe modules are ready because of the flush, we still view them as busy
 module ISSUEUNIT #(
-    parameter int unsigned DIV_CYCLES = 7,
+    parameter int unsigned DIV_CYCLES = 64,
     parameter int unsigned MUL_CYCLES = 4,
     parameter int unsigned INT_CYCLES = 1,
     parameter int unsigned LD_ST_CYCLES = 1

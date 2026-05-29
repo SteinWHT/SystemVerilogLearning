@@ -191,6 +191,17 @@ clean-all:
 	@echo "[clean-all] Removing $(PROJ_DIR)/build"
 	rm -rf $(PROJ_DIR)/build
 
+# ---- synthesis with Design Compiler (ASAP7 7nm) ----
+.PHONY: synth
+synth:
+	@echo "============================================"
+	@echo "  Running Synthesis with Design Compiler (ASAP7 7nm)"
+	@echo "  CLK_PERIOD: $(if $(CLK_PERIOD),$(CLK_PERIOD),3.0) ns"
+	@echo "============================================"
+	@mkdir -p $(PROJ_DIR)/synth
+	@mkdir -p $(PROJ_DIR)/report
+	cd $(PROJ_DIR) && dc_shell -x "set argv {CPU $(if $(CLK_PERIOD),$(CLK_PERIOD),3.0)}" -f script/synth_asap7.tcl 2>&1 | tee synth/synthesis.log
+
 # ============================================================
 #  QuestaSim / ModelSim targets  (USE_DW=0 by default, uses stubs)
 # ============================================================

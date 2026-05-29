@@ -1,0 +1,34 @@
+ 
+****************************************
+Report : area
+Design : CPU
+Version: V-2023.12-SP3
+Date   : Fri May 29 06:03:34 2026
+****************************************
+
+Library(s) Used:
+
+    asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120 (File: /data/asap7_lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.db)
+    asap7sc7p5t_INVBUF_RVT_TT_nldm_211120 (File: /data/asap7_lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_211120.db)
+    asap7sc7p5t_AO_RVT_TT_nldm_211120 (File: /data/asap7_lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.db)
+    asap7sc7p5t_OA_RVT_TT_nldm_211120 (File: /data/asap7_lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.db)
+    asap7sc7p5t_SEQ_RVT_TT_nldm_220123 (File: /data/asap7_lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.db)
+
+Number of ports:                        15459
+Number of nets:                        203837
+Number of cells:                       187539
+Number of combinational cells:         162996
+Number of sequential cells:             24478
+Number of macros/black boxes:               0
+Number of buf/inv:                      41609
+Number of references:                       3
+
+Combinational area:              14433.223048
+Buf/Inv area:                     2056.173686
+Noncombinational area:            8948.985207
+Macro/Black Box area:                0.000000
+Net Interconnect area:      undefined  (No wire load specified)
+
+Total cell area:                 23382.208255
+Total area:                 undefined
+1

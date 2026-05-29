@@ -32,7 +32,7 @@ import riscv_types_pkg::*;
     input logic                                     valid,
 
     // CDB interface
-    input logic [ROB_INDEX_WIDTH-1:0]               cdb_flush,
+    input logic                                     cdb_flush,
     input logic [ROB_INDEX_WIDTH-1:0]               cdb_rob_depth,
 
     // ROB interface

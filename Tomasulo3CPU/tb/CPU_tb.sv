@@ -34,7 +34,7 @@ module CPU_tb;
     parameter int unsigned SB_INDEX_WIDTH          = $clog2(SB_DEPTH);
     parameter int unsigned ISSUE_QUEUE_DEPTH       = 16;
     parameter int unsigned LSB_DEPTH               = 4;
-    parameter int unsigned DIV_CYCLES              = 7;
+    parameter int unsigned DIV_CYCLES              = 64;
     parameter int unsigned MUL_CYCLES              = 4;
     parameter int unsigned INT_CYCLES              = 1;
     parameter int unsigned LD_ST_CYCLES            = 1;
@@ -719,7 +719,7 @@ module CPU_tb;
 
         wait_cdb_tag(0); // ADDI x1
         wait_cdb_tag(1); // ADDI x2
-        check_cdb_result("DIV 100/5 = 20", 2, 64'd20, 50);
+        check_cdb_result("DIV 100/5 = 20", 2, 64'd20, 100);
 
         // ==============================================================
         // Test 13: REM instruction
@@ -734,7 +734,7 @@ module CPU_tb;
 
         wait_cdb_tag(0); // ADDI x1
         wait_cdb_tag(1); // ADDI x2
-        check_cdb_result("REM 100%%7 = 2", 2, 64'd2, 50);
+        check_cdb_result("REM 100%%7 = 2", 2, 64'd2, 100);
 
         // ==============================================================
         // Test 14: LD instruction
