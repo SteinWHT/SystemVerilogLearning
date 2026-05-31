@@ -354,4 +354,24 @@ module ROB
         {write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag} : {~write_ptr[ROB_INDEX_WIDTH], cdb_rob_tag});
     end
 
+    // synthesis translate_off
+    // Simulation-only CDB capture. sim_cdb_rd_data is driven hierarchically from CPU
+    logic [REG_FILE_DATA_WIDTH-1:0] sim_cdb_rd_data;
+    logic [REG_FILE_DATA_WIDTH-1:0] sim_cdb_data_by_rob [ROB_DEPTH];
+    logic [REG_FILE_DATA_WIDTH-1:0] sim_head_cdb_data;
+
+    assign sim_head_cdb_data =
+        sim_cdb_data_by_rob[read_ptr[ROB_INDEX_WIDTH-1:0]];
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            for (int i = 0; i < ROB_DEPTH; i++) begin
+                sim_cdb_data_by_rob[i] <= '0;
+            end
+        end else if (cdb_valid) begin
+            sim_cdb_data_by_rob[cdb_rob_tag] <= sim_cdb_rd_data;
+        end
+    end
+    // synthesis translate_on
+
 endmodule

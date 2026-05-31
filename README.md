@@ -20,7 +20,7 @@ Key microarchitectural features:
 - 128-entry physical register file with 7-bit tags
 - FRAT/RRAT register alias tables with 8-slot checkpoint array for single-cycle branch recovery
 - 4 parallel issue queues (INT / MUL / DIV / LD-ST) with CDB operand wakeup
-- Multi-cycle pipelined execution (4-cycle MUL, 7-cycle DIV)
+- Multi-cycle pipelined execution (4-cycle MUL, 64-cycle DIV)
 - Load-store buffer with store-to-load forwarding
 - 2-bit saturating-counter branch predictor with return address stack
 - Machine-mode CSR access and trap handling (ECALL / EBREAK / MRET)

@@ -385,4 +385,8 @@ module CPU #(
         .lsb_result_valid                (lsb_result_valid)
     );
 
+    // synthesis translate_off
+    assign front_end.rob.sim_cdb_rd_data = cdb_rd_data;
+    // synthesis translate_on
+
 endmodule
