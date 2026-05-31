@@ -10,8 +10,9 @@ class cpu_add_test extends cpu_base_test;
 
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        void'(uvm_cmdline_processor::get().get_arg_value("+NUM_ADD=", num_add_instr));
-        void'(uvm_cmdline_processor::get().get_arg_value("+NUM_ADDW=", num_addw_instr));
+        // $value$plusargs — no uvm_cmdline_processor / UVM DPI (Questa + UVM_NO_DPI friendly).
+        void'($value$plusargs("NUM_ADD=%d", num_add_instr));
+        void'($value$plusargs("NUM_ADDW=%d", num_addw_instr));
     endfunction
 
     task wait_for_reset_release();

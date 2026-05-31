@@ -96,7 +96,8 @@ class cpu_commit_item #(
 
     // Same word index as cpu_base_item.imem_word_index() for scoreboard PC matching.
     function bit [63:0] pc_word_index();
-        return {64-IMEM_DEPTH{1'b0}, pc[IMEM_DEPTH-1:2]};
+        // Zero-extend word index (Questa lint-friendly vs. param-sized replication).
+        return 64'(pc[IMEM_DEPTH-1:2]);
     endfunction
 
     // Populate all rob_entry fields in one call (monitor / reference model helper).

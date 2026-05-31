@@ -117,7 +117,7 @@ class cpu_scoreboard extends uvm_scoreboard;
         input bit [63:0] commit_word_idx,
         output int     match_idx
     );
-        if (cfg.sb_match_mode == CPU_SB_MATCH_FIFO) begin
+        if (cfg.sb_match_mode == cpu_cfg::CPU_SB_MATCH_FIFO) begin
             match_idx = 0;
             return 1'b1;
         end

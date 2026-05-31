@@ -158,6 +158,8 @@ module tb_top;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             cpu_vif.dcache_wresp_valid <= 1'b0;
+            for (int i = 0; i < DMEM_LINES; i++)
+                dmem_array[i] <= '0;
         end else if (cpu_vif.dcache_wready && cpu_vif.dcache_wvalid) begin
             for (int i = 0; i < W_BYTE_NUM; i++) begin
                 if (cpu_vif.dcache_wstrb[i])
@@ -179,44 +181,77 @@ module tb_top;
     end
 
     // ----------------------------------------------------------------
-    // ROB commit interface hookup (rob_commit_bind.sv must be compiled)
+    // ROB commit observer (explicit instance — bind + vopt often drops u_rob_commit_mon)
     // ----------------------------------------------------------------
+    rob_commit_monitor #(
+        .ROB_DEPTH              (ROB_DEPTH),
+        .ROB_INDEX_WIDTH        (ROB_INDEX_WIDTH),
+        .DMEM_WIDTH             (DMEM_WIDTH),
+        .DMEM_DEPTH             (DMEM_DEPTH),
+        .IMEM_DEPTH             (IMEM_DEPTH),
+        .REG_FILE_DATA_WIDTH    (REG_FILE_DATA_WIDTH),
+        .ARCH_REG_COUNT         (ARCH_REG_COUNT),
+        .ARCH_REG_WIDTH         (ARCH_REG_WIDTH),
+        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .W_BYTE_NUM             (W_BYTE_NUM)
+    ) u_rob_commit_mon (
+        .clk              (clk),
+        .rst_n            (rst_n),
+        .commit_valid     (dut.front_end.rob.enable),
+        .commit_rob_tag   (dut.front_end.rob.read_ptr[ROB_INDEX_WIDTH-1:0]),
+        .head_curr_phy    (dut.front_end.rob.head.curr_phy),
+        .head_prev_phy    (dut.front_end.rob.head.prev_phy),
+        .head_rd_arch     (dut.front_end.rob.head.rd_addr),
+        .head_rw          (dut.front_end.rob.head.rw),
+        .head_mw          (dut.front_end.rob.head.mw),
+        .head_sw_addr     (dut.front_end.rob.head.sw_addr),
+        .head_sw_strb     (dut.front_end.rob.head.sw_strb),
+        .head_pc          (dut.front_end.rob.head.pc),
+        .head_trap_cause  (dut.front_end.rob.head.trap_cause),
+        .head_mret        (dut.front_end.rob.head.mret_occur),
+        .head_is_csr      (dut.front_end.rob.head.is_csr),
+        .head_csr_addr    (dut.front_end.rob.head.csr_addr),
+        .head_csr_cmd     (dut.front_end.rob.head.csr_cmd),
+        .head_rs1_arch    (dut.front_end.rob.head.rs1_arch),
+        .head_cdb_data    (dut.front_end.rob.sim_head_cdb_data)
+    );
+
     assign commit_if.rob_commit           = dut.front_end.rob.rob_commit;
-    assign commit_if.mon_commit_valid     = dut.front_end.rob.u_rob_commit_mon.mon_commit_valid;
-    assign commit_if.mon_commit_rob_tag   = dut.front_end.rob.u_rob_commit_mon.mon_commit_rob_tag;
-    assign commit_if.mon_curr_phy         = dut.front_end.rob.u_rob_commit_mon.mon_curr_phy;
-    assign commit_if.mon_prev_phy         = dut.front_end.rob.u_rob_commit_mon.mon_prev_phy;
-    assign commit_if.mon_rd_arch          = dut.front_end.rob.u_rob_commit_mon.mon_rd_arch;
-    assign commit_if.mon_reg_write        = dut.front_end.rob.u_rob_commit_mon.mon_reg_write;
-    assign commit_if.mon_mem_write        = dut.front_end.rob.u_rob_commit_mon.mon_mem_write;
-    assign commit_if.mon_sw_addr          = dut.front_end.rob.u_rob_commit_mon.mon_sw_addr;
-    assign commit_if.mon_sw_strb          = dut.front_end.rob.u_rob_commit_mon.mon_sw_strb;
-    assign commit_if.mon_pc               = dut.front_end.rob.u_rob_commit_mon.mon_pc;
-    assign commit_if.mon_trap_cause       = dut.front_end.rob.u_rob_commit_mon.mon_trap_cause;
-    assign commit_if.mon_mret             = dut.front_end.rob.u_rob_commit_mon.mon_mret;
-    assign commit_if.mon_is_csr           = dut.front_end.rob.u_rob_commit_mon.mon_is_csr;
-    assign commit_if.mon_csr_addr         = dut.front_end.rob.u_rob_commit_mon.mon_csr_addr;
-    assign commit_if.mon_csr_cmd          = dut.front_end.rob.u_rob_commit_mon.mon_csr_cmd;
-    assign commit_if.mon_rs1_arch         = dut.front_end.rob.u_rob_commit_mon.mon_rs1_arch;
-    assign commit_if.mon_cdb_data         = dut.front_end.rob.u_rob_commit_mon.mon_cdb_data;
-    assign commit_if.lat_valid            = dut.front_end.rob.u_rob_commit_mon.lat_valid;
-    assign commit_if.lat_rob_tag          = dut.front_end.rob.u_rob_commit_mon.lat_rob_tag;
-    assign commit_if.lat_curr_phy         = dut.front_end.rob.u_rob_commit_mon.lat_curr_phy;
-    assign commit_if.lat_prev_phy         = dut.front_end.rob.u_rob_commit_mon.lat_prev_phy;
-    assign commit_if.lat_rd_arch          = dut.front_end.rob.u_rob_commit_mon.lat_rd_arch;
-    assign commit_if.lat_reg_write        = dut.front_end.rob.u_rob_commit_mon.lat_reg_write;
-    assign commit_if.lat_mem_write        = dut.front_end.rob.u_rob_commit_mon.lat_mem_write;
-    assign commit_if.lat_sw_addr          = dut.front_end.rob.u_rob_commit_mon.lat_sw_addr;
-    assign commit_if.lat_sw_strb          = dut.front_end.rob.u_rob_commit_mon.lat_sw_strb;
-    assign commit_if.lat_pc               = dut.front_end.rob.u_rob_commit_mon.lat_pc;
-    assign commit_if.lat_trap_cause       = dut.front_end.rob.u_rob_commit_mon.lat_trap_cause;
-    assign commit_if.lat_mret             = dut.front_end.rob.u_rob_commit_mon.lat_mret;
-    assign commit_if.lat_is_csr           = dut.front_end.rob.u_rob_commit_mon.lat_is_csr;
-    assign commit_if.lat_csr_addr         = dut.front_end.rob.u_rob_commit_mon.lat_csr_addr;
-    assign commit_if.lat_csr_cmd          = dut.front_end.rob.u_rob_commit_mon.lat_csr_cmd;
-    assign commit_if.lat_rs1_arch         = dut.front_end.rob.u_rob_commit_mon.lat_rs1_arch;
-    assign commit_if.lat_cdb_data         = dut.front_end.rob.u_rob_commit_mon.lat_cdb_data;
-    assign commit_if.lat_commit_count     = dut.front_end.rob.u_rob_commit_mon.lat_commit_count;
+    assign commit_if.mon_commit_valid     = u_rob_commit_mon.mon_commit_valid;
+    assign commit_if.mon_commit_rob_tag   = u_rob_commit_mon.mon_commit_rob_tag;
+    assign commit_if.mon_curr_phy         = u_rob_commit_mon.mon_curr_phy;
+    assign commit_if.mon_prev_phy         = u_rob_commit_mon.mon_prev_phy;
+    assign commit_if.mon_rd_arch          = u_rob_commit_mon.mon_rd_arch;
+    assign commit_if.mon_reg_write        = u_rob_commit_mon.mon_reg_write;
+    assign commit_if.mon_mem_write        = u_rob_commit_mon.mon_mem_write;
+    assign commit_if.mon_sw_addr          = u_rob_commit_mon.mon_sw_addr;
+    assign commit_if.mon_sw_strb          = u_rob_commit_mon.mon_sw_strb;
+    assign commit_if.mon_pc               = u_rob_commit_mon.mon_pc;
+    assign commit_if.mon_trap_cause       = u_rob_commit_mon.mon_trap_cause;
+    assign commit_if.mon_mret             = u_rob_commit_mon.mon_mret;
+    assign commit_if.mon_is_csr           = u_rob_commit_mon.mon_is_csr;
+    assign commit_if.mon_csr_addr         = u_rob_commit_mon.mon_csr_addr;
+    assign commit_if.mon_csr_cmd          = u_rob_commit_mon.mon_csr_cmd;
+    assign commit_if.mon_rs1_arch         = u_rob_commit_mon.mon_rs1_arch;
+    assign commit_if.mon_cdb_data         = u_rob_commit_mon.mon_cdb_data;
+    assign commit_if.lat_valid            = u_rob_commit_mon.lat_valid;
+    assign commit_if.lat_rob_tag          = u_rob_commit_mon.lat_rob_tag;
+    assign commit_if.lat_curr_phy         = u_rob_commit_mon.lat_curr_phy;
+    assign commit_if.lat_prev_phy         = u_rob_commit_mon.lat_prev_phy;
+    assign commit_if.lat_rd_arch          = u_rob_commit_mon.lat_rd_arch;
+    assign commit_if.lat_reg_write        = u_rob_commit_mon.lat_reg_write;
+    assign commit_if.lat_mem_write        = u_rob_commit_mon.lat_mem_write;
+    assign commit_if.lat_sw_addr          = u_rob_commit_mon.lat_sw_addr;
+    assign commit_if.lat_sw_strb          = u_rob_commit_mon.lat_sw_strb;
+    assign commit_if.lat_pc               = u_rob_commit_mon.lat_pc;
+    assign commit_if.lat_trap_cause       = u_rob_commit_mon.lat_trap_cause;
+    assign commit_if.lat_mret             = u_rob_commit_mon.lat_mret;
+    assign commit_if.lat_is_csr           = u_rob_commit_mon.lat_is_csr;
+    assign commit_if.lat_csr_addr         = u_rob_commit_mon.lat_csr_addr;
+    assign commit_if.lat_csr_cmd          = u_rob_commit_mon.lat_csr_cmd;
+    assign commit_if.lat_rs1_arch         = u_rob_commit_mon.lat_rs1_arch;
+    assign commit_if.lat_cdb_data         = u_rob_commit_mon.lat_cdb_data;
+    assign commit_if.lat_commit_count     = u_rob_commit_mon.lat_commit_count;
 
     // ----------------------------------------------------------------
     // Clock / reset / memory init
@@ -227,8 +262,6 @@ module tb_top;
     initial begin
         for (int i = 0; i < IMEM_WORDS; i++)
             cpu_vif.imem_array[i] = cpu_vif.nop();
-        for (int i = 0; i < DMEM_LINES; i++)
-            dmem_array[i] = '0;
     end
 
     initial begin
@@ -248,7 +281,7 @@ module tb_top;
 
         uvm_config_db#(virtual cpu_if.drv_mp)::set(null, "uvm_test_top", "vif", cpu_vif);
         uvm_config_db#(cpu_commit_vif_t)::set(null, "uvm_test_top", "commit_vif", commit_if);
-        uvm_config_db#(virtual cpu_backdoor_if.drv_mp)::set(null, "uvm_test_top", "backdoor_vif", backdoor_vif);
+        uvm_config_db#(virtual cpu_backdoor_if.drv_mp)::set(null, "uvm_test_top", "backdoor_vif", backdoor_if);
         uvm_config_db#(cpu_cfg)::set(null, "uvm_test_top", "cfg", cfg);
 
         run_test("cpu_add_test");

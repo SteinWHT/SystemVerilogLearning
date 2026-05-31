@@ -6,7 +6,7 @@ class cpu_add_item extends cpu_base_item;
         instr_format == RISCV_FMT_R;
         if (is_addw) {
             instr_name == RISCV_OP_ADDW;
-        end else {
+        } else {
             instr_name == RISCV_OP_ADD;
         }
     }

@@ -4,14 +4,15 @@ package cpu_pkg;
 
     `include "uvm_macros.svh"
 
-    `include "cpu_params.sv"
     `include "cpu_types.sv"
-    `include "cpu_cfg.sv"
 
     `include "cpu_item/cpu_base_item.sv"
-    `include "cpu_item/cpu_add_item.sv"
     `include "cpu_item/cpu_commit_item.sv"
+    `include "cpu_item/cpu_add_item.sv"
+
+    `include "cpu_params.sv"
     `include "cpu_item/cpu_dcache_item.sv"
+    `include "cpu_cfg.sv"
 
     `include "cpu_driver.sv"
     `include "cpu_monitor.sv"

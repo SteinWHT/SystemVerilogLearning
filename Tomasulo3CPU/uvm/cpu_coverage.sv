@@ -35,8 +35,8 @@ class cpu_coverage extends uvm_subscriber #(cpu_commit_tr);
         cg_commit = new();
     endfunction
 
-    virtual function void write(cpu_commit_tr tr);
-        cg_commit.sample(tr);
+    virtual function void write(cpu_commit_tr t);
+        cg_commit.sample(t);
     endfunction
 
 endclass
@@ -73,8 +73,8 @@ class cpu_instr_coverage extends uvm_subscriber #(cpu_base_item);
         cg_instr = new();
     endfunction
 
-    virtual function void write(cpu_base_item tr);
-        cg_instr.sample(tr);
+    virtual function void write(cpu_base_item t);
+        cg_instr.sample(t);
     endfunction
 
 endclass
