@@ -30,12 +30,12 @@ class cpu_reg_setup;
         input bit [4:0] avoid1 = 5'd0,
         input bit [4:0] avoid2 = 5'd0
     );
-        bit [4:0] candidates[4] = '{5'd31, 5'd30, 5'd29, 5'd28};
+        bit [4:0] candidates[8] = '{5'd31, 5'd30, 5'd29, 5'd28, 5'd27, 5'd26, 5'd25, 5'd24};
         foreach (candidates[i]) begin
             if (candidates[i] != avoid0 && candidates[i] != avoid1 && candidates[i] != avoid2)
                 return candidates[i];
         end
-        return 5'd31;
+        return avoid0;
     endfunction
 
     task automatic emit_reg_write(
@@ -55,6 +55,7 @@ class cpu_reg_setup;
         setup_tr.instr           = instr;
         setup_tr.instr_name      = instr_name;
         setup_tr.checks_enabled  = 1'b1;
+        setup_tr.is_operand_setup = 1'b1;
 
         vif.load_instr(pc[63:0], instr);
         ap.write(setup_tr);
@@ -96,7 +97,8 @@ class cpu_reg_setup;
             emit_reg_write(
                 rd,
                 lui_result,
-                cpu_instr_encoder::lui(rd, hi20)
+                cpu_instr_encoder::lui(rd, hi20),
+                RISCV_OP_ADDI
             );
             emit_reg_write(
                 rd,

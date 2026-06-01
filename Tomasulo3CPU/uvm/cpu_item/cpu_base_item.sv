@@ -24,6 +24,9 @@ class cpu_base_item extends uvm_sequence_item;
     rand bit [31:0] imm;
     bit [31:0] instr;
 
+    // Set by cpu_reg_setup for ADDI/LUI/LD operand-setup instructions.
+    bit        is_operand_setup = 1'b0;
+
     constraint c_reg_range {
         rs1 inside {[5'd0:5'd31]};
         rs2 inside {[5'd0:5'd31]};

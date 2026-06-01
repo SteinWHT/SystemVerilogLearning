@@ -12,9 +12,10 @@ typedef enum bit [2:0] {
 typedef enum bit [4:0] {
     RISCV_OP_ADD,
     RISCV_OP_ADDW,
+    RISCV_OP_SUB,
+    RISCV_OP_SUBW,
 
     // Future expansion
-    RISCV_OP_SUB,
     RISCV_OP_AND,
     RISCV_OP_OR,
     RISCV_OP_XOR,

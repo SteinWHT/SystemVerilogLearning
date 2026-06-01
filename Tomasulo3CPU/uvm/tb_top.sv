@@ -272,7 +272,11 @@ module tb_top;
         uvm_config_db#(cpu_commit_vif_t)::set(null, "uvm_test_top", "commit_vif", commit_if);
         uvm_config_db#(cpu_cfg)::set(null, "uvm_test_top", "cfg", cfg);
 
-        run_test("cpu_add_test");
+        begin
+            automatic string test_name = "cpu_int_alu_test";
+            void'($value$plusargs("UVM_TESTNAME=%s", test_name));
+            run_test(test_name);
+        end
     end
 
 endmodule

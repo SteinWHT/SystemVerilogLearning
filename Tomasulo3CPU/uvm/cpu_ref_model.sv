@@ -31,11 +31,11 @@ virtual class cpu_ref_model extends uvm_component;
 
 endclass
 
-// Lightweight ADD/ADDW predictor for early bring-up (optional wiring in cpu_env).
-class cpu_add_ref_model extends cpu_ref_model;
-    `uvm_component_utils(cpu_add_ref_model)
+// Lightweight ADD/ADDW/SUB/SUBW predictor for early bring-up (optional wiring in cpu_env).
+class cpu_int_alu_ref_model extends cpu_ref_model;
+    `uvm_component_utils(cpu_int_alu_ref_model)
 
-    function new(string name = "cpu_add_ref_model", uvm_component parent = null);
+    function new(string name = "cpu_int_alu_ref_model", uvm_component parent = null);
         super.new(name, parent);
     endfunction
 
@@ -43,19 +43,24 @@ class cpu_add_ref_model extends cpu_ref_model;
         input  cpu_base_item t,
         output cpu_commit_tr pred
     );
-        cpu_add_item add_tr;
-        if (!$cast(add_tr, t))
-            return 1'b0;
-        if (!add_tr.expects_reg_write())
+        if (!t.expects_reg_write())
             return 1'b0;
 
         pred = cpu_commit_tr::type_id::create("pred");
         pred.valid    = 1'b1;
         pred.rw       = 1'b1;
-        pred.rd_addr  = add_tr.rd;
-        pred.pc       = add_tr.pc[CPU_IMEM_DEPTH-1:0];
-        pred.cdb_data = add_tr.expected_result;
+        pred.rd_addr  = t.rd;
+        pred.pc       = t.pc[CPU_IMEM_DEPTH-1:0];
+        pred.cdb_data = t.expected_result;
         return 1'b1;
     endfunction
 
+endclass
+
+// Backward-compatible alias.
+class cpu_add_ref_model extends cpu_int_alu_ref_model;
+    `uvm_component_utils(cpu_add_ref_model)
+    function new(string name = "cpu_add_ref_model", uvm_component parent = null);
+        super.new(name, parent);
+    endfunction
 endclass

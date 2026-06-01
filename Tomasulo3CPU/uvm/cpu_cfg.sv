@@ -5,6 +5,7 @@ class cpu_cfg extends uvm_object;
     bit                     enable_coverage   = 0;
     bit                     enable_ref_model  = 0;
     bit                     enable_operand_setup   = 1;
+    real                    coverage_goal_pct = 100.0;
 
     // Scratch dmem lines for LD-based register setup (full 64-bit operands).
     // Pool is [setup_dmem_line, setup_dmem_line + slots). Default uses all of dmem_lines.
@@ -36,6 +37,7 @@ class cpu_cfg extends uvm_object;
         `uvm_field_int(enable_coverage,                                UVM_ALL_ON)
         `uvm_field_int(enable_ref_model,                               UVM_ALL_ON)
         `uvm_field_int(enable_operand_setup,                           UVM_ALL_ON)
+        `uvm_field_real(coverage_goal_pct,                             UVM_ALL_ON)
         `uvm_field_int(setup_dmem_line,                                UVM_ALL_ON | UVM_DEC)
         `uvm_field_int(dmem_width,                                     UVM_ALL_ON | UVM_DEC)
         `uvm_field_int(boot_pc,                                        UVM_ALL_ON | UVM_HEX)

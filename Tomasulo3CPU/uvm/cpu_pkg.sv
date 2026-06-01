@@ -11,6 +11,7 @@ package cpu_pkg;
     `include "cpu_item/cpu_base_item.sv"
     `include "cpu_item/cpu_commit_item.sv"
     `include "cpu_item/cpu_add_item.sv"
+    `include "cpu_item/cpu_sub_item.sv"
 
     `include "cpu_params.sv"
     `include "cpu_item/cpu_dcache_item.sv"
@@ -29,8 +30,10 @@ package cpu_pkg;
 
     `include "cpu_base_seq.sv"
     `include "cpu_add_seq.sv"
+    `include "cpu_sub_seq.sv"
 
     `include "cpu_base_test.sv"
     `include "cpu_add_test.sv"
+    `include "cpu_int_alu_test.sv"
 
 endpackage

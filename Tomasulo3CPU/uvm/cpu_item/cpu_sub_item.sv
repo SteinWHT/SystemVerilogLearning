@@ -1,0 +1,69 @@
+class cpu_sub_item extends cpu_base_item;
+
+    rand bit is_subw;
+
+    constraint c_distinct_srcs {
+        rs1 != rs2;
+    }
+
+    constraint c_sub_instr {
+        instr_format == RISCV_FMT_R;
+        if (is_subw) {
+            instr_name == RISCV_OP_SUBW;
+        } else {
+            instr_name == RISCV_OP_SUB;
+        }
+    }
+
+    constraint c_sub_corner_cases {
+        rs1_data dist {
+            64'h0000_0000_0000_0000 := 5,
+            64'h0000_0000_0000_0001 := 5,
+            64'hFFFF_FFFF_FFFF_FFFF := 5,
+            64'h7FFF_FFFF_FFFF_FFFF := 5,
+            64'h8000_0000_0000_0000 := 5,
+            [64'h0000_0000_0000_0000:64'hFFFF_FFFF_FFFF_FFFF] :/ 80
+        };
+        rs2_data dist {
+            64'h0000_0000_0000_0000 := 5,
+            64'h0000_0000_0000_0001 := 5,
+            64'hFFFF_FFFF_FFFF_FFFF := 5,
+            64'h7FFF_FFFF_FFFF_FFFF := 5,
+            64'h8000_0000_0000_0000 := 5,
+            [64'h0000_0000_0000_0000:64'hFFFF_FFFF_FFFF_FFFF] :/ 80
+        };
+    }
+
+    `uvm_object_utils_begin(cpu_sub_item)
+        `uvm_field_int(is_subw, UVM_ALL_ON)
+    `uvm_object_utils_end
+
+    function new(string name = "cpu_sub_item");
+        super.new(name);
+    endfunction
+
+    virtual function void set_encoding_fields();
+        funct3 = 3'b000;
+        funct7 = 7'b0100000; // FUNCT7_ALT: SUB / SUBW
+        if (is_subw) begin
+            opcode = 7'b0111011;
+        end else begin
+            opcode = 7'b0110011;
+        end
+    endfunction
+
+    virtual function void calculate_expected_result();
+        bit [31:0] subw_result;
+        if (is_subw) begin
+            subw_result     = rs1_data[31:0] - rs2_data[31:0];
+            expected_result = {{32{subw_result[31]}}, subw_result};
+        end else begin
+            expected_result = rs1_data - rs2_data;
+        end
+    endfunction
+
+    virtual function string instr_name_str();
+        return is_subw ? "SUBW" : "SUB";
+    endfunction
+
+endclass
