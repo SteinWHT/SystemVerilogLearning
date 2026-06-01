@@ -5,7 +5,8 @@ interface cpu_if #(
     parameter int unsigned DMEM_WIDTH   = 64,
     parameter int unsigned DMEM_DEPTH   = 32,
     parameter int unsigned W_BYTE_NUM   = DMEM_WIDTH / 8,
-    parameter int unsigned IMEM_WORDS   = 1024
+    parameter int unsigned IMEM_WORDS   = 1024,
+    parameter int unsigned DMEM_LINES   = 256
 )(
     input logic clk,
     input logic rst_n
@@ -33,14 +34,22 @@ interface cpu_if #(
     logic                   dcache_wready;
     logic                   dcache_wresp_ready;
 
-    // Instruction memory image (backdoor load from driver/sequences)
+    // Memory images (program/data preload from driver/sequences — not PRF force)
     logic [INSTR_WIDTH-1:0] imem_array [IMEM_WORDS];
+    logic [DMEM_WIDTH-1:0]  dmem_array [DMEM_LINES];
 
     task automatic load_instr(
         input logic [IMEM_DEPTH-1:0] byte_addr,
         input logic [INSTR_WIDTH-1:0] instr
     );
         imem_array[byte_addr[IMEM_DEPTH-1:2]] = instr;
+    endtask
+
+    task automatic write_dmem_line(
+        input int unsigned            line_idx,
+        input logic [DMEM_WIDTH-1:0]  data
+    );
+        dmem_array[line_idx] = data;
     endtask
 
     function automatic logic [INSTR_WIDTH-1:0] nop();
@@ -84,6 +93,7 @@ interface cpu_if #(
         input  clk,
         input  rst_n,
         import load_instr,
+        import write_dmem_line,
         import fill_nops,
         import nop
     );

@@ -5,8 +5,6 @@ class cpu_base_test extends uvm_test;
     cpu_cfg                       cfg;
     virtual cpu_if.drv_mp         vif;
     cpu_commit_vif_t              commit_vif;
-    virtual cpu_backdoor_if.drv_mp backdoor_vif;
-
     function new(string name = "cpu_base_test", uvm_component parent = null);
         super.new(name, parent);
     endfunction
@@ -18,8 +16,6 @@ class cpu_base_test extends uvm_test;
             `uvm_fatal("NOVIF", "tb_top must set virtual cpu_if.drv_mp for uvm_test_top")
         if (!uvm_config_db#(cpu_commit_vif_t)::get(this, "", "commit_vif", commit_vif))
             `uvm_fatal("NOVIF", "tb_top must set cpu_commit_vif_t for uvm_test_top")
-        void'(uvm_config_db#(virtual cpu_backdoor_if.drv_mp)::get(this, "", "backdoor_vif", backdoor_vif));
-
         if (!uvm_config_db#(cpu_cfg)::get(this, "", "cfg", cfg)) begin
             cfg = cpu_cfg::type_id::create("cfg");
             uvm_config_db#(cpu_cfg)::set(this, "*", "cfg", cfg);
@@ -27,7 +23,6 @@ class cpu_base_test extends uvm_test;
 
         uvm_config_db#(virtual cpu_if.drv_mp)::set(this, "env.agt*", "vif", vif);
         uvm_config_db#(cpu_commit_vif_t)::set(this, "env.agt*", "commit_vif", commit_vif);
-        uvm_config_db#(virtual cpu_backdoor_if.drv_mp)::set(this, "env.agt*", "backdoor_vif", backdoor_vif);
         uvm_config_db#(cpu_cfg)::set(this, "env*", "cfg", cfg);
         uvm_config_db#(int)::set(this, "env.agt", "is_active", cfg.is_active);
 

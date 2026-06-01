@@ -47,7 +47,8 @@ module tb_top;
         .DMEM_WIDTH  (DMEM_WIDTH),
         .DMEM_DEPTH  (DMEM_DEPTH),
         .W_BYTE_NUM  (W_BYTE_NUM),
-        .IMEM_WORDS  (IMEM_WORDS)
+        .IMEM_WORDS  (IMEM_WORDS),
+        .DMEM_LINES  (DMEM_LINES)
     ) cpu_vif (
         .clk   (clk),
         .rst_n (rst_n)
@@ -65,10 +66,6 @@ module tb_top;
         .clk   (clk),
         .rst_n (rst_n)
     );
-
-    cpu_backdoor_if backdoor_if (.clk(clk));
-
-    logic [REG_FILE_DATA_WIDTH-1:0] dmem_array [DMEM_LINES];
 
     CPU #(
         .INSTR_WIDTH             (INSTR_WIDTH),
@@ -149,7 +146,7 @@ module tb_top;
             cpu_vif.dcache_rdata       <= '0;
         end else if (cpu_vif.dcache_rready && cpu_vif.dcache_rvalid) begin
             cpu_vif.dcache_rresp_valid <= 1'b1;
-            cpu_vif.dcache_rdata       <= dmem_array[cpu_vif.dcache_raddr[DMEM_DEPTH-1:3]];
+            cpu_vif.dcache_rdata       <= cpu_vif.dmem_array[cpu_vif.dcache_raddr[DMEM_DEPTH-1:3]];
         end else if (cpu_vif.dcache_rresp_valid && cpu_vif.dcache_rresp_ready) begin
             cpu_vif.dcache_rresp_valid <= 1'b0;
         end
@@ -158,26 +155,16 @@ module tb_top;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             cpu_vif.dcache_wresp_valid <= 1'b0;
-            for (int i = 0; i < DMEM_LINES; i++)
-                dmem_array[i] <= '0;
         end else if (cpu_vif.dcache_wready && cpu_vif.dcache_wvalid) begin
             for (int i = 0; i < W_BYTE_NUM; i++) begin
                 if (cpu_vif.dcache_wstrb[i])
-                    dmem_array[cpu_vif.dcache_sw_addr[DMEM_DEPTH-1:3]][i*8 +: 8] <=
+                    cpu_vif.dmem_array[cpu_vif.dcache_sw_addr[DMEM_DEPTH-1:3]][i*8 +: 8] <=
                         cpu_vif.dcache_sw_data[i*8 +: 8];
             end
             cpu_vif.dcache_wresp_valid <= 1'b1;
         end else begin
             cpu_vif.dcache_wresp_valid <= 1'b0;
         end
-    end
-
-    // ----------------------------------------------------------------
-    // PRF backdoor (RRAT identity map holds after reset: arch[i]->phy[i])
-    // ----------------------------------------------------------------
-    always_ff @(posedge clk) begin
-        if (backdoor_if.prf_wr_pending)
-            dut.back_end.prf.prf_data_array[backdoor_if.prf_wr_addr] <= backdoor_if.prf_wr_data;
     end
 
     // ----------------------------------------------------------------
@@ -262,6 +249,8 @@ module tb_top;
     initial begin
         for (int i = 0; i < IMEM_WORDS; i++)
             cpu_vif.imem_array[i] = cpu_vif.nop();
+        for (int i = 0; i < DMEM_LINES; i++)
+            cpu_vif.dmem_array[i] = '0;
     end
 
     initial begin
@@ -281,7 +270,6 @@ module tb_top;
 
         uvm_config_db#(virtual cpu_if.drv_mp)::set(null, "uvm_test_top", "vif", cpu_vif);
         uvm_config_db#(cpu_commit_vif_t)::set(null, "uvm_test_top", "commit_vif", commit_if);
-        uvm_config_db#(virtual cpu_backdoor_if.drv_mp)::set(null, "uvm_test_top", "backdoor_vif", backdoor_if);
         uvm_config_db#(cpu_cfg)::set(null, "uvm_test_top", "cfg", cfg);
 
         run_test("cpu_add_test");

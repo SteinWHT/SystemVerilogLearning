@@ -1,6 +1,8 @@
 package cpu_pkg;
     import uvm_pkg::*;
     import riscv_types_pkg::*;
+    import riscv_opcode_pkg::*;
+    import riscv_funct_pkg::*;
 
     `include "uvm_macros.svh"
 
@@ -13,6 +15,8 @@ package cpu_pkg;
     `include "cpu_params.sv"
     `include "cpu_item/cpu_dcache_item.sv"
     `include "cpu_cfg.sv"
+    `include "cpu_instr_encoder.sv"
+    `include "cpu_reg_setup.sv"
 
     `include "cpu_driver.sv"
     `include "cpu_monitor.sv"

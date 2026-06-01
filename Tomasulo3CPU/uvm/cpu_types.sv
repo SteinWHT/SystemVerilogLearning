@@ -23,6 +23,7 @@ typedef enum bit [4:0] {
     RISCV_OP_SRA,
     RISCV_OP_ADDI,
     RISCV_OP_LW,
+    RISCV_OP_LD,
     RISCV_OP_SW,
     RISCV_OP_BEQ,
     RISCV_OP_JAL

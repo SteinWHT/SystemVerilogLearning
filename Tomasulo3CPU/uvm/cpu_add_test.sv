@@ -36,15 +36,15 @@ class cpu_add_test extends cpu_base_test;
     task run_phase(uvm_phase phase);
         phase.raise_objection(this);
 
-        wait_for_reset_release();
-
         `uvm_info(get_type_name(), $sformatf(
             "Starting ADD/ADDW stimulus: num_add=%0d num_addw=%0d drain_cycles=%0d",
             num_add_instr, num_addw_instr, cfg.drain_cycles), UVM_LOW)
 
+        // Load the full IMEM/DMEM image while the core is still in reset.
         run_add_seq(num_add_instr, 1'b0);
         run_add_seq(num_addw_instr, 1'b1);
 
+        wait_for_reset_release();
         drain_pipeline();
 
         phase.drop_objection(this);

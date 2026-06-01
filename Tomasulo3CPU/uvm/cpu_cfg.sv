@@ -4,12 +4,23 @@ class cpu_cfg extends uvm_object;
     bit                     enable_scoreboard = 1;
     bit                     enable_coverage   = 0;
     bit                     enable_ref_model  = 0;
-    bit                     enable_operand_preload = 1;
+    bit                     enable_operand_setup   = 1;
+
+    // Scratch dmem lines for LD-based register setup (full 64-bit operands).
+    // Pool is [setup_dmem_line, setup_dmem_line + slots). Default uses all of dmem_lines.
+    int unsigned            setup_dmem_line        = 0;
+    int unsigned            dmem_width             = 64;
 
     // Boot / memory map (match Tomasulo3CPU CPU_tb defaults)
     bit [63:0]              boot_pc           = 64'h0;
     int unsigned            imem_words        = 1024;
     int unsigned            dmem_lines        = 256;
+
+    function int unsigned setup_dmem_slots();
+        if (setup_dmem_line >= dmem_lines)
+            return 0;
+        return dmem_lines - setup_dmem_line;
+    endfunction
 
     // Stimulus pacing
     int unsigned            instr_gap_cycles  = 0;
@@ -24,7 +35,9 @@ class cpu_cfg extends uvm_object;
         `uvm_field_int(enable_scoreboard,                              UVM_ALL_ON)
         `uvm_field_int(enable_coverage,                                UVM_ALL_ON)
         `uvm_field_int(enable_ref_model,                               UVM_ALL_ON)
-        `uvm_field_int(enable_operand_preload,                         UVM_ALL_ON)
+        `uvm_field_int(enable_operand_setup,                           UVM_ALL_ON)
+        `uvm_field_int(setup_dmem_line,                                UVM_ALL_ON | UVM_DEC)
+        `uvm_field_int(dmem_width,                                     UVM_ALL_ON | UVM_DEC)
         `uvm_field_int(boot_pc,                                        UVM_ALL_ON | UVM_HEX)
         `uvm_field_int(imem_words,                                     UVM_ALL_ON | UVM_DEC)
         `uvm_field_int(dmem_lines,                                     UVM_ALL_ON | UVM_DEC)

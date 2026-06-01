@@ -2,8 +2,8 @@ class cpu_driver extends uvm_driver #(cpu_base_item);
     `uvm_component_utils(cpu_driver)
 
     virtual cpu_if.drv_mp           vif;
-    virtual cpu_backdoor_if.drv_mp  backdoor_vif;
     cpu_cfg                         cfg;
+    cpu_reg_setup                   reg_setup;
 
     uvm_analysis_port #(cpu_base_item) ap_instr;
 
@@ -23,11 +23,18 @@ class cpu_driver extends uvm_driver #(cpu_base_item);
             cfg = cpu_cfg::type_id::create("cfg");
             `uvm_info("NOCFG", "cpu_cfg not found; using defaults", UVM_LOW)
         end
-        void'(uvm_config_db#(virtual cpu_backdoor_if.drv_mp)::get(this, "", "backdoor_vif", backdoor_vif));
+    endfunction
+
+    function void reg_setup_refresh();
+        int unsigned saved_dmem_slot = 0;
+        if (reg_setup != null)
+            saved_dmem_slot = reg_setup.dmem_slot;
+        reg_setup = new(vif, cfg, ap_instr, next_pc_offset, saved_dmem_slot);
     endfunction
 
     task run_phase(uvm_phase phase);
         cpu_base_item tr;
+        reg_setup = new(vif, cfg, ap_instr, next_pc_offset, 0);
         forever begin
             seq_item_port.get_next_item(tr);
             drive_item(tr);
@@ -36,9 +43,8 @@ class cpu_driver extends uvm_driver #(cpu_base_item);
     endtask
 
     virtual task drive_item(cpu_base_item tr);
-        while (!vif.rst_n)
-            @(posedge vif.clk);
-
+        // IMEM/DMEM backdoor loads are safe while rst_n=0; do not wait for reset here
+        // or the CPU may execute before the full program image is written.
         if (tr.pc == '0)
             tr.pc = cfg.boot_pc + next_pc_offset;
 
@@ -46,26 +52,16 @@ class cpu_driver extends uvm_driver #(cpu_base_item);
 
         `uvm_info(get_type_name(), $sformatf("Drive: %s", tr.convert2string()), UVM_MEDIUM)
 
-        preload_operands(tr);
-        vif.load_instr(tr.pc[63:0], tr.instr);
+        reg_setup_refresh();
+        reg_setup.setup_operands(tr);
+        next_pc_offset = reg_setup.next_pc_offset;
 
+        tr.pc = cfg.boot_pc + next_pc_offset;
+        vif.load_instr(tr.pc[63:0], tr.instr);
         ap_instr.write(tr);
 
         next_pc_offset += 4;
         repeat (cfg.instr_gap_cycles) @(posedge vif.clk);
-    endtask
-
-    virtual task preload_operands(cpu_base_item tr);
-        if (cfg == null || !cfg.enable_operand_preload || !tr.needs_operand_preload())
-            return;
-        if (backdoor_vif == null) begin
-            `uvm_warning(get_type_name(),
-                "enable_operand_preload set but backdoor_vif not connected; skipping PRF preload")
-            return;
-        end
-        // After reset RRAT maps arch[i] -> phy[i].
-        backdoor_vif.write_prf(tr.rs1, tr.rs1_data);
-        backdoor_vif.write_prf(tr.rs2, tr.rs2_data);
     endtask
 
 endclass

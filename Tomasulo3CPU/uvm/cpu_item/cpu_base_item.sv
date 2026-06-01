@@ -104,8 +104,8 @@ class cpu_base_item extends uvm_sequence_item;
         return 1'b1;
     endfunction
 
-    // Override when operands must be preloaded via PRF backdoor (R-type, etc.).
-    virtual function bit needs_operand_preload();
+    // Override when operands must be set up before the main instruction (R-type, etc.).
+    virtual function bit needs_operand_setup();
         return (instr_format == RISCV_FMT_R);
     endfunction
 

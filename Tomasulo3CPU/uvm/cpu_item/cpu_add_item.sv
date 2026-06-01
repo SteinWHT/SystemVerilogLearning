@@ -2,6 +2,10 @@ class cpu_add_item extends cpu_base_item;
 
     rand bit is_addw;
 
+    constraint c_distinct_srcs {
+        rs1 != rs2;
+    }
+
     constraint c_add_instr {
         instr_format == RISCV_FMT_R;
         if (is_addw) {
