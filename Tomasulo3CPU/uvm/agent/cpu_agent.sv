@@ -5,6 +5,7 @@ class cpu_agent extends uvm_agent;
     cpu_sequencer sqr;
     cpu_driver    drv;
     cpu_monitor   mon;
+    cpu_dcache_monitor dmon;
 
     function new(string name = "cpu_agent", uvm_component parent = null);
         super.new(name, parent);
@@ -17,7 +18,8 @@ class cpu_agent extends uvm_agent;
             cfg.is_active = get_is_active();
         end
 
-        mon = cpu_monitor::type_id::create("mon", this);
+        mon  = cpu_monitor::type_id::create("mon", this);
+        dmon = cpu_dcache_monitor::type_id::create("dmon", this);
 
         if (cfg.is_active == UVM_ACTIVE) begin
             sqr = cpu_sequencer::type_id::create("sqr", this);

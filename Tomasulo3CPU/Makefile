@@ -5,6 +5,8 @@
 #    make sim PROJECT=IFQ
 #    make gui PROJECT=IFQ
 #    make clean PROJECT=IFQ
+#    make uvm UVM_TEST=cpu_int_alu_test
+#    make uvm-gui UVM_TEST=cpu_int_alu_test
 #
 #  Assumption:
 #    TB file: tb/$(PROJECT)_tb.sv
@@ -17,12 +19,31 @@ SHELL := /bin/bash
 .SHELLFLAGS := -o pipefail -c
 
 PROJECT ?= IFQ
+UVM_TEST ?= cpu_int_alu_test
+COV ?= 0
+COV_METRICS ?= line+cond+fsm+tgl+branch+assert
+COV_NAME ?= $(PROJECT)_$(UVM_TEST)
+COV_INPUTS ?= $(PROJ_DIR)/build/uvm_cov/*.vdb
+COV_MERGE_DIR ?= $(PROJ_DIR)/build/uvm_cov_merged.vdb
+COV_REPORT_DIR ?= $(PROJ_DIR)/build/uvm_cov_report
 
 # ---- paths ----
 PROJ_DIR  := $(shell pwd)
 SRC_DIR   := $(PROJ_DIR)/src
 TB_DIR    := $(PROJ_DIR)/tb
+UVM_DIR   := $(PROJ_DIR)/uvm
 BUILD_DIR := $(PROJ_DIR)/build/$(PROJECT)
+UVM_INC_DIRS := \
+	+incdir+$(UVM_DIR) \
+	+incdir+$(UVM_DIR)/agent \
+	+incdir+$(UVM_DIR)/env \
+	+incdir+$(UVM_DIR)/items \
+	+incdir+$(UVM_DIR)/seq \
+	+incdir+$(UVM_DIR)/tests \
+	+incdir+$(UVM_DIR)/scoreboard \
+	+incdir+$(UVM_DIR)/ref \
+	+incdir+$(UVM_DIR)/cov \
+	+incdir+$(UVM_DIR)/utils
 
 # ---- Synopsys DesignWare simulation library ----
 # Override these from the command line if your Synopsys install moves:
@@ -83,8 +104,18 @@ SRC_FILES := \
 # DW IP behavioral stubs for simulators without Synopsys DesignWare
 DW_STUB_FILE := $(TB_DIR)/dw_ip_stubs.sv
 
+ifeq ($(PROJECT),uvm)
+TOP_MODULE := tb_top
+TB_FILES := \
+	$(UVM_DIR)/cpu_if.sv \
+	$(UVM_DIR)/cpu_commit_if.sv \
+	$(TB_DIR)/rob_commit_bind.sv \
+	$(UVM_DIR)/cpu_pkg.sv \
+	$(UVM_DIR)/tb_top.sv
+else
 TB_FILES := \
 	$(TB_DIR)/$(PROJECT)_tb.sv
+endif
 
 # ---- VCS options ----
 VCS_OPTS := \
@@ -96,13 +127,33 @@ VCS_OPTS := \
 	+define+DW_SUPPRESS_WARN \
 	+lint=all
 
+ifeq ($(PROJECT),uvm)
+VCS_OPTS += -ntb_opts uvm $(UVM_INC_DIRS)
+endif
+
 ifeq ($(USE_DW),1)
 VCS_OPTS += +incdir+$(DW_SIM_DIR)
+endif
+
+ifeq ($(COV),1)
+VCS_OPTS += -cm $(COV_METRICS) -cm_dir simv.vdb
+RUN_COV_OPTS := -cm $(COV_METRICS) -cm_dir simv.vdb -cm_name $(COV_NAME)
+else
+RUN_COV_OPTS :=
 endif
 
 # ---- Verdi options ----
 VERDI_FILES := $(SRC_FILES) $(TB_FILES)
 VERDI_OPTS  := -sv
+
+ifeq ($(PROJECT),uvm)
+VERDI_OPTS  += -ntb_opts uvm $(UVM_INC_DIRS)
+endif
+
+RUN_PLUSARGS := $(PLUSARGS)
+ifeq ($(PROJECT),uvm)
+RUN_PLUSARGS += +UVM_TESTNAME=$(UVM_TEST)
+endif
 
 ifeq ($(USE_DW),1)
 VERDI_FILES := $(DW_SIM_FILES) $(VERDI_FILES)
@@ -116,8 +167,17 @@ all: sim
 # ---- check testbench exists ----
 .PHONY: check
 check:
+ifeq ($(PROJECT),uvm)
+	@test -f "$(UVM_DIR)/tb_top.sv" || \
+		(echo "[ERROR] Missing UVM TB top: $(UVM_DIR)/tb_top.sv"; exit 1)
+	@for file in $(TB_FILES); do \
+		test -f "$$file" || \
+			(echo "[ERROR] Missing UVM/TB file: $$file"; exit 1); \
+	done
+else
 	@test -f "$(TB_DIR)/$(PROJECT)_tb.sv" || \
 		(echo "[ERROR] Missing TB file: $(TB_DIR)/$(PROJECT)_tb.sv"; exit 1)
+endif
 ifeq ($(USE_DW),1)
 	@test -d "$(DW_SIM_DIR)" || \
 		(echo "[ERROR] Missing DesignWare sim directory: $(DW_SIM_DIR)"; exit 1)
@@ -164,7 +224,8 @@ sim: compile
 	@test -x "$(BUILD_DIR)/simv" || \
 		(echo "[ERROR] Missing simulator executable: $(BUILD_DIR)/simv"; exit 1)
 	cd $(BUILD_DIR) && ./simv -l sim.log +fsdbfile+$(FSDB_FILE) \
-		$(PLUSARGS) \
+		$(RUN_COV_OPTS) \
+		$(RUN_PLUSARGS) \
 		2>&1 | tee sim_screen.log
 	@echo ""
 	@echo "============================================"
@@ -178,6 +239,21 @@ gui: sim
 	cd $(BUILD_DIR) && verdi -ssf $(FSDB_FILE) $(VERDI_OPTS) \
 		$(VERDI_FILES) \
 		-top $(TOP_MODULE) &
+
+.PHONY: uvm uvm-compile uvm-gui
+uvm:
+	$(MAKE) PROJECT=uvm sim
+
+uvm-compile:
+	$(MAKE) PROJECT=uvm compile
+
+uvm-gui:
+	$(MAKE) PROJECT=uvm gui
+
+.PHONY: uvm-cov-merge
+uvm-cov-merge:
+	@mkdir -p $(dir $(COV_REPORT_DIR))
+	urg -full64 -dir $(COV_INPUTS) -dbname $(COV_MERGE_DIR) -report $(COV_REPORT_DIR)
 
 # ---- clean current project ----
 .PHONY: clean
@@ -209,6 +285,11 @@ synth:
 QUESTA_BUILD := $(PROJ_DIR)/build/questa_$(PROJECT)
 QUESTA_WORK  := $(QUESTA_BUILD)/work
 
+QUESTA_VLOG_OPTS := -sv -timescale "1ns/1ps"
+ifeq ($(PROJECT),uvm)
+QUESTA_VLOG_OPTS += -uvm $(UVM_INC_DIRS)
+endif
+
 PKG_FILES := \
 	$(SRC_DIR)/riscv_funct_pkg.sv \
 	$(SRC_DIR)/riscv_opcode_pkg.sv \
@@ -225,7 +306,7 @@ sim-questa: check
 	@echo "  Build:     $(QUESTA_BUILD)"
 	@echo "============================================"
 	cd $(QUESTA_BUILD) && vlib work 2>/dev/null; true
-	cd $(QUESTA_BUILD) && vlog -sv -timescale "1ns/1ps" \
+	cd $(QUESTA_BUILD) && vlog $(QUESTA_VLOG_OPTS) \
 		$(PKG_FILES) \
 		$(DW_STUB_FILE) \
 		$(NON_PKG_SRC_FILES) \
@@ -233,7 +314,7 @@ sim-questa: check
 		2>&1 | tee compile.log
 	cd $(QUESTA_BUILD) && vsim -c -do "run -all; quit -f" \
 		$(TOP_MODULE) \
-		$(PLUSARGS) \
+		$(RUN_PLUSARGS) \
 		2>&1 | tee sim.log
 	@echo ""
 	@echo "============================================"
@@ -245,7 +326,7 @@ sim-questa: check
 gui-questa: check
 	@mkdir -p $(QUESTA_BUILD)
 	cd $(QUESTA_BUILD) && vlib work 2>/dev/null; true
-	cd $(QUESTA_BUILD) && vlog -sv -timescale "1ns/1ps" \
+	cd $(QUESTA_BUILD) && vlog $(QUESTA_VLOG_OPTS) \
 		$(PKG_FILES) \
 		$(DW_STUB_FILE) \
 		$(NON_PKG_SRC_FILES) \

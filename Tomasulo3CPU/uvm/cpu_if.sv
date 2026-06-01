@@ -66,6 +66,38 @@ interface cpu_if #(
         end
     endtask
 
+    task automatic clear_memories();
+        for (int unsigned i = 0; i < IMEM_WORDS; i++)
+            imem_array[i] = nop();
+        for (int unsigned i = 0; i < DMEM_LINES; i++)
+            dmem_array[i] = '0;
+    endtask
+
+    task automatic load_imem_file(input string path);
+        $readmemh(path, imem_array);
+    endtask
+
+    task automatic load_dmem_file(input string path);
+        $readmemh(path, dmem_array);
+    endtask
+
+    function automatic logic [DMEM_WIDTH-1:0] read_dmem_line(
+        input logic [DMEM_DEPTH-1:0] byte_addr
+    );
+        return dmem_array[byte_addr[DMEM_DEPTH-1:3]];
+    endfunction
+
+    function automatic logic [31:0] read_dmem_word32(
+        input logic [DMEM_DEPTH-1:0] byte_addr
+    );
+        logic [DMEM_WIDTH-1:0] line;
+        line = read_dmem_line(byte_addr);
+        case (byte_addr[2])
+            1'b0: return line[31:0];
+            1'b1: return line[63:32];
+        endcase
+    endfunction
+
     modport dut_mp (
         input  clk,
         input  rst_n,
@@ -95,7 +127,31 @@ interface cpu_if #(
         import load_instr,
         import write_dmem_line,
         import fill_nops,
+        import clear_memories,
+        import load_imem_file,
+        import load_dmem_file,
+        import read_dmem_line,
+        import read_dmem_word32,
         import nop
+    );
+
+    modport mon_mp (
+        input  clk,
+        input  rst_n,
+        input  dcache_rvalid,
+        input  dcache_rresp_valid,
+        input  dcache_rdata,
+        input  dcache_raddr,
+        input  dcache_rready,
+        input  dcache_rresp_ready,
+        input  dcache_wvalid,
+        input  dcache_wresp_valid,
+        input  dcache_write,
+        input  dcache_sw_data,
+        input  dcache_wstrb,
+        input  dcache_sw_addr,
+        input  dcache_wready,
+        input  dcache_wresp_ready
     );
 
 endinterface

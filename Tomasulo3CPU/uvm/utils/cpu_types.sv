@@ -29,3 +29,16 @@ typedef enum bit [4:0] {
     RISCV_OP_BEQ,
     RISCV_OP_JAL
 } riscv_instr_name_e;
+
+typedef enum int unsigned {
+    CPU_SPIKE_CLASS_UNKNOWN = 0,
+    CPU_SPIKE_CLASS_ALU,
+    CPU_SPIKE_CLASS_LOAD,
+    CPU_SPIKE_CLASS_STORE,
+    CPU_SPIKE_CLASS_BRANCH,
+    CPU_SPIKE_CLASS_JUMP,
+    CPU_SPIKE_CLASS_MUL,
+    CPU_SPIKE_CLASS_DIV,
+    CPU_SPIKE_CLASS_WORD,
+    CPU_SPIKE_CLASS_SYSTEM
+} cpu_spike_instr_class_e;

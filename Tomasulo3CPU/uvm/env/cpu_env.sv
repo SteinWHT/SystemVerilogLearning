@@ -4,9 +4,13 @@ class cpu_env extends uvm_env;
     cpu_cfg             cfg;
     cpu_agent           agt;
     cpu_scoreboard      sb;
+    cpu_spike_scoreboard sb_spike;
     cpu_int_alu_ref_model   rm;
     cpu_coverage        cov_commit;
     cpu_instr_coverage  cov_instr;
+    cpu_baremetal_commit_coverage cov_bm_commit;
+    cpu_baremetal_dcache_coverage cov_bm_dcache;
+    cpu_spike_trace_coverage      cov_spike_trace;
 
     function new(string name = "cpu_env", uvm_component parent = null);
         super.new(name, parent);
@@ -26,12 +30,21 @@ class cpu_env extends uvm_env;
         if (cfg.enable_scoreboard)
             sb = cpu_scoreboard::type_id::create("sb", this);
 
+        if (cfg.enable_spike_scoreboard)
+            sb_spike = cpu_spike_scoreboard::type_id::create("sb_spike", this);
+
         if (cfg.enable_ref_model)
             rm = cpu_int_alu_ref_model::type_id::create("rm", this);
 
         if (cfg.enable_coverage) begin
             cov_commit = cpu_coverage::type_id::create("cov_commit", this);
             cov_instr  = cpu_instr_coverage::type_id::create("cov_instr", this);
+        end
+
+        if (cfg.enable_baremetal_coverage) begin
+            cov_bm_commit   = cpu_baremetal_commit_coverage::type_id::create("cov_bm_commit", this);
+            cov_bm_dcache   = cpu_baremetal_dcache_coverage::type_id::create("cov_bm_dcache", this);
+            cov_spike_trace = cpu_spike_trace_coverage::type_id::create("cov_spike_trace", this);
         end
     endfunction
 
@@ -44,6 +57,9 @@ class cpu_env extends uvm_env;
                 agt.drv.ap_instr.connect(sb.imp_instr);
         end
 
+        if (cfg.enable_spike_scoreboard)
+            agt.mon.ap_commit.connect(sb_spike.imp_commit);
+
         if (cfg.enable_ref_model && cfg.is_active == UVM_ACTIVE)
             agt.drv.ap_instr.connect(rm.imp_instr);
 
@@ -51,6 +67,11 @@ class cpu_env extends uvm_env;
             agt.mon.ap_commit.connect(cov_commit.analysis_export);
             if (cfg.is_active == UVM_ACTIVE)
                 agt.drv.ap_instr.connect(cov_instr.analysis_export);
+        end
+
+        if (cfg.enable_baremetal_coverage) begin
+            agt.mon.ap_commit.connect(cov_bm_commit.analysis_export);
+            agt.dmon.ap_dcache.connect(cov_bm_dcache.analysis_export);
         end
     endfunction
 

@@ -152,7 +152,9 @@ module tb_top;
         end
     end
 
-    always_ff @(posedge clk or negedge rst_n) begin
+    // Plain always is intentional: dmem_array is also initialized/preloaded by
+    // UVM tasks, so it cannot be written from an always_ff block.
+    always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             cpu_vif.dcache_wresp_valid <= 1'b0;
         end else if (cpu_vif.dcache_wready && cpu_vif.dcache_wvalid) begin
@@ -254,8 +256,11 @@ module tb_top;
     end
 
     initial begin
+        int unsigned reset_hold_cycles;
         rst_n = 1'b0;
-        repeat (3) @(posedge clk);
+        reset_hold_cycles = 3;
+        void'($value$plusargs("RESET_HOLD_CYCLES=%d", reset_hold_cycles));
+        repeat (reset_hold_cycles) @(posedge clk);
         rst_n = 1'b1;
     end
 
@@ -269,6 +274,7 @@ module tb_top;
         cfg.dmem_lines = DMEM_LINES;
 
         uvm_config_db#(virtual cpu_if.drv_mp)::set(null, "uvm_test_top", "vif", cpu_vif);
+        uvm_config_db#(cpu_mon_vif_t)::set(null, "uvm_test_top", "mon_vif", cpu_vif);
         uvm_config_db#(cpu_commit_vif_t)::set(null, "uvm_test_top", "commit_vif", commit_if);
         uvm_config_db#(cpu_cfg)::set(null, "uvm_test_top", "cfg", cfg);
 
