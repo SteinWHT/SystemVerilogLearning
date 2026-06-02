@@ -1,7 +1,7 @@
 class cpu_driver extends uvm_driver #(cpu_base_item);
     `uvm_component_utils(cpu_driver)
 
-    virtual cpu_if.drv_mp           vif;
+    cpu_drv_vif_t                   vif;
     cpu_cfg                         cfg;
     cpu_reg_setup                   reg_setup;
 
@@ -17,7 +17,7 @@ class cpu_driver extends uvm_driver #(cpu_base_item);
 
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        if (!uvm_config_db#(virtual cpu_if.drv_mp)::get(this, "", "vif", vif))
+        if (!uvm_config_db#(cpu_drv_vif_t)::get(this, "", "vif", vif))
             `uvm_fatal("NOVIF", "Set virtual cpu_if.drv_mp on cpu_driver via config_db")
         if (!uvm_config_db#(cpu_cfg)::get(this, "", "cfg", cfg)) begin
             cfg = cpu_cfg::type_id::create("cfg");

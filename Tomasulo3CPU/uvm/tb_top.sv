@@ -16,7 +16,7 @@ module tb_top;
     localparam int unsigned REG_FILE_DATA_WIDTH     = 64;
     localparam int unsigned PHY_REGISTER_FILE_WIDTH = 7;
     localparam int unsigned DMEM_WIDTH              = 64;
-    localparam int unsigned DMEM_DEPTH              = 32;
+    localparam int unsigned DMEM_DEPTH              = 64;
     localparam int unsigned BPB_PC_BITS             = 3;
     localparam int unsigned NUM_WAYS                = 4;
     localparam int unsigned IFQ_DEPTH               = 16;
@@ -34,8 +34,8 @@ module tb_top;
     localparam int unsigned LD_ST_CYCLES            = 1;
     localparam int unsigned OPCODE_WIDTH            = 7;
     localparam int unsigned W_BYTE_NUM              = DMEM_WIDTH / 8;
-    localparam int unsigned IMEM_WORDS              = 1024;
-    localparam int unsigned DMEM_LINES              = 256;
+    localparam int unsigned IMEM_WORDS              = 16384;
+    localparam int unsigned DMEM_LINES              = 8192;
 
     logic clk;
     logic rst_n;
@@ -124,13 +124,17 @@ module tb_top;
     // ----------------------------------------------------------------
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            cpu_vif.imem_valid <= 1'b0;
-            cpu_vif.imem_data  <= '0;
-        end else if (cpu_vif.imem_read_rdy) begin
             cpu_vif.imem_valid <= 1'b1;
-            cpu_vif.imem_data  <= cpu_vif.imem_array[cpu_vif.imem_addr[IMEM_DEPTH-1:2]];
+            cpu_vif.imem_data  <= '0;
         end else begin
-            cpu_vif.imem_valid <= 1'b0;
+            if (cpu_vif.imem_read_rdy) begin
+                cpu_vif.imem_valid <= 1'b1;
+            end else begin
+                cpu_vif.imem_valid <= 1'b0;
+            end
+            if (cpu_vif.imem_read_rdy && cpu_vif.imem_valid) begin
+                cpu_vif.imem_data <= cpu_vif.imem_array[cpu_vif.imem_addr[15:2]];
+            end
         end
     end
 
@@ -146,7 +150,7 @@ module tb_top;
             cpu_vif.dcache_rdata       <= '0;
         end else if (cpu_vif.dcache_rready && cpu_vif.dcache_rvalid) begin
             cpu_vif.dcache_rresp_valid <= 1'b1;
-            cpu_vif.dcache_rdata       <= cpu_vif.dmem_array[cpu_vif.dcache_raddr[DMEM_DEPTH-1:3]];
+            cpu_vif.dcache_rdata       <= cpu_vif.dmem_array[cpu_vif.dcache_raddr[15:3]];
         end else if (cpu_vif.dcache_rresp_valid && cpu_vif.dcache_rresp_ready) begin
             cpu_vif.dcache_rresp_valid <= 1'b0;
         end
@@ -158,11 +162,13 @@ module tb_top;
         if (!rst_n) begin
             cpu_vif.dcache_wresp_valid <= 1'b0;
         end else if (cpu_vif.dcache_wready && cpu_vif.dcache_wvalid) begin
+            logic [REG_FILE_DATA_WIDTH-1:0] temp_data;
+            temp_data = cpu_vif.dmem_array[cpu_vif.dcache_sw_addr[15:3]];
             for (int i = 0; i < W_BYTE_NUM; i++) begin
                 if (cpu_vif.dcache_wstrb[i])
-                    cpu_vif.dmem_array[cpu_vif.dcache_sw_addr[DMEM_DEPTH-1:3]][i*8 +: 8] <=
-                        cpu_vif.dcache_sw_data[i*8 +: 8];
+                    temp_data[i*8 +: 8] = cpu_vif.dcache_sw_data[i*8 +: 8];
             end
+            cpu_vif.dmem_array[cpu_vif.dcache_sw_addr[15:3]] <= temp_data;
             cpu_vif.dcache_wresp_valid <= 1'b1;
         end else begin
             cpu_vif.dcache_wresp_valid <= 1'b0;
@@ -273,7 +279,7 @@ module tb_top;
         cfg.imem_words = IMEM_WORDS;
         cfg.dmem_lines = DMEM_LINES;
 
-        uvm_config_db#(virtual cpu_if.drv_mp)::set(null, "uvm_test_top", "vif", cpu_vif);
+        uvm_config_db#(cpu_drv_vif_t)::set(null, "uvm_test_top", "vif", cpu_vif);
         uvm_config_db#(cpu_mon_vif_t)::set(null, "uvm_test_top", "mon_vif", cpu_vif);
         uvm_config_db#(cpu_commit_vif_t)::set(null, "uvm_test_top", "commit_vif", commit_if);
         uvm_config_db#(cpu_cfg)::set(null, "uvm_test_top", "cfg", cfg);

@@ -59,6 +59,17 @@ echo "Synopsys license server is up:"
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 PROJ_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
 
+PTRACE_SCOPE_FILE=/proc/sys/kernel/yama/ptrace_scope
+if [ -r "$PTRACE_SCOPE_FILE" ]; then
+  PTRACE_SCOPE=$(cat "$PTRACE_SCOPE_FILE")
+  if [ "$PTRACE_SCOPE" != "0" ]; then
+    echo "Host ptrace_scope=$PTRACE_SCOPE."
+    echo "If URG/gdb still reports 'ptrace: Operation not permitted', run on the host:"
+    echo "  sudo sysctl -w kernel.yama.ptrace_scope=0"
+    echo ""
+  fi
+fi
+
 # 4. Build the Docker container (This only takes a few minutes the very first time you run it. After that, it is instant)
 echo "Building Synopsys Docker environment (CentOS 7)..."
 docker build -t synopsys-env \
@@ -74,6 +85,29 @@ echo "Type 'exit' to leave the environment."
 echo "=================================================="
 echo ""
 
+# URG may invoke gdb for crash/stack handling. Docker's default security
+# profile can block ptrace, so allow it for Synopsys debug/report tools.
+DOCKER_DEBUG_FLAGS=(
+  --pid=host
+  --cap-add=SYS_PTRACE
+  --security-opt seccomp=unconfined
+  --security-opt apparmor=unconfined
+)
+
+if [ "${SYNOPSYS_DOCKER_PRIVILEGED:-0}" = "1" ]; then
+  DOCKER_DEBUG_FLAGS=(--pid=host --privileged)
+fi
+
+DOCKER_USER_FLAGS=()
+if [ "${SYNOPSYS_DOCKER_ROOT:-0}" = "1" ]; then
+  DOCKER_USER_FLAGS=(--user root)
+fi
+
+echo "Docker debug flags: ${DOCKER_DEBUG_FLAGS[*]}"
+if [ "${#DOCKER_USER_FLAGS[@]}" -gt 0 ]; then
+  echo "Docker user flags: ${DOCKER_USER_FLAGS[*]}"
+fi
+
 # 5. Run the container
 # --net=host : Shares Ubuntu's network (so the license server works perfectly)
 # --uts=host : Shares Ubuntu's hostname, matching the SERVER line in the license
@@ -83,10 +117,12 @@ echo ""
 docker run -it --rm \
   --net=host \
   --uts=host \
+  "${DOCKER_DEBUG_FLAGS[@]}" \
+  "${DOCKER_USER_FLAGS[@]}" \
   -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
   -v /home/synopsys:/home/synopsys:rw \
   -v /data:/data:rw \
   -v /data/synopsys_project/synop.bashrc:/home/synopsys/synop.bashrc:ro \
   -v "$PROJ_DIR":/workspace \
-  synopsys-env bash -c "source /home/synopsys/synop.bashrc && lmutil lmstat -c /home/synopsys/scl/2024.06/admin/license/synopsys.lic || true; bash"
+  synopsys-env bash -c "echo \"Container user=\$(id -un) uid=\$(id -u)\"; echo \"Container ptrace_scope=\$(cat /proc/sys/kernel/yama/ptrace_scope 2>/dev/null || echo unknown)\"; source /home/synopsys/synop.bashrc && lmutil lmstat -c /home/synopsys/scl/2024.06/admin/license/synopsys.lic || true; bash"

@@ -1,26 +1,21 @@
 #!/usr/bin/env python3
-from __future__ import annotations
 
 import argparse
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
-from dataclasses import dataclass
 from pathlib import Path
 
 UVM_TOOLS = Path(__file__).resolve().parent
 UVM_DIR = UVM_TOOLS.parent
 PROJ = UVM_DIR.parent
 C_SUITE = PROJ / "cprogram" / "c_suite"
-ARCH_TEST = PROJ / "arch_test"
 BUILD_ROOT = PROJ / "build" / "uvm_baremetal"
+COV_ROOT = PROJ / "build" / "uvm_cov"
 SPIKE_DEFAULT = PROJ / "tools" / "riscv" / "bin" / "spike"
-
-sys.path.insert(0, str(ARCH_TEST))
-from elf_to_hex import convert_elf  # type: ignore
-from riscv_toolchain import resolve_bin_dir, resolve_prefix, tool_path  # type: ignore
 
 PROGRAMS = [
     "memcpy",
@@ -43,22 +38,33 @@ CLASS_DIV = 7
 CLASS_WORD = 8
 CLASS_SYSTEM = 9
 
+TOOL_PREFIXES = (
+    "riscv-none-elf-",
+    "riscv64-unknown-elf-",
+)
 
-@dataclass
+DEFAULT_BIN_DIRS = [
+    Path("/opt/riscv/bin"),
+    Path("/usr/local/bin"),
+    Path("/usr/bin"),
+]
+
+
 class SpikeCommit:
-    index: int
-    pc: int
-    instr: int
-    rd_write: int = 0
-    rd_addr: int = 0
-    rd_data: int = 0
-    mem_write: int = 0
-    mem_addr_valid: int = 0
-    mem_addr: int = 0
-    mem_data: int = 0
-    instr_class: int = CLASS_UNKNOWN
+    def __init__(self, index, pc, instr):
+        self.index = index
+        self.pc = pc
+        self.instr = instr
+        self.rd_write = 0
+        self.rd_addr = 0
+        self.rd_data = 0
+        self.mem_write = 0
+        self.mem_addr_valid = 0
+        self.mem_addr = 0
+        self.mem_data = 0
+        self.instr_class = CLASS_UNKNOWN
 
-    def to_trace_line(self) -> str:
+    def to_trace_line(self):
         return (
             f"{self.index} {self.pc:016X} {self.instr:08X} "
             f"{self.rd_write} {self.rd_addr} {self.rd_data:016X} "
@@ -67,19 +73,88 @@ class SpikeCommit:
         )
 
 
-def run(cmd: list[str], cwd: Path, *, capture: bool = False, timeout: int | None = None) -> subprocess.CompletedProcess[str]:
+def run(cmd, cwd, capture=False, timeout=None):
     print(f"[RUN] ({cwd}) {' '.join(cmd)}")
+    stdout = subprocess.PIPE if capture else None
+    stderr = subprocess.PIPE if capture else None
     return subprocess.run(
         cmd,
         cwd=cwd,
         check=True,
-        text=True,
-        capture_output=capture,
+        universal_newlines=True,
+        stdout=stdout,
+        stderr=stderr,
         timeout=timeout,
     )
 
 
-def write_linker_script(path: Path, spike_base: int) -> None:
+def _which(name):
+    found = shutil.which(name)
+    return Path(found).resolve() if found else None
+
+
+def _tool_in_dir(bin_dir, prefix, tool):
+    candidate = bin_dir / (prefix + tool)
+    return candidate if candidate.is_file() else None
+
+
+def _scan_bin_dir(bin_dir):
+    if not bin_dir or not bin_dir.is_dir():
+        return None
+    for prefix in TOOL_PREFIXES:
+        if _tool_in_dir(bin_dir, prefix, "gcc") is not None:
+            return prefix
+    return None
+
+
+def resolve_bin_dir(explicit=None):
+    if explicit is not None:
+        p = Path(explicit)
+        if _scan_bin_dir(p):
+            return p.resolve()
+        raise RuntimeError("No riscv*-gcc in {0}".format(p))
+
+    for env_key in ("RISCV_TOOLCHAIN_BIN", "RISCV_BIN", "RISCV"):
+        val = os.environ.get(env_key)
+        if not val:
+            continue
+        p = Path(val)
+        if env_key == "RISCV" and p.is_dir() and (p / "bin").is_dir():
+            p = p / "bin"
+        if _scan_bin_dir(p):
+            return p.resolve()
+
+    for prefix in TOOL_PREFIXES:
+        gcc = _which(prefix + "gcc")
+        if gcc is not None:
+            return gcc.parent
+
+    for p in DEFAULT_BIN_DIRS:
+        if _scan_bin_dir(p):
+            return p.resolve()
+
+    raise RuntimeError(
+        "RISC-V toolchain not found. Put riscv-none-elf-* or "
+        "riscv64-unknown-elf-* tools on PATH, set RISCV/RISCV_BIN/"
+        "RISCV_TOOLCHAIN_BIN, or pass --bin-dir."
+    )
+
+
+def resolve_prefix(bin_dir):
+    prefix = _scan_bin_dir(bin_dir)
+    if prefix is None:
+        raise RuntimeError("No supported RISC-V gcc prefix found in {0}".format(bin_dir))
+    return prefix
+
+
+def tool_path(bin_dir, prefix, name):
+    path = bin_dir / (prefix + name)
+    if not path.is_file():
+        raise RuntimeError("Missing RISC-V tool: {0}".format(path))
+    return str(path)
+
+
+def write_linker_script(path, spike_base):
     dmem_base = spike_base + 0x400
     text = f"""OUTPUT_ARCH(riscv)
 ENTRY(_start)
@@ -129,7 +204,7 @@ SECTIONS {{
     path.write_text(text, encoding="utf-8")
 
 
-def write_start_file(path: Path) -> None:
+def write_start_file(path):
     path.write_text(
         """.section .text.start
 .globl _start
@@ -143,7 +218,7 @@ _start:
     )
 
 
-def resolve_spike(explicit: Path | None) -> Path:
+def resolve_spike(explicit):
     if explicit is not None:
         return explicit.resolve()
     env = os.environ.get("SPIKE")
@@ -157,8 +232,11 @@ def resolve_spike(explicit: Path | None) -> Path:
     raise RuntimeError("Spike not found. Set SPIKE=/path/to/spike or install spike on PATH.")
 
 
-def nm_symbol(bin_dir: Path, prefix: str, elf: Path, symbol: str) -> int:
-    out = subprocess.check_output([tool_path(bin_dir, prefix, "nm"), str(elf)], text=True)
+def nm_symbol(bin_dir, prefix, elf, symbol):
+    out = subprocess.check_output(
+        [tool_path(bin_dir, prefix, "nm"), str(elf)],
+        universal_newlines=True,
+    )
     for line in out.splitlines():
         parts = line.split()
         if len(parts) >= 3 and parts[2] == symbol:
@@ -166,7 +244,42 @@ def nm_symbol(bin_dir: Path, prefix: str, elf: Path, symbol: str) -> int:
     raise RuntimeError(f"Missing symbol {symbol} in {elf}")
 
 
-def build_program(test: str, bin_dir_arg: Path | None, spike_base: int) -> tuple[Path, int, int]:
+def load_flat_binary(bin_path):
+    data = bin_path.read_bytes()
+    if len(data) % 4:
+        data += b"\x00" * (4 - (len(data) % 4))
+    return data
+
+
+def write_imem_hex(data, out):
+    lines = ["// Auto-generated from ELF (instruction-side preload)"]
+    for word_idx in range(0, len(data) // 4):
+        word = struct.unpack_from("<I", data, word_idx * 4)[0]
+        lines.append("@{0:04X} {1:08X}".format(word_idx, word))
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def write_dmem_hex(data, out):
+    lines = ["// Auto-generated from ELF (data-side preload)"]
+    if len(data) % 8:
+        data += b"\x00" * (8 - (len(data) % 8))
+    for qidx in range(0, len(data) // 8):
+        lo = struct.unpack_from("<I", data, qidx * 8)[0]
+        hi = struct.unpack_from("<I", data, qidx * 8 + 4)[0]
+        lines.append("@{0:04X} {1:08X}{2:08X}".format(qidx, hi, lo))
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def convert_elf_local(elf, out_dir, bin_dir, prefix):
+    out_dir.mkdir(parents=True, exist_ok=True)
+    bin_path = out_dir / "flat.bin"
+    run([tool_path(bin_dir, prefix, "objcopy"), "-O", "binary", str(elf), str(bin_path)], out_dir)
+    data = load_flat_binary(bin_path)
+    write_imem_hex(data, out_dir / "imem.hex")
+    write_dmem_hex(data, out_dir / "dmem.hex")
+
+
+def build_program(test, bin_dir_arg, spike_base):
     bin_dir = resolve_bin_dir(bin_dir_arg)
     prefix = resolve_prefix(bin_dir)
     cc = tool_path(bin_dir, prefix, "gcc")
@@ -208,12 +321,15 @@ def build_program(test: str, bin_dir_arg: Path | None, spike_base: int) -> tuple
     ]
     run(cmd, src_dir)
     dump.write_text(
-        subprocess.check_output([objdump, "-d", "-M", "no-aliases", str(elf)], text=True),
+        subprocess.check_output(
+            [objdump, "-d", "-M", "no-aliases", str(elf)],
+            universal_newlines=True,
+        ),
         encoding="utf-8",
     )
     run([size, str(elf)], src_dir)
     spike_tohost = nm_symbol(bin_dir, prefix, elf, "tohost")
-    convert_elf(elf, out, bin_dir)
+    convert_elf_local(elf, out, bin_dir, prefix)
     dut_tohost = spike_tohost - spike_base
     (out / "meta.txt").write_text(
         "\n".join(
@@ -230,7 +346,7 @@ def build_program(test: str, bin_dir_arg: Path | None, spike_base: int) -> tuple
     return out, spike_tohost, dut_tohost
 
 
-def classify_instr(instr: int) -> int:
+def classify_instr(instr):
     opcode = instr & 0x7F
     funct3 = (instr >> 12) & 0x7
     funct7 = (instr >> 25) & 0x7F
@@ -261,20 +377,18 @@ RD_RE = re.compile(r"\bx\s*([0-9]+)\s+(0x[0-9a-fA-F]+)")
 MEM_RE = re.compile(r"\bmem\s+(0x[0-9a-fA-F]+)\s+(0x[0-9a-fA-F]+)")
 
 
-def normalize_commit(commit: SpikeCommit, spike_base: int, spike_mem_size: int) -> SpikeCommit:
+def normalize_commit(commit, spike_base, spike_mem_size):
     commit.pc -= spike_base
-    if commit.rd_write and spike_base <= commit.rd_data < (spike_base + spike_mem_size):
-        commit.rd_data -= spike_base
     if commit.mem_addr_valid:
         commit.mem_addr -= spike_base
     return commit
 
 
-def parse_spike_log(log: str, spike_base: int, spike_mem_size: int, spike_tohost: int) -> list[SpikeCommit]:
-    commits: list[SpikeCommit] = []
-    current: SpikeCommit | None = None
+def parse_spike_log(log, spike_base, spike_mem_size, spike_tohost):
+    commits = []
+    current = None
 
-    def append_current() -> bool:
+    def append_current():
         nonlocal current
         if current is None:
             return False
@@ -285,7 +399,7 @@ def parse_spike_log(log: str, spike_base: int, spike_mem_size: int, spike_tohost
         current = None
         return done
 
-    def update_current_from_tail(tail: str) -> None:
+    def update_current_from_tail(tail):
         assert current is not None
         tail_no_mem = tail.split("mem", 1)[0]
         rd_match = RD_RE.search(tail_no_mem)
@@ -335,7 +449,7 @@ def parse_spike_log(log: str, spike_base: int, spike_mem_size: int, spike_tohost
     return commits
 
 
-def run_spike(test: str, out: Path, spike: Path, spike_base: int, spike_mem_size: int, spike_tohost: int, instructions: int, timeout_s: int) -> Path:
+def run_spike(test, out, spike, spike_base, spike_mem_size, spike_tohost, instructions, timeout_s):
     elf = out / f"{test}.elf"
     spike_log = out / "spike.log"
     trace = out / "spike_commit_trace.txt"
@@ -365,7 +479,76 @@ def run_spike(test: str, out: Path, spike: Path, spike_base: int, spike_mem_size
     return trace
 
 
-def run_uvm(test: str, out: Path, trace: Path, dut_tohost: int, spike_tohost: int, spike_base: int, args: argparse.Namespace) -> None:
+def read_generated_meta(out):
+    meta = out / "meta.txt"
+    values = {
+        "SPIKE_BASE": None,
+        "SPIKE_TOHOST_ADDR": None,
+        "DUT_TOHOST_ADDR": None,
+    }
+    if not meta.is_file():
+        raise RuntimeError("Missing generated meta file: {0}".format(meta))
+
+    for line in meta.read_text(encoding="utf-8").splitlines():
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if key in values:
+            values[key] = int(value, 0)
+
+    missing = [k for k, v in values.items() if v is None]
+    if missing:
+        raise RuntimeError("Meta file {0} missing {1}".format(meta, ", ".join(missing)))
+
+    return values["SPIKE_TOHOST_ADDR"], values["DUT_TOHOST_ADDR"], values["SPIKE_BASE"]
+
+
+def require_generated_artifacts(test):
+    out = BUILD_ROOT / test
+    required = [
+        out / "imem.hex",
+        out / "dmem.hex",
+        out / "meta.txt",
+        out / "spike_commit_trace.txt",
+    ]
+    missing = [str(p) for p in required if not p.is_file()]
+    if missing:
+        raise RuntimeError(
+            "Missing generated artifact(s) for {0}: {1}. "
+            "Run outside Docker first: python3 uvm/tools/run_baremetal_spike.py --no-sim {0}".format(
+                test, ", ".join(missing)
+            )
+        )
+    return out, out / "spike_commit_trace.txt"
+
+
+def preserve_coverage_db(test):
+    src = PROJ / "build" / "uvm" / "simv.vdb"
+    dst = COV_ROOT / ("uvm_{0}.vdb".format(test))
+
+    if not src.is_dir():
+        raise RuntimeError(
+            "Coverage was requested, but VCS did not create {0}. "
+            "Check that the run used COV=1 and that build/uvm/sim.log contains -cm options.".format(src)
+        )
+
+    COV_ROOT.mkdir(parents=True, exist_ok=True)
+    if dst.exists():
+        shutil.rmtree(str(dst))
+    shutil.copytree(str(src), str(dst))
+    print("[COV] saved {0}".format(dst))
+
+
+def clean_current_coverage_db():
+    src = PROJ / "build" / "uvm" / "simv.vdb"
+    if src.exists():
+        shutil.rmtree(str(src))
+        print("[COV] removed stale {0}".format(src))
+
+
+def run_uvm(test, out, trace, dut_tohost, spike_tohost, spike_base, args):
     plusargs = " ".join(
         [
             f"+BM_TEST={test}",
@@ -389,10 +572,14 @@ def run_uvm(test: str, out: Path, trace: Path, dut_tohost: int, spike_tohost: in
         f"COV_NAME=uvm_{test}",
         f"PLUSARGS={plusargs}",
     ]
+    if args.coverage:
+        clean_current_coverage_db()
     run(cmd, PROJ)
+    if args.coverage:
+        preserve_coverage_db(test)
 
 
-def main() -> int:
+def main():
     parser = argparse.ArgumentParser(description="Build C-suite tests, run Spike, and launch Spike-golden UVM.")
     parser.add_argument("tests", nargs="*", help="C-suite test names or 'all'")
     parser.add_argument("--bin-dir", type=Path, default=None, help="RISC-V toolchain bin directory")
@@ -405,18 +592,78 @@ def main() -> int:
     parser.add_argument("--reset-hold-cycles", type=int, default=20)
     parser.add_argument("--coverage", action="store_true", help="Pass COV=1 to VCS make flow")
     parser.add_argument("--no-sim", action="store_true", help="Only build images and Spike trace")
+    parser.add_argument("--sim-only", action="store_true", help="Use existing generated artifacts and only launch VCS")
+    parser.add_argument("--arch-test", action="store_true", help="Run on pre-built arch_test/build/ ELFs instead of C-suite")
     args = parser.parse_args()
+
+    arch_test_build = PROJ / "arch_test" / "build"
+    built_tests = []
+    if args.arch_test and arch_test_build.is_dir():
+        for d in sorted(arch_test_build.iterdir()):
+            if d.is_dir() and (d / "imem.hex").is_file() and (d / "meta.txt").is_file():
+                if list(d.glob("*.elf")):
+                    built_tests.append(d.name)
+
+    if args.arch_test:
+        if args.spike_mem_size == 0x4000:
+            args.spike_mem_size = 0x10000
 
     targets = args.tests or ["all"]
     if "all" in targets:
-        targets = PROGRAMS
+        targets = built_tests if args.arch_test else PROGRAMS
+    
+    valid_tests = built_tests if args.arch_test else PROGRAMS
     for test in targets:
-        if test not in PROGRAMS:
-            raise SystemExit(f"Unknown test '{test}'. Valid tests: {', '.join(PROGRAMS)}")
+        if test not in valid_tests:
+            raise SystemExit(f"Unknown test '{test}'. Valid tests: {', '.join(valid_tests)}")
+
+    if args.no_sim and args.sim_only:
+        raise SystemExit("--no-sim and --sim-only cannot be used together")
+
+    if args.sim_only:
+        for test in targets:
+            out, trace = require_generated_artifacts(test)
+            spike_tohost, dut_tohost, spike_base = read_generated_meta(out)
+            run_uvm(test, out, trace, dut_tohost, spike_tohost, spike_base, args)
+        print(f"\n[DONE] ran {len(targets)} generated bare-metal UVM test(s)")
+        return 0
 
     spike = resolve_spike(args.spike)
     for test in targets:
-        out, spike_tohost, dut_tohost = build_program(test, args.bin_dir, args.spike_base)
+        if args.arch_test:
+            test_dir = arch_test_build / test
+            out = BUILD_ROOT / test
+            out.mkdir(parents=True, exist_ok=True)
+            
+            elf_files = list(test_dir.glob("*.elf"))
+            if not elf_files:
+                raise RuntimeError(f"No .elf found in {test_dir}")
+            src_elf = elf_files[0]
+            
+            shutil.copy2(src_elf, out / f"{test}.elf")
+            shutil.copy2(test_dir / "imem.hex", out / "imem.hex")
+            shutil.copy2(test_dir / "dmem.hex", out / "dmem.hex")
+            
+            meta_text = (test_dir / "meta.txt").read_text(encoding="utf-8")
+            m = re.search(r"TOHOST_ADDR=0x([0-9a-fA-F]+)", meta_text)
+            if not m:
+                raise RuntimeError(f"Bad meta.txt in {test_dir}")
+            spike_tohost = int(m.group(1), 16)
+            dut_tohost = spike_tohost - args.spike_base
+            
+            (out / "meta.txt").write_text(
+                "\n".join([
+                    f"BM_TEST={test}",
+                    f"SPIKE_BASE=0x{args.spike_base:X}",
+                    f"SPIKE_TOHOST_ADDR=0x{spike_tohost:X}",
+                    f"DUT_TOHOST_ADDR=0x{dut_tohost:X}",
+                    ""
+                ]),
+                encoding="utf-8"
+            )
+        else:
+            out, spike_tohost, dut_tohost = build_program(test, args.bin_dir, args.spike_base)
+            
         trace = run_spike(
             test,
             out,

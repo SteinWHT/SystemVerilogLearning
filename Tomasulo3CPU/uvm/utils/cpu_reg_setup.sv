@@ -1,14 +1,14 @@
 // Load architectural GPR values through normal retired instructions (ADDI/LUI/LD).
 class cpu_reg_setup;
 
-    virtual cpu_if.drv_mp           vif;
+    cpu_drv_vif_t                   vif;
     cpu_cfg                         cfg;
     uvm_analysis_port #(cpu_base_item) ap;
     int unsigned                    next_pc_offset;
     int unsigned                    dmem_slot;
 
     function new(
-        virtual cpu_if.drv_mp           vif,
+        cpu_drv_vif_t                   vif,
         cpu_cfg                         cfg,
         uvm_analysis_port #(cpu_base_item) ap,
         input int unsigned              next_pc_offset = 0,

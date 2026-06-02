@@ -83,12 +83,12 @@ class cpu_baremetal_commit_coverage extends uvm_subscriber #(cpu_commit_tr);
     int unsigned program_id;
 
     covergroup cg_baremetal_commit with function sample(
-        int unsigned program,
+        int unsigned program_id_arg,
         int unsigned commit_kind
     );
         option.per_instance = 1;
 
-        cp_program: coverpoint program {
+        cp_program: coverpoint program_id_arg {
             bins memcpy          = {0};
             bins memset          = {1};
             bins strlen          = {2};
@@ -172,16 +172,16 @@ class cpu_baremetal_dcache_coverage extends uvm_subscriber #(cpu_dcache_item#())
         option.per_instance = 1;
 
         cp_access: coverpoint access_kind {
-            bins read  = {0};
-            bins write = {1};
+            bins acc_read  = {0};
+            bins acc_write = {1};
         }
 
         cp_strb: coverpoint strb_kind {
             bins none = {0};
-            bins byte = {1};
-            bins half = {2};
-            bins word = {4};
-            bins dword = {8};
+            bins strb_byte  = {1};
+            bins strb_half  = {2};
+            bins strb_word  = {4};
+            bins strb_dword = {8};
             bins mixed = default;
         }
 
@@ -236,12 +236,12 @@ class cpu_spike_trace_coverage extends uvm_component;
     int unsigned program_id;
 
     covergroup cg_spike_instr_class with function sample(
-        int unsigned program,
+        int unsigned program_id_arg,
         int unsigned instr_class
     );
         option.per_instance = 1;
 
-        cp_program: coverpoint program {
+        cp_program: coverpoint program_id_arg {
             bins memcpy          = {0};
             bins memset          = {1};
             bins strlen          = {2};

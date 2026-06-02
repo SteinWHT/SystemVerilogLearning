@@ -26,6 +26,12 @@ COV_NAME ?= $(PROJECT)_$(UVM_TEST)
 COV_INPUTS ?= $(PROJ_DIR)/build/uvm_cov/*.vdb
 COV_MERGE_DIR ?= $(PROJ_DIR)/build/uvm_cov_merged.vdb
 COV_REPORT_DIR ?= $(PROJ_DIR)/build/uvm_cov_report
+URG_LICENSE ?= 27000@127.0.0.1
+SHIM_LIB = $(PROJ_DIR)/tools/libsnpsmalloc_shim/libsnpsmalloc_shim.so
+URG_ENV = SNPSLMD_LICENSE_FILE=$(URG_LICENSE) LM_LICENSE_FILE=$(URG_LICENSE) SYNOPSYS_LICENSE_FILE=$(URG_LICENSE) LD_LIBRARY_PATH= LD_PRELOAD=$(SHIM_LIB)
+URG_METRICS ?= line+cond+fsm+tgl+branch+assert+group
+URG_EXTRA ?=
+URG_OPTS := -full64 -metric $(URG_METRICS) $(URG_EXTRA)
 
 # ---- paths ----
 PROJ_DIR  := $(shell pwd)
@@ -250,10 +256,19 @@ uvm-compile:
 uvm-gui:
 	$(MAKE) PROJECT=uvm gui
 
+$(SHIM_LIB): $(PROJ_DIR)/tools/libsnpsmalloc_shim/libsnpsmalloc_shim.c
+	@mkdir -p $(dir $@)
+	gcc -shared -fPIC -O2 -o $@ $< -ldl
+
 .PHONY: uvm-cov-merge
-uvm-cov-merge:
+uvm-cov-merge: $(SHIM_LIB)
 	@mkdir -p $(dir $(COV_REPORT_DIR))
-	urg -full64 -dir $(COV_INPUTS) -dbname $(COV_MERGE_DIR) -report $(COV_REPORT_DIR)
+	$(URG_ENV) urg $(URG_OPTS) -dir $(COV_INPUTS) -dbname $(COV_MERGE_DIR) -report $(COV_REPORT_DIR)
+
+.PHONY: uvm-cov-report
+uvm-cov-report: $(SHIM_LIB)
+	@mkdir -p $(dir $(COV_REPORT_DIR))
+	$(URG_ENV) urg $(URG_OPTS) -dir $(COV_INPUTS) -report $(COV_REPORT_DIR)
 
 # ---- clean current project ----
 .PHONY: clean
