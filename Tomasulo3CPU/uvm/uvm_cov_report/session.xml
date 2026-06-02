@@ -1,0 +1,56 @@
+<session version="1.1" release="W-2024.09-SP1" timestp="2026-06-02 03:52:44 GMT">
+  <info>
+    <attr name="datetime" value="Tue Jun  2 03:54:53 2026
+"/>
+    <attr name="command" value="urg -full64 -metric line+cond+fsm+tgl+branch+assert+group -dir build/uvm_cov/uvm_linked_list.vdb build/uvm_cov/uvm_matrix_multiply.vdb build/uvm_cov/uvm_memcpy.vdb build/uvm_cov/uvm_memset.vdb build/uvm_cov/uvm_recursion.vdb build/uvm_cov/uvm_rv64ui-add.vdb build/uvm_cov/uvm_rv64ui-addi.vdb build/uvm_cov/uvm_rv64ui-addiw.vdb build/uvm_cov/uvm_rv64ui-addw.vdb build/uvm_cov/uvm_rv64ui-and.vdb build/uvm_cov/uvm_rv64ui-andi.vdb build/uvm_cov/uvm_rv64ui-auipc.vdb build/uvm_cov/uvm_rv64ui-beq.vdb build/uvm_cov/uvm_rv64ui-bge.vdb build/uvm_cov/uvm_rv64ui-bgeu.vdb build/uvm_cov/uvm_rv64ui-blt.vdb build/uvm_cov/uvm_rv64ui-bltu.vdb build/uvm_cov/uvm_rv64ui-bne.vdb build/uvm_cov/uvm_rv64ui-jal.vdb build/uvm_cov/uvm_rv64ui-jalr.vdb build/uvm_cov/uvm_rv64ui-lb.vdb build/uvm_cov/uvm_rv64ui-lbu.vdb build/uvm_cov/uvm_rv64ui-ld.vdb build/uvm_cov/uvm_rv64ui-ld_st.vdb build/uvm_cov/uvm_rv64ui-lh.vdb build/uvm_cov/uvm_rv64ui-lhu.vdb build/uvm_cov/uvm_rv64ui-lui.vdb build/uvm_cov/uvm_rv64ui-lw.vdb build/uvm_cov/uvm_rv64ui-lwu.vdb build/uvm_cov/uvm_rv64ui-or.vdb build/uvm_cov/uvm_rv64ui-ori.vdb build/uvm_cov/uvm_rv64ui-sb.vdb build/uvm_cov/uvm_rv64ui-sd.vdb build/uvm_cov/uvm_rv64ui-sh.vdb build/uvm_cov/uvm_rv64ui-simple.vdb build/uvm_cov/uvm_rv64ui-sll.vdb build/uvm_cov/uvm_rv64ui-slli.vdb build/uvm_cov/uvm_rv64ui-slliw.vdb build/uvm_cov/uvm_rv64ui-sllw.vdb build/uvm_cov/uvm_rv64ui-slt.vdb build/uvm_cov/uvm_rv64ui-slti.vdb build/uvm_cov/uvm_rv64ui-sltiu.vdb build/uvm_cov/uvm_rv64ui-sltu.vdb build/uvm_cov/uvm_rv64ui-sra.vdb build/uvm_cov/uvm_rv64ui-srai.vdb build/uvm_cov/uvm_rv64ui-sraiw.vdb build/uvm_cov/uvm_rv64ui-sraw.vdb build/uvm_cov/uvm_rv64ui-srl.vdb build/uvm_cov/uvm_rv64ui-srli.vdb build/uvm_cov/uvm_rv64ui-srliw.vdb build/uvm_cov/uvm_rv64ui-srlw.vdb build/uvm_cov/uvm_rv64ui-st_ld.vdb build/uvm_cov/uvm_rv64ui-sub.vdb build/uvm_cov/uvm_rv64ui-subw.vdb build/uvm_cov/uvm_rv64ui-sw.vdb build/uvm_cov/uvm_rv64ui-xor.vdb build/uvm_cov/uvm_rv64ui-xori.vdb build/uvm_cov/uvm_rv64um-div.vdb build/uvm_cov/uvm_rv64um-divu.vdb build/uvm_cov/uvm_rv64um-divuw.vdb build/uvm_cov/uvm_rv64um-divw.vdb build/uvm_cov/uvm_rv64um-mul.vdb build/uvm_cov/uvm_rv64um-mulh.vdb build/uvm_cov/uvm_rv64um-mulhsu.vdb build/uvm_cov/uvm_rv64um-mulhu.vdb build/uvm_cov/uvm_rv64um-mulw.vdb build/uvm_cov/uvm_rv64um-rem.vdb build/uvm_cov/uvm_rv64um-remu.vdb build/uvm_cov/uvm_rv64um-remuw.vdb build/uvm_cov/uvm_rv64um-remw.vdb build/uvm_cov/uvm_strcmp.vdb build/uvm_cov/uvm_strlen.vdb -dbname /workspace/build/uvm_cov_merged.vdb -report /workspace/build/uvm_cov_report"/>
+    <attr name="top_instance" value="tb_top,uvm_custom_install_verdi_recording,uvm_pkg"/>
+  </info>
+  <hvp>
+    <datadef>
+      <metdef name="Line" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="Cond" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="Toggle" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="FSM" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="Branch" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="Assert" type="ratio" aggregator="average" builtin="1" />
+      <metdef name="Group" type="percent" aggregator="average" builtin="1" />
+    </datadef>
+  </hvp>
+  <old_coverage>
+  <scope type="top" name="top">
+    <metric name="Line" value="1767/2360" />
+    <metric name="Cond" value="851/1144" />
+    <metric name="Toggle" value="44599/72440" />
+    <metric name="Branch" value="614/923" />
+    <metric name="Assert" value="14/16" />
+    <metric name="Group" value="89.2747%" />
+  </scope>
+  <scope type="instance" name="top">
+  </scope>
+  <scope type="group" name="top">
+    <scope type="group" name="cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit">
+      <metric name="Group" value="77.7778%" />
+    </scope>
+    <scope type="group" name="cpu_pkg::cpu_baremetal_dcache_coverage::cg_baremetal_dcache">
+      <metric name="Group" value="93.75%" />
+    </scope>
+    <scope type="group" name="cpu_pkg::cpu_spike_trace_coverage::cg_spike_instr_class">
+      <metric name="Group" value="96.2963%" />
+    </scope>
+  </scope>
+  <scope type="assert" name="Statistics">
+    <scorelist type="total" name="Design Hierarchy Assert">
+      <score name="Assert" value="14/16" />
+      <score name="Score" value="87.50" />
+    </scorelist>
+    <scorelist type="total" name="Module List Assert">
+      <score name="Assert" value="14/16" />
+      <score name="Score" value="87.50" />
+    </scorelist>
+    <scorelist type="total" name="Assertion">
+      <score name="Assert" value="14/16" />
+      <score name="Score" value="87.50" />
+    </scorelist>
+  </scope>
+  </old_coverage>
+</session>

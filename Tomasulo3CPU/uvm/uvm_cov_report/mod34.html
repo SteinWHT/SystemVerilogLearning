@@ -1,0 +1,4404 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="Author" content="<username>"> <meta name="GENERATOR" content="urg/version [en] (platform name) [urg]">
+<title>Unified Coverage Report :: Module :: RISC_V_DECODER</title>
+<link type="text/css" rel="stylesheet" href="css/.urg.css">
+<link type="text/css" rel="stylesheet" href="css/.layout.css">
+<link type="text/css" rel="stylesheet" href="css/.breadcrumb.css">
+<script type="text/javascript" src="js/.jquery.js"></script>
+<script type="text/javascript" src="js/.jquery-ui.js"></script>
+<script type="text/javascript" src="js/.sortable.js"></script>
+<script type="text/javascript" src="js/.layout.js"></script>
+<script type="text/javascript" src="js/.breadcrumb.js"></script>
+<script type="text/javascript">
+var layout, westLayout, centerLayout;
+$(document).ready(function () {
+  if ($("#north-bread-crumb")) {
+    $("#north-bread-crumb").jBreadCrumb({easing:'swing'})
+  }
+  layout = $("body").layout({ 
+    resizable: true,
+    spacing_open: 4,
+    spacing_closed: 4,
+    north: {
+      size: 76
+    },
+    south: {
+      size: 45,
+      initClosed: true
+    },
+    west: {
+      size: 500,
+      resizable: true,
+      initClosed: false
+    }
+  });
+  centerLayout = $('div.ui-layout-center').layout({
+    north__paneSelector: ".ui-layout-center-inner-north",
+    center__paneSelector: ".ui-layout-center-inner-center", 
+    north__size: 50,
+    spacing_open: 4,
+    spacing_closed: 4
+  });
+});
+</script>
+</head>
+<body onLoad="initPage();"><div class="ui-layout-north">
+<div class="logo"></div>
+<center class="pagetitle">Module Definition</center>
+<div align="center"><a href="dashboard.html" ><b>dashboard</b></a> | <a href="hierarchy.html" ><b>hierarchy</b></a> | <a href="modlist.html" ><b>modlist</b></a> | <a href="groups.html" ><b>groups</b></a> | <a href="tests.html" ><b>tests</b></a> | <a href="asserts.html" ><b>asserts</b></a></div>
+
+</div>
+<div class="ui-layout-west">
+<div name='tag_RISC_V_DECODER'>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module : <a href="#"  onclick="showContent('tag_RISC_V_DECODER')">RISC_V_DECODER</a></span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s7 cl rt"> 77.91</td>
+<td class="s8 cl rt"><a href="mod34.html#Line" > 83.33</a></td>
+<td class="s6 cl rt"><a href="mod34.html#Cond" > 63.64</a></td>
+<td class="s9 cl rt"><a href="mod34.html#Toggle" > 96.28</a></td>
+<td class="wht cl rt"></td>
+<td class="s6 cl rt"><a href="mod34.html#Branch" > 68.38</a></td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<span class=repname>Source File(s) : </span>
+<br clear=all>
+<a href="javascript:void(0);"  onclick="openSrcFile('/workspace/src/RISC_V_DECODER.sv')">/workspace/src/RISC_V_DECODER.sv</a><br clear=all>
+<br clear=all>
+<span class=repname>Module self-instances :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="wht cl wordwrap"><a href="mod34.html#inst_tag_35"  onclick="showContent('inst_tag_35')">tb_top.dut.front_end.dispatch.decoder</a></td>
+<td class="s7 cl rt"> 77.91</td>
+<td class="s8 cl rt"><a href="mod34.html#Line" > 83.33</a></td>
+<td class="s6 cl rt"><a href="mod34.html#Cond" > 63.64</a></td>
+<td class="s9 cl rt"><a href="mod34.html#Toggle" > 96.28</a></td>
+<td class="wht cl rt"></td>
+<td class="s6 cl rt"><a href="mod34.html#Branch" > 68.38</a></td>
+<td class="wht cl rt"></td>
+</tr></table></div>
+</div>
+<br clear=all>
+<div name='tag_RISC_V_DECODER'>
+<hr>
+<a name="inst_tag_35"></a>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module Instance : <a href="hierarchy.html#tag_urg_inst_35" >tb_top.dut.front_end.dispatch.decoder</a></span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Instance :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s7 cl rt"> 77.91</td>
+<td class="s8 cl rt"><a href="mod34.html#Line" > 83.33</a></td>
+<td class="s6 cl rt"><a href="mod34.html#Cond" > 63.64</a></td>
+<td class="s9 cl rt"><a href="mod34.html#Toggle" > 96.28</a></td>
+<td class="wht cl rt"></td>
+<td class="s6 cl rt"><a href="mod34.html#Branch" > 68.38</a></td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Instance's subtree :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s7 cl rt"> 77.91</td>
+<td class="s8 cl rt"> 83.33</td>
+<td class="s6 cl rt"> 63.64</td>
+<td class="s9 cl rt"> 96.28</td>
+<td class="wht cl rt"></td>
+<td class="s6 cl rt"> 68.38</td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Parent : </span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td><td class="alfsrt">NAME</td></tr><tr>
+<td class="s7 cl rt"> 76.66</td>
+<td class="s9 cl rt"> 95.27</td>
+<td class="s7 cl rt"> 73.65</td>
+<td class="s5 cl rt"> 59.30</td>
+<td class="wht cl rt"></td>
+<td class="s7 cl rt"> 78.43</td>
+<td class="wht cl rt"></td>
+<td><a href="mod2.html#inst_tag_2" >dispatch</a></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Subtrees :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td colspan=8>no children</td>
+</tr></table><br clear=all>
+</div>
+</div>
+<hr>
+Since this is the module's only instance, the coverage report is the same as for the module.</div>
+<div class="ui-layout-center">
+<div class="ui-layout-center-inner-center">
+<div name='tag_RISC_V_DECODER'>
+<a name="Line"></a>
+Line Coverage for Module : <a href="mod34.html" >RISC_V_DECODER</a><br clear=all>
+<table class="noborder">
+<col width="122">
+<col span="4" width="82">
+<tr><th></th><th>Line No.</th><th>Total</th><th>Covered</th><th>Percent</th></tr>
+<tr class="s8"><td class="lf">TOTAL</td><td></td><td>216</td><td>180</td><td>83.33</td></tr>
+<tr class="s7"><td class="lf">ALWAYS</td><td>66</td><td>125</td><td>95</td><td>76.00</td></tr>
+<tr class="s9"><td class="lf">ALWAYS</td><td>294</td><td>91</td><td>85</td><td>93.41</td></tr>
+</table>
+<pre class="code"><br clear=all>
+65                          always_comb begin
+66         1/1                  instr_type = INSTR_NONE;
+67                              // optimized logic
+68                              // TODO: is this useful or compiler will optimize it?
+69                              // If directly assigning the output instead of using another instr_type variable, is it better?
+70         1/1                  unique case (opcode)
+71                                  // R-type
+72                                  OP_REG: begin
+73         1/1                          case (funct3)
+74                                          FUNCT3_ADD_SUB: begin
+75         1/1                                  unique case (funct7)
+76         1/1                                      FUNCT7_ZERO:   instr_type = INSTR_ADD;
+77         1/1                                      FUNCT7_ALT:    instr_type = INSTR_SUB;
+78         1/1                                      FUNCT7_MULDIV: instr_type = INSTR_MUL;
+79         <font color = "red">0/1     ==>                              default:       instr_type = INSTR_NONE;</font>
+80                                              endcase
+81                                          end
+82                                          FUNCT3_SLL: begin
+83         1/1                                  unique case (funct7)
+84         1/1                                      FUNCT7_ZERO:   instr_type = INSTR_SLL;
+85         1/1                                      FUNCT7_MULDIV: instr_type = INSTR_MULH;
+86         <font color = "red">0/1     ==>                              default:       instr_type = INSTR_NONE;</font>
+87                                              endcase
+88                                          end
+89                                          FUNCT3_SLT: begin
+90         1/1                                  unique case (funct7)
+91         1/1                                      FUNCT7_ZERO:   instr_type = INSTR_SLT;
+92         1/1                                      FUNCT7_MULDIV: instr_type = INSTR_MULHSU;
+93         <font color = "red">0/1     ==>                              default:       instr_type = INSTR_NONE;</font>
+94                                              endcase
+95                                          end
+96                                          FUNCT3_SLTU: begin
+97         1/1                                  unique case (funct7)
+98         1/1                                      FUNCT7_ZERO:   instr_type = INSTR_SLTU;
+99         1/1                                      FUNCT7_MULDIV: instr_type = INSTR_MULHU;
+100        <font color = "red">0/1     ==>                              default:       instr_type = INSTR_NONE;</font>
+101                                             endcase
+102                                         end
+103                                         FUNCT3_XOR: begin
+104        1/1                                  unique case (funct7)
+105        1/1                                      FUNCT7_ZERO: instr_type = INSTR_XOR;
+106        1/1                                      FUNCT7_MULDIV:  instr_type = INSTR_DIV;
+107        <font color = "red">0/1     ==>                              default:     instr_type = INSTR_NONE;</font>
+108                                             endcase
+109                                         end
+110                                         FUNCT3_SRL_SRA: begin
+111        1/1                                  unique case (funct7)
+112        1/1                                      FUNCT7_ZERO:   instr_type = INSTR_SRL;
+113        1/1                                      FUNCT7_ALT:    instr_type = INSTR_SRA;
+114        1/1                                      FUNCT7_MULDIV: instr_type = INSTR_DIVU;
+115        <font color = "red">0/1     ==>                              default:       instr_type = INSTR_NONE;</font>
+116                                             endcase
+117                                         end
+118                                         FUNCT3_OR: begin
+119        1/1                                  unique case (funct7)
+120        1/1                                      FUNCT7_ZERO:   instr_type = INSTR_OR;
+121        1/1                                      FUNCT7_MULDIV: instr_type = INSTR_REM;
+122        <font color = "red">0/1     ==>                              default:       instr_type = INSTR_NONE;</font>
+123                                             endcase
+124                                         end
+125                                         FUNCT3_AND: begin
+126        1/1                                  unique case (funct7)
+127        1/1                                      FUNCT7_ZERO:   instr_type = INSTR_AND;
+128        1/1                                      FUNCT7_MULDIV: instr_type = INSTR_REMU;
+129        <font color = "red">0/1     ==>                              default:       instr_type = INSTR_NONE;</font>
+130                                             endcase
+131                                         end
+132        <font color = "red">0/1     ==>                      default:    instr_type = INSTR_NONE;</font>
+133                                     endcase
+134                                 end
+135                     
+136                                 // I-type
+137                                 OP_IMM: begin
+138        1/1                          unique case (funct3)
+139        1/1                              FUNCT3_ADD_SUB: instr_type = INSTR_ADDI;
+140        1/1                              FUNCT3_SLT:     instr_type = INSTR_SLTI;
+141        1/1                              FUNCT3_SLTU:    instr_type = INSTR_SLTIU;
+142        1/1                              FUNCT3_XOR:     instr_type = INSTR_XORI;
+143        1/1                              FUNCT3_OR:      instr_type = INSTR_ORI;
+144        1/1                              FUNCT3_AND:     instr_type = INSTR_ANDI;
+145        1/1                              FUNCT3_SLL:     instr_type = INSTR_SLLI;
+146                                         FUNCT3_SRL_SRA: begin
+147        1/1                                  unique case (funct7[6:1])
+148        1/1                                      FUNCT7_ZERO[6:1]: instr_type = INSTR_SRLI;
+149        1/1                                      FUNCT7_ALT[6:1]:  instr_type = INSTR_SRAI;
+150        <font color = "red">0/1     ==>                              default:          instr_type = INSTR_NONE;</font>
+151                                             endcase
+152                                         end
+153        <font color = "red">0/1     ==>                      default: instr_type = INSTR_NONE;</font>
+154                                     endcase
+155                                 end
+156                     
+157                                 // IMM-32
+158                                 OP_IMM_32: begin
+159        1/1                          unique case (funct3)
+160        1/1                              FUNCT3_ADD_SUB: instr_type = INSTR_ADDIW;
+161        1/1                              FUNCT3_SLL:     instr_type = INSTR_SLLIW;
+162                                         FUNCT3_SRL_SRA: begin
+163        1/1                                  unique case (funct7)
+164        1/1                                      FUNCT7_ZERO: instr_type = INSTR_SRLIW;
+165        1/1                                      FUNCT7_ALT:  instr_type = INSTR_SRAIW;
+166        <font color = "red">0/1     ==>                              default:     instr_type = INSTR_NONE;</font>
+167                                             endcase
+168                                         end
+169        <font color = "red">0/1     ==>                      default: instr_type = INSTR_NONE;</font>
+170                                     endcase
+171                                 end
+172                     
+173                                 // REG-32 (RV64: word-width R-type)
+174                                 OP_REG_32: begin
+175        1/1                          case (funct3)
+176                                         FUNCT3_ADD_SUB: begin
+177        1/1                                  unique case (funct7)
+178        1/1                                      FUNCT7_ZERO:   instr_type = INSTR_ADDW;
+179        1/1                                      FUNCT7_ALT:    instr_type = INSTR_SUBW;
+180        1/1                                      FUNCT7_MULDIV: instr_type = INSTR_MULW;
+181        <font color = "red">0/1     ==>                              default:       instr_type = INSTR_NONE;</font>
+182                                             endcase
+183                                         end
+184                                         FUNCT3_SLL: begin
+185        1/1                                  unique case (funct7)
+186        1/1                                      FUNCT7_ZERO: instr_type = INSTR_SLLW;
+187        <font color = "red">0/1     ==>                              default:     instr_type = INSTR_NONE;</font>
+188                                             endcase
+189                                         end
+190                                         FUNCT3_XOR: begin
+191        1/1                                  unique case (funct7)
+192        1/1                                      FUNCT7_MULDIV: instr_type = INSTR_DIVW;
+193        <font color = "red">0/1     ==>                              default:       instr_type = INSTR_NONE;</font>
+194                                             endcase
+195                                         end
+196                                         FUNCT3_SRL_SRA: begin
+197        1/1                                  unique case (funct7)
+198        1/1                                      FUNCT7_ZERO:   instr_type = INSTR_SRLW;
+199        1/1                                      FUNCT7_ALT:    instr_type = INSTR_SRAW;
+200        1/1                                      FUNCT7_MULDIV: instr_type = INSTR_DIVUW;
+201        <font color = "red">0/1     ==>                              default:       instr_type = INSTR_NONE;</font>
+202                                             endcase
+203                                         end
+204                                         FUNCT3_OR: begin
+205        1/1                                  unique case (funct7)
+206        1/1                                      FUNCT7_MULDIV: instr_type = INSTR_REMW;
+207        <font color = "red">0/1     ==>                              default:       instr_type = INSTR_NONE;</font>
+208                                             endcase
+209                                         end
+210                                         FUNCT3_AND: begin
+211        1/1                                  unique case (funct7)
+212        1/1                                      FUNCT7_MULDIV: instr_type = INSTR_REMUW;
+213        <font color = "red">0/1     ==>                              default:       instr_type = INSTR_NONE;</font>
+214                                             endcase
+215                                         end
+216        <font color = "red">0/1     ==>                      default: instr_type = INSTR_NONE;</font>
+217                                     endcase
+218                                 end
+219                     
+220                                 // Load
+221                                 OP_LOAD: begin
+222        1/1                          unique case (funct3)
+223        1/1                              FUNCT3_LB:  instr_type = INSTR_LB;  // LB
+224        1/1                              FUNCT3_LH:  instr_type = INSTR_LH;  // LH
+225        1/1                              FUNCT3_LW:  instr_type = INSTR_LW;
+226        1/1                              FUNCT3_LD:  instr_type = INSTR_LD;  // LD  (RV64)
+227        1/1                              FUNCT3_LBU: instr_type = INSTR_LBU; // LBU
+228        1/1                              FUNCT3_LHU: instr_type = INSTR_LHU; // LHU
+229        1/1                              FUNCT3_LWU: instr_type = INSTR_LWU; // LWU (RV64)
+230        <font color = "red">0/1     ==>                      default:    instr_type = INSTR_NONE;</font>
+231                                     endcase
+232                                 end
+233                     
+234                                 // Store
+235                                 OP_STORE: begin
+236        1/1                          unique case (funct3)
+237        1/1                              FUNCT3_SB: instr_type = INSTR_SB;
+238        1/1                              FUNCT3_SH: instr_type = INSTR_SH;
+239        1/1                              FUNCT3_SW: instr_type = INSTR_SW;
+240        1/1                              FUNCT3_SD: instr_type = INSTR_SD;
+241        <font color = "red">0/1     ==>                      default:   instr_type = INSTR_NONE;</font>
+242                                     endcase
+243                                 end
+244                     
+245                                 // Branch
+246                                 OP_BRANCH: begin
+247        1/1                          unique case (funct3)
+248        1/1                              FUNCT3_BEQ: instr_type = INSTR_BEQ;
+249        1/1                              FUNCT3_BNE: instr_type = INSTR_BNE;
+250        1/1                              FUNCT3_BLT: instr_type = INSTR_BLT;
+251        1/1                              FUNCT3_BGE: instr_type = INSTR_BGE;
+252        1/1                              FUNCT3_BLTU: instr_type = INSTR_BLTU;
+253        1/1                              FUNCT3_BGEU: instr_type = INSTR_BGEU;
+254        <font color = "red">0/1     ==>                      default:     instr_type = INSTR_NONE;</font>
+255                                     endcase
+256                                 end
+257                     
+258                                 // Jump
+259        1/1                      OP_JAL:  instr_type = INSTR_JAL;
+260        1/1                      OP_JALR: instr_type = INSTR_JALR;
+261                     
+262                                 // Upper immediate
+263        1/1                      OP_LUI:   instr_type = INSTR_LUI;
+264        1/1                      OP_AUIPC: instr_type = INSTR_AUIPC;
+265                     
+266                                 // SYSTEM / CSR
+267                                 OP_SYSTEM: begin
+268        1/1                          unique case (funct3)
+269                                         FUNCT3_PRIV: begin
+270        1/1                                  if ((rd == '0) &amp;&amp; (rs == '0)) begin
+271        1/1                                      unique case (csr)
+272        1/1                                          FUNCT12_ECALL:  instr_type = INSTR_ECALL;
+273        <font color = "red">0/1     ==>                                  FUNCT12_EBREAK: instr_type = INSTR_EBREAK;</font>
+274        <font color = "red">0/1     ==>                                  FUNCT12_MRET:   instr_type = INSTR_MRET;</font>
+275        <font color = "red">0/1     ==>                                  default:        instr_type = INSTR_NONE;</font>
+276                                                 endcase
+277                                             end
+                   <font color = "red">==>  MISSING_ELSE</font>
+278                                         end
+279        1/1                              FUNCT3_CSRRW:  instr_type = INSTR_CSRRW;
+280        1/1                              FUNCT3_CSRRS:  instr_type = INSTR_CSRRS;
+281        <font color = "red">0/1     ==>                      FUNCT3_CSRRC:  instr_type = INSTR_CSRRC;</font>
+282        1/1                              FUNCT3_CSRRWI: instr_type = INSTR_CSRRWI;
+283        <font color = "red">0/1     ==>                      FUNCT3_CSRRSI: instr_type = INSTR_CSRRSI;</font>
+284        <font color = "red">0/1     ==>                      FUNCT3_CSRRCI: instr_type = INSTR_CSRRCI;</font>
+285        <font color = "red">0/1     ==>                      default:       instr_type = INSTR_NONE;</font>
+286                                     endcase
+287                                 end
+288                     
+289        1/1                      default: instr_type = INSTR_NONE;
+290                             endcase
+291                         end
+292                     
+293                         always_comb begin
+294        1/1                  rw = 0;
+295        1/1                  mw = 0;
+296        1/1                  branch = 0;
+297        1/1                  jr_inst = 0;
+298        1/1                  jal_inst = 0;
+299        1/1                  jr31_inst = 0;
+300        1/1                  csr_inst = 0;
+301        1/1                  csr_cmd = CSR_CMD_NONE;
+302        1/1                  csr_addr = '0;
+303        1/1                  trap_inst = 0;
+304        1/1                  mret_inst = 0;
+305        1/1                  rd_arch_addr = 0;
+306        1/1                  rs_arch_addr = 0;
+307        1/1                  rt_arch_addr = 0;
+308        1/1                  imm = 0;
+309        1/1                  unique case (instr_type)
+310                                 INSTR_ADD, INSTR_SUB, INSTR_SLT, INSTR_SLTU, INSTR_XOR,
+311                                 INSTR_SRL, INSTR_SRA, INSTR_OR, INSTR_AND, INSTR_SLL,
+312                                 INSTR_ADDW, INSTR_SUBW, INSTR_SLLW, INSTR_SRLW, INSTR_SRAW,
+313                                 INSTR_MUL, INSTR_MULH, INSTR_MULHU, INSTR_MULHSU, INSTR_MULW,
+314                                 INSTR_DIV, INSTR_DIVU, INSTR_REM, INSTR_REMU,
+315                                 INSTR_DIVW, INSTR_DIVUW, INSTR_REMW, INSTR_REMUW,
+316                                 INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
+317                                 INSTR_ADDIW, INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
+318                                 INSTR_SLLI, INSTR_SRLI, INSTR_SRAI,
+319                                 INSTR_LW, INSTR_LD, INSTR_LB, INSTR_LH, INSTR_LBU, INSTR_LHU, INSTR_LWU: begin
+320        1/1                          rw = 1;
+321        1/1                          rd_arch_addr = rd;
+322        1/1                          rs_arch_addr = rs;
+323        1/1                          rt_arch_addr = rt;
+324        1/1                          imm = imm_i;
+325                                 end
+326                                 INSTR_SD, INSTR_SW, INSTR_SB, INSTR_SH: begin
+327        1/1                          mw = 1;
+328        1/1                          rs_arch_addr = rs;
+329        1/1                          rt_arch_addr = rt;
+330        1/1                          imm = imm_s;
+331                                 end
+332                                 INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU, INSTR_BGE, INSTR_BGEU: begin
+333        1/1                          branch = 1;
+334        1/1                          rs_arch_addr = rs;
+335        1/1                          rt_arch_addr = rt;
+336        1/1                          imm = imm_b;
+337                                 end
+338                                 INSTR_JAL: begin
+339        1/1                          jal_inst = 1;
+340        1/1                          imm = imm_j;
+341        1/1                          rw = 1;
+342        1/1                          rd_arch_addr = rd;
+343                                 end
+344                                 INSTR_JALR: begin
+345        1/1                          if (rs == 5'd1) begin
+346        1/1                              jr31_inst = 1;
+347        1/1                              imm = imm_i;
+348        1/1                              rw = 1;
+349        1/1                              rs_arch_addr = rs;
+350        1/1                              rd_arch_addr = rd;
+351        1/1                          end else if (rd == 5'd0) begin
+352                                         // This is a JR instruction (JALR with rd = x0)
+353        1/1                              jr_inst = 1;
+354        1/1                              rs_arch_addr = rs;
+355        1/1                              imm = imm_i;
+356                                     end else begin
+357        1/1                              jal_inst = 1;
+358        1/1                              jr_inst = 1;
+359        1/1                              rs_arch_addr = rs;
+360        1/1                              imm = imm_i;
+361        1/1                              rw = 1;
+362        1/1                              rd_arch_addr = rd;
+363                                     end
+364                                 end
+365                                 INSTR_LUI, INSTR_AUIPC: begin
+366        1/1                          rw = 1;
+367        1/1                          rd_arch_addr = rd;
+368        1/1                          imm = imm_u;
+369                                 end
+370                                 INSTR_CSRRW, INSTR_CSRRS, INSTR_CSRRC: begin
+371        1/1                          rw = 1;
+372        1/1                          csr_inst = 1;
+373        1/1                          csr_addr = csr;
+374        1/1                          rd_arch_addr = rd;
+375        1/1                          rs_arch_addr = rs;
+376        1/1                          imm = XLEN'(csr);
+377                     
+378        1/1                          unique case (instr_type)
+379        1/1                              INSTR_CSRRW: csr_cmd = CSR_CMD_RW;
+380        1/1                              INSTR_CSRRS: csr_cmd = CSR_CMD_RS;
+381        <font color = "red">0/1     ==>                      INSTR_CSRRC: csr_cmd = CSR_CMD_RC;</font>
+382        <font color = "red">0/1     ==>                      default:     csr_cmd = CSR_CMD_NONE;</font>
+383                                     endcase
+384                                 end
+385                                 INSTR_CSRRWI, INSTR_CSRRSI, INSTR_CSRRCI: begin
+386        1/1                          rw = 1;
+387        1/1                          csr_inst = 1;
+388        1/1                          csr_addr = csr;
+389        1/1                          rd_arch_addr = rd;
+390        1/1                          rs_arch_addr = imm_zimm;
+391        1/1                          imm = XLEN'(csr);
+392                     
+393        1/1                          unique case (instr_type)
+394        1/1                              INSTR_CSRRWI: csr_cmd = CSR_CMD_RWI;
+395        <font color = "red">0/1     ==>                      INSTR_CSRRSI: csr_cmd = CSR_CMD_RSI;</font>
+396        <font color = "red">0/1     ==>                      INSTR_CSRRCI: csr_cmd = CSR_CMD_RCI;</font>
+397        <font color = "red">0/1     ==>                      default:      csr_cmd = CSR_CMD_NONE;</font>
+398                                     endcase
+399                                 end
+400                                 INSTR_ECALL, INSTR_EBREAK: begin
+401        1/1                          trap_inst = 1;
+402                                 end
+403                                 INSTR_MRET: begin
+404        <font color = "red">0/1     ==>                  mret_inst = 1;</font>
+405                                 end
+406                                 default: begin
+407        1/1                          rw = 0;
+408        1/1                          mw = 0;
+409        1/1                          branch = 0;
+410        1/1                          jr_inst = 0;
+411        1/1                          jal_inst = 0;
+412        1/1                          jr31_inst = 0;
+413        1/1                          csr_inst = 0;
+414        1/1                          csr_cmd = CSR_CMD_NONE;
+415        1/1                          csr_addr = '0;
+416        1/1                          trap_inst = 0;
+417        1/1                          mret_inst = 0;
+418        1/1                          rd_arch_addr = 0;
+419        1/1                          rs_arch_addr = 0;
+420        1/1                          rt_arch_addr = 0;
+421        1/1                          imm = 0;
+</pre>
+<hr>
+<a name="Cond"></a>
+Cond Coverage for Module : <a href="mod34.html" >RISC_V_DECODER</a><br clear=all>
+<table class="noborder">
+<col width="122">
+<col span="3" width="82">
+<tr><th></th><th>Total</th><th>Covered</th><th>Percent</th></tr>
+<tr class="s6"><td class="lf">Conditions</td><td>11</td><td>7</td><td>63.64</td></tr>
+<tr class="s6"><td class="lf">Logical</td><td>11</td><td>7</td><td>63.64</td></tr>
+<tr class="wht"><td class="lf">Non-Logical</td><td>0</td><td>0</td><td></td></tr>
+<tr class="wht"><td class="lf">Event</td><td>0</td><td>0</td><td></td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       270
+ EXPRESSION ((rd == '0) &amp;&amp; (rs == '0))
+             -----1----    -----2----
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       270
+ SUB-EXPRESSION (rd == '0)
+                -----1----
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       270
+ SUB-EXPRESSION (rs == '0)
+                -----1----
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       345
+ EXPRESSION (rs == 5'b1)
+            ------1-----
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       351
+ EXPRESSION (rd == 5'b0)
+            ------1-----
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<hr>
+<a name="Toggle"></a>
+Toggle Coverage for Module : <a href="mod34.html" >RISC_V_DECODER</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s8">
+<td>Totals</td>
+<td class="rt">30</td>
+<td class="rt">25</td>
+<td class="rt">83.33 </td>
+</tr><tr class="s9">
+<td>Total Bits</td>
+<td class="rt">1022</td>
+<td class="rt">984</td>
+<td class="rt">96.28 </td>
+</tr><tr class="s9">
+<td nowrap>Total Bits 0->1</td>
+<td class="rt">511</td>
+<td class="rt">492</td>
+<td class="rt">96.28 </td>
+</tr><tr class="s9">
+<td nowrap>Total Bits 1->0</td>
+<td class="rt">511</td>
+<td class="rt">492</td>
+<td class="rt">96.28 </td>
+</tr></table><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80></th><th nowrap width=80></th><th nowrap width=80></th></tr><tr class="s8">
+<td>Ports</td>
+<td class="rt">17</td>
+<td class="rt">15</td>
+<td class="rt">88.24 </td>
+</tr><tr class="s9">
+<td>Port Bits</td>
+<td class="rt">284</td>
+<td class="rt">274</td>
+<td class="rt">96.48 </td>
+</tr><tr class="s9">
+<td nowrap>Port Bits 0->1</td>
+<td class="rt">142</td>
+<td class="rt">137</td>
+<td class="rt">96.48 </td>
+</tr><tr class="s9">
+<td nowrap>Port Bits 1->0</td>
+<td class="rt">142</td>
+<td class="rt">137</td>
+<td class="rt">96.48 </td>
+</tr></table><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80></th><th nowrap width=80></th><th nowrap width=80></th></tr><tr class="s7">
+<td>Signals</td>
+<td class="rt">13</td>
+<td class="rt">10</td>
+<td class="rt">76.92 </td>
+</tr><tr class="s9">
+<td>Signal Bits</td>
+<td class="rt">738</td>
+<td class="rt">710</td>
+<td class="rt">96.21 </td>
+</tr><tr class="s9">
+<td nowrap>Signal Bits 0->1</td>
+<td class="rt">369</td>
+<td class="rt">355</td>
+<td class="rt">96.21 </td>
+</tr><tr class="s9">
+<td nowrap>Signal Bits 1->0</td>
+<td class="rt">369</td>
+<td class="rt">355</td>
+<td class="rt">96.21 </td>
+</tr></table><br clear=all>
+<table align=left class="sortable noborder">
+<caption><b>Port Details</b></caption>
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td class="alfsrt">Toggle</td><td class="alfsrt">Toggle 1->0</td><td class="alfsrt">Toggle 0->1</td><td class="alfsrt">Direction</td></tr><tr>
+<td>instr[31:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rd_arch_addr[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>rs_arch_addr[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>rt_arch_addr[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>imm[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>instr_type[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>rw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>mw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>branch</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>jr_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>jal_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>csr_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>csr_cmd[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>csr_addr[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>csr_addr[5:3]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>csr_addr[6]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>csr_addr[7]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>csr_addr[11:8]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>trap_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>mret_inst</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>jr31_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr></table><br clear=all>
+<table align=left class="sortable noborder">
+<caption><b>Signal Details</b></caption>
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td class="alfsrt">Toggle</td><td class="alfsrt">Toggle 1->0</td><td class="alfsrt">Toggle 0->1</td></tr><tr>
+<td>opcode[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>rd[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>rs[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>rt[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>funct3[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>funct7[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>csr[11:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>imm_i[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>imm_s[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>imm_b[0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>imm_b[63:1]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>imm_u[11:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>imm_u[63:12]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>imm_j[0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>imm_j[63:1]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>imm_zimm[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr></table><br clear=all>
+<hr>
+<a name="Branch"></a>
+Branch Coverage for Module : <a href="mod34.html" >RISC_V_DECODER</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Line No.</th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s6">
+<td>Branches</td>
+<td></td>
+<td class="rt">117</td>
+<td class="rt">80</td>
+<td class="rt">68.38 </td>
+</tr><tr class="s6">
+<td>CASE</td>
+<td class="rt">70</td>
+<td class="rt">98</td>
+<td class="rt">67</td>
+<td class="rt">68.37 </td>
+</tr><tr class="s6">
+<td>CASE</td>
+<td class="rt">309</td>
+<td class="rt">19</td>
+<td class="rt">13</td>
+<td class="rt">68.42 </td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+70                 unique case (opcode)
+                          <font color = "green">-1-</font>  
+71                     // R-type
+72                     OP_REG: begin
+73                         case (funct3)
+                           <font color = "red">-2-</font>  
+74                             FUNCT3_ADD_SUB: begin
+75                                 unique case (funct7)
+                                          <font color = "red">-3-</font>  
+76                                     FUNCT7_ZERO:   instr_type = INSTR_ADD;
+           <font color = "green">                            ==></font>
+77                                     FUNCT7_ALT:    instr_type = INSTR_SUB;
+           <font color = "green">                            ==></font>
+78                                     FUNCT7_MULDIV: instr_type = INSTR_MUL;
+           <font color = "green">                            ==></font>
+79                                     default:       instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+80                                 endcase
+81                             end
+82                             FUNCT3_SLL: begin
+83                                 unique case (funct7)
+                                          <font color = "red">-4-</font>  
+84                                     FUNCT7_ZERO:   instr_type = INSTR_SLL;
+           <font color = "green">                            ==></font>
+85                                     FUNCT7_MULDIV: instr_type = INSTR_MULH;
+           <font color = "green">                            ==></font>
+86                                     default:       instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+87                                 endcase
+88                             end
+89                             FUNCT3_SLT: begin
+90                                 unique case (funct7)
+                                          <font color = "red">-5-</font>  
+91                                     FUNCT7_ZERO:   instr_type = INSTR_SLT;
+           <font color = "green">                            ==></font>
+92                                     FUNCT7_MULDIV: instr_type = INSTR_MULHSU;
+           <font color = "green">                            ==></font>
+93                                     default:       instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+94                                 endcase
+95                             end
+96                             FUNCT3_SLTU: begin
+97                                 unique case (funct7)
+                                          <font color = "red">-6-</font>  
+98                                     FUNCT7_ZERO:   instr_type = INSTR_SLTU;
+           <font color = "green">                            ==></font>
+99                                     FUNCT7_MULDIV: instr_type = INSTR_MULHU;
+           <font color = "green">                            ==></font>
+100                                    default:       instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+101                                endcase
+102                            end
+103                            FUNCT3_XOR: begin
+104                                unique case (funct7)
+                                          <font color = "red">-7-</font>  
+105                                    FUNCT7_ZERO: instr_type = INSTR_XOR;
+           <font color = "green">                            ==></font>
+106                                    FUNCT7_MULDIV:  instr_type = INSTR_DIV;
+           <font color = "green">                            ==></font>
+107                                    default:     instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+108                                endcase
+109                            end
+110                            FUNCT3_SRL_SRA: begin
+111                                unique case (funct7)
+                                          <font color = "red">-8-</font>  
+112                                    FUNCT7_ZERO:   instr_type = INSTR_SRL;
+           <font color = "green">                            ==></font>
+113                                    FUNCT7_ALT:    instr_type = INSTR_SRA;
+           <font color = "green">                            ==></font>
+114                                    FUNCT7_MULDIV: instr_type = INSTR_DIVU;
+           <font color = "green">                            ==></font>
+115                                    default:       instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+116                                endcase
+117                            end
+118                            FUNCT3_OR: begin
+119                                unique case (funct7)
+                                          <font color = "red">-9-</font>  
+120                                    FUNCT7_ZERO:   instr_type = INSTR_OR;
+           <font color = "green">                            ==></font>
+121                                    FUNCT7_MULDIV: instr_type = INSTR_REM;
+           <font color = "green">                            ==></font>
+122                                    default:       instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+123                                endcase
+124                            end
+125                            FUNCT3_AND: begin
+126                                unique case (funct7)
+                                          <font color = "red">-10-</font>  
+127                                    FUNCT7_ZERO:   instr_type = INSTR_AND;
+           <font color = "green">                            ==></font>
+128                                    FUNCT7_MULDIV: instr_type = INSTR_REMU;
+           <font color = "green">                            ==></font>
+129                                    default:       instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+130                                endcase
+131                            end
+132                            default:    instr_type = INSTR_NONE;
+           <font color = "red">                    ==></font>
+133                        endcase
+134                    end
+135        
+136                    // I-type
+137                    OP_IMM: begin
+138                        unique case (funct3)
+                                  <font color = "red">-11-</font>  
+139                            FUNCT3_ADD_SUB: instr_type = INSTR_ADDI;
+           <font color = "green">                    ==></font>
+140                            FUNCT3_SLT:     instr_type = INSTR_SLTI;
+           <font color = "green">                    ==></font>
+141                            FUNCT3_SLTU:    instr_type = INSTR_SLTIU;
+           <font color = "green">                    ==></font>
+142                            FUNCT3_XOR:     instr_type = INSTR_XORI;
+           <font color = "green">                    ==></font>
+143                            FUNCT3_OR:      instr_type = INSTR_ORI;
+           <font color = "green">                    ==></font>
+144                            FUNCT3_AND:     instr_type = INSTR_ANDI;
+           <font color = "green">                    ==></font>
+145                            FUNCT3_SLL:     instr_type = INSTR_SLLI;
+           <font color = "green">                    ==></font>
+146                            FUNCT3_SRL_SRA: begin
+147                                unique case (funct7[6:1])
+                                          <font color = "red">-12-</font>  
+148                                    FUNCT7_ZERO[6:1]: instr_type = INSTR_SRLI;
+           <font color = "green">                            ==></font>
+149                                    FUNCT7_ALT[6:1]:  instr_type = INSTR_SRAI;
+           <font color = "green">                            ==></font>
+150                                    default:          instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+151                                endcase
+152                            end
+153                            default: instr_type = INSTR_NONE;
+           <font color = "red">                    ==></font>
+154                        endcase
+155                    end
+156        
+157                    // IMM-32
+158                    OP_IMM_32: begin
+159                        unique case (funct3)
+                                  <font color = "red">-13-</font>  
+160                            FUNCT3_ADD_SUB: instr_type = INSTR_ADDIW;
+           <font color = "green">                    ==></font>
+161                            FUNCT3_SLL:     instr_type = INSTR_SLLIW;
+           <font color = "green">                    ==></font>
+162                            FUNCT3_SRL_SRA: begin
+163                                unique case (funct7)
+                                          <font color = "red">-14-</font>  
+164                                    FUNCT7_ZERO: instr_type = INSTR_SRLIW;
+           <font color = "green">                            ==></font>
+165                                    FUNCT7_ALT:  instr_type = INSTR_SRAIW;
+           <font color = "green">                            ==></font>
+166                                    default:     instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+167                                endcase
+168                            end
+169                            default: instr_type = INSTR_NONE;
+           <font color = "red">                    ==></font>
+170                        endcase
+171                    end
+172        
+173                    // REG-32 (RV64: word-width R-type)
+174                    OP_REG_32: begin
+175                        case (funct3)
+                           <font color = "red">-15-</font>  
+176                            FUNCT3_ADD_SUB: begin
+177                                unique case (funct7)
+                                          <font color = "red">-16-</font>  
+178                                    FUNCT7_ZERO:   instr_type = INSTR_ADDW;
+           <font color = "green">                            ==></font>
+179                                    FUNCT7_ALT:    instr_type = INSTR_SUBW;
+           <font color = "green">                            ==></font>
+180                                    FUNCT7_MULDIV: instr_type = INSTR_MULW;
+           <font color = "green">                            ==></font>
+181                                    default:       instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+182                                endcase
+183                            end
+184                            FUNCT3_SLL: begin
+185                                unique case (funct7)
+                                          <font color = "red">-17-</font>  
+186                                    FUNCT7_ZERO: instr_type = INSTR_SLLW;
+           <font color = "green">                            ==></font>
+187                                    default:     instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+188                                endcase
+189                            end
+190                            FUNCT3_XOR: begin
+191                                unique case (funct7)
+                                          <font color = "red">-18-</font>  
+192                                    FUNCT7_MULDIV: instr_type = INSTR_DIVW;
+           <font color = "green">                            ==></font>
+193                                    default:       instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+194                                endcase
+195                            end
+196                            FUNCT3_SRL_SRA: begin
+197                                unique case (funct7)
+                                          <font color = "red">-19-</font>  
+198                                    FUNCT7_ZERO:   instr_type = INSTR_SRLW;
+           <font color = "green">                            ==></font>
+199                                    FUNCT7_ALT:    instr_type = INSTR_SRAW;
+           <font color = "green">                            ==></font>
+200                                    FUNCT7_MULDIV: instr_type = INSTR_DIVUW;
+           <font color = "green">                            ==></font>
+201                                    default:       instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+202                                endcase
+203                            end
+204                            FUNCT3_OR: begin
+205                                unique case (funct7)
+                                          <font color = "red">-20-</font>  
+206                                    FUNCT7_MULDIV: instr_type = INSTR_REMW;
+           <font color = "green">                            ==></font>
+207                                    default:       instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+208                                endcase
+209                            end
+210                            FUNCT3_AND: begin
+211                                unique case (funct7)
+                                          <font color = "red">-21-</font>  
+212                                    FUNCT7_MULDIV: instr_type = INSTR_REMUW;
+           <font color = "green">                            ==></font>
+213                                    default:       instr_type = INSTR_NONE;
+           <font color = "red">                            ==></font>
+214                                endcase
+215                            end
+216                            default: instr_type = INSTR_NONE;
+           <font color = "red">                    ==></font>
+217                        endcase
+218                    end
+219        
+220                    // Load
+221                    OP_LOAD: begin
+222                        unique case (funct3)
+                                  <font color = "red">-22-</font>  
+223                            FUNCT3_LB:  instr_type = INSTR_LB;  // LB
+           <font color = "green">                    ==></font>
+224                            FUNCT3_LH:  instr_type = INSTR_LH;  // LH
+           <font color = "green">                    ==></font>
+225                            FUNCT3_LW:  instr_type = INSTR_LW;
+           <font color = "green">                    ==></font>
+226                            FUNCT3_LD:  instr_type = INSTR_LD;  // LD  (RV64)
+           <font color = "green">                    ==></font>
+227                            FUNCT3_LBU: instr_type = INSTR_LBU; // LBU
+           <font color = "green">                    ==></font>
+228                            FUNCT3_LHU: instr_type = INSTR_LHU; // LHU
+           <font color = "green">                    ==></font>
+229                            FUNCT3_LWU: instr_type = INSTR_LWU; // LWU (RV64)
+           <font color = "green">                    ==></font>
+230                            default:    instr_type = INSTR_NONE;
+           <font color = "red">                    ==></font>
+231                        endcase
+232                    end
+233        
+234                    // Store
+235                    OP_STORE: begin
+236                        unique case (funct3)
+                                  <font color = "red">-23-</font>  
+237                            FUNCT3_SB: instr_type = INSTR_SB;
+           <font color = "green">                    ==></font>
+238                            FUNCT3_SH: instr_type = INSTR_SH;
+           <font color = "green">                    ==></font>
+239                            FUNCT3_SW: instr_type = INSTR_SW;
+           <font color = "green">                    ==></font>
+240                            FUNCT3_SD: instr_type = INSTR_SD;
+           <font color = "green">                    ==></font>
+241                            default:   instr_type = INSTR_NONE;
+           <font color = "red">                    ==></font>
+242                        endcase
+243                    end
+244        
+245                    // Branch
+246                    OP_BRANCH: begin
+247                        unique case (funct3)
+                                  <font color = "red">-24-</font>  
+248                            FUNCT3_BEQ: instr_type = INSTR_BEQ;
+           <font color = "green">                    ==></font>
+249                            FUNCT3_BNE: instr_type = INSTR_BNE;
+           <font color = "green">                    ==></font>
+250                            FUNCT3_BLT: instr_type = INSTR_BLT;
+           <font color = "green">                    ==></font>
+251                            FUNCT3_BGE: instr_type = INSTR_BGE;
+           <font color = "green">                    ==></font>
+252                            FUNCT3_BLTU: instr_type = INSTR_BLTU;
+           <font color = "green">                    ==></font>
+253                            FUNCT3_BGEU: instr_type = INSTR_BGEU;
+           <font color = "green">                    ==></font>
+254                            default:     instr_type = INSTR_NONE;
+           <font color = "red">                    ==></font>
+255                        endcase
+256                    end
+257        
+258                    // Jump
+259                    OP_JAL:  instr_type = INSTR_JAL;
+           <font color = "green">            ==></font>
+260                    OP_JALR: instr_type = INSTR_JALR;
+           <font color = "green">            ==></font>
+261        
+262                    // Upper immediate
+263                    OP_LUI:   instr_type = INSTR_LUI;
+           <font color = "green">            ==></font>
+264                    OP_AUIPC: instr_type = INSTR_AUIPC;
+           <font color = "green">            ==></font>
+265        
+266                    // SYSTEM / CSR
+267                    OP_SYSTEM: begin
+268                        unique case (funct3)
+                                  <font color = "red">-25-</font>  
+269                            FUNCT3_PRIV: begin
+270                                if ((rd == '0) && (rs == '0)) begin
+                                   <font color = "red">-26-</font>  
+271                                    unique case (csr)
+                                              <font color = "red">-27-</font>  
+272                                        FUNCT12_ECALL:  instr_type = INSTR_ECALL;
+           <font color = "green">                                ==></font>
+273                                        FUNCT12_EBREAK: instr_type = INSTR_EBREAK;
+           <font color = "red">                                ==></font>
+274                                        FUNCT12_MRET:   instr_type = INSTR_MRET;
+           <font color = "red">                                ==></font>
+275                                        default:        instr_type = INSTR_NONE;
+           <font color = "red">                                ==></font>
+276                                    endcase
+277                                end
+                                   MISSING_ELSE
+           <font color = "red">                        ==></font>
+278                            end
+279                            FUNCT3_CSRRW:  instr_type = INSTR_CSRRW;
+           <font color = "green">                    ==></font>
+280                            FUNCT3_CSRRS:  instr_type = INSTR_CSRRS;
+           <font color = "green">                    ==></font>
+281                            FUNCT3_CSRRC:  instr_type = INSTR_CSRRC;
+           <font color = "red">                    ==></font>
+282                            FUNCT3_CSRRWI: instr_type = INSTR_CSRRWI;
+           <font color = "green">                    ==></font>
+283                            FUNCT3_CSRRSI: instr_type = INSTR_CSRRSI;
+           <font color = "red">                    ==></font>
+284                            FUNCT3_CSRRCI: instr_type = INSTR_CSRRCI;
+           <font color = "red">                    ==></font>
+285                            default:       instr_type = INSTR_NONE;
+           <font color = "red">                    ==></font>
+286                        endcase
+287                    end
+288        
+289                    default: instr_type = INSTR_NONE;
+           <font color = "green">            ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>-3-</th><th nowrap width=80>-4-</th><th nowrap width=80>-5-</th><th nowrap width=80>-6-</th><th nowrap width=80>-7-</th><th nowrap width=80>-8-</th><th nowrap width=80>-9-</th><th nowrap width=80>-10-</th><th nowrap width=80>-11-</th><th nowrap width=80>-12-</th><th nowrap width=80>-13-</th><th nowrap width=80>-14-</th><th nowrap width=80>-15-</th><th nowrap width=80>-16-</th><th nowrap width=80>-17-</th><th nowrap width=80>-18-</th><th nowrap width=80>-19-</th><th nowrap width=80>-20-</th><th nowrap width=80>-21-</th><th nowrap width=80>-22-</th><th nowrap width=80>-23-</th><th nowrap width=80>-24-</th><th nowrap width=80>-25-</th><th nowrap width=80>-26-</th><th nowrap width=80>-27-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_ADD_SUB </td>
+<td align=center>riscv_funct_pkg::FUNCT7_ZERO </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_ADD_SUB </td>
+<td align=center>riscv_funct_pkg::FUNCT7_ALT </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_ADD_SUB </td>
+<td align=center>riscv_funct_pkg::FUNCT7_MULDIV </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_ADD_SUB </td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLL </td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_ZERO </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLL </td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_MULDIV </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLL </td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLT </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_ZERO </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLT </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_MULDIV </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLT </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLTU </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_ZERO </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLTU </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_MULDIV </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLTU </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_XOR </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_ZERO </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_XOR </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_MULDIV </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_XOR </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_ZERO </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_ALT </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_MULDIV </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_OR </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_ZERO </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_OR </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_MULDIV </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_OR </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_AND </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_ZERO </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_AND </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_MULDIV </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG </td>
+<td align=center>riscv_funct_pkg::FUNCT3_AND </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG </td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_IMM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_ADD_SUB </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_IMM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLT </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_IMM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLTU </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_IMM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_XOR </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_IMM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_OR </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_IMM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_AND </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_IMM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLL </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_IMM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center>riscv_funct_pkg::FUNCT7_ZERO[6:1] </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_IMM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center>riscv_funct_pkg::FUNCT7_ALT[6:1] </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_IMM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_IMM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_IMM_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_ADD_SUB </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_IMM_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLL </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_IMM_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center>riscv_funct_pkg::FUNCT7_ZERO </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_IMM_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center>riscv_funct_pkg::FUNCT7_ALT </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_IMM_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_IMM_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_ADD_SUB </td>
+<td align=center>riscv_funct_pkg::FUNCT7_ZERO </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_ADD_SUB </td>
+<td align=center>riscv_funct_pkg::FUNCT7_ALT </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_ADD_SUB </td>
+<td align=center>riscv_funct_pkg::FUNCT7_MULDIV </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_ADD_SUB </td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLL </td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_ZERO </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SLL </td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_XOR </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_MULDIV </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_XOR </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_ZERO </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_ALT </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_MULDIV </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SRL_SRA </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_OR </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_MULDIV </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_OR </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_AND </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT7_MULDIV </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_AND </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_REG_32 </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_LOAD </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_LB </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_LOAD </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_LH </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_LOAD </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_LW </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_LOAD </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_LD </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_LOAD </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_LBU </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_LOAD </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_LHU </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_LOAD </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_LWU </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_LOAD </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_STORE </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SB </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_STORE </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SH </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_STORE </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SW </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_STORE </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_SD </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_STORE </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_BRANCH </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_BEQ </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_BRANCH </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_BNE </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_BRANCH </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_BLT </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_BRANCH </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_BGE </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_BRANCH </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_BLTU </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_BRANCH </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_BGEU </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_BRANCH </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_JAL </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_JALR </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_LUI </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_AUIPC </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_SYSTEM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_PRIV </td>
+<td align=center>1</td>
+<td align=center>riscv_funct_pkg::FUNCT12_ECALL </td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_SYSTEM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_PRIV </td>
+<td align=center>1</td>
+<td align=center>riscv_funct_pkg::FUNCT12_EBREAK </td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_SYSTEM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_PRIV </td>
+<td align=center>1</td>
+<td align=center>riscv_funct_pkg::FUNCT12_MRET </td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_SYSTEM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_PRIV </td>
+<td align=center>1</td>
+<td align=center>default</td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_SYSTEM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_PRIV </td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_SYSTEM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_CSRRW </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_SYSTEM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_CSRRS </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_SYSTEM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_CSRRC </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>OP_SYSTEM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_CSRRWI </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_SYSTEM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_CSRRSI </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_SYSTEM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>riscv_funct_pkg::FUNCT3_CSRRCI </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>OP_SYSTEM </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+309                unique case (instr_type)
+                          <font color = "red">-1-</font>  
+310                    INSTR_ADD, INSTR_SUB, INSTR_SLT, INSTR_SLTU, INSTR_XOR,
+311                    INSTR_SRL, INSTR_SRA, INSTR_OR, INSTR_AND, INSTR_SLL,
+312                    INSTR_ADDW, INSTR_SUBW, INSTR_SLLW, INSTR_SRLW, INSTR_SRAW,
+313                    INSTR_MUL, INSTR_MULH, INSTR_MULHU, INSTR_MULHSU, INSTR_MULW,
+314                    INSTR_DIV, INSTR_DIVU, INSTR_REM, INSTR_REMU,
+315                    INSTR_DIVW, INSTR_DIVUW, INSTR_REMW, INSTR_REMUW,
+316                    INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
+317                    INSTR_ADDIW, INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
+318                    INSTR_SLLI, INSTR_SRLI, INSTR_SRAI,
+319                    INSTR_LW, INSTR_LD, INSTR_LB, INSTR_LH, INSTR_LBU, INSTR_LHU, INSTR_LWU: begin
+320                        rw = 1;
+           <font color = "green">                ==></font>
+321                        rd_arch_addr = rd;
+322                        rs_arch_addr = rs;
+323                        rt_arch_addr = rt;
+324                        imm = imm_i;
+325                    end
+326                    INSTR_SD, INSTR_SW, INSTR_SB, INSTR_SH: begin
+327                        mw = 1;
+           <font color = "green">                ==></font>
+328                        rs_arch_addr = rs;
+329                        rt_arch_addr = rt;
+330                        imm = imm_s;
+331                    end
+332                    INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU, INSTR_BGE, INSTR_BGEU: begin
+333                        branch = 1;
+           <font color = "green">                ==></font>
+334                        rs_arch_addr = rs;
+335                        rt_arch_addr = rt;
+336                        imm = imm_b;
+337                    end
+338                    INSTR_JAL: begin
+339                        jal_inst = 1;
+           <font color = "green">                ==></font>
+340                        imm = imm_j;
+341                        rw = 1;
+342                        rd_arch_addr = rd;
+343                    end
+344                    INSTR_JALR: begin
+345                        if (rs == 5'd1) begin
+                           <font color = "green">-2-</font>  
+346                            jr31_inst = 1;
+           <font color = "green">                    ==></font>
+347                            imm = imm_i;
+348                            rw = 1;
+349                            rs_arch_addr = rs;
+350                            rd_arch_addr = rd;
+351                        end else if (rd == 5'd0) begin
+                                    <font color = "green">-3-</font>  
+352                            // This is a JR instruction (JALR with rd = x0)
+353                            jr_inst = 1;
+           <font color = "green">                    ==></font>
+354                            rs_arch_addr = rs;
+355                            imm = imm_i;
+356                        end else begin
+357                            jal_inst = 1;
+           <font color = "green">                    ==></font>
+358                            jr_inst = 1;
+359                            rs_arch_addr = rs;
+360                            imm = imm_i;
+361                            rw = 1;
+362                            rd_arch_addr = rd;
+363                        end
+364                    end
+365                    INSTR_LUI, INSTR_AUIPC: begin
+366                        rw = 1;
+           <font color = "green">                ==></font>
+367                        rd_arch_addr = rd;
+368                        imm = imm_u;
+369                    end
+370                    INSTR_CSRRW, INSTR_CSRRS, INSTR_CSRRC: begin
+371                        rw = 1;
+372                        csr_inst = 1;
+373                        csr_addr = csr;
+374                        rd_arch_addr = rd;
+375                        rs_arch_addr = rs;
+376                        imm = XLEN'(csr);
+377        
+378                        unique case (instr_type)
+                                  <font color = "red">-4-</font>  
+379                            INSTR_CSRRW: csr_cmd = CSR_CMD_RW;
+           <font color = "green">                    ==></font>
+380                            INSTR_CSRRS: csr_cmd = CSR_CMD_RS;
+           <font color = "green">                    ==></font>
+381                            INSTR_CSRRC: csr_cmd = CSR_CMD_RC;
+           <font color = "red">                    ==></font>
+382                            default:     csr_cmd = CSR_CMD_NONE;
+           <font color = "red">                    ==></font>
+383                        endcase
+384                    end
+385                    INSTR_CSRRWI, INSTR_CSRRSI, INSTR_CSRRCI: begin
+386                        rw = 1;
+387                        csr_inst = 1;
+388                        csr_addr = csr;
+389                        rd_arch_addr = rd;
+390                        rs_arch_addr = imm_zimm;
+391                        imm = XLEN'(csr);
+392        
+393                        unique case (instr_type)
+                                  <font color = "red">-5-</font>  
+394                            INSTR_CSRRWI: csr_cmd = CSR_CMD_RWI;
+           <font color = "green">                    ==></font>
+395                            INSTR_CSRRSI: csr_cmd = CSR_CMD_RSI;
+           <font color = "red">                    ==></font>
+396                            INSTR_CSRRCI: csr_cmd = CSR_CMD_RCI;
+           <font color = "red">                    ==></font>
+397                            default:      csr_cmd = CSR_CMD_NONE;
+           <font color = "red">                    ==></font>
+398                        endcase
+399                    end
+400                    INSTR_ECALL, INSTR_EBREAK: begin
+401                        trap_inst = 1;
+           <font color = "green">                ==></font>
+402                    end
+403                    INSTR_MRET: begin
+404                        mret_inst = 1;
+           <font color = "red">                ==></font>
+405                    end
+406                    default: begin
+407                        rw = 0;
+           <font color = "green">                ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>-3-</th><th nowrap width=80>-4-</th><th nowrap width=80>-5-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center nowrap>CASEITEM-1: INSTR_ADD INSTR_SUB INSTR_SLT INSTR_SLTU INSTR_XOR INSTR_SRL INSTR_SRA INSTR_OR INSTR_AND INSTR_SLL INSTR_ADDW INSTR_SUBW INSTR_SLLW INSTR_SRLW INSTR_SRAW INSTR_MUL INSTR_MULH INSTR_MULHU INSTR_MULHSU INSTR_MULW INSTR_DIV INSTR_DIVU INSTR_REM INSTR_REMU INSTR_DIVW INSTR_DIVUW INSTR_REMW INSTR_REMUW INSTR_ADDI INSTR_SLTI INSTR_SLTIU INSTR_XORI INSTR_ORI INSTR_ANDI INSTR_ADDIW INSTR_SLLIW INSTR_SRLIW INSTR_SRAIW INSTR_SLLI INSTR_SRLI INSTR_SRAI INSTR_LW INSTR_LD INSTR_LB INSTR_LH INSTR_LBU INSTR_LHU INSTR_LWU </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_SD INSTR_SW INSTR_SB INSTR_SH </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_BEQ INSTR_BNE INSTR_BLT INSTR_BLTU INSTR_BGE INSTR_BGEU </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_JAL </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_JALR </td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_JALR </td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_JALR </td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_LUI INSTR_AUIPC </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_CSRRW INSTR_CSRRS INSTR_CSRRC </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>INSTR_CSRRW </td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_CSRRW INSTR_CSRRS INSTR_CSRRC </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>INSTR_CSRRS </td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>INSTR_CSRRW INSTR_CSRRS INSTR_CSRRC </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>INSTR_CSRRC </td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>INSTR_CSRRW INSTR_CSRRS INSTR_CSRRC </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_CSRRWI INSTR_CSRRSI INSTR_CSRRCI </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>INSTR_CSRRWI </td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>INSTR_CSRRWI INSTR_CSRRSI INSTR_CSRRCI </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>INSTR_CSRRSI </td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>INSTR_CSRRWI INSTR_CSRRSI INSTR_CSRRCI </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>INSTR_CSRRCI </td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>INSTR_CSRRWI INSTR_CSRRSI INSTR_CSRRCI </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>default</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_ECALL INSTR_EBREAK </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>INSTR_MRET </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+</div>
+</div>
+<div class="ui-layout-center-inner-north">
+<div id="center-bread-crumb" class="breadCrumb module urg-margin-bottom">
+  <ul name="inst_tag_35">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Cond">Cond</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+  </ul>
+  <ul name="tag_RISC_V_DECODER">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Cond">Cond</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+  </ul>
+</div>
+</div>
+</div>
+<div class="ui-layout-south">
+<table align=center><tr><td class="s0 cl">0%</td>
+<td class="s1 cl">10%</td>
+<td class="s2 cl">20%</td>
+<td class="s3 cl">30%</td>
+<td class="s4 cl">40%</td>
+<td class="s5 cl">50%</td>
+<td class="s6 cl">60%</td>
+<td class="s7 cl">70%</td>
+<td class="s8 cl">80%</td>
+<td class="s9 cl">90%</td>
+<td class="s10 cl">100%</td></tr></table></div>
+</body>
+</html>

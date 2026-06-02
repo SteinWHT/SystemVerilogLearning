@@ -208,7 +208,7 @@ module tb_top;
         .head_csr_addr    (dut.front_end.rob.head.csr_addr),
         .head_csr_cmd     (dut.front_end.rob.head.csr_cmd),
         .head_rs1_arch    (dut.front_end.rob.head.rs1_arch),
-        .head_cdb_data    (dut.front_end.rob.sim_head_cdb_data)
+        .head_cdb_data    (dut.front_end.rob.head.is_csr ? dut.front_end.rob.csr_rdata : dut.front_end.rob.sim_head_cdb_data)
     );
 
     assign commit_if.rob_commit           = dut.front_end.rob.rob_commit;

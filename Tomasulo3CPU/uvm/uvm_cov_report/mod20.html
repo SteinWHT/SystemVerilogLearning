@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="Author" content="<username>"> <meta name="GENERATOR" content="urg/version [en] (platform name) [urg]">
+<title>Unified Coverage Report :: Module :: tb_top</title>
+<link type="text/css" rel="stylesheet" href="css/.urg.css">
+<link type="text/css" rel="stylesheet" href="css/.layout.css">
+<link type="text/css" rel="stylesheet" href="css/.breadcrumb.css">
+<script type="text/javascript" src="js/.jquery.js"></script>
+<script type="text/javascript" src="js/.jquery-ui.js"></script>
+<script type="text/javascript" src="js/.sortable.js"></script>
+<script type="text/javascript" src="js/.layout.js"></script>
+<script type="text/javascript" src="js/.breadcrumb.js"></script>
+<script type="text/javascript">
+var layout, westLayout, centerLayout;
+$(document).ready(function () {
+  if ($("#north-bread-crumb")) {
+    $("#north-bread-crumb").jBreadCrumb({easing:'swing'})
+  }
+  layout = $("body").layout({ 
+    resizable: true,
+    spacing_open: 4,
+    spacing_closed: 4,
+    north: {
+      size: 76
+    },
+    south: {
+      size: 45,
+      initClosed: true
+    },
+    west: {
+      size: 500,
+      resizable: true,
+      initClosed: false
+    }
+  });
+  centerLayout = $('div.ui-layout-center').layout({
+    north__paneSelector: ".ui-layout-center-inner-north",
+    center__paneSelector: ".ui-layout-center-inner-center", 
+    north__size: 50,
+    spacing_open: 4,
+    spacing_closed: 4
+  });
+});
+</script>
+</head>
+<body onLoad="initPage();"><div class="ui-layout-north">
+<div class="logo"></div>
+<center class="pagetitle">Module Definition</center>
+<div align="center"><a href="dashboard.html" ><b>dashboard</b></a> | <a href="hierarchy.html" ><b>hierarchy</b></a> | <a href="modlist.html" ><b>modlist</b></a> | <a href="groups.html" ><b>groups</b></a> | <a href="tests.html" ><b>tests</b></a> | <a href="asserts.html" ><b>asserts</b></a></div>
+
+</div>
+<div class="ui-layout-west">
+<div name='tag_tb_top'>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module : <a href="#"  onclick="showContent('tag_tb_top')">tb_top</a></span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s8 cl rt"> 85.42</td>
+<td class="s10 cl rt"><a href="mod20.html#Line" >100.00</a></td>
+<td class="s6 cl rt"><a href="mod20.html#Cond" > 66.67</a></td>
+<td class="s7 cl rt"><a href="mod20.html#Toggle" > 75.00</a></td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt"><a href="mod20.html#Branch" >100.00</a></td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<span class=repname>Source File(s) : </span>
+<br clear=all>
+<a href="javascript:void(0);"  onclick="openSrcFile('/workspace/uvm/tb_top.sv')">/workspace/uvm/tb_top.sv</a><br clear=all>
+<br clear=all>
+<span class=repname>Module self-instances :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="wht cl wordwrap"><a href="mod20.html#inst_tag_21"  onclick="showContent('inst_tag_21')">tb_top</a></td>
+<td class="s8 cl rt"> 85.42</td>
+<td class="s10 cl rt"><a href="mod20.html#Line" >100.00</a></td>
+<td class="s6 cl rt"><a href="mod20.html#Cond" > 66.67</a></td>
+<td class="s7 cl rt"><a href="mod20.html#Toggle" > 75.00</a></td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt"><a href="mod20.html#Branch" >100.00</a></td>
+<td class="wht cl rt"></td>
+</tr></table></div>
+</div>
+<br clear=all>
+<div name='tag_tb_top'>
+<hr>
+<a name="inst_tag_21"></a>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module Instance : <a href="hierarchy.html#tag_urg_inst_21" >tb_top</a></span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Instance :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s8 cl rt"> 85.42</td>
+<td class="s10 cl rt"><a href="mod20.html#Line" >100.00</a></td>
+<td class="s6 cl rt"><a href="mod20.html#Cond" > 66.67</a></td>
+<td class="s7 cl rt"><a href="mod20.html#Toggle" > 75.00</a></td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt"><a href="mod20.html#Branch" >100.00</a></td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Instance's subtree :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s8 cl rt"> 83.00</td>
+<td class="s8 cl rt"> 89.64</td>
+<td class="s8 cl rt"> 81.15</td>
+<td class="s6 cl rt"> 61.58</td>
+<td class="wht cl rt"></td>
+<td class="s8 cl rt"> 82.65</td>
+<td class="s10 cl rt">100.00</td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Parent : </span>
+<br clear=all>
+<span class=inst>none</span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Subtrees :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="wht cl wordwrap"><a href="mod24.html#inst_tag_25" id="tag_urg_inst_25">commit_if</a></td>
+<td class="s5 cl rt"> 55.33</td>
+<td class="wht cl rt"></td>
+<td class="wht cl rt"></td>
+<td class="s5 cl rt"> 55.33</td>
+<td class="wht cl rt"></td>
+<td class="wht cl rt"></td>
+<td class="wht cl rt"></td>
+</tr><tr>
+<td class="wht cl wordwrap"><a href="mod36.html#inst_tag_37" id="tag_urg_inst_37">cpu_vif</a></td>
+<td class="s8 cl rt"> 85.72</td>
+<td class="s10 cl rt">100.00</td>
+<td class="wht cl rt"></td>
+<td class="s7 cl rt"> 71.45</td>
+<td class="wht cl rt"></td>
+<td class="wht cl rt"></td>
+<td class="wht cl rt"></td>
+</tr><tr>
+<td class="wht cl wordwrap"><a href="mod3.html#inst_tag_3" id="tag_urg_inst_3">dut</a></td>
+<td class="s8 cl rt"> 82.89</td>
+<td class="s8 cl rt"> 89.14</td>
+<td class="s8 cl rt"> 81.32</td>
+<td class="s6 cl rt"> 61.70</td>
+<td class="wht cl rt"></td>
+<td class="s8 cl rt"> 82.29</td>
+<td class="s10 cl rt">100.00</td>
+</tr><tr>
+<td class="wht cl wordwrap"><a href="mod15.html#inst_tag_16" id="tag_urg_inst_16">u_rob_commit_mon</a></td>
+<td class="s8 cl rt"> 85.16</td>
+<td class="s10 cl rt">100.00</td>
+<td class="wht cl rt"></td>
+<td class="s5 cl rt"> 55.47</td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt">100.00</td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+</div>
+</div>
+<hr>
+Since this is the module's only instance, the coverage report is the same as for the module.</div>
+<div class="ui-layout-center">
+<div class="ui-layout-center-inner-center">
+<div name='tag_tb_top'>
+<a name="Line"></a>
+Line Coverage for Module : <a href="mod20.html" >tb_top</a><br clear=all>
+<table class="noborder">
+<col width="122">
+<col span="4" width="82">
+<tr><th></th><th>Line No.</th><th>Total</th><th>Covered</th><th>Percent</th></tr>
+<tr class="s10"><td class="lf">TOTAL</td><td></td><td>50</td><td>50</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>126</td><td>8</td><td>8</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>148</td><td>8</td><td>8</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>162</td><td>10</td><td>10</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">INITIAL</td><td>254</td><td>1</td><td>1</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>255</td><td>2</td><td>2</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">INITIAL</td><td>258</td><td>4</td><td>4</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">INITIAL</td><td>266</td><td>7</td><td>7</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">INITIAL</td><td>278</td><td>10</td><td>10</td><td>100.00</td></tr>
+</table>
+<pre class="code"><br clear=all>
+125                         always_ff @(posedge clk or negedge rst_n) begin
+126        1/1                  if (!rst_n) begin
+127        1/1                      cpu_vif.imem_valid &lt;= 1'b1;
+128        1/1                      cpu_vif.imem_data  &lt;= '0;
+129                             end else begin
+130        1/1                      if (cpu_vif.imem_read_rdy) begin
+131        1/1                          cpu_vif.imem_valid &lt;= 1'b1;
+132                                 end else begin
+133        1/1                          cpu_vif.imem_valid &lt;= 1'b0;
+134                                 end
+135        1/1                      if (cpu_vif.imem_read_rdy &amp;&amp; cpu_vif.imem_valid) begin
+136        1/1                          cpu_vif.imem_data &lt;= cpu_vif.imem_array[cpu_vif.imem_addr[15:2]];
+137                                 end
+                        MISSING_ELSE
+138                             end
+139                         end
+140                     
+141                         // ----------------------------------------------------------------
+142                         // D-cache model (1-cycle read / write)
+143                         // ----------------------------------------------------------------
+144                         assign cpu_vif.dcache_rvalid = rst_n;
+145                         assign cpu_vif.dcache_wvalid = rst_n;
+146                     
+147                         always_ff @(posedge clk or negedge rst_n) begin
+148        1/1                  if (!rst_n) begin
+149        1/1                      cpu_vif.dcache_rresp_valid &lt;= 1'b0;
+150        1/1                      cpu_vif.dcache_rdata       &lt;= '0;
+151        1/1                  end else if (cpu_vif.dcache_rready &amp;&amp; cpu_vif.dcache_rvalid) begin
+152        1/1                      cpu_vif.dcache_rresp_valid &lt;= 1'b1;
+153        1/1                      cpu_vif.dcache_rdata       &lt;= cpu_vif.dmem_array[cpu_vif.dcache_raddr[15:3]];
+154        1/1                  end else if (cpu_vif.dcache_rresp_valid &amp;&amp; cpu_vif.dcache_rresp_ready) begin
+155        1/1                      cpu_vif.dcache_rresp_valid &lt;= 1'b0;
+156                             end
+                        MISSING_ELSE
+157                         end
+158                     
+159                         // Plain always is intentional: dmem_array is also initialized/preloaded by
+160                         // UVM tasks, so it cannot be written from an always_ff block.
+161                         always @(posedge clk or negedge rst_n) begin
+162        1/1                  if (!rst_n) begin
+163        1/1                      cpu_vif.dcache_wresp_valid &lt;= 1'b0;
+164        1/1                  end else if (cpu_vif.dcache_wready &amp;&amp; cpu_vif.dcache_wvalid) begin
+165                                 logic [REG_FILE_DATA_WIDTH-1:0] temp_data;
+166        1/1                      temp_data = cpu_vif.dmem_array[cpu_vif.dcache_sw_addr[15:3]];
+167        1/1                      for (int i = 0; i &lt; W_BYTE_NUM; i++) begin
+168        1/1                          if (cpu_vif.dcache_wstrb[i])
+169        1/1                              temp_data[i*8 +: 8] = cpu_vif.dcache_sw_data[i*8 +: 8];
+                        MISSING_ELSE
+170                                 end
+171        1/1                      cpu_vif.dmem_array[cpu_vif.dcache_sw_addr[15:3]] &lt;= temp_data;
+172        1/1                      cpu_vif.dcache_wresp_valid &lt;= 1'b1;
+173                             end else begin
+174        1/1                      cpu_vif.dcache_wresp_valid &lt;= 1'b0;
+175                             end
+176                         end
+177                     
+178                         // ----------------------------------------------------------------
+179                         // ROB commit observer (explicit instance — bind + vopt often drops u_rob_commit_mon)
+180                         // ----------------------------------------------------------------
+181                         rob_commit_monitor #(
+182                             .ROB_DEPTH              (ROB_DEPTH),
+183                             .ROB_INDEX_WIDTH        (ROB_INDEX_WIDTH),
+184                             .DMEM_WIDTH             (DMEM_WIDTH),
+185                             .DMEM_DEPTH             (DMEM_DEPTH),
+186                             .IMEM_DEPTH             (IMEM_DEPTH),
+187                             .REG_FILE_DATA_WIDTH    (REG_FILE_DATA_WIDTH),
+188                             .ARCH_REG_COUNT         (ARCH_REG_COUNT),
+189                             .ARCH_REG_WIDTH         (ARCH_REG_WIDTH),
+190                             .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+191                             .W_BYTE_NUM             (W_BYTE_NUM)
+192                         ) u_rob_commit_mon (
+193                             .clk              (clk),
+194                             .rst_n            (rst_n),
+195                             .commit_valid     (dut.front_end.rob.enable),
+196                             .commit_rob_tag   (dut.front_end.rob.read_ptr[ROB_INDEX_WIDTH-1:0]),
+197                             .head_curr_phy    (dut.front_end.rob.head.curr_phy),
+198                             .head_prev_phy    (dut.front_end.rob.head.prev_phy),
+199                             .head_rd_arch     (dut.front_end.rob.head.rd_addr),
+200                             .head_rw          (dut.front_end.rob.head.rw),
+201                             .head_mw          (dut.front_end.rob.head.mw),
+202                             .head_sw_addr     (dut.front_end.rob.head.sw_addr),
+203                             .head_sw_strb     (dut.front_end.rob.head.sw_strb),
+204                             .head_pc          (dut.front_end.rob.head.pc),
+205                             .head_trap_cause  (dut.front_end.rob.head.trap_cause),
+206                             .head_mret        (dut.front_end.rob.head.mret_occur),
+207                             .head_is_csr      (dut.front_end.rob.head.is_csr),
+208                             .head_csr_addr    (dut.front_end.rob.head.csr_addr),
+209                             .head_csr_cmd     (dut.front_end.rob.head.csr_cmd),
+210                             .head_rs1_arch    (dut.front_end.rob.head.rs1_arch),
+211                             .head_cdb_data    (dut.front_end.rob.head.is_csr ? dut.front_end.rob.csr_rdata : dut.front_end.rob.sim_head_cdb_data)
+212                         );
+213                     
+214                         assign commit_if.rob_commit           = dut.front_end.rob.rob_commit;
+215                         assign commit_if.mon_commit_valid     = u_rob_commit_mon.mon_commit_valid;
+216                         assign commit_if.mon_commit_rob_tag   = u_rob_commit_mon.mon_commit_rob_tag;
+217                         assign commit_if.mon_curr_phy         = u_rob_commit_mon.mon_curr_phy;
+218                         assign commit_if.mon_prev_phy         = u_rob_commit_mon.mon_prev_phy;
+219                         assign commit_if.mon_rd_arch          = u_rob_commit_mon.mon_rd_arch;
+220                         assign commit_if.mon_reg_write        = u_rob_commit_mon.mon_reg_write;
+221                         assign commit_if.mon_mem_write        = u_rob_commit_mon.mon_mem_write;
+222                         assign commit_if.mon_sw_addr          = u_rob_commit_mon.mon_sw_addr;
+223                         assign commit_if.mon_sw_strb          = u_rob_commit_mon.mon_sw_strb;
+224                         assign commit_if.mon_pc               = u_rob_commit_mon.mon_pc;
+225                         assign commit_if.mon_trap_cause       = u_rob_commit_mon.mon_trap_cause;
+226                         assign commit_if.mon_mret             = u_rob_commit_mon.mon_mret;
+227                         assign commit_if.mon_is_csr           = u_rob_commit_mon.mon_is_csr;
+228                         assign commit_if.mon_csr_addr         = u_rob_commit_mon.mon_csr_addr;
+229                         assign commit_if.mon_csr_cmd          = u_rob_commit_mon.mon_csr_cmd;
+230                         assign commit_if.mon_rs1_arch         = u_rob_commit_mon.mon_rs1_arch;
+231                         assign commit_if.mon_cdb_data         = u_rob_commit_mon.mon_cdb_data;
+232                         assign commit_if.lat_valid            = u_rob_commit_mon.lat_valid;
+233                         assign commit_if.lat_rob_tag          = u_rob_commit_mon.lat_rob_tag;
+234                         assign commit_if.lat_curr_phy         = u_rob_commit_mon.lat_curr_phy;
+235                         assign commit_if.lat_prev_phy         = u_rob_commit_mon.lat_prev_phy;
+236                         assign commit_if.lat_rd_arch          = u_rob_commit_mon.lat_rd_arch;
+237                         assign commit_if.lat_reg_write        = u_rob_commit_mon.lat_reg_write;
+238                         assign commit_if.lat_mem_write        = u_rob_commit_mon.lat_mem_write;
+239                         assign commit_if.lat_sw_addr          = u_rob_commit_mon.lat_sw_addr;
+240                         assign commit_if.lat_sw_strb          = u_rob_commit_mon.lat_sw_strb;
+241                         assign commit_if.lat_pc               = u_rob_commit_mon.lat_pc;
+242                         assign commit_if.lat_trap_cause       = u_rob_commit_mon.lat_trap_cause;
+243                         assign commit_if.lat_mret             = u_rob_commit_mon.lat_mret;
+244                         assign commit_if.lat_is_csr           = u_rob_commit_mon.lat_is_csr;
+245                         assign commit_if.lat_csr_addr         = u_rob_commit_mon.lat_csr_addr;
+246                         assign commit_if.lat_csr_cmd          = u_rob_commit_mon.lat_csr_cmd;
+247                         assign commit_if.lat_rs1_arch         = u_rob_commit_mon.lat_rs1_arch;
+248                         assign commit_if.lat_cdb_data         = u_rob_commit_mon.lat_cdb_data;
+249                         assign commit_if.lat_commit_count     = u_rob_commit_mon.lat_commit_count;
+250                     
+251                         // ----------------------------------------------------------------
+252                         // Clock / reset / memory init
+253                         // ----------------------------------------------------------------
+254        1/1              initial clk = 1'b0;
+255        2/2              always #5 clk = ~clk;
+256                     
+257                         initial begin
+258        1/1                  for (int i = 0; i &lt; IMEM_WORDS; i++)
+259        1/1                      cpu_vif.imem_array[i] = cpu_vif.nop();
+260        1/1                  for (int i = 0; i &lt; DMEM_LINES; i++)
+261        1/1                      cpu_vif.dmem_array[i] = '0;
+262                         end
+263                     
+264                         initial begin
+265                             int unsigned reset_hold_cycles;
+266        1/1                  rst_n = 1'b0;
+267        1/1                  reset_hold_cycles = 3;
+268        1/1                  void'($value$plusargs(&quot;RESET_HOLD_CYCLES=%d&quot;, reset_hold_cycles));
+269        3/3                  repeat (reset_hold_cycles) @(posedge clk);
+                        REPEAT_FALSE
+270        1/1                  rst_n = 1'b1;
+271                         end
+272                     
+273                         // ----------------------------------------------------------------
+274                         // UVM
+275                         // ----------------------------------------------------------------
+276                         initial begin
+277                             cpu_cfg cfg;
+278        1/1                  cfg = cpu_cfg::type_id::create(&quot;cfg&quot;);
+279        1/1                  cfg.imem_words = IMEM_WORDS;
+280        1/1                  cfg.dmem_lines = DMEM_LINES;
+281                     
+282        1/1                  uvm_config_db#(cpu_drv_vif_t)::set(null, &quot;uvm_test_top&quot;, &quot;vif&quot;, cpu_vif);
+283        1/1                  uvm_config_db#(cpu_mon_vif_t)::set(null, &quot;uvm_test_top&quot;, &quot;mon_vif&quot;, cpu_vif);
+284        1/1                  uvm_config_db#(cpu_commit_vif_t)::set(null, &quot;uvm_test_top&quot;, &quot;commit_vif&quot;, commit_if);
+285        1/1                  uvm_config_db#(cpu_cfg)::set(null, &quot;uvm_test_top&quot;, &quot;cfg&quot;, cfg);
+286                     
+287                             begin
+288        1/1                      automatic string test_name = &quot;cpu_int_alu_test&quot;;
+289        1/1                      void'($value$plusargs(&quot;UVM_TESTNAME=%s&quot;, test_name));
+290        1/1                      run_test(test_name);
+</pre>
+<hr>
+<a name="Cond"></a>
+Cond Coverage for Module : <a href="mod20.html" >tb_top</a><br clear=all>
+<table class="noborder">
+<col width="122">
+<col span="3" width="82">
+<tr><th></th><th>Total</th><th>Covered</th><th>Percent</th></tr>
+<tr class="s6"><td class="lf">Conditions</td><td>12</td><td>8</td><td>66.67</td></tr>
+<tr class="s6"><td class="lf">Logical</td><td>12</td><td>8</td><td>66.67</td></tr>
+<tr class="wht"><td class="lf">Non-Logical</td><td>0</td><td>0</td><td></td></tr>
+<tr class="wht"><td class="lf">Event</td><td>0</td><td>0</td><td></td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       135
+ EXPRESSION (tb_top.cpu_vif.imem_read_rdy &amp;&amp; tb_top.cpu_vif.imem_valid)
+             --------------1-------------    ------------2------------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       151
+ EXPRESSION (tb_top.cpu_vif.dcache_rready &amp;&amp; tb_top.cpu_vif.dcache_rvalid)
+             --------------1-------------    --------------2-------------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       154
+ EXPRESSION (tb_top.cpu_vif.dcache_rresp_valid &amp;&amp; tb_top.cpu_vif.dcache_rresp_ready)
+             ----------------1----------------    ----------------2----------------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       164
+ EXPRESSION (tb_top.cpu_vif.dcache_wready &amp;&amp; tb_top.cpu_vif.dcache_wvalid)
+             --------------1-------------    --------------2-------------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<hr>
+<a name="Toggle"></a>
+Toggle Coverage for Module : <a href="mod20.html" >tb_top</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s5">
+<td>Totals</td>
+<td class="rt">2</td>
+<td class="rt">1</td>
+<td class="rt">50.00 </td>
+</tr><tr class="s7">
+<td>Total Bits</td>
+<td class="rt">4</td>
+<td class="rt">3</td>
+<td class="rt">75.00 </td>
+</tr><tr class="s10">
+<td nowrap>Total Bits 0->1</td>
+<td class="rt">2</td>
+<td class="rt">2</td>
+<td class="rt">100.00</td>
+</tr><tr class="s5">
+<td nowrap>Total Bits 1->0</td>
+<td class="rt">2</td>
+<td class="rt">1</td>
+<td class="rt">50.00 </td>
+</tr></table><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80></th><th nowrap width=80></th><th nowrap width=80></th></tr><tr class="s5">
+<td>Signals</td>
+<td class="rt">2</td>
+<td class="rt">1</td>
+<td class="rt">50.00 </td>
+</tr><tr class="s7">
+<td>Signal Bits</td>
+<td class="rt">4</td>
+<td class="rt">3</td>
+<td class="rt">75.00 </td>
+</tr><tr class="s10">
+<td nowrap>Signal Bits 0->1</td>
+<td class="rt">2</td>
+<td class="rt">2</td>
+<td class="rt">100.00</td>
+</tr><tr class="s5">
+<td nowrap>Signal Bits 1->0</td>
+<td class="rt">2</td>
+<td class="rt">1</td>
+<td class="rt">50.00 </td>
+</tr></table><br clear=all>
+<table align=left class="sortable noborder">
+<caption><b>Signal Details</b></caption>
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td class="alfsrt">Toggle</td><td class="alfsrt">Toggle 1->0</td><td class="alfsrt">Toggle 0->1</td></tr><tr>
+<td>clk</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>rst_n</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr></table><br clear=all>
+<hr>
+<a name="Branch"></a>
+Branch Coverage for Module : <a href="mod20.html" >tb_top</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Line No.</th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s10">
+<td>Branches</td>
+<td></td>
+<td class="rt">12</td>
+<td class="rt">12</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">126</td>
+<td class="rt">5</td>
+<td class="rt">5</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">148</td>
+<td class="rt">4</td>
+<td class="rt">4</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">162</td>
+<td class="rt">3</td>
+<td class="rt">3</td>
+<td class="rt">100.00</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+126                if (!rst_n) begin
+                   <font color = "green">-1-</font>  
+127                    cpu_vif.imem_valid <= 1'b1;
+           <font color = "green">            ==></font>
+128                    cpu_vif.imem_data  <= '0;
+129                end else begin
+130                    if (cpu_vif.imem_read_rdy) begin
+                       <font color = "green">-2-</font>         
+131                        cpu_vif.imem_valid <= 1'b1;
+           <font color = "green">                ==></font>
+132                    end else begin
+133                        cpu_vif.imem_valid <= 1'b0;
+           <font color = "green">                ==></font>
+134                    end
+135                    if (cpu_vif.imem_read_rdy && cpu_vif.imem_valid) begin
+                       <font color = "green">-3-</font>                                  
+136                        cpu_vif.imem_data <= cpu_vif.imem_array[cpu_vif.imem_addr[15:2]];
+           <font color = "green">                ==></font>
+137                    end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>-3-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+148                if (!rst_n) begin
+                   <font color = "green">-1-</font>  
+149                    cpu_vif.dcache_rresp_valid <= 1'b0;
+           <font color = "green">            ==></font>
+150                    cpu_vif.dcache_rdata       <= '0;
+151                end else if (cpu_vif.dcache_rready && cpu_vif.dcache_rvalid) begin
+                            <font color = "green">-2-</font>                                  
+152                    cpu_vif.dcache_rresp_valid <= 1'b1;
+           <font color = "green">            ==></font>
+153                    cpu_vif.dcache_rdata       <= cpu_vif.dmem_array[cpu_vif.dcache_raddr[15:3]];
+154                end else if (cpu_vif.dcache_rresp_valid && cpu_vif.dcache_rresp_ready) begin
+                            <font color = "green">-3-</font>                                       
+155                    cpu_vif.dcache_rresp_valid <= 1'b0;
+           <font color = "green">            ==></font>
+156                end
+                   MISSING_ELSE
+           <font color = "green">        ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>-3-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+162                if (!rst_n) begin
+                   <font color = "green">-1-</font>  
+163                    cpu_vif.dcache_wresp_valid <= 1'b0;
+           <font color = "green">            ==></font>
+164                end else if (cpu_vif.dcache_wready && cpu_vif.dcache_wvalid) begin
+                            <font color = "green">-2-</font>                                  
+165                    logic [REG_FILE_DATA_WIDTH-1:0] temp_data;
+166                    temp_data = cpu_vif.dmem_array[cpu_vif.dcache_sw_addr[15:3]];
+           <font color = "green">            ==></font>
+167                    for (int i = 0; i < W_BYTE_NUM; i++) begin
+168                        if (cpu_vif.dcache_wstrb[i])
+169                            temp_data[i*8 +: 8] = cpu_vif.dcache_sw_data[i*8 +: 8];
+170                    end
+171                    cpu_vif.dmem_array[cpu_vif.dcache_sw_addr[15:3]] <= temp_data;
+172                    cpu_vif.dcache_wresp_valid <= 1'b1;
+173                end else begin
+174                    cpu_vif.dcache_wresp_valid <= 1'b0;
+           <font color = "green">            ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+</div>
+</div>
+<div class="ui-layout-center-inner-north">
+<div id="center-bread-crumb" class="breadCrumb module urg-margin-bottom">
+  <ul name="inst_tag_21">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Cond">Cond</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+  </ul>
+  <ul name="tag_tb_top">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Cond">Cond</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+  </ul>
+</div>
+</div>
+</div>
+<div class="ui-layout-south">
+<table align=center><tr><td class="s0 cl">0%</td>
+<td class="s1 cl">10%</td>
+<td class="s2 cl">20%</td>
+<td class="s3 cl">30%</td>
+<td class="s4 cl">40%</td>
+<td class="s5 cl">50%</td>
+<td class="s6 cl">60%</td>
+<td class="s7 cl">70%</td>
+<td class="s8 cl">80%</td>
+<td class="s9 cl">90%</td>
+<td class="s10 cl">100%</td></tr></table></div>
+</body>
+</html>

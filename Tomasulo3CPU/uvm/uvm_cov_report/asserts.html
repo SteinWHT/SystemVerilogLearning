@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="Author" content="<username>"> <meta name="GENERATOR" content="urg/version [en] (platform name) [urg]">
+<title>Unified Coverage Report :: Assertions</title>
+<link type="text/css" rel="stylesheet" href="css/.urg.css">
+<link type="text/css" rel="stylesheet" href="css/.layout.css">
+<link type="text/css" rel="stylesheet" href="css/.breadcrumb.css">
+<script type="text/javascript" src="js/.jquery.js"></script>
+<script type="text/javascript" src="js/.jquery-ui.js"></script>
+<script type="text/javascript" src="js/.sortable.js"></script>
+<script type="text/javascript" src="js/.layout.js"></script>
+<script type="text/javascript" src="js/.breadcrumb.js"></script>
+<script type="text/javascript">
+var layout, westLayout, centerLayout;
+$(document).ready(function () {
+  if ($("#north-bread-crumb")) {
+    $("#north-bread-crumb").jBreadCrumb({easing:'swing'})
+  }
+  layout = $("body").layout({ 
+    resizable: true,
+    spacing_open: 4,
+    spacing_closed: 4,
+    north: {
+      size: 76
+    },
+    south: {
+      size: 45,
+      initClosed: true
+    },
+    west: {
+      size: 500,
+      resizable: true,
+      initClosed: false
+    }
+  });
+  centerLayout = $('div.ui-layout-center').layout({
+    north__paneSelector: ".ui-layout-center-inner-north",
+    center__paneSelector: ".ui-layout-center-inner-center", 
+    north__size: 50,
+    spacing_open: 4,
+    spacing_closed: 4
+  });
+});
+</script>
+</head>
+<body onLoad="initPage();"><div class="ui-layout-north">
+<div class="logo"></div>
+<center class="pagetitle">Assertions</center>
+<div align="center"><a href="dashboard.html" ><b>dashboard</b></a> | <a href="hierarchy.html" ><b>hierarchy</b></a> | <a href="modlist.html" ><b>modlist</b></a> | <a href="groups.html" ><b>groups</b></a> | <a href="tests.html" ><b>tests</b></a> | <a href="asserts.html" ><b>asserts</b></a></div>
+
+</div>
+<br clear=all>
+<div class="ui-layout-west">
+<b>Assertions by Category</b><table class="noborder">
+<col width="180">
+<col span="3" width="60"><tr class="sortablehead"><td> </td><td>ASSERT</td><td>PROPERTIES</td><td>SEQUENCES</td>
+<tr class="wht"><td class="lf">Total</td><td>16</td><td>0</td><td>0</td></tr>
+<tr class="wht"><td class="lf">Category 0</td><td>16</td><td>0</td><td>0</td></tr>
+</table>
+<hr>
+<br clear=all>
+<b>Assertions by Severity</b><table class="noborder">
+<col width="180">
+<col span="3" width="60"><tr class="sortablehead"><td> </td><td>ASSERT</td><td>PROPERTIES</td><td>SEQUENCES</td>
+<tr class="wht"><td class="lf">Total</td><td>16</td><td>0</td><td>0</td></tr>
+<tr class="wht"><td class="lf">Severity 0</td><td>16</td><td>0</td><td>0</td></tr>
+</table>
+<hr>
+<br clear=all>
+<b>Summary for Assertions</b><table class="noborder">
+<col width="180">
+<col span="2" width="60"><tr class="sortablehead"><td> </td><td>NUMBER</td><td>PERCENT</td>
+<tr class="wht"><td class="lf">Total Number</td><td>16</td><td>100.00</td></tr>
+<tr class="wht"><td class="lf"><a href="#tag_ast_no_covr">Uncovered</a></td><td>2</td><td>12.50</td></tr>
+<tr class="wht"><td class="lf"><a href="#tag_ast_succ">Success</a></td><td>14</td><td>87.50</td></tr>
+<tr class="wht"><td class="lf">Failure</td><td>0</td><td>0.00</td></tr>
+<tr class="wht"><td class="lf">Incomplete</td><td>0</td><td>0.00</td></tr>
+<tr class="wht"><td class="lf"><a href="#tag_ast_no_attp">Without Attempts</a></td><td>2</td><td>12.50</td></tr>
+</table>
+</div>
+<div class="ui-layout-center">
+<div class="ui-layout-center-inner-center">
+<hr>
+<br clear=all>
+<b>Detail Report for Assertions</b><br clear=all>
+<br clear=all>
+Assertions Uncovered:<a name="tag_ast_no_covr"></a>
+<table class="sortable rt">
+<col width="180">
+<col span="6" width="60"><tr class="sortablehead">
+<td class="alfsrt">ASSERTIONS<td>CATEGORY</td><td>SEVERITY</td><td>ATTEMPTS</td><td>REAL SUCCESSES</td><td>FAILURES</td><td>INCOMPLETE</td><td>SRC</td>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_uvm_pkg.\uvm_reg_map::do_read .unnamed$$_0.unnamed$$_1" title="mod7.html#117826508" href="mod7.html#117826508">uvm_pkg.\uvm_reg_map::do_read .unnamed$$_0.unnamed$$_1</a>
+</td><td>0</td><td>0</td><td class="s3">0</td><td class="s3">0</td><td>0</td><td>0</td><td class="ct"><a title="/home/synopsys/vcs/W-2024.09-SP1/etc/uvm/reg/uvm_reg_map.svh" href="javascript:void(0);" onclick="openSrcFile('/home/synopsys/vcs/W-2024.09-SP1/etc/uvm/reg/uvm_reg_map.svh')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_uvm_pkg.\uvm_reg_map::do_write .unnamed$$_0.unnamed$$_1" title="mod7.html#686230363" href="mod7.html#686230363">uvm_pkg.\uvm_reg_map::do_write .unnamed$$_0.unnamed$$_1</a>
+</td><td>0</td><td>0</td><td class="s3">0</td><td class="s3">0</td><td>0</td><td>0</td><td class="ct"><a title="/home/synopsys/vcs/W-2024.09-SP1/etc/uvm/reg/uvm_reg_map.svh" href="javascript:void(0);" onclick="openSrcFile('/home/synopsys/vcs/W-2024.09-SP1/etc/uvm/reg/uvm_reg_map.svh')"><img class="sourcefile"></a>
+</td></tr>
+</table>
+<br clear=all>
+Assertions Success:<a name="tag_ast_succ"></a>
+<table class="sortable rt">
+<col width="180">
+<col span="6" width="60"><tr class="sortablehead">
+<td class="alfsrt">ASSERTIONS<td>CATEGORY</td><td>SEVERITY</td><td>ATTEMPTS</td><td>REAL SUCCESSES</td><td>FAILURES</td><td>INCOMPLETE</td><td>SRC</td>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.back_end.cdb.CDB_VALID_ASSERT" title="mod42.html#102354476" href="mod42.html#102354476">tb_top.dut.back_end.cdb.CDB_VALID_ASSERT</a>
+</td><td>0</td><td>0</td><td class="s9">561095</td><td class="s9">559727</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/back_end/CDB.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/back_end/CDB.sv')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.back_end.exe.EXE_COMPLETED_ASSERT" title="mod31.html#1049480477" href="mod31.html#1049480477">tb_top.dut.back_end.exe.EXE_COMPLETED_ASSERT</a>
+</td><td>0</td><td>0</td><td class="s9">561095</td><td class="s9">559727</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/back_end/EXE/EXE.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/back_end/EXE/EXE.sv')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.back_end.exe.div.DIV_BUSY_ASSERT" title="mod6.html#1812380801" href="mod6.html#1812380801">tb_top.dut.back_end.exe.div.DIV_BUSY_ASSERT</a>
+</td><td>0</td><td>0</td><td class="s9">561095</td><td class="s9">559727</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/back_end/EXE/DIV.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/back_end/EXE/DIV.sv')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.back_end.issueunit.ISSUE_PRIORITY_RULE" title="mod9.html#109678208" href="mod9.html#109678208">tb_top.dut.back_end.issueunit.ISSUE_PRIORITY_RULE</a>
+</td><td>0</td><td>0</td><td class="s9">561095</td><td class="s9">559727</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/back_end/ISSUEUNIT.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/back_end/ISSUEUNIT.sv')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.back_end.issueunit.MUL_CYCLES_RULE" title="mod9.html#1663818526" href="mod9.html#1663818526">tb_top.dut.back_end.issueunit.MUL_CYCLES_RULE</a>
+</td><td>0</td><td>0</td><td class="s9">561095</td><td class="s9">559727</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/back_end/ISSUEUNIT.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/back_end/ISSUEUNIT.sv')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.back_end.lsb.LSB_BUFFER_OVERFLOW" title="mod13.html#1115657066" href="mod13.html#1115657066">tb_top.dut.back_end.lsb.LSB_BUFFER_OVERFLOW</a>
+</td><td>0</td><td>0</td><td class="s9">559727</td><td class="s9">559727</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/back_end/LSB.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/back_end/LSB.sv')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.back_end.lsb.LSB_DCACHE_LATENCY" title="mod13.html#937731500" href="mod13.html#937731500">tb_top.dut.back_end.lsb.LSB_DCACHE_LATENCY</a>
+</td><td>0</td><td>0</td><td class="s9">559727</td><td class="s9">559727</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/back_end/LSB.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/back_end/LSB.sv')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.back_end.prf.CSR_PRIORITY" title="mod12.html#798261013" href="mod12.html#798261013">tb_top.dut.back_end.prf.CSR_PRIORITY</a>
+</td><td>0</td><td>0</td><td class="s9">561095</td><td class="s9">559727</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/back_end/PRF.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/back_end/PRF.sv')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.front_end.bpb.bpb_memory.DUAL_PORT_MEMORY" title="mod23.html#1771181906" href="mod23.html#1771181906">tb_top.dut.front_end.bpb.bpb_memory.DUAL_PORT_MEMORY</a>
+</td><td>0</td><td>0</td><td class="s9">559727</td><td class="s9">559727</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/simple_module/dual_port_memory.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/simple_module/dual_port_memory.sv')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.front_end.frl.FRL_OVERFLOW" title="mod40.html#468690351" href="mod40.html#468690351">tb_top.dut.front_end.frl.FRL_OVERFLOW</a>
+</td><td>0</td><td>0</td><td class="s9">559727</td><td class="s9">559727</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/FRL.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/FRL.sv')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.front_end.frl.FRL_UNDERFLOW" title="mod40.html#184538183" href="mod40.html#184538183">tb_top.dut.front_end.frl.FRL_UNDERFLOW</a>
+</td><td>0</td><td>0</td><td class="s9">559727</td><td class="s9">559727</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/FRL.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/FRL.sv')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.front_end.ifq.IFQ_DEPTH_ASSERTION" title="mod16.html#1611923711" href="mod16.html#1611923711">tb_top.dut.front_end.ifq.IFQ_DEPTH_ASSERTION</a>
+</td><td>0</td><td>0</td><td class="s9">72</td><td class="s9">72</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/IFQ.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/IFQ.sv')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.front_end.ifq.IFQ_MAX_INSTR_NUM_ASSERTIONL" title="mod16.html#1967882486" href="mod16.html#1967882486">tb_top.dut.front_end.ifq.IFQ_MAX_INSTR_NUM_ASSERTIONL</a>
+</td><td>0</td><td>0</td><td class="s9">72</td><td class="s9">72</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/IFQ.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/IFQ.sv')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_tb_top.dut.front_end.ifq.IFQ_POWER_OF_2_ASSERTION" title="mod16.html#1599303916" href="mod16.html#1599303916">tb_top.dut.front_end.ifq.IFQ_POWER_OF_2_ASSERTION</a>
+</td><td>0</td><td>0</td><td class="s9">72</td><td class="s9">72</td><td>0</td><td>0</td><td class="ct"><a title="/workspace/src/IFQ.sv" href="javascript:void(0);" onclick="openSrcFile('/workspace/src/IFQ.sv')"><img class="sourcefile"></a>
+</td></tr>
+</table>
+<br clear=all>
+Assertions Without Attempts:<a name="tag_ast_no_attp"></a>
+<table class="sortable rt">
+<col width="180">
+<col span="6" width="60"><tr class="sortablehead">
+<td class="alfsrt">ASSERTIONS<td>CATEGORY</td><td>SEVERITY</td><td>ATTEMPTS</td><td>REAL SUCCESSES</td><td>FAILURES</td><td>INCOMPLETE</td><td>SRC</td>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_uvm_pkg.\uvm_reg_map::do_read .unnamed$$_0.unnamed$$_1" title="mod7.html#117826508" href="mod7.html#117826508">uvm_pkg.\uvm_reg_map::do_read .unnamed$$_0.unnamed$$_1</a>
+</td><td>0</td><td>0</td><td class="s3">0</td><td class="s3">0</td><td>0</td><td>0</td><td class="ct"><a title="/home/synopsys/vcs/W-2024.09-SP1/etc/uvm/reg/uvm_reg_map.svh" href="javascript:void(0);" onclick="openSrcFile('/home/synopsys/vcs/W-2024.09-SP1/etc/uvm/reg/uvm_reg_map.svh')"><img class="sourcefile"></a>
+</td></tr>
+<tr class="wht"><td class="lf"><a name="tag_hvp_ast_uvm_pkg.\uvm_reg_map::do_write .unnamed$$_0.unnamed$$_1" title="mod7.html#686230363" href="mod7.html#686230363">uvm_pkg.\uvm_reg_map::do_write .unnamed$$_0.unnamed$$_1</a>
+</td><td>0</td><td>0</td><td class="s3">0</td><td class="s3">0</td><td>0</td><td>0</td><td class="ct"><a title="/home/synopsys/vcs/W-2024.09-SP1/etc/uvm/reg/uvm_reg_map.svh" href="javascript:void(0);" onclick="openSrcFile('/home/synopsys/vcs/W-2024.09-SP1/etc/uvm/reg/uvm_reg_map.svh')"><img class="sourcefile"></a>
+</td></tr>
+</table>
+<br clear=all>
+</div>
+<div class="ui-layout-center-inner-north">
+<div id="center-bread-crumb" class="breadCrumb module urg-margin-bottom">
+  <ul>
+    <li>
+      <a href="#tag_ast_no_covr">Assertions Uncovered</a>    </li>
+    <li>
+      <a href="#tag_ast_succ">Assertions Success</a>    </li>
+    <li>
+      <a href="#tag_ast_no_attp">Assertions Without Attempts</a>    </li>
+  </ul>
+</div>
+</div>
+</div>
+<div class="ui-layout-south">
+<table align=center><tr><td class="s0 cl">0%</td>
+<td class="s1 cl">10%</td>
+<td class="s2 cl">20%</td>
+<td class="s3 cl">30%</td>
+<td class="s4 cl">40%</td>
+<td class="s5 cl">50%</td>
+<td class="s6 cl">60%</td>
+<td class="s7 cl">70%</td>
+<td class="s8 cl">80%</td>
+<td class="s9 cl">90%</td>
+<td class="s10 cl">100%</td></tr></table></div>
+</body>
+</html>

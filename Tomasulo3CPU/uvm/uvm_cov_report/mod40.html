@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="Author" content="<username>"> <meta name="GENERATOR" content="urg/version [en] (platform name) [urg]">
+<title>Unified Coverage Report :: Module :: FRL</title>
+<link type="text/css" rel="stylesheet" href="css/.urg.css">
+<link type="text/css" rel="stylesheet" href="css/.layout.css">
+<link type="text/css" rel="stylesheet" href="css/.breadcrumb.css">
+<script type="text/javascript" src="js/.jquery.js"></script>
+<script type="text/javascript" src="js/.jquery-ui.js"></script>
+<script type="text/javascript" src="js/.sortable.js"></script>
+<script type="text/javascript" src="js/.layout.js"></script>
+<script type="text/javascript" src="js/.breadcrumb.js"></script>
+<script type="text/javascript">
+var layout, westLayout, centerLayout;
+$(document).ready(function () {
+  if ($("#north-bread-crumb")) {
+    $("#north-bread-crumb").jBreadCrumb({easing:'swing'})
+  }
+  layout = $("body").layout({ 
+    resizable: true,
+    spacing_open: 4,
+    spacing_closed: 4,
+    north: {
+      size: 76
+    },
+    south: {
+      size: 45,
+      initClosed: true
+    },
+    west: {
+      size: 500,
+      resizable: true,
+      initClosed: false
+    }
+  });
+  centerLayout = $('div.ui-layout-center').layout({
+    north__paneSelector: ".ui-layout-center-inner-north",
+    center__paneSelector: ".ui-layout-center-inner-center", 
+    north__size: 50,
+    spacing_open: 4,
+    spacing_closed: 4
+  });
+});
+</script>
+</head>
+<body onLoad="initPage();"><div class="ui-layout-north">
+<div class="logo"></div>
+<center class="pagetitle">Module Definition</center>
+<div align="center"><a href="dashboard.html" ><b>dashboard</b></a> | <a href="hierarchy.html" ><b>hierarchy</b></a> | <a href="modlist.html" ><b>modlist</b></a> | <a href="groups.html" ><b>groups</b></a> | <a href="tests.html" ><b>tests</b></a> | <a href="asserts.html" ><b>asserts</b></a></div>
+
+</div>
+<div class="ui-layout-west">
+<div name='tag_FRL'>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module : <a href="#"  onclick="showContent('tag_FRL')">FRL</a></span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s9 cl rt"> 96.40</td>
+<td class="s10 cl rt"><a href="mod40.html#Line" >100.00</a></td>
+<td class="s8 cl rt"><a href="mod40.html#Cond" > 86.36</a></td>
+<td class="s9 cl rt"><a href="mod40.html#Toggle" > 95.61</a></td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt"><a href="mod40.html#Branch" >100.00</a></td>
+<td class="s10 cl rt"><a href="mod40.html#Assert" >100.00</a></td>
+</tr></table><br clear=all>
+<span class=repname>Source File(s) : </span>
+<br clear=all>
+<a href="javascript:void(0);"  onclick="openSrcFile('/workspace/src/FRL.sv')">/workspace/src/FRL.sv</a><br clear=all>
+<br clear=all>
+<span class=repname>Module self-instances :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="wht cl wordwrap"><a href="mod40.html#inst_tag_42"  onclick="showContent('inst_tag_42')">tb_top.dut.front_end.frl</a></td>
+<td class="s9 cl rt"> 96.40</td>
+<td class="s10 cl rt"><a href="mod40.html#Line" >100.00</a></td>
+<td class="s8 cl rt"><a href="mod40.html#Cond" > 86.36</a></td>
+<td class="s9 cl rt"><a href="mod40.html#Toggle" > 95.61</a></td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt"><a href="mod40.html#Branch" >100.00</a></td>
+<td class="s10 cl rt"><a href="mod40.html#Assert" >100.00</a></td>
+</tr></table></div>
+</div>
+<br clear=all>
+<div name='tag_FRL'>
+<hr>
+<a name="inst_tag_42"></a>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module Instance : <a href="hierarchy.html#tag_urg_inst_42" >tb_top.dut.front_end.frl</a></span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Instance :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s9 cl rt"> 96.40</td>
+<td class="s10 cl rt"><a href="mod40.html#Line" >100.00</a></td>
+<td class="s8 cl rt"><a href="mod40.html#Cond" > 86.36</a></td>
+<td class="s9 cl rt"><a href="mod40.html#Toggle" > 95.61</a></td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt"><a href="mod40.html#Branch" >100.00</a></td>
+<td class="s10 cl rt"><a href="mod40.html#Assert" >100.00</a></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Instance's subtree :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s9 cl rt"> 96.40</td>
+<td class="s10 cl rt">100.00</td>
+<td class="s8 cl rt"> 86.36</td>
+<td class="s9 cl rt"> 95.61</td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt">100.00</td>
+<td class="s10 cl rt">100.00</td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Parent : </span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td><td class="alfsrt">NAME</td></tr><tr>
+<td class="s8 cl rt"> 82.30</td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt">100.00</td>
+<td class="s4 cl rt"> 46.90</td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt">100.00</td>
+<td class="wht cl rt"></td>
+<td><a href="mod1.html#inst_tag_1" >front_end</a></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Subtrees :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td colspan=8>no children</td>
+</tr></table><br clear=all>
+</div>
+</div>
+<hr>
+Since this is the module's only instance, the coverage report is the same as for the module.</div>
+<div class="ui-layout-center">
+<div class="ui-layout-center-inner-center">
+<div name='tag_FRL'>
+<a name="Line"></a>
+Line Coverage for Module : <a href="mod40.html" >FRL</a><br clear=all>
+<table class="noborder">
+<col width="122">
+<col span="4" width="82">
+<tr><th></th><th>Line No.</th><th>Total</th><th>Covered</th><th>Percent</th></tr>
+<tr class="s10"><td class="lf">TOTAL</td><td></td><td>18</td><td>18</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ROUTINE</td><td>40</td><td>3</td><td>3</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>48</td><td>14</td><td>14</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>87</td><td>1</td><td>1</td><td>100.00</td></tr>
+</table>
+<pre class="code"><br clear=all>
+39                          );
+40         1/1                  if (ptr[FRL_PTR_WIDTH-1:0] == FRL_PTR_WIDTH'(FRL_SIZE - 1)) begin
+41         1/1                      ptr_next = {~ptr[FRL_PTR_WIDTH], {FRL_PTR_WIDTH{1'b0}}};
+42                              end else begin
+43         1/1                      ptr_next = ptr + 1'b1;
+44                              end
+45                          endfunction
+46                      
+47                          always_ff @(posedge clk or negedge rst_n) begin
+48         1/1                  if (!rst_n) begin
+49         1/1                      head_ptr &lt;= '0;
+50         1/1                      tail_ptr &lt;= {1'b1, {FRL_PTR_WIDTH{1'b0}}};
+51         1/1                      for (int i = 0; i &lt; FRL_SIZE; i++) begin
+52                                      // initialize with physical register indices
+53         1/1                          frl_array[i] &lt;= PHY_REGISTER_FILE_WIDTH'(ARCH_REG_COUNT + i);
+54                                  end
+55         1/1                      frl_read_phy_addr &lt;= '0;
+56                              end else begin
+57         1/1                      if (do_write) begin
+58                                      // On commit, add the freed physical register back to the free list
+59         1/1                          frl_array[tail_ptr[FRL_PTR_WIDTH-1:0]] &lt;= rob_commit_pre_phy_addr;
+60         1/1                          tail_ptr &lt;= ptr_next(tail_ptr);
+61                                  end
+                        MISSING_ELSE
+62                      
+63         1/1                      if(cdb_flush) begin
+64                                      // On flush, we might need to restore the head pointer from CFC
+65         1/1                          head_ptr &lt;= frat_frl_head_ptr;
+66         1/1                      end else if (do_read) begin
+67                                      // On read, provide the next free physical register and move head pointer
+68         1/1                          frl_read_phy_addr &lt;= frl_array[head_ptr[FRL_PTR_WIDTH-1:0]];
+69         1/1                          head_ptr &lt;= ptr_next(head_ptr);
+70                                  end
+                        MISSING_ELSE
+71                              end
+72                          end
+73                      
+74                          assign empty = (head_ptr == tail_ptr);
+75                          assign full = (head_ptr[FRL_PTR_WIDTH] != tail_ptr[FRL_PTR_WIDTH]) &amp;&amp;
+76                                        (head_ptr[FRL_PTR_WIDTH-1:0] == tail_ptr[FRL_PTR_WIDTH-1:0]);
+77                      
+78                          assign do_read = dis_frl_read &amp;&amp; !empty &amp;&amp; !cdb_flush;
+79                          assign do_write = rob_commit &amp;&amp; rob_commit_reg_write &amp;&amp; (!full || do_read);
+80                      
+81                          assign frl_read_empty = empty;
+82                      
+83                          assign frl_head_ptr_to_frat = head_ptr;
+84                      
+85                          // synthesis translate_off
+86                          always_ff @(posedge clk) begin
+87         1/1                  if (rst_n) begin
+88                                  FRL_UNDERFLOW: assert (!(do_read &amp;&amp; empty))
+89                                                  else $error(&quot;FRL underflow at time %0t&quot;, $time);
+90                                  FRL_OVERFLOW: assert (!(do_write &amp;&amp; full &amp;&amp; !do_read))
+91                                                  else $error(&quot;FRL overflow at time %0t&quot;, $time);
+92                              end
+                        MISSING_ELSE
+</pre>
+<hr>
+<a name="Cond"></a>
+Cond Coverage for Module : <a href="mod40.html" >FRL</a><br clear=all>
+<table class="noborder">
+<col width="122">
+<col span="3" width="82">
+<tr><th></th><th>Total</th><th>Covered</th><th>Percent</th></tr>
+<tr class="s8"><td class="lf">Conditions</td><td>22</td><td>19</td><td>86.36</td></tr>
+<tr class="s8"><td class="lf">Logical</td><td>22</td><td>19</td><td>86.36</td></tr>
+<tr class="wht"><td class="lf">Non-Logical</td><td>0</td><td>0</td><td></td></tr>
+<tr class="wht"><td class="lf">Event</td><td>0</td><td>0</td><td></td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       40
+ EXPRESSION (ptr[(FRL_PTR_WIDTH - 1):0] == 7'((FRL_SIZE - 1)))
+            -------------------------1------------------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       74
+ EXPRESSION (head_ptr == tail_ptr)
+            -----------1----------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       75
+ EXPRESSION ((head_ptr[FRL_PTR_WIDTH] != tail_ptr[FRL_PTR_WIDTH]) &amp;&amp; (head_ptr[(FRL_PTR_WIDTH - 1):0] == tail_ptr[(FRL_PTR_WIDTH - 1):0]))
+             --------------------------1-------------------------    ----------------------------------2---------------------------------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       75
+ SUB-EXPRESSION (head_ptr[FRL_PTR_WIDTH] != tail_ptr[FRL_PTR_WIDTH])
+                --------------------------1-------------------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       75
+ SUB-EXPRESSION (head_ptr[(FRL_PTR_WIDTH - 1):0] == tail_ptr[(FRL_PTR_WIDTH - 1):0])
+                ----------------------------------1---------------------------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       78
+ EXPRESSION (dis_frl_read &amp;&amp; ((!empty)) &amp;&amp; ((!cdb_flush)))
+             ------1-----    -----2----    -------3------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       79
+ EXPRESSION (rob_commit &amp;&amp; rob_commit_reg_write &amp;&amp; (((!full)) || do_read))
+             -----1----    ----------2---------    -----------3----------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       79
+ SUB-EXPRESSION (((!full)) || do_read)
+                 ----1----    ---2---
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+</table>
+<hr>
+<a name="Toggle"></a>
+Toggle Coverage for Module : <a href="mod40.html" >FRL</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s8">
+<td>Totals</td>
+<td class="rt">17</td>
+<td class="rt">14</td>
+<td class="rt">82.35 </td>
+</tr><tr class="s9">
+<td>Total Bits</td>
+<td class="rt">114</td>
+<td class="rt">109</td>
+<td class="rt">95.61 </td>
+</tr><tr class="s9">
+<td nowrap>Total Bits 0->1</td>
+<td class="rt">57</td>
+<td class="rt">55</td>
+<td class="rt">96.49 </td>
+</tr><tr class="s9">
+<td nowrap>Total Bits 1->0</td>
+<td class="rt">57</td>
+<td class="rt">54</td>
+<td class="rt">94.74 </td>
+</tr></table><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80></th><th nowrap width=80></th><th nowrap width=80></th></tr><tr class="s8">
+<td>Ports</td>
+<td class="rt">11</td>
+<td class="rt">9</td>
+<td class="rt">81.82 </td>
+</tr><tr class="s9">
+<td>Port Bits</td>
+<td class="rt">74</td>
+<td class="rt">71</td>
+<td class="rt">95.95 </td>
+</tr><tr class="s9">
+<td nowrap>Port Bits 0->1</td>
+<td class="rt">37</td>
+<td class="rt">36</td>
+<td class="rt">97.30 </td>
+</tr><tr class="s9">
+<td nowrap>Port Bits 1->0</td>
+<td class="rt">37</td>
+<td class="rt">35</td>
+<td class="rt">94.59 </td>
+</tr></table><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80></th><th nowrap width=80></th><th nowrap width=80></th></tr><tr class="s8">
+<td>Signals</td>
+<td class="rt">6</td>
+<td class="rt">5</td>
+<td class="rt">83.33 </td>
+</tr><tr class="s9">
+<td>Signal Bits</td>
+<td class="rt">40</td>
+<td class="rt">38</td>
+<td class="rt">95.00 </td>
+</tr><tr class="s9">
+<td nowrap>Signal Bits 0->1</td>
+<td class="rt">20</td>
+<td class="rt">19</td>
+<td class="rt">95.00 </td>
+</tr><tr class="s9">
+<td nowrap>Signal Bits 1->0</td>
+<td class="rt">20</td>
+<td class="rt">19</td>
+<td class="rt">95.00 </td>
+</tr></table><br clear=all>
+<table align=left class="sortable noborder">
+<caption><b>Port Details</b></caption>
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td class="alfsrt">Toggle</td><td class="alfsrt">Toggle 1->0</td><td class="alfsrt">Toggle 0->1</td><td class="alfsrt">Direction</td></tr><tr>
+<td>clk</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rst_n</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rob_commit_pre_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rob_commit</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rob_commit_reg_write</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>frat_frl_head_ptr[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>cdb_flush</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_frl_read</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>frl_read_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>frl_read_empty</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>frl_head_ptr_to_frat[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr></table><br clear=all>
+<table align=left class="sortable noborder">
+<caption><b>Signal Details</b></caption>
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td class="alfsrt">Toggle</td><td class="alfsrt">Toggle 1->0</td><td class="alfsrt">Toggle 0->1</td></tr><tr>
+<td>head_ptr[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>tail_ptr[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>empty</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>full</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>do_read</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>do_write</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr></table><br clear=all>
+<hr>
+<a name="Branch"></a>
+Branch Coverage for Module : <a href="mod40.html" >FRL</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Line No.</th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s10">
+<td>Branches</td>
+<td></td>
+<td class="rt">10</td>
+<td class="rt">10</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">48</td>
+<td class="rt">6</td>
+<td class="rt">6</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">87</td>
+<td class="rt">2</td>
+<td class="rt">2</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">40</td>
+<td class="rt">2</td>
+<td class="rt">2</td>
+<td class="rt">100.00</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+48                 if (!rst_n) begin
+                   <font color = "green">-1-</font>  
+49                     head_ptr <= '0;
+           <font color = "green">            ==></font>
+50                     tail_ptr <= {1'b1, {FRL_PTR_WIDTH{1'b0}}};
+51                     for (int i = 0; i < FRL_SIZE; i++) begin
+52                         // initialize with physical register indices
+53                         frl_array[i] <= PHY_REGISTER_FILE_WIDTH'(ARCH_REG_COUNT + i);
+54                     end
+55                     frl_read_phy_addr <= '0;
+56                 end else begin
+57                     if (do_write) begin
+                       <font color = "green">-2-</font>  
+58                         // On commit, add the freed physical register back to the free list
+59                         frl_array[tail_ptr[FRL_PTR_WIDTH-1:0]] <= rob_commit_pre_phy_addr;
+           <font color = "green">                ==></font>
+60                         tail_ptr <= ptr_next(tail_ptr);
+61                     end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+62         
+63                     if(cdb_flush) begin
+                       <font color = "green">-3-</font>  
+64                         // On flush, we might need to restore the head pointer from CFC
+65                         head_ptr <= frat_frl_head_ptr;
+           <font color = "green">                ==></font>
+66                     end else if (do_read) begin
+                                <font color = "green">-4-</font>  
+67                         // On read, provide the next free physical register and move head pointer
+68                         frl_read_phy_addr <= frl_array[head_ptr[FRL_PTR_WIDTH-1:0]];
+           <font color = "green">                ==></font>
+69                         head_ptr <= ptr_next(head_ptr);
+70                     end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>-3-</th><th nowrap width=80>-4-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+87                 if (rst_n) begin
+                   <font color = "green">-1-</font>  
+88                     FRL_UNDERFLOW: assert (!(do_read && empty))
+           <font color = "green">            ==></font>
+89                                     else $error("FRL underflow at time %0t", $time);
+90                     FRL_OVERFLOW: assert (!(do_write && full && !do_read))
+91                                     else $error("FRL overflow at time %0t", $time);
+92                 end
+                   MISSING_ELSE
+           <font color = "green">        ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+40                 if (ptr[FRL_PTR_WIDTH-1:0] == FRL_PTR_WIDTH'(FRL_SIZE - 1)) begin
+                   <font color = "green">-1-</font>  
+41                     ptr_next = {~ptr[FRL_PTR_WIDTH], {FRL_PTR_WIDTH{1'b0}}};
+           <font color = "green">            ==></font>
+42                 end else begin
+43                     ptr_next = ptr + 1'b1;
+           <font color = "green">            ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<hr>
+<a name="Assert"></a>
+Assert Coverage for Module : <a href="mod40.html" >FRL</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Total</th><th nowrap width=80>Attempted</th><th nowrap width=80>Percent</th><th nowrap width=80>Succeeded/Matched</th><th nowrap width=80>Percent</th></tr><tr>
+<td class="wht cl"><a href="#1330125969" >Assertions</a></td>
+<td class="wht cl rt">2</td>
+<td class="s10 cl rt">2</td>
+<td class="s10 cl rt">100.00</td>
+<td class="s10 cl rt">2</td>
+<td class="s10 cl rt">100.00</td>
+</tr><tr>
+<td class="wht cl"><a href="#1280959780" >Cover properties</a></td>
+<td class="wht cl rt">0</td>
+<td class="wht cl rt">0</td>
+<td class="wht cl"></td>
+<td class="wht cl rt">0</td>
+<td class="wht cl"></td>
+</tr><tr>
+<td class="wht cl"><a href="#1887657175" >Cover sequences</a></td>
+<td class="wht cl rt">0</td>
+<td class="wht cl rt">0</td>
+<td class="wht cl"></td>
+<td class="wht cl rt">0</td>
+<td class="wht cl"></td>
+</tr><tr>
+<td class="wht cl"><b>Total</b></td>
+<td class="wht cl rt">2</td>
+<td class="s10 cl rt">2</td>
+<td class="s10 cl rt">100.00</td>
+<td class="s10 cl rt">2</td>
+<td class="s10 cl rt">100.00</td>
+</tr></table><br clear=all>
+<br clear=all>
+<hr>
+<br clear=all>
+<a name="1330125969"></a>
+<b>Assertion Details</b><br clear=all>
+<br clear=all>
+<table align=left class="sortable noborder">
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td>Attempts</td><td>Real Successes</td><td>Failures</td><td>Incomplete</td></tr><tr>
+<td class="wht cl"><a name="468690351"></a>
+FRL_OVERFLOW</td>
+<td class="s9 cl rt">559727</td>
+<td class="s9 cl rt">559727</td>
+<td class="s9 cl rt">0</td>
+<td class="wht cl rt">0</td>
+</tr><tr>
+<td class="wht cl"><a name="184538183"></a>
+FRL_UNDERFLOW</td>
+<td class="s9 cl rt">559727</td>
+<td class="s9 cl rt">559727</td>
+<td class="s9 cl rt">0</td>
+<td class="wht cl rt">0</td>
+</tr></table><br clear=all>
+</div>
+</div>
+<div class="ui-layout-center-inner-north">
+<div id="center-bread-crumb" class="breadCrumb module urg-margin-bottom">
+  <ul name="inst_tag_42">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Cond">Cond</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+    <li>
+      <a href="#Assert">Assert</a>    </li>
+  </ul>
+  <ul name="tag_FRL">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Cond">Cond</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+    <li>
+      <a href="#Assert">Assert</a>    </li>
+  </ul>
+</div>
+</div>
+</div>
+<div class="ui-layout-south">
+<table align=center><tr><td class="s0 cl">0%</td>
+<td class="s1 cl">10%</td>
+<td class="s2 cl">20%</td>
+<td class="s3 cl">30%</td>
+<td class="s4 cl">40%</td>
+<td class="s5 cl">50%</td>
+<td class="s6 cl">60%</td>
+<td class="s7 cl">70%</td>
+<td class="s8 cl">80%</td>
+<td class="s9 cl">90%</td>
+<td class="s10 cl">100%</td></tr></table></div>
+</body>
+</html>

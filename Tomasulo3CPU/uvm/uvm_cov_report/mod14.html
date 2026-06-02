@@ -1,0 +1,2571 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="Author" content="<username>"> <meta name="GENERATOR" content="urg/version [en] (platform name) [urg]">
+<title>Unified Coverage Report :: Module :: LSQ</title>
+<link type="text/css" rel="stylesheet" href="css/.urg.css">
+<link type="text/css" rel="stylesheet" href="css/.layout.css">
+<link type="text/css" rel="stylesheet" href="css/.breadcrumb.css">
+<script type="text/javascript" src="js/.jquery.js"></script>
+<script type="text/javascript" src="js/.jquery-ui.js"></script>
+<script type="text/javascript" src="js/.sortable.js"></script>
+<script type="text/javascript" src="js/.layout.js"></script>
+<script type="text/javascript" src="js/.breadcrumb.js"></script>
+<script type="text/javascript">
+var layout, westLayout, centerLayout;
+$(document).ready(function () {
+  if ($("#north-bread-crumb")) {
+    $("#north-bread-crumb").jBreadCrumb({easing:'swing'})
+  }
+  layout = $("body").layout({ 
+    resizable: true,
+    spacing_open: 4,
+    spacing_closed: 4,
+    north: {
+      size: 76
+    },
+    south: {
+      size: 45,
+      initClosed: true
+    },
+    west: {
+      size: 500,
+      resizable: true,
+      initClosed: false
+    }
+  });
+  centerLayout = $('div.ui-layout-center').layout({
+    north__paneSelector: ".ui-layout-center-inner-north",
+    center__paneSelector: ".ui-layout-center-inner-center", 
+    north__size: 50,
+    spacing_open: 4,
+    spacing_closed: 4
+  });
+});
+</script>
+</head>
+<body onLoad="initPage();"><div class="ui-layout-north">
+<div class="logo"></div>
+<center class="pagetitle">Module Definition</center>
+<div align="center"><a href="dashboard.html" ><b>dashboard</b></a> | <a href="hierarchy.html" ><b>hierarchy</b></a> | <a href="modlist.html" ><b>modlist</b></a> | <a href="groups.html" ><b>groups</b></a> | <a href="tests.html" ><b>tests</b></a> | <a href="asserts.html" ><b>asserts</b></a></div>
+
+</div>
+<div class="ui-layout-west">
+<div name='tag_LSQ'>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module : <a href="#"  onclick="showContent('tag_LSQ')">LSQ</a></span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s8 cl rt"> 80.69</td>
+<td class="s9 cl rt"><a href="mod14.html#Line" > 99.26</a></td>
+<td class="s8 cl rt"><a href="mod14.html#Cond" > 84.21</a></td>
+<td class="s3 cl rt"><a href="mod14.html#Toggle" > 39.29</a></td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt"><a href="mod14.html#Branch" >100.00</a></td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<span class=repname>Source File(s) : </span>
+<br clear=all>
+<a href="javascript:void(0);"  onclick="openSrcFile('/workspace/src/back_end/ISSUE_QUEUE/LSQ.sv')">/workspace/src/back_end/ISSUE_QUEUE/LSQ.sv</a><br clear=all>
+<br clear=all>
+<span class=repname>Module self-instances :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="wht cl wordwrap"><a href="mod14.html#inst_tag_14"  onclick="showContent('inst_tag_14')">tb_top.dut.back_end.issueq.lsq</a></td>
+<td class="s8 cl rt"> 80.69</td>
+<td class="s9 cl rt"><a href="mod14.html#Line" > 99.26</a></td>
+<td class="s8 cl rt"><a href="mod14.html#Cond" > 84.21</a></td>
+<td class="s3 cl rt"><a href="mod14.html#Toggle" > 39.29</a></td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt"><a href="mod14.html#Branch" >100.00</a></td>
+<td class="wht cl rt"></td>
+</tr></table></div>
+</div>
+<br clear=all>
+<div name='tag_LSQ'>
+<hr>
+<a name="inst_tag_14"></a>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module Instance : <a href="hierarchy.html#tag_urg_inst_14" >tb_top.dut.back_end.issueq.lsq</a></span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Instance :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s8 cl rt"> 80.69</td>
+<td class="s9 cl rt"><a href="mod14.html#Line" > 99.26</a></td>
+<td class="s8 cl rt"><a href="mod14.html#Cond" > 84.21</a></td>
+<td class="s3 cl rt"><a href="mod14.html#Toggle" > 39.29</a></td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt"><a href="mod14.html#Branch" >100.00</a></td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Instance's subtree :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s8 cl rt"> 80.69</td>
+<td class="s9 cl rt"> 99.26</td>
+<td class="s8 cl rt"> 84.21</td>
+<td class="s3 cl rt"> 39.29</td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt">100.00</td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Parent : </span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td><td class="alfsrt">NAME</td></tr><tr>
+<td class="s8 cl rt"> 87.68</td>
+<td class="s10 cl rt">100.00</td>
+<td class="s6 cl rt"> 66.67</td>
+<td class="s8 cl rt"> 84.04</td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt">100.00</td>
+<td class="wht cl rt"></td>
+<td><a href="mod28.html#inst_tag_29" >issueq</a></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Subtrees :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td colspan=8>no children</td>
+</tr></table><br clear=all>
+</div>
+</div>
+<hr>
+Since this is the module's only instance, the coverage report is the same as for the module.</div>
+<div class="ui-layout-center">
+<div class="ui-layout-center-inner-center">
+<div name='tag_LSQ'>
+<a name="Line"></a>
+Line Coverage for Module : <a href="mod14.html" >LSQ</a><br clear=all>
+<table class="noborder">
+<col width="122">
+<col span="4" width="82">
+<tr><th></th><th>Line No.</th><th>Total</th><th>Covered</th><th>Percent</th></tr>
+<tr class="s9"><td class="lf">TOTAL</td><td></td><td>136</td><td>135</td><td>99.26</td></tr>
+<tr class="s10"><td class="lf">ROUTINE</td><td>134</td><td>2</td><td>2</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ROUTINE</td><td>143</td><td>2</td><td>2</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>149</td><td>6</td><td>6</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>168</td><td>6</td><td>6</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>183</td><td>4</td><td>4</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>193</td><td>7</td><td>7</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>223</td><td>31</td><td>31</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>287</td><td>2</td><td>2</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>298</td><td>9</td><td>9</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>324</td><td>9</td><td>9</td><td>100.00</td></tr>
+<tr class="s9"><td class="lf">ALWAYS</td><td>340</td><td>27</td><td>26</td><td>96.30</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>425</td><td>9</td><td>9</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>441</td><td>2</td><td>2</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>448</td><td>20</td><td>20</td><td>100.00</td></tr>
+</table>
+<pre class="code"><br clear=all>
+133                             instr_e instr_op;
+134        1/1                  instr_op = instr_e'(op);
+135        1/1                  return (instr_op == INSTR_LW  || instr_op == INSTR_LD  ||
+136                                     instr_op == INSTR_LB  || instr_op == INSTR_LH  ||
+137                                     instr_op == INSTR_LBU || instr_op == INSTR_LHU ||
+138                                     instr_op == INSTR_LWU);
+139                         endfunction
+140                     
+141                         function automatic logic is_store(logic [OPCODE_WIDTH-1:0] op);
+142                             instr_e instr_op;
+143        1/1                  instr_op = instr_e'(op);
+144        1/1                  return (instr_op == INSTR_SW || instr_op == INSTR_SD ||
+145                                     instr_op == INSTR_SB || instr_op == INSTR_SH);
+146                         endfunction
+147                     
+148                         always_comb begin
+149        1/1                  for (int i = 0; i &lt; LSQ_DEPTH; i++) begin
+150        1/1                      wk_rs_rdy[i] = q[i].rs_data_valid;
+151                     
+152        1/1                      if (q_valid[i]) begin
+153        1/1                          if (!q[i].rs_data_valid) begin
+154        2/2                              if (cdb_valid &amp;&amp; cdb_phy_reg_write   &amp;&amp; (q[i].rs_phy_addr == cdb_rd_phy_addr))      wk_rs_rdy[i] = 1'b1;
+                        MISSING_ELSE
+155                                     end
+                        MISSING_ELSE
+156                                 end
+                        MISSING_ELSE
+157                             end
+158                         end
+159                     
+160                         // Get the register data from the PRF and add offset to get the address
+161                         logic addr_calculating_valid;
+162                         logic [LSQ_INDEX_WIDTH-1:0] addr_calculating_idx;
+163                         logic [DMEM_DEPTH-1:0] lsq_addr_next;
+164                         assign iss_rs_phy_addr_ls = q[addr_calculating_idx].rs_phy_addr;
+165                         assign lsq_addr_next = q[addr_calculating_idx].addr_offset + iss_rs_data_lsq;
+166                     
+167                         always_comb begin
+168        1/1                  addr_calculating_valid = 1'b0;
+169        1/1                  addr_calculating_idx = '0;
+170        1/1                  for (int i = 0; i &lt; LSQ_DEPTH; i++) begin
+171        1/1                      if (q_valid[i] &amp;&amp; wk_rs_rdy[i] &amp;&amp; !q[i].addr_rdy) begin
+172        1/1                          addr_calculating_valid = 1'b1;
+173        1/1                          addr_calculating_idx = i;
+174                                 end
+                        MISSING_ELSE
+175                             end
+176                         end
+177                     
+178                         // Dispatch-Time Wakeup — catch same-cycle forwarding for new entry
+179                         // TODO: check if no this forwarding, will the cdb data be lost?
+180                         logic dis_rs_rdy_eff;
+181                     
+182                         always_comb begin
+183        1/1                  dis_rs_rdy_eff = dis_rs_data_ready;
+184                     
+185        1/1                  if (!dis_rs_data_ready) begin
+186        2/2                      if (cdb_valid &amp;&amp; cdb_phy_reg_write   &amp;&amp; (dis_rs_phy_addr == cdb_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
+                        MISSING_ELSE
+187                             end
+                        MISSING_ELSE
+188                         end
+189                     
+190                         // Match Number Detection
+191                         logic [SAB_INDEX_WIDTH-1:0] match_number [LSQ_DEPTH];
+192                         always_comb begin
+193        1/1                  for (int i = 0; i &lt; LSQ_DEPTH; i++) begin
+194        1/1                      match_number[i] = '0;
+195                             end
+196        1/1                  for (int i = 0; i &lt; LSQ_DEPTH; i++) begin
+197        1/1                      if (q_valid[i] &amp;&amp; is_load(q[i].opcode)) begin
+198        1/1                          for (int j = 0; j &lt; SAB_DEPTH; j++) begin
+199        1/1                              if (sab_array[j].addr[DMEM_DEPTH-1:3] == q[i].addr_offset[DMEM_DEPTH-1:3] &amp;&amp;
+200                                             sab_valid[j] == 1'b1) begin
+201        1/1                                  match_number[i] = match_number[i] + 1;
+202                                         end
+                        MISSING_ELSE
+203                                     end
+204                                 end
+                        MISSING_ELSE
+205                             end
+206                         end
+207                     
+208                         // Ready Detection &amp; Oldest-First Selection
+209                         // depth = rob_tag - rob_top_ptr (unsigned mod 2^N, smaller = older)
+210                         logic [LSQ_DEPTH-1:0] q_ready;
+211                         logic [ROB_INDEX_WIDTH-1:0] entry_depth [LSQ_DEPTH];
+212                         logic [LSQ_INDEX_WIDTH-1:0] sel_idx;
+213                         logic                       sel_valid, sw_valid, lw_valid;
+214                         logic debug_sw, debug_lw, debug_in;
+215                     
+216                         // ISSUE LOGIC:
+217                         // 1. for sw: all the older lw addresses are known, so we can check if the sw address is in the LSQ
+218                         // 2. for sw: sab is not full
+219                         // 3. for lw: older sw should not have the same address
+220                         // 4. for lw: junior counter equals to the match number
+221                         // 5. for lw: dcache is not busy
+222                         always_comb begin
+223        1/1                  for (int i = 0; i &lt; LSQ_DEPTH; i++) begin
+224        1/1                      q_ready[i]     = q_valid[i] &amp; wk_rs_rdy[i] &amp;&amp; q[i].addr_rdy;
+225        1/1                      entry_depth[i] = q_valid[i] ? (q[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_top_ptr) :
+226                                                 {ROB_INDEX_WIDTH{1'b1}};
+227                             end
+228                     
+229        1/1                  sw_valid  = 1'b0;
+230        1/1                  lw_valid  = 1'b0;
+231        1/1                  sel_idx   = '0;
+232                     
+233        1/1                  debug_sw = 1'b0;
+234        1/1                  debug_lw = 1'b0;
+235        1/1                  debug_in = 1'b0;
+236                     
+237                     
+238        1/1                  for (int i = LSQ_DEPTH - 1; i &gt;= 0; i--) begin
+239        1/1                      if (q_ready[i]) begin
+240        1/1                          debug_in = 1'b1;
+241        1/1                          sel_valid = 1'b1;
+242        1/1                          if (is_store(q[i].opcode)) begin
+243        1/1                              debug_sw = 1'b1;
+244        1/1                              for (int j = 0; j &lt; LSQ_DEPTH; j++) begin
+245                                             // 1. for sw: all the older lw addresses are known
+246                                             // 2. for sw: sab is not full
+247        1/1                                  if(!sab_full &amp;&amp; (j != i) &amp;&amp; q_valid[j] &amp;&amp; is_load(q[j].opcode) &amp;&amp;
+248                                             (entry_depth[j] &lt; entry_depth[i])
+249                                                 &amp;&amp; ((q[j].addr_rdy == 1'b0)) ) begin
+250        1/1                                      sel_valid = 1'b0;
+251        1/1                                      break;
+252                                             end
+                        MISSING_ELSE
+253                                         end
+254        1/1                              if (sel_valid) begin
+255        1/1                                  sw_valid = 1'b1;
+256        1/1                                  sel_idx = i[LSQ_INDEX_WIDTH-1:0];
+257                                         end
+                        MISSING_ELSE
+258                                     end else begin
+259        1/1                              debug_lw = 1'b1;
+260        1/1                              for (int j = 0; j &lt; LSQ_DEPTH; j++) begin
+261                                             // 3. for lw: older sw should not have the same address
+262        1/1                                  if(q_valid[j] &amp;&amp; (j != i) &amp;&amp; is_store(q[j].opcode) &amp;&amp;
+263                                                 (entry_depth[j] &lt; entry_depth[i]) &amp;&amp;
+264                                                 ((q[j].addr_rdy == 1'b0) ||
+265                                                 ((q[j].addr_rdy == 1'b1) &amp;&amp;
+266                                                 q[j].addr_offset[DMEM_DEPTH-1:3] == q[i].addr_offset[DMEM_DEPTH-1:3]))) begin
+267        1/1                                      sel_valid = 1'b0;
+268        1/1                                      break;
+269                                             end
+                        MISSING_ELSE
+270                                         end
+271                                         // 4. for lw: junior counter equals to the match number
+272                                         // 5. for lw: dcache is not busy
+273        1/1                              if (sel_valid &amp;&amp; dcache_valid &amp;&amp; junior_counter[i] == match_number[i]) begin
+274        1/1                                  sel_idx = i[LSQ_INDEX_WIDTH-1:0];
+275        1/1                                  lw_valid = 1'b1;
+276                                         end
+                        MISSING_ELSE
+277                                     end
+278                                 end
+                        MISSING_ELSE
+279                             end
+280        1/1                  sel_valid = sw_valid | lw_valid;
+281                         end
+282                     
+283                         // Flush Detection — entries younger than the mispredicting branch
+284                         logic [LSQ_DEPTH-1:0] flush_mask;
+285                     
+286                         always_comb begin
+287        1/1                  for (int i = 0; i &lt; LSQ_DEPTH; i++) begin
+288        1/1                      flush_mask[i] = cdb_flush &amp; q_valid[i] &amp; (entry_depth[i] &gt; cdb_rob_depth);
+289                             end
+290                         end
+291                     
+292                         // Free Slot Allocation &amp; Vacancy Count
+293                         logic [LSQ_INDEX_WIDTH-1:0]           free_idx;
+294                         logic                                 has_free;
+295                         logic [$clog2(LSQ_DEPTH+1)-1:0] vacant_count;
+296                     
+297                         always_comb begin
+298        1/1                  has_free     = 1'b0;
+299        1/1                  free_idx     = '0;
+300        1/1                  vacant_count = '0;
+301        1/1                  for (int i = 0; i &lt; LSQ_DEPTH; i++) begin
+302        1/1                      if (!q_valid[i]) begin
+303        1/1                          vacant_count += {{($clog2(LSQ_DEPTH+1)-1){1'b0}}, 1'b1};
+304        1/1                          if (!has_free) begin
+305        1/1                              free_idx = i[LSQ_INDEX_WIDTH-1:0];
+306        1/1                              has_free = 1'b1;
+307                                     end
+                        MISSING_ELSE
+308                                 end
+                        MISSING_ELSE
+309                             end
+310                         end
+311                     
+312                         assign lsq_ld_st_full              = &amp;q_valid;
+313                         assign lsq_ld_st_two_or_more_vacant= (vacant_count &gt;= 2);
+314                     
+315                         // LSQ issues to LSB when an entry is ready and LSB can accept (not ISSUEUNIT).
+316                         logic issue_lsq;
+317                         assign issue_lsq = iss_lsq_rdy &amp; lsb_en;
+318                         assign iss_lsq_rdy = sel_valid &amp; ~cdb_flush;
+319                     
+320                         assign dcache_ready = iss_lsq_rdy &amp;&amp; is_load(q[sel_idx].opcode);
+321                         assign dcache_addr  = q[sel_idx].addr_offset;
+322                     
+323                         always_comb begin
+324        1/1                  iss_lsq_rob_tag         = '0;
+325        1/1                  iss_lsq_opcode          = INSTR_NONE;
+326        1/1                  iss_lsq_addr            = '0;
+327        1/1                  iss_lsq_phy_addr        = '0;
+328                     
+329        1/1                  if (issue_lsq) begin
+330        1/1                      iss_lsq_rob_tag         = q[sel_idx].rob_tag;
+331        1/1                      iss_lsq_opcode          = q[sel_idx].opcode;
+332        1/1                      iss_lsq_addr            = q[sel_idx].addr_offset;
+333        1/1                      iss_lsq_phy_addr        = q[sel_idx].rd_phy_addr;
+334                             end
+                        MISSING_ELSE
+335                         end
+336                     
+337                         // State Update
+338                         // Last-write-wins ordering: wakeup -&gt; flush -&gt; addr_calculating -&gt; issue -&gt; dispatch
+339                         always_ff @(posedge clk or negedge rst_n) begin
+340        1/1                  if (!rst_n) begin
+341        1/1                      for (int i = 0; i &lt; LSQ_DEPTH; i++) begin
+342        1/1                          q[i]       &lt;= '{
+343                                         rs_data_valid : 1'b0,
+344                                         opcode : INSTR_NONE,
+345                                         addr_rdy : 1'b0,
+346                                         rob_tag : '0,
+347                                         rs_phy_addr : '0,
+348                                         rd_phy_addr : '0,
+349                                         addr_offset : '0
+350                                     };
+351        1/1                          q_valid[i] &lt;= 1'b0;
+352        1/1                          junior_counter[i] &lt;= '0;
+353                                 end
+354                             end else begin
+355                                 // Wakeup: latch updated ready bits
+356        1/1                      for (int i = 0; i &lt; LSQ_DEPTH; i++) begin
+357        1/1                          q[i].rs_data_valid &lt;= wk_rs_rdy[i];
+358                                 end
+359                     
+360                                 // Addr Calculating: calculate the address
+361        1/1                      if (addr_calculating_valid) begin
+362        1/1                          q[addr_calculating_idx].addr_offset &lt;= lsq_addr_next;
+363        1/1                          q[addr_calculating_idx].addr_rdy &lt;= 1'b1;
+364                                 end
+                        MISSING_ELSE
+365                     
+366                                 // Flush: invalidate entries younger than the branch
+367        1/1                      for (int i = 0; i &lt; LSQ_DEPTH; i++) begin
+368        1/1                          if (flush_mask[i] &amp;&amp; q_valid[i]) begin
+369        1/1                              if (is_load(q[i].opcode)) begin
+370        1/1                                  for (int j = 0; j &lt; SAB_DEPTH; j++) begin
+371        1/1                                      if (sab_array[j].addr[DMEM_DEPTH-1:3] == q[i].addr_offset[DMEM_DEPTH-1:3] &amp;&amp;
+372                                                     sab_valid[j] == 1'b1 &amp;&amp;
+373                                                     sab_entry_depth[j] &gt; cdb_rob_depth) begin
+374        <font color = "red">0/1     ==>                                  junior_counter[i] &lt;= junior_counter[i] - 1;</font>
+375                                                 end
+                        MISSING_ELSE
+376                                             end
+377                                         end
+                        MISSING_ELSE
+378        1/1                              q_valid[i] &lt;= 1'b0;
+379                                     end
+                        MISSING_ELSE
+380                                 end
+381                     
+382                                 // Issue: dequeue into LSB (issue_lsq already requires lsb_rdy)
+383        1/1                      if (issue_lsq) begin
+384        1/1                          q_valid[sel_idx]        &lt;= 1'b0;
+385                     
+386        1/1                          if (is_store(q[sel_idx].opcode)) begin
+387        1/1                              for (int i = 0; i &lt; LSQ_DEPTH; i++) begin
+388                                             // when sw is issued, the junior counter of the older lw is incremented
+389        1/1                                  if (is_load(q[i].opcode) &amp;&amp;
+390                                                 (entry_depth[i] &lt; entry_depth[sel_idx]) &amp;&amp;
+391                                                 (q[i].addr_offset[DMEM_DEPTH-1:3] == q[sel_idx].addr_offset[DMEM_DEPTH-1:3])) begin
+392        1/1                                      junior_counter[i] &lt;= junior_counter[i] + 1;
+393                                             end
+                        MISSING_ELSE
+394                                         end
+395                                     end
+                        MISSING_ELSE
+396                                 end
+                        MISSING_ELSE
+397                     
+398                                 // Dispatch: enqueue new entry (suppressed during flush)
+399        1/1                      if (dis_ld_st_issue_en &amp;&amp; has_free &amp;&amp; !cdb_flush) begin
+400        1/1                          q_valid[free_idx] &lt;= 1'b1;
+401        1/1                          q[free_idx]       &lt;= '{
+402                                         rs_data_valid : dis_rs_rdy_eff,
+403                                         opcode : dis_opcode,
+404                                         addr_rdy : 1'b0,
+405                                         rob_tag   : dis_rob_tag,
+406                                         rs_phy_addr : dis_rs_phy_addr,
+407                                         rd_phy_addr : dis_new_rd_phy_addr,
+408                                         addr_offset : dis_imm
+409                                     };
+410        1/1                          junior_counter[free_idx] &lt;= '0;
+411                                 end
+                        MISSING_ELSE
+412                             end
+413                         end
+414                     
+415                     
+416                     
+417                         // --------------------------------------------------------
+418                         // SAB part
+419                         // --------------------------------------------------------
+420                         logic [SAB_INDEX_WIDTH-1:0]           sab_free_idx;
+421                         logic                                 sab_has_free;
+422                         logic [$clog2(SAB_DEPTH+1)-1:0]   sab_vacant_count;
+423                     
+424                         always_comb begin
+425        1/1                  sab_has_free     = 1'b0;
+426        1/1                  sab_free_idx     = '0;
+427        1/1                  sab_vacant_count = '0;
+428        1/1                  for (int i = 0; i &lt; SAB_DEPTH; i++) begin
+429        1/1                      if (!sab_valid[i]) begin
+430        1/1                          sab_vacant_count += {{($clog2(SAB_DEPTH+1)-1){1'b0}}, 1'b1};
+431        1/1                          if (!sab_has_free) begin
+432        1/1                              sab_free_idx = i[LSQ_INDEX_WIDTH-1:0];
+433        1/1                              sab_has_free = 1'b1;
+434                                     end
+                        MISSING_ELSE
+435                                 end
+                        MISSING_ELSE
+436                             end
+437                         end
+438                     
+439                         // Entry Depth
+440                         always_comb begin
+441        1/1                  for (int i = 0; i &lt; SAB_DEPTH; i++) begin
+442        1/1                      sab_entry_depth[i] = sab_array[i].tag_sel ?
+443                                 (0) : (sab_array[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_top_ptr);
+444                             end
+445                         end
+446                     
+447                         always_ff @(posedge clk or negedge rst_n) begin
+448        1/1                  if (!rst_n) begin
+449        1/1                      for (int i = 0; i &lt; SAB_DEPTH; i++) begin
+450        1/1                          sab_valid[i] &lt;= 1'b0;
+451        1/1                          sab_array[i] &lt;= '{
+452                                         addr    : '0,
+453                                         rob_tag : '0,
+454                                         sb_tag  : '0,
+455                                         tag_sel : '0
+456                                     };
+457                                 end
+458                             end else begin
+459                                 // Issue Store
+460        1/1                      if (issue_lsq &amp;&amp; is_store(q[sel_idx].opcode)) begin
+461        1/1                          sab_valid[sab_free_idx] &lt;= 1'b1;
+462        1/1                          sab_array[sab_free_idx] &lt;= '{
+463                                         addr: q[sel_idx].addr_offset,
+464                                         rob_tag: q[sel_idx].rob_tag,
+465                                         sb_tag: '0,
+466                                         tag_sel: 1'b0
+467                                     };
+468                                 end
+                        MISSING_ELSE
+469                     
+470                                 // SB Entry
+471        1/1                      if (sb_entry_sw) begin
+472        1/1                          for (int i = 0; i &lt; SAB_DEPTH; i++) begin
+473        1/1                              if ((sab_array[i].tag_sel == 1'b0) &amp;&amp;
+474                                             (sab_array[i].rob_tag == sb_entry_sw_rob_tag) &amp;&amp;
+475                                             (sab_valid[i] == 1'b1)) begin
+476        1/1                                  sab_array[i].tag_sel &lt;= 1'b1;
+477        1/1                                  sab_array[i].sb_tag &lt;= sb_entry_sw_tag;
+478                                         end
+                        MISSING_ELSE
+479                                     end
+480                                 end
+                        MISSING_ELSE
+481                     
+482                                 // SB Flush
+483        1/1                      if (sb_flush_sw) begin
+484        1/1                          for (int i = 0; i &lt; SAB_DEPTH; i++) begin
+485        1/1                              if (sab_valid[i] &amp;&amp; (sab_array[i].tag_sel == 1'b1) &amp;&amp;
+486                                             (sab_array[i].sb_tag == sb_flush_sw_tag)) begin
+487        1/1                                  sab_valid[i] &lt;= 1'b0;
+488                                         end
+                        MISSING_ELSE
+489                                     end
+490                                 end
+                        MISSING_ELSE
+491                     
+492                                 // SAB Flush
+493        1/1                      if (cdb_flush) begin
+494        1/1                          for (int i = 0; i &lt; SAB_DEPTH; i++) begin
+495        1/1                              if (sab_entry_depth[i] &gt; cdb_rob_depth) begin
+496        1/1                                  sab_valid[i] &lt;= 1'b0;
+497                                         end
+                        MISSING_ELSE
+498                                     end
+499                                 end
+                        MISSING_ELSE
+</pre>
+<hr>
+<a name="Cond"></a>
+Cond Coverage for Module : <a href="mod14.html" >LSQ</a><br clear=all>
+<table class="noborder">
+<col width="122">
+<col span="3" width="82">
+<tr><th></th><th>Total</th><th>Covered</th><th>Percent</th></tr>
+<tr class="s8"><td class="lf">Conditions</td><td>19</td><td>16</td><td>84.21</td></tr>
+<tr class="s8"><td class="lf">Logical</td><td>19</td><td>16</td><td>84.21</td></tr>
+<tr class="wht"><td class="lf">Non-Logical</td><td>0</td><td>0</td><td></td></tr>
+<tr class="wht"><td class="lf">Event</td><td>0</td><td>0</td><td></td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       186
+ EXPRESSION (cdb_valid &amp;&amp; cdb_phy_reg_write &amp;&amp; (dis_rs_phy_addr == cdb_rd_phy_addr))
+             ----1----    --------2--------    ------------------3-----------------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       186
+ SUB-EXPRESSION (dis_rs_phy_addr == cdb_rd_phy_addr)
+                ------------------1-----------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       280
+ EXPRESSION (sw_valid | lw_valid)
+             ----1---   ----2---
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       317
+ EXPRESSION (iss_lsq_rdy &amp; lsb_en)
+             -----1-----   ---2--
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       318
+ EXPRESSION (sel_valid &amp; ((~cdb_flush)))
+             ----1----   -------2------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       399
+ EXPRESSION (dis_ld_st_issue_en &amp;&amp; has_free &amp;&amp; ((!cdb_flush)))
+             ---------1--------    ----2---    -------3------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<hr>
+<a name="Toggle"></a>
+Toggle Coverage for Module : <a href="mod14.html" >LSQ</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s4">
+<td>Totals</td>
+<td class="rt">204</td>
+<td class="rt">89</td>
+<td class="rt">43.63 </td>
+</tr><tr class="s3">
+<td>Total Bits</td>
+<td class="rt">5068</td>
+<td class="rt">1991</td>
+<td class="rt">39.29 </td>
+</tr><tr class="s4">
+<td nowrap>Total Bits 0->1</td>
+<td class="rt">2534</td>
+<td class="rt">1020</td>
+<td class="rt">40.25 </td>
+</tr><tr class="s3">
+<td nowrap>Total Bits 1->0</td>
+<td class="rt">2534</td>
+<td class="rt">971</td>
+<td class="rt">38.32 </td>
+</tr></table><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80></th><th nowrap width=80></th><th nowrap width=80></th></tr><tr class="s8">
+<td>Ports</td>
+<td class="rt">35</td>
+<td class="rt">30</td>
+<td class="rt">85.71 </td>
+</tr><tr class="s9">
+<td>Port Bits</td>
+<td class="rt">698</td>
+<td class="rt">690</td>
+<td class="rt">98.85 </td>
+</tr><tr class="s9">
+<td nowrap>Port Bits 0->1</td>
+<td class="rt">349</td>
+<td class="rt">346</td>
+<td class="rt">99.14 </td>
+</tr><tr class="s9">
+<td nowrap>Port Bits 1->0</td>
+<td class="rt">349</td>
+<td class="rt">344</td>
+<td class="rt">98.57 </td>
+</tr></table><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80></th><th nowrap width=80></th><th nowrap width=80></th></tr><tr class="s3">
+<td>Signals</td>
+<td class="rt">169</td>
+<td class="rt">59</td>
+<td class="rt">34.91 </td>
+</tr><tr class="s2">
+<td>Signal Bits</td>
+<td class="rt">4370</td>
+<td class="rt">1301</td>
+<td class="rt">29.77 </td>
+</tr><tr class="s3">
+<td nowrap>Signal Bits 0->1</td>
+<td class="rt">2185</td>
+<td class="rt">674</td>
+<td class="rt">30.85 </td>
+</tr><tr class="s2">
+<td nowrap>Signal Bits 1->0</td>
+<td class="rt">2185</td>
+<td class="rt">627</td>
+<td class="rt">28.70 </td>
+</tr></table><br clear=all>
+<table align=left class="sortable noborder">
+<caption><b>Port Details</b></caption>
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td class="alfsrt">Toggle</td><td class="alfsrt">Toggle 1->0</td><td class="alfsrt">Toggle 0->1</td><td class="alfsrt">Direction</td></tr><tr>
+<td>clk</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rst_n</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>sb_flush_sw_tag[1:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>sb_flush_sw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>sb_entry_sw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>sb_entry_sw_tag[1:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>sb_entry_sw_rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rob_top_ptr[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rob_commit_mem_write</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_ld_st_issue_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_rs_data_ready</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_rs_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_new_rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_opcode[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_imm[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>lsq_ld_st_full</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>lsq_ld_st_two_or_more_vacant</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dcache_valid</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dcache_ready</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dcache_addr[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>cdb_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>cdb_flush</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>cdb_rob_depth[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>cdb_rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>cdb_phy_reg_write</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>iss_rs_data_lsq[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>iss_rs_phy_addr_ls[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>lsb_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>iss_lsq_opcode[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>iss_lsq_rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>iss_lsq_addr[13:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>iss_lsq_addr[14]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>iss_lsq_addr[63:15]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>iss_lsq_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>iss_lsq_rdy</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr></table><br clear=all>
+<table align=left class="sortable noborder">
+<caption><b>Signal Details</b></caption>
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td class="alfsrt">Toggle</td><td class="alfsrt">Toggle 1->0</td><td class="alfsrt">Toggle 0->1</td></tr><tr>
+<td>sab_array[0].tag_sel</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[0].sb_tag[1:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[0].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[0].addr[13:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[0].addr[14]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[0].addr[63:15]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[1].tag_sel</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[1].sb_tag[1:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[1].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[1].addr[12:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[1].addr[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[2].tag_sel</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[2].sb_tag[1:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[2].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[2].addr[0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[2].addr[7:1]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[2].addr[9:8]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[2].addr[10]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[2].addr[12:11]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[2].addr[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[3].tag_sel</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[3].sb_tag[1:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[3].rob_tag[2:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[3].rob_tag[3]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[3].addr[0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[3].addr[5:1]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[3].addr[6]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[3].addr[9:7]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[3].addr[63:10]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[4].tag_sel</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[4].sb_tag[1:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[4].rob_tag[2:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[4].rob_tag[3]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[4].addr[2:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[4].addr[9:3]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[4].addr[63:10]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[5].tag_sel</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[5].sb_tag[0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[5].sb_tag[1]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[5].rob_tag[2:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[5].rob_tag[3]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[5].addr[1:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[5].addr[2]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[5].addr[3]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[5].addr[5:4]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[5].addr[6]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[5].addr[9:7]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_array[5].addr[63:10]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[6].tag_sel</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[6].sb_tag[1:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[6].rob_tag[3:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[6].addr[63:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[7].tag_sel</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[7].sb_tag[1:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[7].rob_tag[3:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_array[7].addr[63:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_valid[5:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_valid[7:6]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_full</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_empty</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[0].addr_offset[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[0].rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[0].rs_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[0].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[0].addr_rdy</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[0].opcode[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[0].opcode[5]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[0].opcode[6]</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[0].rs_data_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[1].addr_offset[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[1].rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[1].rs_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[1].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[1].addr_rdy</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[1].opcode[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[1].opcode[5]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[1].opcode[6]</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[1].rs_data_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[2].addr_offset[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[2].rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[2].rs_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[2].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[2].addr_rdy</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[2].opcode[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[2].opcode[5]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[2].opcode[6]</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[2].rs_data_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[3].addr_offset[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[3].addr_offset[9:7]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[3].addr_offset[10]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[3].addr_offset[12:11]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[3].addr_offset[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[3].rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[3].rs_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[3].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[3].addr_rdy</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[3].opcode[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[3].opcode[5]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[3].opcode[6]</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[3].rs_data_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[4].addr_offset[0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[4].addr_offset[6:1]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[4].addr_offset[10:7]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[4].addr_offset[12:11]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[4].addr_offset[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[4].rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[4].rs_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[4].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[4].addr_rdy</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[4].opcode[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[4].opcode[5]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[4].opcode[6]</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[4].rs_data_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[5].addr_offset[0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[5].addr_offset[6:1]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[5].addr_offset[10:7]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[5].addr_offset[12:11]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[5].addr_offset[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[5].rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[5].rs_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[5].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[5].addr_rdy</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[5].opcode[1:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[5].opcode[2]</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[5].opcode[3]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[5].opcode[5:4]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[5].opcode[6]</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[5].rs_data_valid</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[6].addr_offset[0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[6].addr_offset[6:1]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[6].addr_offset[10:7]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[6].addr_offset[12:11]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[6].addr_offset[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[6].rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[6].rs_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[6].rob_tag[0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[6].rob_tag[1]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[6].rob_tag[3:2]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[6].addr_rdy</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[6].opcode[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[6].opcode[3]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[6].opcode[4]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[6].opcode[5]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[6].opcode[6]</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[6].rs_data_valid</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q[7].addr_offset[63:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[7].rd_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[7].rs_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[7].rob_tag[3:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[7].addr_rdy</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[7].opcode[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[7].rs_data_valid</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[8].addr_offset[63:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[8].rd_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[8].rs_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[8].rob_tag[3:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[8].addr_rdy</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[8].opcode[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[8].rs_data_valid</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[9].addr_offset[63:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[9].rd_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[9].rs_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[9].rob_tag[3:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[9].addr_rdy</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[9].opcode[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[9].rs_data_valid</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[10].addr_offset[63:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[10].rd_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[10].rs_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[10].rob_tag[3:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[10].addr_rdy</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[10].opcode[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[10].rs_data_valid</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[11].addr_offset[63:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[11].rd_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[11].rs_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[11].rob_tag[3:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[11].addr_rdy</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[11].opcode[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[11].rs_data_valid</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[12].addr_offset[63:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[12].rd_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[12].rs_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[12].rob_tag[3:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[12].addr_rdy</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[12].opcode[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[12].rs_data_valid</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[13].addr_offset[63:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[13].rd_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[13].rs_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[13].rob_tag[3:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[13].addr_rdy</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[13].opcode[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[13].rs_data_valid</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[14].addr_offset[63:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[14].rd_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[14].rs_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[14].rob_tag[3:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[14].addr_rdy</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[14].opcode[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[14].rs_data_valid</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[15].addr_offset[63:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[15].rd_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[15].rs_phy_addr[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[15].rob_tag[3:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[15].addr_rdy</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[15].opcode[6:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q[15].rs_data_valid</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>q_valid[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q_valid[15:7]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>issue_idx[3:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>addr_calculating_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>addr_calculating_idx[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>addr_calculating_idx[3]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsq_addr_next[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>dis_rs_rdy_eff</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q_ready[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>q_ready[15:7]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sel_idx[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sel_idx[3]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sel_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sw_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lw_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>debug_sw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>debug_lw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>debug_in</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_mask[1:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_mask[15:2]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>free_idx[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>free_idx[3]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>has_free</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>vacant_count[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>issue_lsq</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_free_idx[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>sab_has_free</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>sab_vacant_count[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr></table><br clear=all>
+<hr>
+<a name="Branch"></a>
+Branch Coverage for Module : <a href="mod14.html" >LSQ</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Line No.</th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s10">
+<td>Branches</td>
+<td></td>
+<td class="rt">22</td>
+<td class="rt">22</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">185</td>
+<td class="rt">3</td>
+<td class="rt">3</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">329</td>
+<td class="rt">2</td>
+<td class="rt">2</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">340</td>
+<td class="rt">8</td>
+<td class="rt">8</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">448</td>
+<td class="rt">9</td>
+<td class="rt">9</td>
+<td class="rt">100.00</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+185                if (!dis_rs_data_ready) begin
+                   <font color = "green">-1-</font>  
+186                    if (cdb_valid && cdb_phy_reg_write   && (dis_rs_phy_addr == cdb_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
+                       <font color = "green">-2-</font>  
+           <font color = "green">            ==></font>
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+187                end
+                   MISSING_ELSE
+           <font color = "green">        ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+329                if (issue_lsq) begin
+                   <font color = "green">-1-</font>  
+330                    iss_lsq_rob_tag         = q[sel_idx].rob_tag;
+           <font color = "green">            ==></font>
+331                    iss_lsq_opcode          = q[sel_idx].opcode;
+332                    iss_lsq_addr            = q[sel_idx].addr_offset;
+333                    iss_lsq_phy_addr        = q[sel_idx].rd_phy_addr;
+334                end
+                   MISSING_ELSE
+           <font color = "green">        ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+340                if (!rst_n) begin
+                   <font color = "green">-1-</font>  
+341                    for (int i = 0; i < LSQ_DEPTH; i++) begin
+           <font color = "green">            ==></font>
+342                        q[i]       <= '{
+343                            rs_data_valid : 1'b0,
+344                            opcode : INSTR_NONE,
+345                            addr_rdy : 1'b0,
+346                            rob_tag : '0,
+347                            rs_phy_addr : '0,
+348                            rd_phy_addr : '0,
+349                            addr_offset : '0
+350                        };
+351                        q_valid[i] <= 1'b0;
+352                        junior_counter[i] <= '0;
+353                    end
+354                end else begin
+355                    // Wakeup: latch updated ready bits
+356                    for (int i = 0; i < LSQ_DEPTH; i++) begin
+357                        q[i].rs_data_valid <= wk_rs_rdy[i];
+358                    end
+359        
+360                    // Addr Calculating: calculate the address
+361                    if (addr_calculating_valid) begin
+                       <font color = "green">-2-</font>  
+362                        q[addr_calculating_idx].addr_offset <= lsq_addr_next;
+           <font color = "green">                ==></font>
+363                        q[addr_calculating_idx].addr_rdy <= 1'b1;
+364                    end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+365        
+366                    // Flush: invalidate entries younger than the branch
+367                    for (int i = 0; i < LSQ_DEPTH; i++) begin
+368                        if (flush_mask[i] && q_valid[i]) begin
+369                            if (is_load(q[i].opcode)) begin
+370                                for (int j = 0; j < SAB_DEPTH; j++) begin
+371                                    if (sab_array[j].addr[DMEM_DEPTH-1:3] == q[i].addr_offset[DMEM_DEPTH-1:3] &&
+372                                        sab_valid[j] == 1'b1 &&
+373                                        sab_entry_depth[j] > cdb_rob_depth) begin
+374                                        junior_counter[i] <= junior_counter[i] - 1;
+375                                    end
+376                                end
+377                            end
+378                            q_valid[i] <= 1'b0;
+379                        end
+380                    end
+381        
+382                    // Issue: dequeue into LSB (issue_lsq already requires lsb_rdy)
+383                    if (issue_lsq) begin
+                       <font color = "green">-3-</font>  
+384                        q_valid[sel_idx]        <= 1'b0;
+385        
+386                        if (is_store(q[sel_idx].opcode)) begin
+                           <font color = "green">-4-</font>  
+387                            for (int i = 0; i < LSQ_DEPTH; i++) begin
+           <font color = "green">                    ==></font>
+388                                // when sw is issued, the junior counter of the older lw is incremented
+389                                if (is_load(q[i].opcode) &&
+390                                    (entry_depth[i] < entry_depth[sel_idx]) &&
+391                                    (q[i].addr_offset[DMEM_DEPTH-1:3] == q[sel_idx].addr_offset[DMEM_DEPTH-1:3])) begin
+392                                    junior_counter[i] <= junior_counter[i] + 1;
+393                                end
+394                            end
+395                        end
+                           MISSING_ELSE
+           <font color = "green">                ==></font>
+396                    end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+397        
+398                    // Dispatch: enqueue new entry (suppressed during flush)
+399                    if (dis_ld_st_issue_en && has_free && !cdb_flush) begin
+                       <font color = "green">-5-</font>  
+400                        q_valid[free_idx] <= 1'b1;
+           <font color = "green">                ==></font>
+401                        q[free_idx]       <= '{
+402                            rs_data_valid : dis_rs_rdy_eff,
+403                            opcode : dis_opcode,
+404                            addr_rdy : 1'b0,
+405                            rob_tag   : dis_rob_tag,
+406                            rs_phy_addr : dis_rs_phy_addr,
+407                            rd_phy_addr : dis_new_rd_phy_addr,
+408                            addr_offset : dis_imm
+409                        };
+410                        junior_counter[free_idx] <= '0;
+411                    end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>-3-</th><th nowrap width=80>-4-</th><th nowrap width=80>-5-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+448                if (!rst_n) begin
+                   <font color = "green">-1-</font>  
+449                    for (int i = 0; i < SAB_DEPTH; i++) begin
+           <font color = "green">            ==></font>
+450                        sab_valid[i] <= 1'b0;
+451                        sab_array[i] <= '{
+452                            addr    : '0,
+453                            rob_tag : '0,
+454                            sb_tag  : '0,
+455                            tag_sel : '0
+456                        };
+457                    end
+458                end else begin
+459                    // Issue Store
+460                    if (issue_lsq && is_store(q[sel_idx].opcode)) begin
+                       <font color = "green">-2-</font>  
+461                        sab_valid[sab_free_idx] <= 1'b1;
+           <font color = "green">                ==></font>
+462                        sab_array[sab_free_idx] <= '{
+463                            addr: q[sel_idx].addr_offset,
+464                            rob_tag: q[sel_idx].rob_tag,
+465                            sb_tag: '0,
+466                            tag_sel: 1'b0
+467                        };
+468                    end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+469        
+470                    // SB Entry
+471                    if (sb_entry_sw) begin
+                       <font color = "green">-3-</font>  
+472                        for (int i = 0; i < SAB_DEPTH; i++) begin
+           <font color = "green">                ==></font>
+473                            if ((sab_array[i].tag_sel == 1'b0) &&
+474                                (sab_array[i].rob_tag == sb_entry_sw_rob_tag) &&
+475                                (sab_valid[i] == 1'b1)) begin
+476                                sab_array[i].tag_sel <= 1'b1;
+477                                sab_array[i].sb_tag <= sb_entry_sw_tag;
+478                            end
+479                        end
+480                    end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+481        
+482                    // SB Flush
+483                    if (sb_flush_sw) begin
+                       <font color = "green">-4-</font>  
+484                        for (int i = 0; i < SAB_DEPTH; i++) begin
+           <font color = "green">                ==></font>
+485                            if (sab_valid[i] && (sab_array[i].tag_sel == 1'b1) &&
+486                                (sab_array[i].sb_tag == sb_flush_sw_tag)) begin
+487                                sab_valid[i] <= 1'b0;
+488                            end
+489                        end
+490                    end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+491        
+492                    // SAB Flush
+493                    if (cdb_flush) begin
+                       <font color = "green">-5-</font>  
+494                        for (int i = 0; i < SAB_DEPTH; i++) begin
+           <font color = "green">                ==></font>
+495                            if (sab_entry_depth[i] > cdb_rob_depth) begin
+496                                sab_valid[i] <= 1'b0;
+497                            end
+498                        end
+499                    end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>-3-</th><th nowrap width=80>-4-</th><th nowrap width=80>-5-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+</div>
+</div>
+<div class="ui-layout-center-inner-north">
+<div id="center-bread-crumb" class="breadCrumb module urg-margin-bottom">
+  <ul name="inst_tag_14">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Cond">Cond</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+  </ul>
+  <ul name="tag_LSQ">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Cond">Cond</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+  </ul>
+</div>
+</div>
+</div>
+<div class="ui-layout-south">
+<table align=center><tr><td class="s0 cl">0%</td>
+<td class="s1 cl">10%</td>
+<td class="s2 cl">20%</td>
+<td class="s3 cl">30%</td>
+<td class="s4 cl">40%</td>
+<td class="s5 cl">50%</td>
+<td class="s6 cl">60%</td>
+<td class="s7 cl">70%</td>
+<td class="s8 cl">80%</td>
+<td class="s9 cl">90%</td>
+<td class="s10 cl">100%</td></tr></table></div>
+</body>
+</html>

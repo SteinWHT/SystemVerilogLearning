@@ -172,5 +172,5 @@ bind ROB rob_commit_monitor #(
     .head_csr_addr    (head.csr_addr),
     .head_csr_cmd     (head.csr_cmd),
     .head_rs1_arch    (head.rs1_arch),
-    .head_cdb_data    (sim_head_cdb_data)
+    .head_cdb_data    (head.is_csr ? csr_rdata : sim_head_cdb_data)
 );

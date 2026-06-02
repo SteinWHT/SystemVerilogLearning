@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="Author" content="<username>"> <meta name="GENERATOR" content="urg/version [en] (platform name) [urg]">
+<title>Unified Coverage Report :: Group :: cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit</title>
+<link type="text/css" rel="stylesheet" href="css/.urg.css">
+<link type="text/css" rel="stylesheet" href="css/.layout.css">
+<link type="text/css" rel="stylesheet" href="css/.breadcrumb.css">
+<script type="text/javascript" src="js/.jquery.js"></script>
+<script type="text/javascript" src="js/.jquery-ui.js"></script>
+<script type="text/javascript" src="js/.sortable.js"></script>
+<script type="text/javascript" src="js/.layout.js"></script>
+<script type="text/javascript" src="js/.breadcrumb.js"></script>
+<script type="text/javascript">
+var layout, westLayout, centerLayout;
+$(document).ready(function () {
+  if ($("#north-bread-crumb")) {
+    $("#north-bread-crumb").jBreadCrumb({easing:'swing'})
+  }
+  layout = $("body").layout({ 
+    resizable: true,
+    spacing_open: 4,
+    spacing_closed: 4,
+    north: {
+      size: 76
+    },
+    south: {
+      size: 45,
+      initClosed: true
+    },
+    west: {
+      size: 500,
+      resizable: true,
+      initClosed: false
+    }
+  });
+  centerLayout = $('div.ui-layout-center').layout({
+    north__paneSelector: ".ui-layout-center-inner-north",
+    center__paneSelector: ".ui-layout-center-inner-center", 
+    north__size: 50,
+    spacing_open: 4,
+    spacing_closed: 4
+  });
+});
+</script>
+</head>
+<body onLoad="initPage();"><div class="ui-layout-north">
+<div class="logo"></div>
+<center class="pagetitle">Group : cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit</center>
+<div align="center"><a href="dashboard.html" ><b>dashboard</b></a> | <a href="hierarchy.html" ><b>hierarchy</b></a> | <a href="modlist.html" ><b>modlist</b></a> | <a href="groups.html" ><b>groups</b></a> | <a href="tests.html" ><b>tests</b></a> | <a href="asserts.html" ><b>asserts</b></a></div>
+
+</div>
+<div class="ui-layout-west">
+<div>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Group : <a href="#"  onclick="showContent('cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit')">cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit</a></span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td><b>SCORE</b></td><td>INSTANCES</td><td>WEIGHT</td><td>GOAL</td><td>AT LEAST</td><td>PER INSTANCE</td><td>AUTO BIN MAX</td><td>PRINT MISSING</td></tr><tr>
+<td class="s7 cl rt"> 77.78</td>
+<td class="s7 cl rt"> 77.78</td>
+<td class="wht cl rt">1     </td>
+<td class="wht cl rt">100   </td>
+<td class="wht cl rt">1     </td>
+<td class="wht cl rt">1     </td>
+<td class="wht cl rt">64    </td>
+<td class="wht cl rt">64    </td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Source File(s) : </span>
+<br clear=all>
+<a href="javascript:void(0);"  onclick="openSrcFile('/workspace/uvm/cov/cpu_coverage.sv')">/workspace/uvm/cov/cpu_coverage.sv</a><br clear=all>
+<br clear=all>
+<span class=repname>1 Instances:</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td><b>SCORE</b></td><td>WEIGHT</td><td>GOAL</td><td>AT LEAST</td><td>AUTO BIN MAX</td><td>PRINT MISSING</td></tr><tr>
+<td class="wht cl wordwrap"><a href="grp0.html#inst_tag_tb_top.me.obj.cg_baremetal_commit"  onclick="showContent('tb_top.me.obj.cg_baremetal_commit')">tb_top.me.obj.cg_baremetal_commit</a></td>
+<td class="s7 cl rt"> 77.78</td>
+<td class="wht cl rt">1     </td>
+<td class="wht cl rt">100   </td>
+<td class="wht cl rt">1     </td>
+<td class="wht cl rt">64    </td>
+<td class="wht cl rt">64    </td>
+</tr></table><br clear=all>
+<br clear=all>
+</div>
+<hr>
+<br clear=all>
+<span class=repname>Summary for Group   cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit
+</span>
+<br clear=all>
+<br clear=all>
+<table align=left class="sortable">
+<tr class="sortablehead">
+<td class="alfsrt">CATEGORY</td><td>EXPECTED</td><td>UNCOVERED</td><td>COVERED</td><td>PERCENT</td></tr><tr class="s9">
+<td><a href="#var_tbl_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit" >Variables</a></td>
+<td class="rt">13</td>
+<td class="rt">1</td>
+<td class="rt">12</td>
+<td class="rt">91.67 </td>
+</tr><tr class="s5">
+<td><a href="#crs_tbl_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit" >Crosses</a></td>
+<td class="rt">42</td>
+<td class="rt">21</td>
+<td class="rt">21</td>
+<td class="rt">50.00 </td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class="repname" id="var_tbl_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit">Variables for Group  cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit
+</span>
+<br clear=all>
+<table align=left class="sortable">
+<tr class="sortablehead">
+<td class="alfsrt">VARIABLE</td><td>EXPECTED</td><td>UNCOVERED</td><td>COVERED</td><td>PERCENT</td><td>GOAL</td><td>WEIGHT</td><td>AT LEAST</td><td>AUTO BIN MAX</td><td>COMMENT</td></tr><tr class="s10">
+<td><a href="#inst_tag_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit.cp_program"  onclick="checkLink(this)" target="detailFrame">cp_program</a></td>
+<td class="rt">7</td>
+<td class="rt">0</td>
+<td class="rt">7</td>
+<td class="rt">100.00</td>
+<td class="rt">100</td>
+<td class="rt">1</td>
+<td class="rt">1</td>
+<td class="rt">0</td>
+<td></td>
+</tr><tr class="s8">
+<td><a href="#inst_tag_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit.cp_commit_kind"  onclick="checkLink(this)" target="detailFrame">cp_commit_kind</a></td>
+<td class="rt">6</td>
+<td class="rt">1</td>
+<td class="rt">5</td>
+<td class="rt">83.33 </td>
+<td class="rt">100</td>
+<td class="rt">1</td>
+<td class="rt">1</td>
+<td class="rt">0</td>
+<td></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class="repname" id="crs_tbl_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit">Crosses for Group  cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit
+</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">CROSS</td><td>EXPECTED</td><td>UNCOVERED</td><td>COVERED</td><td>PERCENT</td><td>GOAL</td><td>WEIGHT</td><td>AT LEAST</td><td>PRINT MISSING</td><td>COMMENT</td></tr><tr class="s5">
+<td><a href="#inst_tag_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit.cg_baremetal_commit_cc"  onclick="checkLink(this)" target="detailFrame">cg_baremetal_commit_cc</a></td>
+<td class="rt">42</td>
+<td class="rt">21</td>
+<td class="rt">21</td>
+<td class="rt">50.00 </td>
+<td class="rt">100</td>
+<td class="rt">1</td>
+<td class="rt">1</td>
+<td class="rt">0</td>
+<td></td>
+</tr></table><br clear=all>
+</div>
+<div name='tb_top.me.obj.cg_baremetal_commit'>
+<a name="inst_tag_tb_top.me.obj.cg_baremetal_commit"></a>
+<hr>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Group Instance : <a href="groups.html#tag_tb_top.me.obj.cg_baremetal_commit" >tb_top.me.obj.cg_baremetal_commit</a></span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td><b>SCORE</b></td><td>WEIGHT</td><td>GOAL</td><td>AT LEAST</td><td>AUTO BIN MAX</td><td>PRINT MISSING</td></tr><tr>
+<td class="s7 cl rt"> 77.78</td>
+<td class="wht cl rt">1     </td>
+<td class="wht cl rt">100   </td>
+<td class="wht cl rt">1     </td>
+<td class="wht cl rt">64    </td>
+<td class="wht cl rt">64    </td>
+</tr></table><br clear=all>
+<br clear=all>
+</div>
+<hr>
+<br clear=all>
+<span class=repname>Summary for Group Instance   tb_top.me.obj.cg_baremetal_commit
+</span>
+<br clear=all>
+<br clear=all>
+<table align=left class="sortable">
+<tr class="sortablehead">
+<td class="alfsrt">CATEGORY</td><td>EXPECTED</td><td>UNCOVERED</td><td>COVERED</td><td>PERCENT</td></tr><tr class="s9">
+<td><a href="#var_tbl_tb_top.me.obj.cg_baremetal_commit" >Variables</a></td>
+<td class="rt">13</td>
+<td class="rt">1</td>
+<td class="rt">12</td>
+<td class="rt">91.67 </td>
+</tr><tr class="s5">
+<td><a href="#crs_tbl_tb_top.me.obj.cg_baremetal_commit" >Crosses</a></td>
+<td class="rt">42</td>
+<td class="rt">21</td>
+<td class="rt">21</td>
+<td class="rt">50.00 </td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class="repname" id="var_tbl_tb_top.me.obj.cg_baremetal_commit">Variables for Group Instance  tb_top.me.obj.cg_baremetal_commit
+</span>
+<br clear=all>
+<table align=left class="sortable">
+<tr class="sortablehead">
+<td class="alfsrt">VARIABLE</td><td>EXPECTED</td><td>UNCOVERED</td><td>COVERED</td><td>PERCENT</td><td>GOAL</td><td>WEIGHT</td><td>AT LEAST</td><td>AUTO BIN MAX</td><td>COMMENT</td></tr><tr class="s10">
+<td><a href="#inst_tag_tb_top.me.obj.cg_baremetal_commit.cp_program"  onclick="checkLink(this)" target="detailFrame">cp_program</a></td>
+<td class="rt">7</td>
+<td class="rt">0</td>
+<td class="rt">7</td>
+<td class="rt">100.00</td>
+<td class="rt">100</td>
+<td class="rt">1</td>
+<td class="rt">1</td>
+<td class="rt">0</td>
+<td></td>
+</tr><tr class="s8">
+<td><a href="#inst_tag_tb_top.me.obj.cg_baremetal_commit.cp_commit_kind"  onclick="checkLink(this)" target="detailFrame">cp_commit_kind</a></td>
+<td class="rt">6</td>
+<td class="rt">1</td>
+<td class="rt">5</td>
+<td class="rt">83.33 </td>
+<td class="rt">100</td>
+<td class="rt">1</td>
+<td class="rt">1</td>
+<td class="rt">0</td>
+<td></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class="repname" id="crs_tbl_tb_top.me.obj.cg_baremetal_commit">Crosses for Group Instance  tb_top.me.obj.cg_baremetal_commit
+</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">CROSS</td><td>EXPECTED</td><td>UNCOVERED</td><td>COVERED</td><td>PERCENT</td><td>GOAL</td><td>WEIGHT</td><td>AT LEAST</td><td>PRINT MISSING</td><td>COMMENT</td></tr><tr class="s5">
+<td><a href="#inst_tag_tb_top.me.obj.cg_baremetal_commit.cg_baremetal_commit_cc"  onclick="checkLink(this)" target="detailFrame">cg_baremetal_commit_cc</a></td>
+<td class="rt">42</td>
+<td class="rt">21</td>
+<td class="rt">21</td>
+<td class="rt">50.00 </td>
+<td class="rt">100</td>
+<td class="rt">1</td>
+<td class="rt">1</td>
+<td class="rt">0</td>
+<td></td>
+</tr></table><br clear=all>
+</div>
+</div>
+<div class="ui-layout-center">
+<div class="ui-layout-center-inner-center">
+<div name='cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit'>
+<br clear=all>
+<a name="inst_tag_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit.cp_program"></a><span class="repname" id="inst_tag_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit.cp_program">Summary for Variable cp_program</span>
+<br clear=all>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">CATEGORY</td><td>EXPECTED</td><td>UNCOVERED</td><td>COVERED</td><td>PERCENT</td></tr><tr class="s10">
+<td>User Defined Bins</td>
+<td class="rt">7</td>
+<td class="rt">0</td>
+<td class="rt">7</td>
+<td class="rt">100.00</td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>User Defined Bins for cp_program</span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Excluded/Illegal bins</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>COUNT</td><td class="alfsrt">STATUS</td></tr><tr class="wht">
+<td>other</td>
+<td class="rt">23689</td>
+<td>Excluded</td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Covered bins</span>
+<br clear=all>
+<table align=left class="sortable">
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>COUNT</td><td>AT LEAST</td></tr><tr class="s10">
+<td>recursion</td>
+<td class="rt">746</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>linked_list</td>
+<td class="rt">274</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>matrix_multiply</td>
+<td class="rt">377</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strcmp</td>
+<td class="rt">238</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strlen</td>
+<td class="rt">256</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memset</td>
+<td class="rt">902</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memcpy</td>
+<td class="rt">785</td>
+<td class="rt">1</td>
+</tr></table><br clear=all>
+<hr>
+<br clear=all>
+<a name="inst_tag_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit.cp_commit_kind"></a><span class="repname" id="inst_tag_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit.cp_commit_kind">Summary for Variable cp_commit_kind</span>
+<br clear=all>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">CATEGORY</td><td>EXPECTED</td><td>UNCOVERED</td><td>COVERED</td><td>PERCENT</td></tr><tr class="s8">
+<td>User Defined Bins</td>
+<td class="rt">6</td>
+<td class="rt">1</td>
+<td class="rt">5</td>
+<td class="rt">83.33 </td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>User Defined Bins for cp_commit_kind</span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Uncovered bins</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>COUNT</td><td>AT LEAST</td><td>NUMBER</td></tr><tr class="s3">
+<td>mret</td>
+<td class="rt">0</td>
+<td class="rt">1</td>
+<td class="rt">1</td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Covered bins</span>
+<br clear=all>
+<table align=left class="sortable">
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>COUNT</td><td>AT LEAST</td></tr><tr class="s10">
+<td>other</td>
+<td class="rt">5544</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>trap</td>
+<td class="rt">64</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>csr</td>
+<td class="rt">194</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>store</td>
+<td class="rt">992</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>reg_write</td>
+<td class="rt">20473</td>
+<td class="rt">1</td>
+</tr></table><br clear=all>
+<hr>
+<br clear=all>
+<a name="inst_tag_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit.cg_baremetal_commit_cc"></a><span class="repname" id="inst_tag_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit.cg_baremetal_commit_cc">Summary for Cross cg_baremetal_commit_cc</span>
+<br clear=all>
+<br clear=all>
+Samples crossed: cp_program cp_commit_kind<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">CATEGORY</td><td>EXPECTED</td><td>UNCOVERED</td><td>COVERED</td><td>PERCENT</td><td>MISSING</td></tr><tr class="s5">
+<td>Automatically Generated Cross Bins</td>
+<td class="rt">42</td>
+<td class="rt">21</td>
+<td class="rt">21</td>
+<td class="rt">50.00 </td>
+<td class="rt">21</td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Automatically Generated Cross Bins for cg_baremetal_commit_cc</span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Element holes</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">cp_program</td><td class="alfsrt">cp_commit_kind</td><td>COUNT</td><td>AT LEAST</td><td>NUMBER</td></tr><tr class="s3">
+<td align=center>*</td>
+<td>[mret , trap , csr]</td>
+<td align=center nowrap>--</td>
+<td align=center nowrap>--</td>
+<td class="rt">21</td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Covered bins</span>
+<br clear=all>
+<table align=left class="sortable">
+<tr class="sortablehead">
+<td class="alfsrt">cp_program</td><td class="alfsrt">cp_commit_kind</td><td>COUNT</td><td>AT LEAST</td></tr><tr class="s10">
+<td>recursion</td>
+<td>other</td>
+<td class="rt">99</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>recursion</td>
+<td>store</td>
+<td class="rt">122</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>recursion</td>
+<td>reg_write</td>
+<td class="rt">525</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>linked_list</td>
+<td>other</td>
+<td class="rt">49</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>linked_list</td>
+<td>store</td>
+<td class="rt">32</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>linked_list</td>
+<td>reg_write</td>
+<td class="rt">193</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>matrix_multiply</td>
+<td>other</td>
+<td class="rt">41</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>matrix_multiply</td>
+<td>store</td>
+<td class="rt">17</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>matrix_multiply</td>
+<td>reg_write</td>
+<td class="rt">319</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strcmp</td>
+<td>other</td>
+<td class="rt">43</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strcmp</td>
+<td>store</td>
+<td class="rt">13</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strcmp</td>
+<td>reg_write</td>
+<td class="rt">182</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strlen</td>
+<td>other</td>
+<td class="rt">39</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strlen</td>
+<td>store</td>
+<td class="rt">8</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strlen</td>
+<td>reg_write</td>
+<td class="rt">209</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memset</td>
+<td>other</td>
+<td class="rt">229</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memset</td>
+<td>store</td>
+<td class="rt">83</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memset</td>
+<td>reg_write</td>
+<td class="rt">590</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memcpy</td>
+<td>other</td>
+<td class="rt">131</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memcpy</td>
+<td>store</td>
+<td class="rt">104</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memcpy</td>
+<td>reg_write</td>
+<td class="rt">550</td>
+<td class="rt">1</td>
+</tr></table><br clear=all>
+</div>
+<div name='tb_top.me.obj.cg_baremetal_commit'>
+<br clear=all>
+<a name="inst_tag_tb_top.me.obj.cg_baremetal_commit.cp_program"></a><span class="repname" id="inst_tag_tb_top.me.obj.cg_baremetal_commit.cp_program">Summary for Variable cp_program</span>
+<br clear=all>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">CATEGORY</td><td>EXPECTED</td><td>UNCOVERED</td><td>COVERED</td><td>PERCENT</td></tr><tr class="s10">
+<td>User Defined Bins</td>
+<td class="rt">7</td>
+<td class="rt">0</td>
+<td class="rt">7</td>
+<td class="rt">100.00</td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>User Defined Bins for cp_program</span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Excluded/Illegal bins</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>COUNT</td><td class="alfsrt">STATUS</td></tr><tr class="wht">
+<td>other</td>
+<td class="rt">23689</td>
+<td>Excluded</td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Covered bins</span>
+<br clear=all>
+<table align=left class="sortable">
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>COUNT</td><td>AT LEAST</td></tr><tr class="s10">
+<td>recursion</td>
+<td class="rt">746</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>linked_list</td>
+<td class="rt">274</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>matrix_multiply</td>
+<td class="rt">377</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strcmp</td>
+<td class="rt">238</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strlen</td>
+<td class="rt">256</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memset</td>
+<td class="rt">902</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memcpy</td>
+<td class="rt">785</td>
+<td class="rt">1</td>
+</tr></table><br clear=all>
+<hr>
+<br clear=all>
+<a name="inst_tag_tb_top.me.obj.cg_baremetal_commit.cp_commit_kind"></a><span class="repname" id="inst_tag_tb_top.me.obj.cg_baremetal_commit.cp_commit_kind">Summary for Variable cp_commit_kind</span>
+<br clear=all>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">CATEGORY</td><td>EXPECTED</td><td>UNCOVERED</td><td>COVERED</td><td>PERCENT</td></tr><tr class="s8">
+<td>User Defined Bins</td>
+<td class="rt">6</td>
+<td class="rt">1</td>
+<td class="rt">5</td>
+<td class="rt">83.33 </td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>User Defined Bins for cp_commit_kind</span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Uncovered bins</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>COUNT</td><td>AT LEAST</td><td>NUMBER</td></tr><tr class="s3">
+<td>mret</td>
+<td class="rt">0</td>
+<td class="rt">1</td>
+<td class="rt">1</td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Covered bins</span>
+<br clear=all>
+<table align=left class="sortable">
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>COUNT</td><td>AT LEAST</td></tr><tr class="s10">
+<td>other</td>
+<td class="rt">5544</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>trap</td>
+<td class="rt">64</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>csr</td>
+<td class="rt">194</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>store</td>
+<td class="rt">992</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>reg_write</td>
+<td class="rt">20473</td>
+<td class="rt">1</td>
+</tr></table><br clear=all>
+<hr>
+<br clear=all>
+<a name="inst_tag_tb_top.me.obj.cg_baremetal_commit.cg_baremetal_commit_cc"></a><span class="repname" id="inst_tag_tb_top.me.obj.cg_baremetal_commit.cg_baremetal_commit_cc">Summary for Cross cg_baremetal_commit_cc</span>
+<br clear=all>
+<br clear=all>
+Samples crossed: cp_program cp_commit_kind<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">CATEGORY</td><td>EXPECTED</td><td>UNCOVERED</td><td>COVERED</td><td>PERCENT</td><td>MISSING</td></tr><tr class="s5">
+<td>Automatically Generated Cross Bins</td>
+<td class="rt">42</td>
+<td class="rt">21</td>
+<td class="rt">21</td>
+<td class="rt">50.00 </td>
+<td class="rt">21</td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Automatically Generated Cross Bins for cg_baremetal_commit_cc</span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Element holes</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">cp_program</td><td class="alfsrt">cp_commit_kind</td><td>COUNT</td><td>AT LEAST</td><td>NUMBER</td></tr><tr class="s3">
+<td align=center>*</td>
+<td>[mret , trap , csr]</td>
+<td align=center nowrap>--</td>
+<td align=center nowrap>--</td>
+<td class="rt">21</td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Covered bins</span>
+<br clear=all>
+<table align=left class="sortable">
+<tr class="sortablehead">
+<td class="alfsrt">cp_program</td><td class="alfsrt">cp_commit_kind</td><td>COUNT</td><td>AT LEAST</td></tr><tr class="s10">
+<td>recursion</td>
+<td>other</td>
+<td class="rt">99</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>recursion</td>
+<td>store</td>
+<td class="rt">122</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>recursion</td>
+<td>reg_write</td>
+<td class="rt">525</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>linked_list</td>
+<td>other</td>
+<td class="rt">49</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>linked_list</td>
+<td>store</td>
+<td class="rt">32</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>linked_list</td>
+<td>reg_write</td>
+<td class="rt">193</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>matrix_multiply</td>
+<td>other</td>
+<td class="rt">41</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>matrix_multiply</td>
+<td>store</td>
+<td class="rt">17</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>matrix_multiply</td>
+<td>reg_write</td>
+<td class="rt">319</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strcmp</td>
+<td>other</td>
+<td class="rt">43</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strcmp</td>
+<td>store</td>
+<td class="rt">13</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strcmp</td>
+<td>reg_write</td>
+<td class="rt">182</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strlen</td>
+<td>other</td>
+<td class="rt">39</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strlen</td>
+<td>store</td>
+<td class="rt">8</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>strlen</td>
+<td>reg_write</td>
+<td class="rt">209</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memset</td>
+<td>other</td>
+<td class="rt">229</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memset</td>
+<td>store</td>
+<td class="rt">83</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memset</td>
+<td>reg_write</td>
+<td class="rt">590</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memcpy</td>
+<td>other</td>
+<td class="rt">131</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memcpy</td>
+<td>store</td>
+<td class="rt">104</td>
+<td class="rt">1</td>
+</tr><tr class="s10">
+<td>memcpy</td>
+<td>reg_write</td>
+<td class="rt">550</td>
+<td class="rt">1</td>
+</tr></table><br clear=all>
+</div>
+</div>
+<div class="ui-layout-center-inner-north">
+<div id="center-bread-crumb" class="breadCrumb module urg-margin-bottom">
+  <ul name="cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit">
+    <li>
+      <a href="#inst_tag_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit.cp_program">Variable : cp_program</a>    </li>
+    <li>
+      <a href="#inst_tag_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit.cp_commit_kind">Variable : cp_commit_kind</a>    </li>
+    <li>
+      <a href="#inst_tag_cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit.cg_baremetal_commit_cc">Cross : cg_baremetal_commit_cc</a>    </li>
+  </ul>
+  <ul name="tb_top.me.obj.cg_baremetal_commit">
+    <li>
+      <a href="#inst_tag_tb_top.me.obj.cg_baremetal_commit.cp_program">Variable : cp_program</a>    </li>
+    <li>
+      <a href="#inst_tag_tb_top.me.obj.cg_baremetal_commit.cp_commit_kind">Variable : cp_commit_kind</a>    </li>
+    <li>
+      <a href="#inst_tag_tb_top.me.obj.cg_baremetal_commit.cg_baremetal_commit_cc">Cross : cg_baremetal_commit_cc</a>    </li>
+  </ul>
+</div>
+</div>
+</div>
+<div class="ui-layout-south">
+<table align=center><tr><td class="s0 cl">0%</td>
+<td class="s1 cl">10%</td>
+<td class="s2 cl">20%</td>
+<td class="s3 cl">30%</td>
+<td class="s4 cl">40%</td>
+<td class="s5 cl">50%</td>
+<td class="s6 cl">60%</td>
+<td class="s7 cl">70%</td>
+<td class="s8 cl">80%</td>
+<td class="s9 cl">90%</td>
+<td class="s10 cl">100%</td></tr></table></div>
+</body>
+</html>

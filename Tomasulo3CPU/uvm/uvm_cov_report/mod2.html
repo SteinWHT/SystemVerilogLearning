@@ -1,0 +1,3057 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="Author" content="<username>"> <meta name="GENERATOR" content="urg/version [en] (platform name) [urg]">
+<title>Unified Coverage Report :: Module :: DISPATCH</title>
+<link type="text/css" rel="stylesheet" href="css/.urg.css">
+<link type="text/css" rel="stylesheet" href="css/.layout.css">
+<link type="text/css" rel="stylesheet" href="css/.breadcrumb.css">
+<script type="text/javascript" src="js/.jquery.js"></script>
+<script type="text/javascript" src="js/.jquery-ui.js"></script>
+<script type="text/javascript" src="js/.sortable.js"></script>
+<script type="text/javascript" src="js/.layout.js"></script>
+<script type="text/javascript" src="js/.breadcrumb.js"></script>
+<script type="text/javascript">
+var layout, westLayout, centerLayout;
+$(document).ready(function () {
+  if ($("#north-bread-crumb")) {
+    $("#north-bread-crumb").jBreadCrumb({easing:'swing'})
+  }
+  layout = $("body").layout({ 
+    resizable: true,
+    spacing_open: 4,
+    spacing_closed: 4,
+    north: {
+      size: 76
+    },
+    south: {
+      size: 45,
+      initClosed: true
+    },
+    west: {
+      size: 500,
+      resizable: true,
+      initClosed: false
+    }
+  });
+  centerLayout = $('div.ui-layout-center').layout({
+    north__paneSelector: ".ui-layout-center-inner-north",
+    center__paneSelector: ".ui-layout-center-inner-center", 
+    north__size: 50,
+    spacing_open: 4,
+    spacing_closed: 4
+  });
+});
+</script>
+</head>
+<body onLoad="initPage();"><div class="ui-layout-north">
+<div class="logo"></div>
+<center class="pagetitle">Module Definition</center>
+<div align="center"><a href="dashboard.html" ><b>dashboard</b></a> | <a href="hierarchy.html" ><b>hierarchy</b></a> | <a href="modlist.html" ><b>modlist</b></a> | <a href="groups.html" ><b>groups</b></a> | <a href="tests.html" ><b>tests</b></a> | <a href="asserts.html" ><b>asserts</b></a></div>
+
+</div>
+<div class="ui-layout-west">
+<div name='tag_DISPATCH'>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module : <a href="#"  onclick="showContent('tag_DISPATCH')">DISPATCH</a></span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s7 cl rt"> 76.66</td>
+<td class="s9 cl rt"><a href="mod2.html#Line" > 95.27</a></td>
+<td class="s7 cl rt"><a href="mod2.html#Cond" > 73.65</a></td>
+<td class="s5 cl rt"><a href="mod2.html#Toggle" > 59.30</a></td>
+<td class="wht cl rt"></td>
+<td class="s7 cl rt"><a href="mod2.html#Branch" > 78.43</a></td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<span class=repname>Source File(s) : </span>
+<br clear=all>
+<a href="javascript:void(0);"  onclick="openSrcFile('/workspace/src/DISPATCH.sv')">/workspace/src/DISPATCH.sv</a><br clear=all>
+<br clear=all>
+<span class=repname>Module self-instances :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="wht cl wordwrap"><a href="mod2.html#inst_tag_2"  onclick="showContent('inst_tag_2')">tb_top.dut.front_end.dispatch</a></td>
+<td class="s7 cl rt"> 76.66</td>
+<td class="s9 cl rt"><a href="mod2.html#Line" > 95.27</a></td>
+<td class="s7 cl rt"><a href="mod2.html#Cond" > 73.65</a></td>
+<td class="s5 cl rt"><a href="mod2.html#Toggle" > 59.30</a></td>
+<td class="wht cl rt"></td>
+<td class="s7 cl rt"><a href="mod2.html#Branch" > 78.43</a></td>
+<td class="wht cl rt"></td>
+</tr></table></div>
+</div>
+<br clear=all>
+<div name='tag_DISPATCH'>
+<hr>
+<a name="inst_tag_2"></a>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module Instance : <a href="hierarchy.html#tag_urg_inst_2" >tb_top.dut.front_end.dispatch</a></span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Instance :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s7 cl rt"> 76.66</td>
+<td class="s9 cl rt"><a href="mod2.html#Line" > 95.27</a></td>
+<td class="s7 cl rt"><a href="mod2.html#Cond" > 73.65</a></td>
+<td class="s5 cl rt"><a href="mod2.html#Toggle" > 59.30</a></td>
+<td class="wht cl rt"></td>
+<td class="s7 cl rt"><a href="mod2.html#Branch" > 78.43</a></td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Instance's subtree :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s7 cl rt"> 75.57</td>
+<td class="s8 cl rt"> 88.19</td>
+<td class="s7 cl rt"> 73.03</td>
+<td class="s6 cl rt"> 69.61</td>
+<td class="wht cl rt"></td>
+<td class="s7 cl rt"> 71.43</td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Parent : </span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td><td class="alfsrt">NAME</td></tr><tr>
+<td class="s8 cl rt"> 82.30</td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt">100.00</td>
+<td class="s4 cl rt"> 46.90</td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt">100.00</td>
+<td class="wht cl rt"></td>
+<td><a href="mod1.html#inst_tag_1" >front_end</a></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Subtrees :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="wht cl wordwrap"><a href="mod34.html#inst_tag_35" id="tag_urg_inst_35">decoder</a></td>
+<td class="s7 cl rt"> 77.91</td>
+<td class="s8 cl rt"> 83.33</td>
+<td class="s6 cl rt"> 63.64</td>
+<td class="s9 cl rt"> 96.28</td>
+<td class="wht cl rt"></td>
+<td class="s6 cl rt"> 68.38</td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+</div>
+</div>
+<hr>
+Since this is the module's only instance, the coverage report is the same as for the module.</div>
+<div class="ui-layout-center">
+<div class="ui-layout-center-inner-center">
+<div name='tag_DISPATCH'>
+<a name="Line"></a>
+Line Coverage for Module : <a href="mod2.html" >DISPATCH</a><br clear=all>
+<table class="noborder">
+<col width="122">
+<col span="4" width="82">
+<tr><th></th><th>Line No.</th><th>Total</th><th>Covered</th><th>Percent</th></tr>
+<tr class="s9"><td class="lf">TOTAL</td><td></td><td>148</td><td>141</td><td>95.27</td></tr>
+<tr class="s7"><td class="lf">ALWAYS</td><td>232</td><td>4</td><td>3</td><td>75.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>264</td><td>22</td><td>22</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>307</td><td>11</td><td>11</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>325</td><td>20</td><td>20</td><td>100.00</td></tr>
+<tr class="s7"><td class="lf">ALWAYS</td><td>389</td><td>25</td><td>19</td><td>76.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>444</td><td>66</td><td>66</td><td>100.00</td></tr>
+</table>
+<pre class="code"><br clear=all>
+231                         always_comb begin
+232        1/1                  unique case (stage1_dis_instr_type)
+233        1/1                      INSTR_ECALL:  stage1_dis_trap_cause = TRAP_CAUSE_ECALL_M;
+234        <font color = "red">0/1     ==>              INSTR_EBREAK: stage1_dis_trap_cause = TRAP_CAUSE_EBREAK;</font>
+235        1/1                      default:      stage1_dis_trap_cause = TRAP_CAUSE_NONE;
+236                             endcase
+237                         end
+238                         assign stage1_valid = (!stall) &amp;&amp; !cdb_flush &amp;&amp; !ifq_wait_after_empty;
+239                         assign stage1_reg_write = stage1_dis_reg_write &amp;&amp; (stage1_rd_arch_addr != '0);
+240                         assign stage1_needs_issue_entry = (stage1_dis_instr_type != INSTR_NONE) &amp;&amp;
+241                                                           !stage1_dis_rob_only;
+242                         assign stage1_issue_entry_available = stage1_dis_int_issue_en ||
+243                                 stage1_dis_div_issue_en ||
+244                                 stage1_dis_mul_issue_en ||
+245                                 stage1_dis_ld_st_issue_en;
+246                     
+247                         // BPB logic
+248                         assign dis_bpb_branch_pc_bits = ifetch_pc[BPB_PC_BITS+1:2];
+249                         assign dis_bpb_branch = stage1_dis_branch;
+250                     
+251                         // RAS logic
+252                         assign dis_pc_plus4 = ifetch_pcplus4_in;
+253                         assign dis_ras_jr31_inst = stage1_dis_jr31_inst &amp;&amp; stage1_valid;
+254                         assign dis_ras_jal_inst = stage1_dis_jal_inst &amp;&amp; stage1_valid;
+255                     
+256                         // IFQ logic
+257                         // We allow the jr and csr instruction to be passed through stage1
+258                         // But block the ifq
+259                         assign dis_ren = (!stall) &amp;&amp; !cdb_flush;
+260                         assign stage1_branch_taken = stage1_dis_branch &amp;&amp; bpb_branch_prediction;
+261                         // redirect logic
+262                         logic [IMEM_DEPTH-1:0] jmpbr_byte_addr;
+263                         always_comb begin
+264        1/1                  dis_jmpbr = '0;
+265        1/1                  dis_jmpbr_addr_valid = '0;
+266        1/1                  dis_jmpbr_addr = '0;
+267        1/1                  jmpbr_byte_addr = stage2_dis_imm + stage2_pc;
+268        1/1                  if (cdb_flush &amp;&amp; cdb_valid) begin
+269        1/1                      dis_jmpbr = 1'b1;
+270        1/1                      dis_jmpbr_addr_valid = 1'b1;
+271        1/1                      dis_jmpbr_addr = cdb_branch_addr[IMEM_DEPTH-1:1];
+272        1/1                  end else if (stage2_valid &amp;&amp; stage2_dis_jr31_inst) begin
+273        1/1                      dis_jmpbr = 1'b1;
+274        1/1                      dis_jmpbr_addr_valid = 1'b1;
+275        1/1                      dis_jmpbr_addr = dis_branch_other_addr[IMEM_DEPTH-1:1];
+276        1/1                  end else if (stage2_valid &amp;&amp; stage2_dis_jal_inst &amp;&amp; !stage2_dis_jr_inst) begin
+277        1/1                      dis_jmpbr = 1'b1;
+278        1/1                      dis_jmpbr_addr_valid = 1'b1;
+279        1/1                      dis_jmpbr_addr = jmpbr_byte_addr[IMEM_DEPTH-1:1];
+280        1/1                  end else if (stage2_valid &amp;&amp; stage2_dis_branch &amp;&amp; stage2_branch_prediction) begin
+281        1/1                      dis_jmpbr = 1'b1;
+282        1/1                      dis_jmpbr_addr_valid = 1'b1;
+283        1/1                      dis_jmpbr_addr = jmpbr_byte_addr[IMEM_DEPTH-1:1];
+284        1/1                  end else if (jr_stall) begin
+285        1/1                      dis_jmpbr = 1'b1;
+286                             end
+                        MISSING_ELSE
+287                         end
+288                         // Rename source and destination registers.
+289                         // The architectural source register IDs ($rs and $rt) are provided to FRAT and RRAT.
+290                         // For register writing instructions, free register list (FRL) provides a free physical register
+291                         // that will be mapped to the destination architectural register.
+292                         // FRL logic
+293                         assign dis_rs_arch_addr = stage1_rs_arch_addr;
+294                         assign dis_rt_arch_addr = stage1_rt_arch_addr;
+295                         assign dis_frl_read = stage1_valid &amp;&amp; stage1_reg_write;
+296                         // The architectural destination register ID ($rd) is also provided to FRAT to find the
+297                         // &quot;old&quot; mapping which can be freed when this instruction commits
+298                         // FRAT logic
+299                         assign dis_rd_arch_addr = stage1_rd_arch_addr;
+300                     
+301                         // jalr $rs1 ($rs1 != $31) until the value of $rs1 is ready in CDB
+302                         // jr -&gt; 1 bit flag register(jr_stall) + 5-bit internal register(jr_rob_tag)
+303                         // if jr_rob_tag is on the CDB and valid, then we can clear the jr_stall flag and proceed with dispatching the jr instruction
+304                         // CSR/trap/mret serialization: stall dispatch after dispatching one
+305                         // until the ROB commits it. Cleared by rob_csr_committed or flush.
+306                         always_ff @(posedge clk or negedge rst_n) begin
+307        1/1                  if (!rst_n) begin
+308        1/1                      jr_stall &lt;= 1'b0;
+309        1/1                      csr_stall &lt;= 1'b0;
+310                                 end else begin
+311        1/1                          if (cdb_valid &amp;&amp; cdb_flush)
+312        1/1                              jr_stall &lt;= 1'b0;
+313        1/1                          else if ((stage1_valid &amp;&amp; stage1_dis_jr_inst &amp;&amp; !jr_stall))
+314        1/1                              jr_stall &lt;= 1'b1;
+                        MISSING_ELSE
+315                     
+316        1/1                          if (rob_csr_committed || (cdb_valid &amp;&amp; cdb_flush))
+317        1/1                              csr_stall &lt;= 1'b0;
+318        1/1                          else if (stage1_valid &amp;&amp; !csr_stall &amp;&amp;
+319                                             (stage1_dis_csr_inst || stage1_dis_trap_inst || stage1_dis_mret_inst))
+320        1/1                              csr_stall &lt;= 1'b1;
+                        MISSING_ELSE
+321                             end
+322                         end
+323                     
+324                         always_comb begin
+325        1/1                  stage1_dis_int_issue_en = 1'b0;
+326        1/1                  stage1_dis_div_issue_en = 1'b0;
+327        1/1                  stage1_dis_mul_issue_en = 1'b0;
+328        1/1                  stage1_dis_ld_st_issue_en = 1'b0;
+329        1/1                  stage1_dis_rob_only = 1'b0;
+330                     
+331        1/1                  unique case (stage1_dis_instr_type)
+332                                 INSTR_ADD, INSTR_SUB, INSTR_SLT, INSTR_SLTU, INSTR_XOR,
+333                                 INSTR_SRL, INSTR_SRA, INSTR_OR, INSTR_AND, INSTR_SLL,
+334                                 INSTR_ADDW, INSTR_SUBW, INSTR_SLLW, INSTR_SRLW, INSTR_SRAW,
+335                                 INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
+336                                 INSTR_ADDIW, INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
+337                                 INSTR_SLLI, INSTR_SRLI, INSTR_SRAI,
+338                                 INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU, INSTR_BGE, INSTR_BGEU,
+339                                 INSTR_JAL, INSTR_JALR, INSTR_LUI, INSTR_AUIPC: begin
+340        1/1                          if (!issue_intq_full) begin
+341        1/1                              stage1_dis_int_issue_en = 1'b1;
+342                                     end
+                   <font color = "red">==>  MISSING_ELSE</font>
+343                                 end
+344                                 INSTR_MUL, INSTR_MULH, INSTR_MULHU, INSTR_MULHSU, INSTR_MULW: begin
+345        1/1                          if (!issue_mulq_full) begin
+346        1/1                              stage1_dis_mul_issue_en = 1'b1;
+347                                     end
+                   <font color = "red">==>  MISSING_ELSE</font>
+348                                 end
+349                                 INSTR_DIV, INSTR_DIVU, INSTR_REM, INSTR_REMU,
+350                                 INSTR_DIVW, INSTR_DIVUW, INSTR_REMW, INSTR_REMUW: begin
+351        1/1                          if (!issue_divq_full) begin
+352        1/1                              stage1_dis_div_issue_en = 1'b1;
+353                                     end
+                   <font color = "red">==>  MISSING_ELSE</font>
+354                                 end
+355                                 INSTR_LD, INSTR_LW, INSTR_LB, INSTR_LH, INSTR_LBU, INSTR_LHU, INSTR_LWU,
+356                                 INSTR_SD, INSTR_SW, INSTR_SB, INSTR_SH: begin
+357        1/1                           if (!issue_ld_stq_full) begin
+358        1/1                              stage1_dis_ld_st_issue_en = 1'b1;
+359                                     end
+                   <font color = "red">==>  MISSING_ELSE</font>
+360                                 end
+361                                 INSTR_CSRRW, INSTR_CSRRS, INSTR_CSRRC,
+362                                 INSTR_CSRRWI, INSTR_CSRRSI, INSTR_CSRRCI,
+363                                 INSTR_ECALL, INSTR_EBREAK, INSTR_MRET: begin
+364        1/1                          stage1_dis_rob_only = 1'b1;
+365                                 end
+366                                 default: begin
+367        1/1                          stage1_dis_int_issue_en = 1'b0;
+368        1/1                          stage1_dis_div_issue_en = 1'b0;
+369        1/1                          stage1_dis_mul_issue_en = 1'b0;
+370        1/1                          stage1_dis_ld_st_issue_en = 1'b0;
+371        1/1                          stage1_dis_rob_only = 1'b0;
+372                                 end
+373                             endcase
+374                         end
+375                     
+376                         // Stalls if:
+377                         // ROB is full
+378                         // The ROB has a single ROB entry AND the instruction in the 2nd dispatch stage is valid
+379                         // (requires an ROB entry)
+380                         // desired issue queue is full
+381                         // The desired issue queue has a single entry AND the instruction in the 2nd stage is of
+382                         // the same type and hence will be using that entry.
+383                         // IFQ is empty (no more instructions to dispatch)
+384                         // FRL is empty (no more free physical registers for renaming) &amp;&amp; regwrite
+385                         // FRAT is full (no more checkpoints for branch instructions) &amp;&amp; (is_branch or jr)
+386                         // if jr
+387                         // if the instruction can be issued but the corresponding issue queue is full, we should also stall
+388                         always_comb begin
+389        1/1                  stall = '0;
+390                     
+391        1/1                  if(ifetch_empty) begin
+392        1/1                     stall = 1'b1;
+393        1/1                  end else if (rob_full) begin
+394        1/1                      stall = 1'b1;
+395                             // check when the second stage is non-valid
+396        1/1                  end else if (!rob_two_or_more_vacant &amp;&amp; stage2_valid) begin
+397        1/1                      stall = 1'b1;
+398        1/1                  end else if (frat_full &amp;&amp; stage1_dis_branch) begin
+399        <font color = "red">0/1     ==>              stall = 1'b1;</font>
+400        1/1                  end else if (dis_frl_empty &amp;&amp; stage1_reg_write) begin
+401        <font color = "red">0/1     ==>              stall = 1'b1;</font>
+402        1/1                  end else if (stage1_needs_issue_entry &amp;&amp; !stage1_issue_entry_available) begin
+403        1/1                      stall = 1'b1;
+404        1/1                  end else if ((stage2_dis_int_issue_en &amp;&amp; stage1_dis_int_issue_en &amp;&amp;
+405                                     !issue_intq_two_or_more_vacant) || (stage2_dis_int_issue_en &amp;&amp;
+406                                     issue_intq_full)) begin
+407        <font color = "red">0/1     ==>              stall = 1'b1;</font>
+408        1/1                  end else if ((stage2_dis_div_issue_en &amp;&amp; stage1_dis_div_issue_en &amp;&amp;
+409                                     !issue_divq_two_or_more_vacant) || (stage2_dis_div_issue_en &amp;&amp;
+410                                     issue_divq_full)) begin
+411        <font color = "red">0/1     ==>              stall = 1'b1;</font>
+412        1/1                  end else if ((stage2_dis_mul_issue_en &amp;&amp; stage1_dis_mul_issue_en &amp;&amp;
+413                                     !issue_mulq_two_or_more_vacant) || (stage2_dis_mul_issue_en &amp;&amp;
+414                                     issue_mulq_full)) begin
+415        <font color = "red">0/1     ==>              stall = 1'b1;</font>
+416        1/1                  end else if ((stage2_dis_ld_st_issue_en &amp;&amp; stage1_dis_ld_st_issue_en &amp;&amp;
+417                                     !issue_ld_stq_two_or_more_vacant) || (stage2_dis_ld_st_issue_en &amp;&amp;
+418                                     issue_ld_stq_full)) begin
+419        <font color = "red">0/1     ==>              stall = 1'b1;</font>
+420        1/1                  end else if (dis_jmpbr) begin
+421        1/1                      stall = 1'b1;
+422        1/1                  end else if (csr_stall) begin
+423        1/1                      stall = 1'b1;
+424                             end
+                        MISSING_ELSE
+425                         end
+426                     
+427                         // Rename forwarding: FRAT updates on the clock edge after stage2 dispatch,
+428                         // so the instruction in stage1 must see stage2's newly allocated physical
+429                         // register directly when it reads the same architectural register.
+430                         assign stage1_rs_phy_addr = (stage2_valid &amp;&amp; stage2_dis_reg_write &amp;&amp;
+431                                                      (stage2_rd_arch_addr == stage1_rs_arch_addr)) ?
+432                                                     dis_frl_rd_phy_addr : frat_rs_phy_addr;
+433                         assign stage1_rt_phy_addr = (stage2_valid &amp;&amp; stage2_dis_reg_write &amp;&amp;
+434                                                      (stage2_rd_arch_addr == stage1_rt_arch_addr)) ?
+435                                                     dis_frl_rd_phy_addr : frat_rt_phy_addr;
+436                         assign stage1_pre_phy_addr = (stage2_valid &amp;&amp; stage2_dis_reg_write &amp;&amp;
+437                                                       (stage2_rd_arch_addr == stage1_rd_arch_addr)) ?
+438                                                      dis_frl_rd_phy_addr : frat_rd_phy_addr;
+439                     
+440                         // ------------------------------------------------------
+441                         // Stage 1 to Stage 2 pipeline register
+442                         // ------------------------------------------------------
+443                         always_ff @(posedge clk or negedge rst_n) begin
+444        1/1                  if (!rst_n) begin
+445                                 // reset logic
+446        1/1                      stage2_valid                &lt;= 1'b0;
+447        1/1                      stage2_dis_branch           &lt;= '0;
+448        1/1                      stage2_dis_jr_inst          &lt;= '0;
+449        1/1                      stage2_dis_jal_inst         &lt;= '0;
+450        1/1                      stage2_dis_jr31_inst        &lt;= '0;
+451                     
+452        1/1                      stage2_dis_instr_type       &lt;= INSTR_NONE;
+453        1/1                      stage2_dis_imm              &lt;= '0;
+454        1/1                      stage2_dis_mem_write        &lt;= '0;
+455        1/1                      stage2_dis_reg_write        &lt;= '0;
+456        1/1                      stage2_rd_arch_addr         &lt;= '0;
+457                     
+458        1/1                      stage2_pc_plus4             &lt;= '0;
+459        1/1                      stage2_pc                   &lt;= '0;
+460                     
+461        1/1                      stage2_dis_int_issue_en     &lt;= '0;
+462        1/1                      stage2_dis_div_issue_en     &lt;= '0;
+463        1/1                      stage2_dis_mul_issue_en     &lt;= '0;
+464        1/1                      stage2_dis_ld_st_issue_en   &lt;= '0;
+465        1/1                      stage2_branch_prediction    &lt;= '0;
+466        1/1                      stage2_rs_phy_addr          &lt;= '0;
+467        1/1                      stage2_rt_phy_addr          &lt;= '0;
+468        1/1                      stage2_pre_phy_addr         &lt;= '0;
+469        1/1                      stage2_ras_address          &lt;= '0;
+470        1/1                      stage2_rs_arch_addr         &lt;= '0;
+471                     
+472        1/1                      stage2_dis_csr_inst        &lt;= '0;
+473        1/1                      stage2_dis_csr_cmd         &lt;= CSR_CMD_NONE;
+474        1/1                      stage2_dis_csr_addr        &lt;= '0;
+475                     
+476        1/1                      stage2_dis_trap_inst       &lt;= '0;
+477        1/1                      stage2_dis_trap_cause      &lt;= TRAP_CAUSE_NONE;
+478        1/1                      stage2_dis_mret_inst       &lt;= '0;
+479                     
+480        1/1                      ifq_wait_after_empty       &lt;= 1'b1;
+481                             end else begin
+482        1/1                      ifq_wait_after_empty        &lt;= ifetch_empty;
+483        1/1                      if (!stage1_valid) begin
+484                                     // On flush, we need to invalidate the instruction in stage 2
+485        1/1                          stage2_valid                &lt;= 1'b0;
+486        1/1                          stage2_dis_int_issue_en     &lt;= 1'b0;
+487        1/1                          stage2_dis_div_issue_en     &lt;= 1'b0;
+488        1/1                          stage2_dis_mul_issue_en     &lt;= 1'b0;
+489        1/1                          stage2_dis_ld_st_issue_en   &lt;= 1'b0;
+490        1/1                          stage2_dis_reg_write        &lt;= 1'b0;
+491                                 end else begin
+492                                     // pipeline register for stage 1 to stage 2
+493        1/1                          stage2_valid                &lt;= stage1_valid;
+494        1/1                          stage2_dis_branch           &lt;= stage1_dis_branch;
+495        1/1                          stage2_dis_jr_inst          &lt;= stage1_dis_jr_inst;
+496        1/1                          stage2_dis_jal_inst         &lt;= stage1_dis_jal_inst;
+497        1/1                          stage2_dis_jr31_inst        &lt;= stage1_dis_jr31_inst;
+498                     
+499        1/1                          stage2_dis_instr_type       &lt;= stage1_dis_instr_type;
+500        1/1                          stage2_dis_imm              &lt;= stage1_dis_imm;
+501        1/1                          stage2_dis_mem_write        &lt;= stage1_dis_mem_write;
+502        1/1                          stage2_dis_reg_write        &lt;= stage1_reg_write;
+503        1/1                          stage2_rd_arch_addr         &lt;= stage1_rd_arch_addr;
+504                     
+505        1/1                          stage2_pc_plus4             &lt;= dis_pc_plus4;
+506        1/1                          stage2_pc                   &lt;= ifetch_pc;
+507                     
+508        1/1                          stage2_dis_int_issue_en     &lt;= stage1_dis_int_issue_en;
+509        1/1                          stage2_dis_div_issue_en     &lt;= stage1_dis_div_issue_en;
+510        1/1                          stage2_dis_mul_issue_en     &lt;= stage1_dis_mul_issue_en;
+511        1/1                          stage2_dis_ld_st_issue_en   &lt;= stage1_dis_ld_st_issue_en;
+512                     
+513        1/1                          stage2_branch_prediction    &lt;= stage1_branch_taken;
+514        1/1                          stage2_rs_phy_addr          &lt;= stage1_rs_phy_addr;
+515        1/1                          stage2_rt_phy_addr          &lt;= stage1_rt_phy_addr;
+516        1/1                          stage2_pre_phy_addr         &lt;= stage1_pre_phy_addr;
+517        1/1                          stage2_ras_address          &lt;= ras_addr;
+518        1/1                          stage2_rs_arch_addr         &lt;= stage1_rs_arch_addr;
+519                     
+520        1/1                          stage2_dis_csr_inst         &lt;= stage1_dis_csr_inst;
+521        1/1                          stage2_dis_csr_cmd          &lt;= stage1_dis_csr_cmd;
+522        1/1                          stage2_dis_csr_addr         &lt;= stage1_dis_csr_addr;
+523        1/1                          stage2_dis_trap_inst        &lt;= stage1_dis_trap_inst;
+524        1/1                          stage2_dis_trap_cause       &lt;= stage1_dis_trap_cause;
+525        1/1                          stage2_dis_mret_inst        &lt;= stage1_dis_mret_inst;
+</pre>
+<hr>
+<a name="Cond"></a>
+Cond Coverage for Module : <a href="mod2.html" >DISPATCH</a><br clear=all>
+<table class="noborder">
+<col width="122">
+<col span="3" width="82">
+<tr><th></th><th>Total</th><th>Covered</th><th>Percent</th></tr>
+<tr class="s7"><td class="lf">Conditions</td><td>167</td><td>123</td><td>73.65</td></tr>
+<tr class="s7"><td class="lf">Logical</td><td>167</td><td>123</td><td>73.65</td></tr>
+<tr class="wht"><td class="lf">Non-Logical</td><td>0</td><td>0</td><td></td></tr>
+<tr class="wht"><td class="lf">Event</td><td>0</td><td>0</td><td></td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       238
+ EXPRESSION (((!stall)) &amp;&amp; ((!cdb_flush)) &amp;&amp; ((!ifq_wait_after_empty)))
+             -----1----    -------2------    ------------3------------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       239
+ EXPRESSION (stage1_dis_reg_write &amp;&amp; (stage1_rd_arch_addr != '0))
+             ----------1---------    -------------2-------------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       239
+ SUB-EXPRESSION (stage1_rd_arch_addr != '0)
+                -------------1-------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       240
+ EXPRESSION ((stage1_dis_instr_type != INSTR_NONE) &amp;&amp; ((!stage1_dis_rob_only)))
+             ------------------1------------------    ------------2-----------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       240
+ SUB-EXPRESSION (stage1_dis_instr_type != INSTR_NONE)
+                ------------------1------------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       242
+ EXPRESSION (stage1_dis_int_issue_en || stage1_dis_div_issue_en || stage1_dis_mul_issue_en || stage1_dis_ld_st_issue_en)
+             -----------1-----------    -----------2-----------    -----------3-----------    ------------4------------
+</pre>
+<table class="noborder">
+<col span="4" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>-4-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>0</td><td>0</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>0</td><td>0</td><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>0</td><td>0</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td>0</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td>0</td><td>0</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       253
+ EXPRESSION (stage1_dis_jr31_inst &amp;&amp; stage1_valid)
+             ----------1---------    ------2-----
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       254
+ EXPRESSION (stage1_dis_jal_inst &amp;&amp; stage1_valid)
+             ---------1---------    ------2-----
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       259
+ EXPRESSION (((!stall)) &amp;&amp; ((!cdb_flush)))
+             -----1----    -------2------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       260
+ EXPRESSION (stage1_dis_branch &amp;&amp; bpb_branch_prediction)
+             --------1--------    ----------2----------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       268
+ EXPRESSION (cdb_flush &amp;&amp; cdb_valid)
+             ----1----    ----2----
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       272
+ EXPRESSION (stage2_valid &amp;&amp; stage2_dis_jr31_inst)
+             ------1-----    ----------2---------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       276
+ EXPRESSION (stage2_valid &amp;&amp; stage2_dis_jal_inst &amp;&amp; ((!stage2_dis_jr_inst)))
+             ------1-----    ---------2---------    -----------3-----------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       280
+ EXPRESSION (stage2_valid &amp;&amp; stage2_dis_branch &amp;&amp; stage2_branch_prediction)
+             ------1-----    --------2--------    ------------3-----------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       295
+ EXPRESSION (stage1_valid &amp;&amp; stage1_reg_write)
+             ------1-----    --------2-------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       311
+ EXPRESSION (cdb_valid &amp;&amp; cdb_flush)
+             ----1----    ----2----
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       313
+ EXPRESSION (stage1_valid &amp;&amp; stage1_dis_jr_inst &amp;&amp; ((!jr_stall)))
+             ------1-----    ---------2--------    ------3------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       316
+ EXPRESSION (rob_csr_committed || (cdb_valid &amp;&amp; cdb_flush))
+             --------1--------    ------------2-----------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       316
+ SUB-EXPRESSION (cdb_valid &amp;&amp; cdb_flush)
+                 ----1----    ----2----
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       318
+ EXPRESSION (stage1_valid &amp;&amp; ((!csr_stall)) &amp;&amp; (stage1_dis_csr_inst || stage1_dis_trap_inst || stage1_dis_mret_inst))
+             ------1-----    -------2------    ----------------------------------3----------------------------------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       318
+ SUB-EXPRESSION (stage1_dis_csr_inst || stage1_dis_trap_inst || stage1_dis_mret_inst)
+                 ---------1---------    ----------2---------    ----------3---------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>0</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>0</td><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td>0</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       396
+ EXPRESSION (((!rob_two_or_more_vacant)) &amp;&amp; stage2_valid)
+             -------------1-------------    ------2-----
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       398
+ EXPRESSION (frat_full &amp;&amp; stage1_dis_branch)
+             ----1----    --------2--------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       400
+ EXPRESSION (dis_frl_empty &amp;&amp; stage1_reg_write)
+             ------1------    --------2-------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       402
+ EXPRESSION (stage1_needs_issue_entry &amp;&amp; ((!stage1_issue_entry_available)))
+             ------------1-----------    ----------------2----------------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       404
+ EXPRESSION ((stage2_dis_int_issue_en &amp;&amp; stage1_dis_int_issue_en &amp;&amp; ((!issue_intq_two_or_more_vacant))) || (stage2_dis_int_issue_en &amp;&amp; issue_intq_full))
+             ---------------------------------------------1--------------------------------------------    ----------------------2---------------------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       404
+ SUB-EXPRESSION (stage2_dis_int_issue_en &amp;&amp; stage1_dis_int_issue_en &amp;&amp; ((!issue_intq_two_or_more_vacant)))
+                 -----------1-----------    -----------2-----------    -----------------3----------------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       404
+ SUB-EXPRESSION (stage2_dis_int_issue_en &amp;&amp; issue_intq_full)
+                 -----------1-----------    -------2-------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       408
+ EXPRESSION ((stage2_dis_div_issue_en &amp;&amp; stage1_dis_div_issue_en &amp;&amp; ((!issue_divq_two_or_more_vacant))) || (stage2_dis_div_issue_en &amp;&amp; issue_divq_full))
+             ---------------------------------------------1--------------------------------------------    ----------------------2---------------------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       408
+ SUB-EXPRESSION (stage2_dis_div_issue_en &amp;&amp; stage1_dis_div_issue_en &amp;&amp; ((!issue_divq_two_or_more_vacant)))
+                 -----------1-----------    -----------2-----------    -----------------3----------------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       408
+ SUB-EXPRESSION (stage2_dis_div_issue_en &amp;&amp; issue_divq_full)
+                 -----------1-----------    -------2-------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       412
+ EXPRESSION ((stage2_dis_mul_issue_en &amp;&amp; stage1_dis_mul_issue_en &amp;&amp; ((!issue_mulq_two_or_more_vacant))) || (stage2_dis_mul_issue_en &amp;&amp; issue_mulq_full))
+             ---------------------------------------------1--------------------------------------------    ----------------------2---------------------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       412
+ SUB-EXPRESSION (stage2_dis_mul_issue_en &amp;&amp; stage1_dis_mul_issue_en &amp;&amp; ((!issue_mulq_two_or_more_vacant)))
+                 -----------1-----------    -----------2-----------    -----------------3----------------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       412
+ SUB-EXPRESSION (stage2_dis_mul_issue_en &amp;&amp; issue_mulq_full)
+                 -----------1-----------    -------2-------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       416
+ EXPRESSION 
+ Number  Term
+      1  (stage2_dis_ld_st_issue_en &amp;&amp; stage1_dis_ld_st_issue_en &amp;&amp; ((!issue_ld_stq_two_or_more_vacant))) || 
+      2  (stage2_dis_ld_st_issue_en &amp;&amp; issue_ld_stq_full))
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       416
+ SUB-EXPRESSION (stage2_dis_ld_st_issue_en &amp;&amp; stage1_dis_ld_st_issue_en &amp;&amp; ((!issue_ld_stq_two_or_more_vacant)))
+                 ------------1------------    ------------2------------    ------------------3-----------------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       416
+ SUB-EXPRESSION (stage2_dis_ld_st_issue_en &amp;&amp; issue_ld_stq_full)
+                 ------------1------------    --------2--------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       430
+ EXPRESSION ((stage2_valid &amp;&amp; stage2_dis_reg_write &amp;&amp; (stage2_rd_arch_addr == stage1_rs_arch_addr)) ? dis_frl_rd_phy_addr : frat_rs_phy_addr)
+             -------------------------------------------1------------------------------------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       430
+ SUB-EXPRESSION (stage2_valid &amp;&amp; stage2_dis_reg_write &amp;&amp; (stage2_rd_arch_addr == stage1_rs_arch_addr))
+                 ------1-----    ----------2---------    ----------------------3---------------------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       430
+ SUB-EXPRESSION (stage2_rd_arch_addr == stage1_rs_arch_addr)
+                ----------------------1---------------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       433
+ EXPRESSION ((stage2_valid &amp;&amp; stage2_dis_reg_write &amp;&amp; (stage2_rd_arch_addr == stage1_rt_arch_addr)) ? dis_frl_rd_phy_addr : frat_rt_phy_addr)
+             -------------------------------------------1------------------------------------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       433
+ SUB-EXPRESSION (stage2_valid &amp;&amp; stage2_dis_reg_write &amp;&amp; (stage2_rd_arch_addr == stage1_rt_arch_addr))
+                 ------1-----    ----------2---------    ----------------------3---------------------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       433
+ SUB-EXPRESSION (stage2_rd_arch_addr == stage1_rt_arch_addr)
+                ----------------------1---------------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       436
+ EXPRESSION ((stage2_valid &amp;&amp; stage2_dis_reg_write &amp;&amp; (stage2_rd_arch_addr == stage1_rd_arch_addr)) ? dis_frl_rd_phy_addr : frat_rd_phy_addr)
+             -------------------------------------------1------------------------------------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       436
+ SUB-EXPRESSION (stage2_valid &amp;&amp; stage2_dis_reg_write &amp;&amp; (stage2_rd_arch_addr == stage1_rd_arch_addr))
+                 ------1-----    ----------2---------    ----------------------3---------------------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       436
+ SUB-EXPRESSION (stage2_rd_arch_addr == stage1_rd_arch_addr)
+                ----------------------1---------------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       542
+ EXPRESSION (stage2_valid &amp;&amp; ((!cdb_flush)))
+             ------1-----    -------2------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       555
+ EXPRESSION (stage2_dis_jr31_inst ? ({stage2_ras_address, 1'b0}) : (stage2_branch_prediction ? stage2_pc_plus4 : ((stage2_pc + 64'(stage2_dis_imm)))))
+             ----------1---------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       555
+ SUB-EXPRESSION (stage2_branch_prediction ? stage2_pc_plus4 : ((stage2_pc + 64'(stage2_dis_imm))))
+                 ------------1-----------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       563
+ EXPRESSION (stage2_fire &amp;&amp; stage2_dis_int_issue_en)
+             -----1-----    -----------2-----------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       564
+ EXPRESSION (stage2_fire &amp;&amp; stage2_dis_div_issue_en)
+             -----1-----    -----------2-----------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       565
+ EXPRESSION (stage2_fire &amp;&amp; stage2_dis_mul_issue_en)
+             -----1-----    -----------2-----------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       566
+ EXPRESSION (stage2_fire &amp;&amp; stage2_dis_ld_st_issue_en)
+             -----1-----    ------------2------------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       578
+ EXPRESSION (stage2_fire &amp;&amp; stage2_dis_reg_write)
+             -----1-----    ----------2---------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<hr>
+<a name="Toggle"></a>
+Toggle Coverage for Module : <a href="mod2.html" >DISPATCH</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s7">
+<td>Totals</td>
+<td class="rt">137</td>
+<td class="rt">107</td>
+<td class="rt">78.10 </td>
+</tr><tr class="s5">
+<td>Total Bits</td>
+<td class="rt">2644</td>
+<td class="rt">1568</td>
+<td class="rt">59.30 </td>
+</tr><tr class="s5">
+<td nowrap>Total Bits 0->1</td>
+<td class="rt">1322</td>
+<td class="rt">759</td>
+<td class="rt">57.41 </td>
+</tr><tr class="s6">
+<td nowrap>Total Bits 1->0</td>
+<td class="rt">1322</td>
+<td class="rt">809</td>
+<td class="rt">61.20 </td>
+</tr></table><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80></th><th nowrap width=80></th><th nowrap width=80></th></tr><tr class="s7">
+<td>Ports</td>
+<td class="rt">73</td>
+<td class="rt">52</td>
+<td class="rt">71.23 </td>
+</tr><tr class="s5">
+<td>Port Bits</td>
+<td class="rt">1562</td>
+<td class="rt">834</td>
+<td class="rt">53.39 </td>
+</tr><tr class="s5">
+<td nowrap>Port Bits 0->1</td>
+<td class="rt">781</td>
+<td class="rt">392</td>
+<td class="rt">50.19 </td>
+</tr><tr class="s5">
+<td nowrap>Port Bits 1->0</td>
+<td class="rt">781</td>
+<td class="rt">442</td>
+<td class="rt">56.59 </td>
+</tr></table><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80></th><th nowrap width=80></th><th nowrap width=80></th></tr><tr class="s8">
+<td>Signals</td>
+<td class="rt">64</td>
+<td class="rt">55</td>
+<td class="rt">85.94 </td>
+</tr><tr class="s6">
+<td>Signal Bits</td>
+<td class="rt">1082</td>
+<td class="rt">734</td>
+<td class="rt">67.84 </td>
+</tr><tr class="s6">
+<td nowrap>Signal Bits 0->1</td>
+<td class="rt">541</td>
+<td class="rt">367</td>
+<td class="rt">67.84 </td>
+</tr><tr class="s6">
+<td nowrap>Signal Bits 1->0</td>
+<td class="rt">541</td>
+<td class="rt">367</td>
+<td class="rt">67.84 </td>
+</tr></table><br clear=all>
+<table align=left class="sortable noborder">
+<caption><b>Port Details</b></caption>
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td class="alfsrt">Toggle</td><td class="alfsrt">Toggle 1->0</td><td class="alfsrt">Toggle 0->1</td><td class="alfsrt">Direction</td></tr><tr>
+<td>clk</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rst_n</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>ifetch_instr_in[31:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>ifetch_pcplus4_in[1:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>ifetch_pcplus4_in[12:2]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>ifetch_pcplus4_in[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>ifetch_pc[1:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>ifetch_pc[12:2]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>ifetch_pc[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>ifetch_empty</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_ren</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_jmpbr</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_jmpbr_addr[0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_jmpbr_addr[11:1]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_jmpbr_addr[62:12]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_jmpbr_addr_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>bpb_branch_prediction</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_bpb_branch_pc_bits[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_bpb_branch</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>ras_addr[0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>ras_addr[9:1]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>ras_addr[62:10]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_ras_jr31_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_ras_jal_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_pc_plus4[1:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_pc_plus4[12:2]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_pc_plus4[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_frl_empty</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_frl_rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_frl_read</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>cdb_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>cdb_branch_addr[1:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>cdb_branch_addr[12:2]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>cdb_branch_addr[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>cdb_flush</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>frat_full</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>frat_rs_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>frat_rt_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>frat_rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_rs_arch_addr[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_rt_arch_addr[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_rd_arch_addr[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>issue_intq_full</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>issue_divq_full</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>issue_mulq_full</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>issue_ld_stq_full</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>issue_intq_two_or_more_vacant</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>issue_divq_two_or_more_vacant</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>issue_mulq_two_or_more_vacant</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>issue_ld_stq_two_or_more_vacant</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_rs_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_rt_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_new_rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_opcode[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_imm[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_branch_other_addr[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_branch_prediction</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_branch</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_branch_pc_bits[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_jr_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_jal_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_jr31_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_int_issue_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_div_issue_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_mul_issue_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_ld_st_issue_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>rob_full</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rob_two_or_more_vacant</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rob_csr_committed</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dis_pre_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_new_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_rob_rd_arch_addr[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_inst_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_pc[1:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_pc[12:2]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_pc[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_csr_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_csr_cmd[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_csr_addr[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_csr_addr[5:3]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_csr_addr[6]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_csr_addr[7]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_csr_addr[9:8]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_csr_addr[11:10]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_trap_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_trap_cause[1:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_trap_cause[2]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_trap_cause[3]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_mret_inst</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_csr_rs1_arch_addr[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_inst_sw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_sw_rt_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_rba_new_rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>dis_rba_reg_write</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr></table><br clear=all>
+<table align=left class="sortable noborder">
+<caption><b>Signal Details</b></caption>
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td class="alfsrt">Toggle</td><td class="alfsrt">Toggle 1->0</td><td class="alfsrt">Toggle 0->1</td></tr><tr>
+<td>stage1_dis_imm[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_mem_write</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_reg_write</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_branch</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_jr_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_jal_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_jr31_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_csr_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_trap_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_mret_inst</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage1_dis_trap_cause[1:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_trap_cause[2]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage1_dis_trap_cause[3]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_csr_cmd[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_csr_addr[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_csr_addr[5:3]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage1_dis_csr_addr[6]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_csr_addr[7]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage1_dis_csr_addr[11:8]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_instr_type[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_rd_arch_addr[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_rs_arch_addr[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_rt_arch_addr[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_rs_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_rt_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_pre_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_branch_taken</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_reg_write</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_needs_issue_entry</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_issue_entry_available</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_int_issue_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_div_issue_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_mul_issue_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_ld_st_issue_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage1_dis_rob_only</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stall</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>ifq_wait_after_empty</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_imm[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_mem_write</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_reg_write</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_branch</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_jr_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_jal_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_jr31_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_csr_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_trap_inst</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_mret_inst</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage2_dis_trap_cause[1:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_trap_cause[2]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage2_dis_trap_cause[3]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_csr_cmd[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_csr_addr[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_csr_addr[5:3]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage2_dis_csr_addr[6]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_csr_addr[7]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage2_dis_csr_addr[9:8]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_csr_addr[11:10]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage2_dis_instr_type[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_rd_arch_addr[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_pc_plus4[1:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage2_pc_plus4[12:2]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_pc_plus4[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage2_pc[1:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage2_pc[12:2]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_pc[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage2_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_fire</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_int_issue_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_div_issue_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_mul_issue_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_dis_ld_st_issue_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_branch_prediction</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_rs_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_rt_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_pre_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_ras_address[0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage2_ras_address[9:1]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>stage2_ras_address[62:10]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>stage2_rs_arch_addr[4:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>jr_stall</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>csr_stall</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>jmpbr_byte_addr[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr></table><br clear=all>
+<hr>
+<a name="Branch"></a>
+Branch Coverage for Module : <a href="mod2.html" >DISPATCH</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Line No.</th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s7">
+<td>Branches</td>
+<td></td>
+<td class="rt">51</td>
+<td class="rt">40</td>
+<td class="rt">78.43 </td>
+</tr><tr class="s10">
+<td>TERNARY</td>
+<td class="rt">430</td>
+<td class="rt">2</td>
+<td class="rt">2</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>TERNARY</td>
+<td class="rt">433</td>
+<td class="rt">2</td>
+<td class="rt">2</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>TERNARY</td>
+<td class="rt">436</td>
+<td class="rt">2</td>
+<td class="rt">2</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>TERNARY</td>
+<td class="rt">555</td>
+<td class="rt">3</td>
+<td class="rt">3</td>
+<td class="rt">100.00</td>
+</tr><tr class="s6">
+<td>CASE</td>
+<td class="rt">232</td>
+<td class="rt">3</td>
+<td class="rt">2</td>
+<td class="rt">66.67 </td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">268</td>
+<td class="rt">6</td>
+<td class="rt">6</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">307</td>
+<td class="rt">7</td>
+<td class="rt">7</td>
+<td class="rt">100.00</td>
+</tr><tr class="s6">
+<td>CASE</td>
+<td class="rt">331</td>
+<td class="rt">10</td>
+<td class="rt">6</td>
+<td class="rt">60.00 </td>
+</tr><tr class="s5">
+<td>IF</td>
+<td class="rt">391</td>
+<td class="rt">13</td>
+<td class="rt">7</td>
+<td class="rt">53.85 </td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">444</td>
+<td class="rt">3</td>
+<td class="rt">3</td>
+<td class="rt">100.00</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+430            assign stage1_rs_phy_addr = (stage2_valid && stage2_dis_reg_write &&
+                                                                                   
+431                                         (stage2_rd_arch_addr == stage1_rs_arch_addr)) ?
+                                                                                          <font color = "green">-1-</font>  
+                                                                                          <font color = "green">==></font>  
+                                                                                          <font color = "green">==></font>  
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+433            assign stage1_rt_phy_addr = (stage2_valid && stage2_dis_reg_write &&
+                                                                                   
+434                                         (stage2_rd_arch_addr == stage1_rt_arch_addr)) ?
+                                                                                          <font color = "green">-1-</font>  
+                                                                                          <font color = "green">==></font>  
+                                                                                          <font color = "green">==></font>  
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+436            assign stage1_pre_phy_addr = (stage2_valid && stage2_dis_reg_write &&
+                                                                                    
+437                                          (stage2_rd_arch_addr == stage1_rd_arch_addr)) ?
+                                                                                           <font color = "green">-1-</font>  
+                                                                                           <font color = "green">==></font>  
+                                                                                           <font color = "green">==></font>  
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+555            assign dis_branch_other_addr = stage2_dis_jr31_inst ? {stage2_ras_address,1'b0} :
+                                                                   <font color = "green">-1-</font>  
+                                                                   <font color = "green">==></font>  
+556                    stage2_branch_prediction ? stage2_pc_plus4 : stage2_pc + IMEM_DEPTH'(stage2_dis_imm);
+                                                <font color = "green">-2-</font>  
+                                                <font color = "green">==></font>  
+                                                <font color = "green">==></font>  
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+232                unique case (stage1_dis_instr_type)
+                          <font color = "red">-1-</font>  
+233                    INSTR_ECALL:  stage1_dis_trap_cause = TRAP_CAUSE_ECALL_M;
+           <font color = "green">            ==></font>
+234                    INSTR_EBREAK: stage1_dis_trap_cause = TRAP_CAUSE_EBREAK;
+           <font color = "red">            ==></font>
+235                    default:      stage1_dis_trap_cause = TRAP_CAUSE_NONE;
+           <font color = "green">            ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>INSTR_ECALL </td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>INSTR_EBREAK </td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>default</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+268                if (cdb_flush && cdb_valid) begin
+                   <font color = "green">-1-</font>  
+269                    dis_jmpbr = 1'b1;
+           <font color = "green">            ==></font>
+270                    dis_jmpbr_addr_valid = 1'b1;
+271                    dis_jmpbr_addr = cdb_branch_addr[IMEM_DEPTH-1:1];
+272                end else if (stage2_valid && stage2_dis_jr31_inst) begin
+                            <font color = "green">-2-</font>  
+273                    dis_jmpbr = 1'b1;
+           <font color = "green">            ==></font>
+274                    dis_jmpbr_addr_valid = 1'b1;
+275                    dis_jmpbr_addr = dis_branch_other_addr[IMEM_DEPTH-1:1];
+276                end else if (stage2_valid && stage2_dis_jal_inst && !stage2_dis_jr_inst) begin
+                            <font color = "green">-3-</font>  
+277                    dis_jmpbr = 1'b1;
+           <font color = "green">            ==></font>
+278                    dis_jmpbr_addr_valid = 1'b1;
+279                    dis_jmpbr_addr = jmpbr_byte_addr[IMEM_DEPTH-1:1];
+280                end else if (stage2_valid && stage2_dis_branch && stage2_branch_prediction) begin
+                            <font color = "green">-4-</font>  
+281                    dis_jmpbr = 1'b1;
+           <font color = "green">            ==></font>
+282                    dis_jmpbr_addr_valid = 1'b1;
+283                    dis_jmpbr_addr = jmpbr_byte_addr[IMEM_DEPTH-1:1];
+284                end else if (jr_stall) begin
+                            <font color = "green">-5-</font>  
+285                    dis_jmpbr = 1'b1;
+           <font color = "green">            ==></font>
+286                end
+                   MISSING_ELSE
+           <font color = "green">        ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>-3-</th><th nowrap width=80>-4-</th><th nowrap width=80>-5-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+307                if (!rst_n) begin
+                   <font color = "green">-1-</font>  
+308                    jr_stall <= 1'b0;
+           <font color = "green">            ==></font>
+309                    csr_stall <= 1'b0;
+310                    end else begin
+311                        if (cdb_valid && cdb_flush)
+                           <font color = "green">-2-</font>  
+312                            jr_stall <= 1'b0;
+           <font color = "green">                    ==></font>
+313                        else if ((stage1_valid && stage1_dis_jr_inst && !jr_stall))
+                                <font color = "green">-3-</font>  
+314                            jr_stall <= 1'b1;
+           <font color = "green">                    ==></font>
+                               MISSING_ELSE
+           <font color = "green">                    ==></font>
+315        
+316                        if (rob_csr_committed || (cdb_valid && cdb_flush))
+                           <font color = "green">-4-</font>  
+317                            csr_stall <= 1'b0;
+           <font color = "green">                    ==></font>
+318                        else if (stage1_valid && !csr_stall &&
+                                <font color = "green">-5-</font>  
+319                                (stage1_dis_csr_inst || stage1_dis_trap_inst || stage1_dis_mret_inst))
+320                            csr_stall <= 1'b1;
+           <font color = "green">                    ==></font>
+                               MISSING_ELSE
+           <font color = "green">                    ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>-3-</th><th nowrap width=80>-4-</th><th nowrap width=80>-5-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+331                unique case (stage1_dis_instr_type)
+                          <font color = "green">-1-</font>  
+332                    INSTR_ADD, INSTR_SUB, INSTR_SLT, INSTR_SLTU, INSTR_XOR,
+333                    INSTR_SRL, INSTR_SRA, INSTR_OR, INSTR_AND, INSTR_SLL,
+334                    INSTR_ADDW, INSTR_SUBW, INSTR_SLLW, INSTR_SRLW, INSTR_SRAW,
+335                    INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
+336                    INSTR_ADDIW, INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
+337                    INSTR_SLLI, INSTR_SRLI, INSTR_SRAI,
+338                    INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU, INSTR_BGE, INSTR_BGEU,
+339                    INSTR_JAL, INSTR_JALR, INSTR_LUI, INSTR_AUIPC: begin
+340                        if (!issue_intq_full) begin
+                           <font color = "red">-2-</font>  
+341                            stage1_dis_int_issue_en = 1'b1;
+           <font color = "green">                    ==></font>
+342                        end
+                           MISSING_ELSE
+           <font color = "red">                ==></font>
+343                    end
+344                    INSTR_MUL, INSTR_MULH, INSTR_MULHU, INSTR_MULHSU, INSTR_MULW: begin
+345                        if (!issue_mulq_full) begin
+                           <font color = "red">-3-</font>  
+346                            stage1_dis_mul_issue_en = 1'b1;
+           <font color = "green">                    ==></font>
+347                        end
+                           MISSING_ELSE
+           <font color = "red">                ==></font>
+348                    end
+349                    INSTR_DIV, INSTR_DIVU, INSTR_REM, INSTR_REMU,
+350                    INSTR_DIVW, INSTR_DIVUW, INSTR_REMW, INSTR_REMUW: begin
+351                        if (!issue_divq_full) begin
+                           <font color = "red">-4-</font>  
+352                            stage1_dis_div_issue_en = 1'b1;
+           <font color = "green">                    ==></font>
+353                        end
+                           MISSING_ELSE
+           <font color = "red">                ==></font>
+354                    end
+355                    INSTR_LD, INSTR_LW, INSTR_LB, INSTR_LH, INSTR_LBU, INSTR_LHU, INSTR_LWU,
+356                    INSTR_SD, INSTR_SW, INSTR_SB, INSTR_SH: begin
+357                         if (!issue_ld_stq_full) begin
+                            <font color = "red">-5-</font>  
+358                            stage1_dis_ld_st_issue_en = 1'b1;
+           <font color = "green">                    ==></font>
+359                        end
+                           MISSING_ELSE
+           <font color = "red">                ==></font>
+360                    end
+361                    INSTR_CSRRW, INSTR_CSRRS, INSTR_CSRRC,
+362                    INSTR_CSRRWI, INSTR_CSRRSI, INSTR_CSRRCI,
+363                    INSTR_ECALL, INSTR_EBREAK, INSTR_MRET: begin
+364                        stage1_dis_rob_only = 1'b1;
+           <font color = "green">                ==></font>
+365                    end
+366                    default: begin
+367                        stage1_dis_int_issue_en = 1'b0;
+           <font color = "green">                ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>-3-</th><th nowrap width=80>-4-</th><th nowrap width=80>-5-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center nowrap>CASEITEM-1: INSTR_ADD INSTR_SUB INSTR_SLT INSTR_SLTU INSTR_XOR INSTR_SRL INSTR_SRA INSTR_OR INSTR_AND INSTR_SLL INSTR_ADDW INSTR_SUBW INSTR_SLLW INSTR_SRLW INSTR_SRAW INSTR_ADDI INSTR_SLTI INSTR_SLTIU INSTR_XORI INSTR_ORI INSTR_ANDI INSTR_ADDIW INSTR_SLLIW INSTR_SRLIW INSTR_SRAIW INSTR_SLLI INSTR_SRLI INSTR_SRAI INSTR_BEQ INSTR_BNE INSTR_BLT INSTR_BLTU INSTR_BGE INSTR_BGEU INSTR_JAL INSTR_JALR INSTR_LUI INSTR_AUIPC </td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center nowrap>CASEITEM-1: INSTR_ADD INSTR_SUB INSTR_SLT INSTR_SLTU INSTR_XOR INSTR_SRL INSTR_SRA INSTR_OR INSTR_AND INSTR_SLL INSTR_ADDW INSTR_SUBW INSTR_SLLW INSTR_SRLW INSTR_SRAW INSTR_ADDI INSTR_SLTI INSTR_SLTIU INSTR_XORI INSTR_ORI INSTR_ANDI INSTR_ADDIW INSTR_SLLIW INSTR_SRLIW INSTR_SRAIW INSTR_SLLI INSTR_SRLI INSTR_SRAI INSTR_BEQ INSTR_BNE INSTR_BLT INSTR_BLTU INSTR_BGE INSTR_BGEU INSTR_JAL INSTR_JALR INSTR_LUI INSTR_AUIPC </td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_MUL INSTR_MULH INSTR_MULHU INSTR_MULHSU INSTR_MULW </td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>INSTR_MUL INSTR_MULH INSTR_MULHU INSTR_MULHSU INSTR_MULW </td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center nowrap>CASEITEM-3: INSTR_DIV INSTR_DIVU INSTR_REM INSTR_REMU INSTR_DIVW INSTR_DIVUW INSTR_REMW INSTR_REMUW </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center nowrap>CASEITEM-3: INSTR_DIV INSTR_DIVU INSTR_REM INSTR_REMU INSTR_DIVW INSTR_DIVUW INSTR_REMW INSTR_REMUW </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center nowrap>CASEITEM-4: INSTR_LD INSTR_LW INSTR_LB INSTR_LH INSTR_LBU INSTR_LHU INSTR_LWU INSTR_SD INSTR_SW INSTR_SB INSTR_SH </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center nowrap>CASEITEM-4: INSTR_LD INSTR_LW INSTR_LB INSTR_LH INSTR_LBU INSTR_LHU INSTR_LWU INSTR_SD INSTR_SW INSTR_SB INSTR_SH </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center nowrap>CASEITEM-5: INSTR_CSRRW INSTR_CSRRS INSTR_CSRRC INSTR_CSRRWI INSTR_CSRRSI INSTR_CSRRCI INSTR_ECALL INSTR_EBREAK INSTR_MRET </td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>default</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+391                if(ifetch_empty) begin
+                   <font color = "green">-1-</font>   
+392                   stall = 1'b1;
+           <font color = "green">           ==></font>
+393                end else if (rob_full) begin
+                            <font color = "green">-2-</font>  
+394                    stall = 1'b1;
+           <font color = "green">            ==></font>
+395                // check when the second stage is non-valid
+396                end else if (!rob_two_or_more_vacant && stage2_valid) begin
+                            <font color = "green">-3-</font>  
+397                    stall = 1'b1;
+           <font color = "green">            ==></font>
+398                end else if (frat_full && stage1_dis_branch) begin
+                            <font color = "red">-4-</font>  
+399                    stall = 1'b1;
+           <font color = "red">            ==></font>
+400                end else if (dis_frl_empty && stage1_reg_write) begin
+                            <font color = "red">-5-</font>  
+401                    stall = 1'b1;
+           <font color = "red">            ==></font>
+402                end else if (stage1_needs_issue_entry && !stage1_issue_entry_available) begin
+                            <font color = "green">-6-</font>  
+403                    stall = 1'b1;
+           <font color = "green">            ==></font>
+404                end else if ((stage2_dis_int_issue_en && stage1_dis_int_issue_en &&
+                            <font color = "red">-7-</font>  
+405                        !issue_intq_two_or_more_vacant) || (stage2_dis_int_issue_en &&
+406                        issue_intq_full)) begin
+407                    stall = 1'b1;
+           <font color = "red">            ==></font>
+408                end else if ((stage2_dis_div_issue_en && stage1_dis_div_issue_en &&
+                            <font color = "red">-8-</font>  
+409                        !issue_divq_two_or_more_vacant) || (stage2_dis_div_issue_en &&
+410                        issue_divq_full)) begin
+411                    stall = 1'b1;
+           <font color = "red">            ==></font>
+412                end else if ((stage2_dis_mul_issue_en && stage1_dis_mul_issue_en &&
+                            <font color = "red">-9-</font>  
+413                        !issue_mulq_two_or_more_vacant) || (stage2_dis_mul_issue_en &&
+414                        issue_mulq_full)) begin
+415                    stall = 1'b1;
+           <font color = "red">            ==></font>
+416                end else if ((stage2_dis_ld_st_issue_en && stage1_dis_ld_st_issue_en &&
+                            <font color = "red">-10-</font>  
+417                        !issue_ld_stq_two_or_more_vacant) || (stage2_dis_ld_st_issue_en &&
+418                        issue_ld_stq_full)) begin
+419                    stall = 1'b1;
+           <font color = "red">            ==></font>
+420                end else if (dis_jmpbr) begin
+                            <font color = "green">-11-</font>  
+421                    stall = 1'b1;
+           <font color = "green">            ==></font>
+422                end else if (csr_stall) begin
+                            <font color = "green">-12-</font>  
+423                    stall = 1'b1;
+           <font color = "green">            ==></font>
+424                end
+                   MISSING_ELSE
+           <font color = "green">        ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>-3-</th><th nowrap width=80>-4-</th><th nowrap width=80>-5-</th><th nowrap width=80>-6-</th><th nowrap width=80>-7-</th><th nowrap width=80>-8-</th><th nowrap width=80>-9-</th><th nowrap width=80>-10-</th><th nowrap width=80>-11-</th><th nowrap width=80>-12-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uRed">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+444                if (!rst_n) begin
+                   <font color = "green">-1-</font>  
+445                    // reset logic
+446                    stage2_valid                <= 1'b0;
+           <font color = "green">            ==></font>
+447                    stage2_dis_branch           <= '0;
+448                    stage2_dis_jr_inst          <= '0;
+449                    stage2_dis_jal_inst         <= '0;
+450                    stage2_dis_jr31_inst        <= '0;
+451        
+452                    stage2_dis_instr_type       <= INSTR_NONE;
+453                    stage2_dis_imm              <= '0;
+454                    stage2_dis_mem_write        <= '0;
+455                    stage2_dis_reg_write        <= '0;
+456                    stage2_rd_arch_addr         <= '0;
+457        
+458                    stage2_pc_plus4             <= '0;
+459                    stage2_pc                   <= '0;
+460        
+461                    stage2_dis_int_issue_en     <= '0;
+462                    stage2_dis_div_issue_en     <= '0;
+463                    stage2_dis_mul_issue_en     <= '0;
+464                    stage2_dis_ld_st_issue_en   <= '0;
+465                    stage2_branch_prediction    <= '0;
+466                    stage2_rs_phy_addr          <= '0;
+467                    stage2_rt_phy_addr          <= '0;
+468                    stage2_pre_phy_addr         <= '0;
+469                    stage2_ras_address          <= '0;
+470                    stage2_rs_arch_addr         <= '0;
+471        
+472                    stage2_dis_csr_inst        <= '0;
+473                    stage2_dis_csr_cmd         <= CSR_CMD_NONE;
+474                    stage2_dis_csr_addr        <= '0;
+475        
+476                    stage2_dis_trap_inst       <= '0;
+477                    stage2_dis_trap_cause      <= TRAP_CAUSE_NONE;
+478                    stage2_dis_mret_inst       <= '0;
+479        
+480                    ifq_wait_after_empty       <= 1'b1;
+481                end else begin
+482                    ifq_wait_after_empty        <= ifetch_empty;
+483                    if (!stage1_valid) begin
+                       <font color = "green">-2-</font>  
+484                        // On flush, we need to invalidate the instruction in stage 2
+485                        stage2_valid                <= 1'b0;
+           <font color = "green">                ==></font>
+486                        stage2_dis_int_issue_en     <= 1'b0;
+487                        stage2_dis_div_issue_en     <= 1'b0;
+488                        stage2_dis_mul_issue_en     <= 1'b0;
+489                        stage2_dis_ld_st_issue_en   <= 1'b0;
+490                        stage2_dis_reg_write        <= 1'b0;
+491                    end else begin
+492                        // pipeline register for stage 1 to stage 2
+493                        stage2_valid                <= stage1_valid;
+           <font color = "green">                ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+</div>
+</div>
+<div class="ui-layout-center-inner-north">
+<div id="center-bread-crumb" class="breadCrumb module urg-margin-bottom">
+  <ul name="inst_tag_2">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Cond">Cond</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+  </ul>
+  <ul name="tag_DISPATCH">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Cond">Cond</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+  </ul>
+</div>
+</div>
+</div>
+<div class="ui-layout-south">
+<table align=center><tr><td class="s0 cl">0%</td>
+<td class="s1 cl">10%</td>
+<td class="s2 cl">20%</td>
+<td class="s3 cl">30%</td>
+<td class="s4 cl">40%</td>
+<td class="s5 cl">50%</td>
+<td class="s6 cl">60%</td>
+<td class="s7 cl">70%</td>
+<td class="s8 cl">80%</td>
+<td class="s9 cl">90%</td>
+<td class="s10 cl">100%</td></tr></table></div>
+</body>
+</html>

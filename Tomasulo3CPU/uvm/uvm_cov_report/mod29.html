@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="Author" content="<username>"> <meta name="GENERATOR" content="urg/version [en] (platform name) [urg]">
+<title>Unified Coverage Report :: Module :: MUL</title>
+<link type="text/css" rel="stylesheet" href="css/.urg.css">
+<link type="text/css" rel="stylesheet" href="css/.layout.css">
+<link type="text/css" rel="stylesheet" href="css/.breadcrumb.css">
+<script type="text/javascript" src="js/.jquery.js"></script>
+<script type="text/javascript" src="js/.jquery-ui.js"></script>
+<script type="text/javascript" src="js/.sortable.js"></script>
+<script type="text/javascript" src="js/.layout.js"></script>
+<script type="text/javascript" src="js/.breadcrumb.js"></script>
+<script type="text/javascript">
+var layout, westLayout, centerLayout;
+$(document).ready(function () {
+  if ($("#north-bread-crumb")) {
+    $("#north-bread-crumb").jBreadCrumb({easing:'swing'})
+  }
+  layout = $("body").layout({ 
+    resizable: true,
+    spacing_open: 4,
+    spacing_closed: 4,
+    north: {
+      size: 76
+    },
+    south: {
+      size: 45,
+      initClosed: true
+    },
+    west: {
+      size: 500,
+      resizable: true,
+      initClosed: false
+    }
+  });
+  centerLayout = $('div.ui-layout-center').layout({
+    north__paneSelector: ".ui-layout-center-inner-north",
+    center__paneSelector: ".ui-layout-center-inner-center", 
+    north__size: 50,
+    spacing_open: 4,
+    spacing_closed: 4
+  });
+});
+</script>
+</head>
+<body onLoad="initPage();"><div class="ui-layout-north">
+<div class="logo"></div>
+<center class="pagetitle">Module Definition</center>
+<div align="center"><a href="dashboard.html" ><b>dashboard</b></a> | <a href="hierarchy.html" ><b>hierarchy</b></a> | <a href="modlist.html" ><b>modlist</b></a> | <a href="groups.html" ><b>groups</b></a> | <a href="tests.html" ><b>tests</b></a> | <a href="asserts.html" ><b>asserts</b></a></div>
+
+</div>
+<div class="ui-layout-west">
+<div name='tag_MUL'>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module : <a href="#"  onclick="showContent('tag_MUL')">MUL</a></span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s9 cl rt"> 99.82</td>
+<td class="s10 cl rt"><a href="mod29.html#Line" >100.00</a></td>
+<td class="wht cl rt"></td>
+<td class="s9 cl rt"><a href="mod29.html#Toggle" > 99.45</a></td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt"><a href="mod29.html#Branch" >100.00</a></td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<span class=repname>Source File(s) : </span>
+<br clear=all>
+<a href="javascript:void(0);"  onclick="openSrcFile('/workspace/src/back_end/EXE/MUL.sv')">/workspace/src/back_end/EXE/MUL.sv</a><br clear=all>
+<br clear=all>
+<span class=repname>Module self-instances :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="wht cl wordwrap"><a href="mod29.html#inst_tag_30"  onclick="showContent('inst_tag_30')">tb_top.dut.back_end.exe.mul</a></td>
+<td class="s9 cl rt"> 99.82</td>
+<td class="s10 cl rt"><a href="mod29.html#Line" >100.00</a></td>
+<td class="wht cl rt"></td>
+<td class="s9 cl rt"><a href="mod29.html#Toggle" > 99.45</a></td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt"><a href="mod29.html#Branch" >100.00</a></td>
+<td class="wht cl rt"></td>
+</tr></table></div>
+</div>
+<br clear=all>
+<div name='tag_MUL'>
+<hr>
+<a name="inst_tag_30"></a>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module Instance : <a href="hierarchy.html#tag_urg_inst_30" >tb_top.dut.back_end.exe.mul</a></span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Instance :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s9 cl rt"> 99.82</td>
+<td class="s10 cl rt"><a href="mod29.html#Line" >100.00</a></td>
+<td class="wht cl rt"></td>
+<td class="s9 cl rt"><a href="mod29.html#Toggle" > 99.45</a></td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt"><a href="mod29.html#Branch" >100.00</a></td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Instance's subtree :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s9 cl rt"> 96.74</td>
+<td class="s10 cl rt">100.00</td>
+<td class="s9 cl rt"> 93.33</td>
+<td class="s9 cl rt"> 99.49</td>
+<td class="wht cl rt"></td>
+<td class="s9 cl rt"> 94.12</td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Parent : </span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td><td class="alfsrt">NAME</td></tr><tr>
+<td class="s9 cl rt"> 98.80</td>
+<td class="s10 cl rt">100.00</td>
+<td class="wht cl rt"></td>
+<td class="s9 cl rt"> 95.22</td>
+<td class="wht cl rt"></td>
+<td class="s10 cl rt">100.00</td>
+<td class="s10 cl rt">100.00</td>
+<td><a href="mod31.html#inst_tag_32" >exe</a></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Subtrees :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="wht cl wordwrap"><a href="mod39.html#inst_tag_41" id="tag_urg_inst_41">u_mul</a></td>
+<td class="s9 cl rt"> 94.64</td>
+<td class="s10 cl rt">100.00</td>
+<td class="s9 cl rt"> 93.33</td>
+<td class="s9 cl rt"> 99.52</td>
+<td class="wht cl rt"></td>
+<td class="s8 cl rt"> 85.71</td>
+<td class="wht cl rt"></td>
+</tr></table><br clear=all>
+</div>
+</div>
+<hr>
+Since this is the module's only instance, the coverage report is the same as for the module.</div>
+<div class="ui-layout-center">
+<div class="ui-layout-center-inner-center">
+<div name='tag_MUL'>
+<a name="Line"></a>
+Line Coverage for Module : <a href="mod29.html" >MUL</a><br clear=all>
+<table class="noborder">
+<col width="122">
+<col span="4" width="82">
+<tr><th></th><th>Line No.</th><th>Total</th><th>Covered</th><th>Percent</th></tr>
+<tr class="s10"><td class="lf">TOTAL</td><td></td><td>41</td><td>41</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>61</td><td>9</td><td>9</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>87</td><td>4</td><td>4</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>98</td><td>4</td><td>4</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>108</td><td>24</td><td>24</td><td>100.00</td></tr>
+</table>
+<pre class="code"><br clear=all>
+60                          always_comb begin
+61         1/1                  unique case (instr_e'(opcode))
+62                                  INSTR_MULHU: begin
+63         1/1                          mul_a = {1'b0, rs_data_mul};
+64         1/1                          mul_b = {1'b0, rt_data_mul};
+65                                  end
+66                                  INSTR_MULHSU: begin
+67         1/1                          mul_a = {rs_data_mul[XLEN-1], rs_data_mul};
+68         1/1                          mul_b = {1'b0, rt_data_mul};
+69                                  end
+70                                  INSTR_MULW: begin
+71         1/1                          mul_a = {{(MUL_WIDTH-32){rs_data_mul[31]}}, rs_data_mul[31:0]};
+72         1/1                          mul_b = {{(MUL_WIDTH-32){rt_data_mul[31]}}, rt_data_mul[31:0]};
+73                                  end
+74                                  default: begin // MUL, MULH
+75         1/1                          mul_a = {rs_data_mul[XLEN-1], rs_data_mul};
+76         1/1                          mul_b = {rt_data_mul[XLEN-1], rt_data_mul};
+77                                  end
+78                              endcase
+79                          end
+80                      
+81                          // Result selection based on pipelined opcode (combinational before output register)
+82                          logic [OPCODE_WIDTH-1:0] out_opcode;
+83                          assign out_opcode = mul_opcode[MUL_CYCLES-1];
+84                      
+85                          //logic [REG_FILE_DATA_WIDTH-1:0] result_sel;
+86                          always_comb begin
+87         1/1                  unique case (instr_e'(out_opcode))
+88                                  INSTR_MULH, INSTR_MULHU, INSTR_MULHSU:
+89         1/1                          exe_rd_data = product_reg[2*XLEN-1:XLEN]; // upper 64 bits
+90                                  INSTR_MULW:
+91         1/1                          exe_rd_data = {{32{product_reg[31]}}, product_reg[31:0]};
+92                                  default: // INSTR_MUL
+93         1/1                          exe_rd_data = product_reg[XLEN-1:0]; // lower 64 bits
+94                              endcase
+95                          end
+96                      
+97                          always_comb begin
+98         1/1                  for (int i = 0; i &lt; MUL_CYCLES; i++) begin
+99         1/1                      if (cdb_flush) begin
+100        1/1                          killed[i] = (cdb_rob_depth &lt; (mul_rob_tag[i] - rob_top_ptr));
+101                                 end else begin
+102        1/1                          killed[i] = '0;
+103                                 end
+104                             end
+105                         end
+106                     
+107                         always_ff @(posedge clk or negedge rst_n) begin
+108        1/1                  if (!rst_n) begin
+109        1/1                      for (int i = 0; i &lt; MUL_CYCLES; i++) begin
+110        1/1                          mul_valid[i]        &lt;= 1'b0;
+111        1/1                          mul_rob_tag[i]      &lt;= '0;
+112        1/1                          mul_rd_phy_addr[i]  &lt;= '0;
+113        1/1                          mul_opcode[i]       &lt;= '0;
+114                                 end
+115        1/1                      product_reg             &lt;= '0;
+116                             end else begin
+117        1/1                      product_reg             &lt;= product;
+118        1/1                      if (valid) begin
+119        1/1                          mul_valid[0]        &lt;= valid;
+120        1/1                          mul_rob_tag[0]      &lt;= rob_tag;
+121        1/1                          mul_rd_phy_addr[0]  &lt;= rd_phy_addr;
+122        1/1                          mul_opcode[0]       &lt;= opcode;
+123                                 end else begin
+124        1/1                          mul_valid[0]        &lt;= '0;
+125        1/1                          mul_rob_tag[0]      &lt;= '0;
+126        1/1                          mul_rd_phy_addr[0]  &lt;= '0;
+127        1/1                          mul_opcode[0]       &lt;= '0;
+128                                 end
+129                     
+130        1/1                      for (int i = 1; i &lt; MUL_CYCLES; i++) begin
+131        1/1                          if (killed[i-1]) begin
+132        1/1                              mul_valid[i]    &lt;= 1'b0;
+133                                     end else begin
+134        1/1                              mul_valid[i]    &lt;= mul_valid[i-1];
+135                                     end
+136        1/1                          mul_rob_tag[i]      &lt;= mul_rob_tag[i-1];
+137        1/1                          mul_rd_phy_addr[i]  &lt;= mul_rd_phy_addr[i-1];
+138        1/1                          mul_opcode[i]       &lt;= mul_opcode[i-1];
+</pre>
+<hr>
+<a name="Toggle"></a>
+Toggle Coverage for Module : <a href="mod29.html" >MUL</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s8">
+<td>Totals</td>
+<td class="rt">21</td>
+<td class="rt">17</td>
+<td class="rt">80.95 </td>
+</tr><tr class="s9">
+<td>Total Bits</td>
+<td class="rt">1264</td>
+<td class="rt">1257</td>
+<td class="rt">99.45 </td>
+</tr><tr class="s9">
+<td nowrap>Total Bits 0->1</td>
+<td class="rt">632</td>
+<td class="rt">629</td>
+<td class="rt">99.53 </td>
+</tr><tr class="s9">
+<td nowrap>Total Bits 1->0</td>
+<td class="rt">632</td>
+<td class="rt">628</td>
+<td class="rt">99.37 </td>
+</tr></table><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80></th><th nowrap width=80></th><th nowrap width=80></th></tr><tr class="s8">
+<td>Ports</td>
+<td class="rt">16</td>
+<td class="rt">13</td>
+<td class="rt">81.25 </td>
+</tr><tr class="s9">
+<td>Port Bits</td>
+<td class="rt">470</td>
+<td class="rt">465</td>
+<td class="rt">98.94 </td>
+</tr><tr class="s9">
+<td nowrap>Port Bits 0->1</td>
+<td class="rt">235</td>
+<td class="rt">233</td>
+<td class="rt">99.15 </td>
+</tr><tr class="s9">
+<td nowrap>Port Bits 1->0</td>
+<td class="rt">235</td>
+<td class="rt">232</td>
+<td class="rt">98.72 </td>
+</tr></table><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80></th><th nowrap width=80></th><th nowrap width=80></th></tr><tr class="s8">
+<td>Signals</td>
+<td class="rt">5</td>
+<td class="rt">4</td>
+<td class="rt">80.00 </td>
+</tr><tr class="s9">
+<td>Signal Bits</td>
+<td class="rt">794</td>
+<td class="rt">792</td>
+<td class="rt">99.75 </td>
+</tr><tr class="s9">
+<td nowrap>Signal Bits 0->1</td>
+<td class="rt">397</td>
+<td class="rt">396</td>
+<td class="rt">99.75 </td>
+</tr><tr class="s9">
+<td nowrap>Signal Bits 1->0</td>
+<td class="rt">397</td>
+<td class="rt">396</td>
+<td class="rt">99.75 </td>
+</tr></table><br clear=all>
+<table align=left class="sortable noborder">
+<caption><b>Port Details</b></caption>
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td class="alfsrt">Toggle</td><td class="alfsrt">Toggle 1->0</td><td class="alfsrt">Toggle 0->1</td><td class="alfsrt">Direction</td></tr><tr>
+<td>clk</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rst_n</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rs_data_mul[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rt_data_mul[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>opcode[5:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>opcode[6]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>cdb_flush</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>cdb_rob_depth[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rob_top_ptr[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>exe_rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>exe_rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>exe_rd_data[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>exe_reg_write</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>exe_result_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr></table><br clear=all>
+<table align=left class="sortable noborder">
+<caption><b>Signal Details</b></caption>
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td class="alfsrt">Toggle</td><td class="alfsrt">Toggle 1->0</td><td class="alfsrt">Toggle 0->1</td></tr><tr>
+<td>product_reg[129:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>product[129:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>mul_a[64:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>mul_b[64:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>out_opcode[5:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>out_opcode[6]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr></table><br clear=all>
+<hr>
+<a name="Branch"></a>
+Branch Coverage for Module : <a href="mod29.html" >MUL</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Line No.</th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s10">
+<td>Branches</td>
+<td></td>
+<td class="rt">10</td>
+<td class="rt">10</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>CASE</td>
+<td class="rt">61</td>
+<td class="rt">4</td>
+<td class="rt">4</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>CASE</td>
+<td class="rt">87</td>
+<td class="rt">3</td>
+<td class="rt">3</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">108</td>
+<td class="rt">3</td>
+<td class="rt">3</td>
+<td class="rt">100.00</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+61                 unique case (instr_e'(opcode))
+                          <font color = "green">-1-</font>  
+62                     INSTR_MULHU: begin
+63                         mul_a = {1'b0, rs_data_mul};
+           <font color = "green">                ==></font>
+64                         mul_b = {1'b0, rt_data_mul};
+65                     end
+66                     INSTR_MULHSU: begin
+67                         mul_a = {rs_data_mul[XLEN-1], rs_data_mul};
+           <font color = "green">                ==></font>
+68                         mul_b = {1'b0, rt_data_mul};
+69                     end
+70                     INSTR_MULW: begin
+71                         mul_a = {{(MUL_WIDTH-32){rs_data_mul[31]}}, rs_data_mul[31:0]};
+           <font color = "green">                ==></font>
+72                         mul_b = {{(MUL_WIDTH-32){rt_data_mul[31]}}, rt_data_mul[31:0]};
+73                     end
+74                     default: begin // MUL, MULH
+75                         mul_a = {rs_data_mul[XLEN-1], rs_data_mul};
+           <font color = "green">                ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>INSTR_MULHU </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_MULHSU </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_MULW </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>default</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+87                 unique case (instr_e'(out_opcode))
+                          <font color = "green">-1-</font>  
+88                     INSTR_MULH, INSTR_MULHU, INSTR_MULHSU:
+89                         exe_rd_data = product_reg[2*XLEN-1:XLEN]; // upper 64 bits
+           <font color = "green">                ==></font>
+90                     INSTR_MULW:
+91                         exe_rd_data = {{32{product_reg[31]}}, product_reg[31:0]};
+           <font color = "green">                ==></font>
+92                     default: // INSTR_MUL
+93                         exe_rd_data = product_reg[XLEN-1:0]; // lower 64 bits
+           <font color = "green">                ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>INSTR_MULH INSTR_MULHU INSTR_MULHSU </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_MULW </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>default</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+108                if (!rst_n) begin
+                   <font color = "green">-1-</font>  
+109                    for (int i = 0; i < MUL_CYCLES; i++) begin
+           <font color = "green">            ==></font>
+110                        mul_valid[i]        <= 1'b0;
+111                        mul_rob_tag[i]      <= '0;
+112                        mul_rd_phy_addr[i]  <= '0;
+113                        mul_opcode[i]       <= '0;
+114                    end
+115                    product_reg             <= '0;
+116                end else begin
+117                    product_reg             <= product;
+118                    if (valid) begin
+                       <font color = "green">-2-</font>  
+119                        mul_valid[0]        <= valid;
+           <font color = "green">                ==></font>
+120                        mul_rob_tag[0]      <= rob_tag;
+121                        mul_rd_phy_addr[0]  <= rd_phy_addr;
+122                        mul_opcode[0]       <= opcode;
+123                    end else begin
+124                        mul_valid[0]        <= '0;
+           <font color = "green">                ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+</div>
+</div>
+<div class="ui-layout-center-inner-north">
+<div id="center-bread-crumb" class="breadCrumb module urg-margin-bottom">
+  <ul name="inst_tag_30">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+  </ul>
+  <ul name="tag_MUL">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+  </ul>
+</div>
+</div>
+</div>
+<div class="ui-layout-south">
+<table align=center><tr><td class="s0 cl">0%</td>
+<td class="s1 cl">10%</td>
+<td class="s2 cl">20%</td>
+<td class="s3 cl">30%</td>
+<td class="s4 cl">40%</td>
+<td class="s5 cl">50%</td>
+<td class="s6 cl">60%</td>
+<td class="s7 cl">70%</td>
+<td class="s8 cl">80%</td>
+<td class="s9 cl">90%</td>
+<td class="s10 cl">100%</td></tr></table></div>
+</body>
+</html>

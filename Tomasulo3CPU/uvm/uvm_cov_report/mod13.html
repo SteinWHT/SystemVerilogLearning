@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="Author" content="<username>"> <meta name="GENERATOR" content="urg/version [en] (platform name) [urg]">
+<title>Unified Coverage Report :: Module :: LSB</title>
+<link type="text/css" rel="stylesheet" href="css/.urg.css">
+<link type="text/css" rel="stylesheet" href="css/.layout.css">
+<link type="text/css" rel="stylesheet" href="css/.breadcrumb.css">
+<script type="text/javascript" src="js/.jquery.js"></script>
+<script type="text/javascript" src="js/.jquery-ui.js"></script>
+<script type="text/javascript" src="js/.sortable.js"></script>
+<script type="text/javascript" src="js/.layout.js"></script>
+<script type="text/javascript" src="js/.breadcrumb.js"></script>
+<script type="text/javascript">
+var layout, westLayout, centerLayout;
+$(document).ready(function () {
+  if ($("#north-bread-crumb")) {
+    $("#north-bread-crumb").jBreadCrumb({easing:'swing'})
+  }
+  layout = $("body").layout({ 
+    resizable: true,
+    spacing_open: 4,
+    spacing_closed: 4,
+    north: {
+      size: 76
+    },
+    south: {
+      size: 45,
+      initClosed: true
+    },
+    west: {
+      size: 500,
+      resizable: true,
+      initClosed: false
+    }
+  });
+  centerLayout = $('div.ui-layout-center').layout({
+    north__paneSelector: ".ui-layout-center-inner-north",
+    center__paneSelector: ".ui-layout-center-inner-center", 
+    north__size: 50,
+    spacing_open: 4,
+    spacing_closed: 4
+  });
+});
+</script>
+</head>
+<body onLoad="initPage();"><div class="ui-layout-north">
+<div class="logo"></div>
+<center class="pagetitle">Module Definition</center>
+<div align="center"><a href="dashboard.html" ><b>dashboard</b></a> | <a href="hierarchy.html" ><b>hierarchy</b></a> | <a href="modlist.html" ><b>modlist</b></a> | <a href="groups.html" ><b>groups</b></a> | <a href="tests.html" ><b>tests</b></a> | <a href="asserts.html" ><b>asserts</b></a></div>
+
+</div>
+<div class="ui-layout-west">
+<div name='tag_LSB'>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module : <a href="#"  onclick="showContent('tag_LSB')">LSB</a></span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s8 cl rt"> 89.70</td>
+<td class="s9 cl rt"><a href="mod13.html#Line" > 97.70</a></td>
+<td class="s7 cl rt"><a href="mod13.html#Cond" > 76.74</a></td>
+<td class="s7 cl rt"><a href="mod13.html#Toggle" > 77.30</a></td>
+<td class="wht cl rt"></td>
+<td class="s9 cl rt"><a href="mod13.html#Branch" > 96.77</a></td>
+<td class="s10 cl rt"><a href="mod13.html#Assert" >100.00</a></td>
+</tr></table><br clear=all>
+<span class=repname>Source File(s) : </span>
+<br clear=all>
+<a href="javascript:void(0);"  onclick="openSrcFile('/workspace/src/back_end/LSB.sv')">/workspace/src/back_end/LSB.sv</a><br clear=all>
+<br clear=all>
+<span class=repname>Module self-instances :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="wht cl wordwrap"><a href="mod13.html#inst_tag_13"  onclick="showContent('inst_tag_13')">tb_top.dut.back_end.lsb</a></td>
+<td class="s8 cl rt"> 89.70</td>
+<td class="s9 cl rt"><a href="mod13.html#Line" > 97.70</a></td>
+<td class="s7 cl rt"><a href="mod13.html#Cond" > 76.74</a></td>
+<td class="s7 cl rt"><a href="mod13.html#Toggle" > 77.30</a></td>
+<td class="wht cl rt"></td>
+<td class="s9 cl rt"><a href="mod13.html#Branch" > 96.77</a></td>
+<td class="s10 cl rt"><a href="mod13.html#Assert" >100.00</a></td>
+</tr></table></div>
+</div>
+<br clear=all>
+<div name='tag_LSB'>
+<hr>
+<a name="inst_tag_13"></a>
+<div class=modhdr>
+<br clear=all>
+<span class=titlename>Module Instance : <a href="hierarchy.html#tag_urg_inst_13" >tb_top.dut.back_end.lsb</a></span>
+<br clear=all>
+<br clear=all>
+<span class=repname>Instance :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s8 cl rt"> 89.70</td>
+<td class="s9 cl rt"><a href="mod13.html#Line" > 97.70</a></td>
+<td class="s7 cl rt"><a href="mod13.html#Cond" > 76.74</a></td>
+<td class="s7 cl rt"><a href="mod13.html#Toggle" > 77.30</a></td>
+<td class="wht cl rt"></td>
+<td class="s9 cl rt"><a href="mod13.html#Branch" > 96.77</a></td>
+<td class="s10 cl rt"><a href="mod13.html#Assert" >100.00</a></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Instance's subtree :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td class="s8 cl rt"> 89.70</td>
+<td class="s9 cl rt"> 97.70</td>
+<td class="s7 cl rt"> 76.74</td>
+<td class="s7 cl rt"> 77.30</td>
+<td class="wht cl rt"></td>
+<td class="s9 cl rt"> 96.77</td>
+<td class="s10 cl rt">100.00</td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Parent : </span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td><td class="alfsrt">NAME</td></tr><tr>
+<td class="s8 cl rt"> 81.49</td>
+<td class="wht cl rt"></td>
+<td class="s8 cl rt"> 80.00</td>
+<td class="s8 cl rt"> 82.99</td>
+<td class="wht cl rt"></td>
+<td class="wht cl rt"></td>
+<td class="wht cl rt"></td>
+<td><a href="mod8.html#inst_tag_8" >back_end</a></td>
+</tr></table><br clear=all>
+<br clear=all>
+<span class=repname>Subtrees :</span>
+<br clear=all>
+<table align=left>
+<tr class="sortablehead">
+<td class="alfsrt">NAME</td><td>SCORE</td><td>LINE</td><td>COND</td><td>TOGGLE</td><td>FSM</td><td>BRANCH</td><td>ASSERT</td></tr><tr>
+<td colspan=8>no children</td>
+</tr></table><br clear=all>
+</div>
+</div>
+<hr>
+Since this is the module's only instance, the coverage report is the same as for the module.</div>
+<div class="ui-layout-center">
+<div class="ui-layout-center-inner-center">
+<div name='tag_LSB'>
+<a name="Line"></a>
+Line Coverage for Module : <a href="mod13.html" >LSB</a><br clear=all>
+<table class="noborder">
+<col width="122">
+<col span="4" width="82">
+<tr><th></th><th>Line No.</th><th>Total</th><th>Covered</th><th>Percent</th></tr>
+<tr class="s9"><td class="lf">TOTAL</td><td></td><td>87</td><td>85</td><td>97.70</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>101</td><td>9</td><td>9</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ROUTINE</td><td>124</td><td>2</td><td>2</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>136</td><td>6</td><td>6</td><td>100.00</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>150</td><td>10</td><td>10</td><td>100.00</td></tr>
+<tr class="s9"><td class="lf">ALWAYS</td><td>181</td><td>59</td><td>57</td><td>96.61</td></tr>
+<tr class="s10"><td class="lf">ALWAYS</td><td>292</td><td>1</td><td>1</td><td>100.00</td></tr>
+</table>
+<pre class="code"><br clear=all>
+100                         always_comb begin
+101        1/1                  flush_keep_count = '0;
+102        1/1                  for (int i = 0; i &lt; LSB_DEPTH; i++)
+103        1/1                      flush_compact[i] = lsb_array[i];
+104                     
+105        1/1                  for (int i = 0; i &lt; LSB_DEPTH; i++) begin
+106        1/1                      if (i[LSB_INDEX_WIDTH:0] &lt; entry_count) begin
+107        1/1                          if ((lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0] + i[LSB_INDEX_WIDTH-1:0]].rob_tag
+108                                          - rob_top_ptr) &lt;= cdb_rob_depth) begin
+109        1/1                              flush_compact[read_ptr[LSB_INDEX_WIDTH-1:0]
+110                                                       + flush_keep_count[LSB_INDEX_WIDTH-1:0]]
+111                                             = lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0] + i[LSB_INDEX_WIDTH-1:0]];
+112        1/1                              flush_keep_count = flush_keep_count + 1;
+113                                     end
+                        MISSING_ELSE
+114                                 end
+                        MISSING_ELSE
+115                             end
+116                     
+117        1/1                  flush_lw_slot = lw_slot_valid &amp;&amp;
+118                                             ((lw_slot.rob_tag - rob_top_ptr) &gt; cdb_rob_depth);
+119                         end
+120                     
+121                     
+122                         function automatic logic is_load(logic [OPCODE_WIDTH-1:0] op);
+123                             instr_e instr_op;
+124        1/1                  instr_op = instr_e'(op);
+125        1/1                  return (instr_op == INSTR_LW  || instr_op == INSTR_LD  ||
+126                                     instr_op == INSTR_LB  || instr_op == INSTR_LH  ||
+127                                     instr_op == INSTR_LBU || instr_op == INSTR_LHU ||
+128                                     instr_op == INSTR_LWU);
+129                         endfunction
+130                     
+131                         logic [W_BYTE_NUM-1:0] store_strb;
+132                         logic [$clog2(W_BYTE_NUM)-1:0] byte_off;
+133                         assign byte_off = iss_lsb_addr[$clog2(W_BYTE_NUM)-1:0];
+134                     
+135                         always_comb begin
+136        1/1                  unique case (iss_lsb_opcode)
+137        1/1                      INSTR_SB: store_strb = {{(W_BYTE_NUM-1){1'b0}}, 1'b1}    &lt;&lt; byte_off;
+138        1/1                      INSTR_SH: store_strb = {{(W_BYTE_NUM-2){1'b0}}, 2'b11}   &lt;&lt; byte_off;
+139        1/1                      INSTR_SW: store_strb = {{(W_BYTE_NUM-4){1'b0}}, 4'b1111} &lt;&lt; byte_off;
+140        1/1                      INSTR_SD: store_strb = {W_BYTE_NUM{1'b1}}                &lt;&lt; byte_off;
+141        1/1                      default:  store_strb = {W_BYTE_NUM{1'b1}};
+142                             endcase
+143                         end
+144                     
+145                         logic [REG_FILE_DATA_WIDTH-1:0] load_data_aligned;
+146                         logic [2:0] r_byte_off;
+147                         assign r_byte_off = lw_slot.addr[2:0];
+148                     
+149                         always_comb begin
+150        1/1                  load_data_aligned = dcache_data;
+151        1/1                  unique case (lw_slot_opcode)
+152                                 INSTR_LB: begin
+153        1/1                          load_data_aligned = {{56{dcache_data[r_byte_off*8 + 7]}}, dcache_data[r_byte_off*8 +: 8]};
+154                                 end
+155                                 INSTR_LBU: begin
+156        1/1                          load_data_aligned = {56'b0, dcache_data[r_byte_off*8 +: 8]};
+157                                 end
+158                                 INSTR_LH: begin
+159        1/1                          load_data_aligned = {{48{dcache_data[r_byte_off*8 + 15]}}, dcache_data[r_byte_off*8 +: 16]};
+160                                 end
+161                                 INSTR_LHU: begin
+162        1/1                          load_data_aligned = {48'b0, dcache_data[r_byte_off*8 +: 16]};
+163                                 end
+164                                 INSTR_LW: begin
+165        1/1                          load_data_aligned = {{32{dcache_data[r_byte_off*8 + 31]}}, dcache_data[r_byte_off*8 +: 32]};
+166                                 end
+167                                 INSTR_LWU: begin
+168        1/1                          load_data_aligned = {32'b0, dcache_data[r_byte_off*8 +: 32]};
+169                                 end
+170                                 INSTR_LD: begin
+171        1/1                          load_data_aligned = dcache_data;
+172                                 end
+173                                 default: begin
+174        1/1                          load_data_aligned = dcache_data;
+175                                 end
+176                             endcase
+177                         end
+178                     
+179                         // flush &gt; {dcache_resp, deferred_xfer,new_instr, issue_to_cdb}
+180                         always_ff @(posedge clk or negedge rst_n) begin
+181        1/1                  if (!rst_n) begin
+182        1/1                      write_ptr          &lt;= '0;
+183        1/1                      read_ptr           &lt;= '0;
+184        1/1                      lw_slot_valid      &lt;= 1'b0;
+185        1/1                      lw_slot_data_ready &lt;= 1'b0;
+186        1/1                      lw_slot            &lt;= '0;
+187        1/1                      lsb_ready          &lt;= 1'b0;
+188        1/1                      lsb_rob_tag        &lt;= '0;
+189        1/1                      lsb_rd_phy_addr    &lt;= '0;
+190        1/1                      lsb_data           &lt;= '0;
+191        1/1                      lsb_rw             &lt;= '0;
+192        1/1                      lsb_sw_addr        &lt;= '0;
+193        1/1                      lsb_sw_strb        &lt;= '0;
+194        1/1                      for (int i = 0; i &lt; LSB_DEPTH; i++)
+195        1/1                          lsb_array[i] &lt;= '0;
+196                     
+197        1/1                  end else if (cdb_flush) begin
+198        1/1                      for (int i = 0; i &lt; LSB_DEPTH; i++)
+199        1/1                          lsb_array[i] &lt;= flush_compact[i];
+200        1/1                      write_ptr &lt;= read_ptr + flush_keep_count;
+201                     
+202        1/1                      if (flush_lw_slot) begin
+203        1/1                          lw_slot_valid      &lt;= 1'b0;
+204        1/1                          lw_slot_data_ready &lt;= 1'b0;
+205        1/1                      end else if (dcache_resp_valid &amp;&amp; lw_slot_valid &amp;&amp; !lw_slot_data_ready) begin
+206        1/1                          lw_slot.data       &lt;= load_data_aligned;
+207        1/1                          lw_slot_data_ready &lt;= 1'b1;
+208                                 end
+                        MISSING_ELSE
+209        1/1                      lsb_ready &lt;= 1'b0;
+210                     
+211                             end else begin
+212                                 // D-Cache read response
+213        1/1                      if (dcache_resp_valid &amp;&amp; lw_slot_valid &amp;&amp; !lw_slot_data_ready) begin
+214        1/1                          if (!lsb_full) begin
+215                                         // Fast path: move completed load straight into the buffer
+216        1/1                              lsb_array[write_ptr[LSB_INDEX_WIDTH-1:0]] &lt;= '{
+217                                             rob_tag:  lw_slot.rob_tag,
+218                                             rw:       lw_slot.rw,
+219                                             addr:     lw_slot.addr,
+220                                             phy_addr: lw_slot.phy_addr,
+221                                             data:     load_data_aligned,
+222                                             strb:     lw_slot.strb
+223                                         };
+224        1/1                              write_ptr     &lt;= write_ptr + 1;
+225        1/1                              lw_slot_valid &lt;= 1'b0;
+226                                     end else begin
+227                                         // Buffer full: park data in lw_slot until space opens
+228        <font color = "red">0/1     ==>                      lw_slot.data       &lt;= load_data_aligned;</font>
+229        <font color = "red">0/1     ==>                      lw_slot_data_ready &lt;= 1'b1;</font>
+230                                     end
+231                                 end
+                        MISSING_ELSE
+232                     
+233                                 // Deferred lw_slot -&gt; buffer transfer
+234        1/1                      if (lw_slot_valid &amp;&amp; lw_slot_data_ready &amp;&amp; !lsb_full) begin
+235        1/1                          lsb_array[write_ptr[LSB_INDEX_WIDTH-1:0]] &lt;= lw_slot;
+236        1/1                          write_ptr          &lt;= write_ptr + 1;
+237        1/1                          lw_slot_valid      &lt;= 1'b0;
+238        1/1                          lw_slot_data_ready &lt;= 1'b0;
+239                                 end
+                        MISSING_ELSE
+240                     
+241                                 // Accept new instruction from LSQ
+242        1/1                      if (iss_lsb_rdy &amp;&amp; lsb_en) begin
+243        1/1                          if (is_load(iss_lsb_opcode)) begin
+244        1/1                             lw_slot &lt;= '{
+245                                             rob_tag:  iss_lsb_rob_tag,
+246                                             rw:       1'b1,
+247                                             addr:     iss_lsb_addr,
+248                                             phy_addr: iss_lsb_phy_addr,
+249                                             data:     '0,
+250                                             strb:     '0
+251                                         };
+252        1/1                              lw_slot_opcode     &lt;= iss_lsb_opcode;
+253        1/1                              lw_slot_valid      &lt;= 1'b1;
+254        1/1                              lw_slot_data_ready &lt;= 1'b0;
+255                                     end else begin
+256        1/1                              lsb_array[write_ptr[LSB_INDEX_WIDTH-1:0]] &lt;= '{
+257                                             rob_tag:  iss_lsb_rob_tag,
+258                                             rw:       1'b0,
+259                                             addr:     iss_lsb_addr,
+260                                             phy_addr: iss_lsb_phy_addr,
+261                                             data:     '0,
+262                                             strb:     store_strb
+263                                         };
+264        1/1                              write_ptr &lt;= write_ptr + 1;
+265                                     end
+266                                 end
+                        MISSING_ELSE
+267        1/1                      if(issue_ld_buf &amp;&amp; !lsb_empty) begin
+268        1/1                          issue_ld_buf_reg &lt;= 1'b1;
+269                                 end else begin
+270        1/1                          issue_ld_buf_reg &lt;= 1'b0;
+271                                 end
+272                     
+273                                 // Issue head entry to CDB
+274        1/1                      if (issue_ld_buf_reg &amp;&amp; !lsb_empty) begin
+275        1/1                          lsb_rob_tag     &lt;= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].rob_tag;
+276        1/1                          lsb_rd_phy_addr &lt;= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].phy_addr;
+277        1/1                          lsb_data        &lt;= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].data;
+278        1/1                          lsb_rw          &lt;= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].rw;
+279        1/1                          lsb_sw_addr     &lt;= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].addr;
+280        1/1                          lsb_sw_strb     &lt;= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].strb;
+281        1/1                          read_ptr        &lt;= read_ptr + 1;
+282        1/1                          lsb_ready       &lt;= 1'b1;
+283                                 end else begin
+284        1/1                          lsb_ready       &lt;= 1'b0;
+285                                 end
+286                             end
+287                         end
+288                     
+289                         // Assertions
+290                         // synthesis translate_off
+291                         always_ff @(posedge clk) begin
+292        1/1                  if (rst_n) begin
+293                                 LSB_BUFFER_OVERFLOW: assert (entry_count &lt;= LSB_DEPTH)
+294                                     else $error(&quot;LSB: buffer overflow, entry_count = %0d&quot;, entry_count);
+295                                 LSB_DCACHE_LATENCY: assert (!(!lw_slot_valid &amp;&amp; dcache_resp_ready))
+296                                     else $error(&quot;LSB: DCACHE is expected to have at least one cycle latency&quot;);
+297                             end
+                        MISSING_ELSE
+</pre>
+<hr>
+<a name="Cond"></a>
+Cond Coverage for Module : <a href="mod13.html" >LSB</a><br clear=all>
+<table class="noborder">
+<col width="122">
+<col span="3" width="82">
+<tr><th></th><th>Total</th><th>Covered</th><th>Percent</th></tr>
+<tr class="s7"><td class="lf">Conditions</td><td>43</td><td>33</td><td>76.74</td></tr>
+<tr class="s7"><td class="lf">Logical</td><td>43</td><td>33</td><td>76.74</td></tr>
+<tr class="wht"><td class="lf">Non-Logical</td><td>0</td><td>0</td><td></td></tr>
+<tr class="wht"><td class="lf">Event</td><td>0</td><td>0</td><td></td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       76
+ EXPRESSION ((write_ptr[LSB_INDEX_WIDTH] != read_ptr[LSB_INDEX_WIDTH]) &amp;&amp; (write_ptr[(LSB_INDEX_WIDTH - 1):0] == read_ptr[(LSB_INDEX_WIDTH - 1):0]))
+             ----------------------------1----------------------------    ------------------------------------2------------------------------------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       76
+ SUB-EXPRESSION (write_ptr[LSB_INDEX_WIDTH] != read_ptr[LSB_INDEX_WIDTH])
+                ----------------------------1----------------------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       76
+ SUB-EXPRESSION (write_ptr[(LSB_INDEX_WIDTH - 1):0] == read_ptr[(LSB_INDEX_WIDTH - 1):0])
+                ------------------------------------1------------------------------------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       78
+ EXPRESSION (write_ptr == read_ptr)
+            -----------1-----------
+</pre>
+<table class="noborder">
+<col width="40">
+<tr><th>-1-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       83
+ EXPRESSION (((!lsb_full)) &amp;&amp; ((!lw_slot_valid)) &amp;&amp; ((!cdb_flush)))
+             ------1------    ---------2--------    -------3------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       84
+ EXPRESSION (((!lsb_empty)) &amp;&amp; ((!cdb_flush)))
+             -------1------    -------2------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       87
+ EXPRESSION (lw_slot_valid &amp;&amp; ((!lw_slot_data_ready)))
+             ------1------    -----------2-----------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       117
+ EXPRESSION (lw_slot_valid &amp;&amp; ((lw_slot.rob_tag - rob_top_ptr) &gt; cdb_rob_depth))
+             ------1------    ------------------------2------------------------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       205
+ EXPRESSION (dcache_resp_valid &amp;&amp; lw_slot_valid &amp;&amp; ((!lw_slot_data_ready)))
+             --------1--------    ------2------    -----------3-----------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       213
+ EXPRESSION (dcache_resp_valid &amp;&amp; lw_slot_valid &amp;&amp; ((!lw_slot_data_ready)))
+             --------1--------    ------2------    -----------3-----------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       234
+ EXPRESSION (lw_slot_valid &amp;&amp; lw_slot_data_ready &amp;&amp; ((!lsb_full)))
+             ------1------    ---------2--------    ------3------
+</pre>
+<table class="noborder">
+<col span="3" width="40">
+<tr><th>-1-</th><th>-2-</th><th>-3-</th><th>Status</th></tr>
+<tr class="uRed"><td>0</td><td>1</td><td>1</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       242
+ EXPRESSION (iss_lsb_rdy &amp;&amp; lsb_en)
+             -----1-----    ---2--
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       267
+ EXPRESSION (issue_ld_buf &amp;&amp; ((!lsb_empty)))
+             ------1-----    -------2------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uRed"><td>1</td><td>0</td><td class="lf">Not Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<br clear=all>
+<pre class="code"> LINE       274
+ EXPRESSION (issue_ld_buf_reg &amp;&amp; ((!lsb_empty)))
+             --------1-------    -------2------
+</pre>
+<table class="noborder">
+<col span="2" width="40">
+<tr><th>-1-</th><th>-2-</th><th>Status</th></tr>
+<tr class="uGreen"><td>0</td><td>1</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>0</td><td class="lf">Covered</td></tr>
+<tr class="uGreen"><td>1</td><td>1</td><td class="lf">Covered</td></tr>
+</table>
+<hr>
+<a name="Toggle"></a>
+Toggle Coverage for Module : <a href="mod13.html" >LSB</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s8">
+<td>Totals</td>
+<td class="rt">92</td>
+<td class="rt">74</td>
+<td class="rt">80.43 </td>
+</tr><tr class="s7">
+<td>Total Bits</td>
+<td class="rt">3494</td>
+<td class="rt">2701</td>
+<td class="rt">77.30 </td>
+</tr><tr class="s7">
+<td nowrap>Total Bits 0->1</td>
+<td class="rt">1747</td>
+<td class="rt">1355</td>
+<td class="rt">77.56 </td>
+</tr><tr class="s7">
+<td nowrap>Total Bits 1->0</td>
+<td class="rt">1747</td>
+<td class="rt">1346</td>
+<td class="rt">77.05 </td>
+</tr></table><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80></th><th nowrap width=80></th><th nowrap width=80></th></tr><tr class="s8">
+<td>Ports</td>
+<td class="rt">23</td>
+<td class="rt">20</td>
+<td class="rt">86.96 </td>
+</tr><tr class="s8">
+<td>Port Bits</td>
+<td class="rt">624</td>
+<td class="rt">527</td>
+<td class="rt">84.46 </td>
+</tr><tr class="s8">
+<td nowrap>Port Bits 0->1</td>
+<td class="rt">312</td>
+<td class="rt">264</td>
+<td class="rt">84.62 </td>
+</tr><tr class="s8">
+<td nowrap>Port Bits 1->0</td>
+<td class="rt">312</td>
+<td class="rt">263</td>
+<td class="rt">84.29 </td>
+</tr></table><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80></th><th nowrap width=80></th><th nowrap width=80></th></tr><tr class="s7">
+<td>Signals</td>
+<td class="rt">69</td>
+<td class="rt">54</td>
+<td class="rt">78.26 </td>
+</tr><tr class="s7">
+<td>Signal Bits</td>
+<td class="rt">2870</td>
+<td class="rt">2174</td>
+<td class="rt">75.75 </td>
+</tr><tr class="s7">
+<td nowrap>Signal Bits 0->1</td>
+<td class="rt">1435</td>
+<td class="rt">1091</td>
+<td class="rt">76.03 </td>
+</tr><tr class="s7">
+<td nowrap>Signal Bits 1->0</td>
+<td class="rt">1435</td>
+<td class="rt">1083</td>
+<td class="rt">75.47 </td>
+</tr></table><br clear=all>
+<table align=left class="sortable noborder">
+<caption><b>Port Details</b></caption>
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td class="alfsrt">Toggle</td><td class="alfsrt">Toggle 1->0</td><td class="alfsrt">Toggle 0->1</td><td class="alfsrt">Direction</td></tr><tr>
+<td>clk</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>rst_n</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dcache_resp_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dcache_data[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>dcache_resp_ready</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>iss_lsb_opcode[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>iss_lsb_rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>iss_lsb_addr[13:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>iss_lsb_addr[14]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>INPUT</td>
+</tr><tr>
+<td>iss_lsb_addr[63:15]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>iss_lsb_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>iss_lsb_rdy</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>lsb_en</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>issue_ld_buf</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>ready_ld_buf</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>cdb_flush</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>cdb_rob_depth[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr><tr>
+<td>lsb_rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>lsb_rd_phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>lsb_data[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>lsb_rw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>lsb_sw_addr[12:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>lsb_sw_addr[23:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>lsb_sw_addr[25:24]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>lsb_sw_addr[27:26]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>lsb_sw_addr[29:28]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>lsb_sw_addr[63:30]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>lsb_sw_strb[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>lsb_ready</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>OUTPUT</td>
+</tr><tr>
+<td>rob_top_ptr[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td>INPUT</td>
+</tr></table><br clear=all>
+<table align=left class="sortable noborder">
+<caption><b>Signal Details</b></caption>
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td class="alfsrt">Toggle</td><td class="alfsrt">Toggle 1->0</td><td class="alfsrt">Toggle 0->1</td></tr><tr>
+<td>lsb_array[0].strb[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[0].data[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[0].phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[0].addr[13:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[0].addr[14]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[0].addr[15]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[0].addr[16]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[0].addr[17]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[0].addr[18]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[0].addr[20:19]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[0].addr[21]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[0].addr[24:22]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[0].addr[25]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[0].addr[27:26]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[0].addr[29:28]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[0].addr[63:30]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[0].rw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[0].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[1].strb[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[1].data[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[1].phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[1].addr[13:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[1].addr[14]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[1].addr[16:15]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[1].addr[17]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[1].addr[20:18]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[1].addr[21]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[1].addr[29:22]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[1].addr[63:30]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[1].rw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[1].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[2].strb[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[2].data[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[2].phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[2].addr[13:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[2].addr[15:14]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[2].addr[17:16]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[2].addr[19:18]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[2].addr[21:20]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[2].addr[24:22]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[2].addr[25]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[2].addr[28:26]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[2].addr[29]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[2].addr[63:30]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[2].rw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[2].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[3].strb[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[3].data[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[3].phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[3].addr[10:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[3].addr[12:11]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[3].addr[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_array[3].rw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lsb_array[3].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>write_ptr[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>read_ptr[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lw_slot.strb[7:0]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lw_slot.data[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lw_slot.phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lw_slot.addr[8:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lw_slot.addr[10:9]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lw_slot.addr[11]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lw_slot.addr[12]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lw_slot.addr[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lw_slot.rw</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lw_slot.rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lw_slot_opcode[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lw_slot_opcode[6:3]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lw_slot_valid</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>lw_slot_data_ready</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>issue_ld_buf_reg</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>entry_count[1:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>entry_count[2]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_full</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>lsb_empty</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_keep_count[1:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_keep_count[2]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[0].strb[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[0].data[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[0].phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[0].addr[13:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[0].addr[14]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[0].addr[15]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[0].addr[16]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[0].addr[17]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[0].addr[18]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[0].addr[20:19]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[0].addr[21]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[0].addr[24:22]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[0].addr[25]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[0].addr[27:26]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[0].addr[29:28]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[0].addr[63:30]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[0].rw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[0].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[1].strb[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[1].data[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[1].phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[1].addr[13:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[1].addr[14]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[1].addr[16:15]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[1].addr[17]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[1].addr[20:18]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[1].addr[21]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[1].addr[29:22]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[1].addr[63:30]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[1].rw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[1].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[2].strb[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[2].data[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[2].phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[2].addr[13:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[2].addr[15:14]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[2].addr[17:16]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[2].addr[19:18]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[2].addr[21:20]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[2].addr[24:22]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[2].addr[25]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[2].addr[28:26]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[2].addr[29]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[2].addr[63:30]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[2].rw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[2].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[3].strb[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[3].data[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[3].phy_addr[6:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[3].addr[10:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[3].addr[12:11]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[3].addr[63:13]</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+<td class="s3 cl">No</td>
+</tr><tr>
+<td>flush_compact[3].rw</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_compact[3].rob_tag[3:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>flush_lw_slot</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>store_strb[7:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>byte_off[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>load_data_aligned[63:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr><tr>
+<td>r_byte_off[2:0]</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+<td class="s9 cl">Yes</td>
+</tr></table><br clear=all>
+<hr>
+<a name="Branch"></a>
+Branch Coverage for Module : <a href="mod13.html" >LSB</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Line No.</th><th nowrap width=80>Total</th><th nowrap width=80>Covered</th><th nowrap width=80>Percent</th></tr><tr class="s9">
+<td>Branches</td>
+<td></td>
+<td class="rt">31</td>
+<td class="rt">30</td>
+<td class="rt">96.77 </td>
+</tr><tr class="s10">
+<td>CASE</td>
+<td class="rt">136</td>
+<td class="rt">5</td>
+<td class="rt">5</td>
+<td class="rt">100.00</td>
+</tr><tr class="s10">
+<td>CASE</td>
+<td class="rt">151</td>
+<td class="rt">8</td>
+<td class="rt">8</td>
+<td class="rt">100.00</td>
+</tr><tr class="s9">
+<td>IF</td>
+<td class="rt">181</td>
+<td class="rt">16</td>
+<td class="rt">15</td>
+<td class="rt">93.75 </td>
+</tr><tr class="s10">
+<td>IF</td>
+<td class="rt">292</td>
+<td class="rt">2</td>
+<td class="rt">2</td>
+<td class="rt">100.00</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+136                unique case (iss_lsb_opcode)
+                          <font color = "green">-1-</font>  
+137                    INSTR_SB: store_strb = {{(W_BYTE_NUM-1){1'b0}}, 1'b1}    << byte_off;
+           <font color = "green">            ==></font>
+138                    INSTR_SH: store_strb = {{(W_BYTE_NUM-2){1'b0}}, 2'b11}   << byte_off;
+           <font color = "green">            ==></font>
+139                    INSTR_SW: store_strb = {{(W_BYTE_NUM-4){1'b0}}, 4'b1111} << byte_off;
+           <font color = "green">            ==></font>
+140                    INSTR_SD: store_strb = {W_BYTE_NUM{1'b1}}                << byte_off;
+           <font color = "green">            ==></font>
+141                    default:  store_strb = {W_BYTE_NUM{1'b1}};
+           <font color = "green">            ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>INSTR_SB </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_SH </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_SW </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_SD </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>default</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+151                unique case (lw_slot_opcode)
+                          <font color = "green">-1-</font>  
+152                    INSTR_LB: begin
+153                        load_data_aligned = {{56{dcache_data[r_byte_off*8 + 7]}}, dcache_data[r_byte_off*8 +: 8]};
+           <font color = "green">                ==></font>
+154                    end
+155                    INSTR_LBU: begin
+156                        load_data_aligned = {56'b0, dcache_data[r_byte_off*8 +: 8]};
+           <font color = "green">                ==></font>
+157                    end
+158                    INSTR_LH: begin
+159                        load_data_aligned = {{48{dcache_data[r_byte_off*8 + 15]}}, dcache_data[r_byte_off*8 +: 16]};
+           <font color = "green">                ==></font>
+160                    end
+161                    INSTR_LHU: begin
+162                        load_data_aligned = {48'b0, dcache_data[r_byte_off*8 +: 16]};
+           <font color = "green">                ==></font>
+163                    end
+164                    INSTR_LW: begin
+165                        load_data_aligned = {{32{dcache_data[r_byte_off*8 + 31]}}, dcache_data[r_byte_off*8 +: 32]};
+           <font color = "green">                ==></font>
+166                    end
+167                    INSTR_LWU: begin
+168                        load_data_aligned = {32'b0, dcache_data[r_byte_off*8 +: 32]};
+           <font color = "green">                ==></font>
+169                    end
+170                    INSTR_LD: begin
+171                        load_data_aligned = dcache_data;
+           <font color = "green">                ==></font>
+172                    end
+173                    default: begin
+174                        load_data_aligned = dcache_data;
+           <font color = "green">                ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>INSTR_LB </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_LBU </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_LH </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_LHU </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_LW </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_LWU </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>INSTR_LD </td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>default</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+181                if (!rst_n) begin
+                   <font color = "green">-1-</font>  
+182                    write_ptr          <= '0;
+           <font color = "green">            ==></font>
+183                    read_ptr           <= '0;
+184                    lw_slot_valid      <= 1'b0;
+185                    lw_slot_data_ready <= 1'b0;
+186                    lw_slot            <= '0;
+187                    lsb_ready          <= 1'b0;
+188                    lsb_rob_tag        <= '0;
+189                    lsb_rd_phy_addr    <= '0;
+190                    lsb_data           <= '0;
+191                    lsb_rw             <= '0;
+192                    lsb_sw_addr        <= '0;
+193                    lsb_sw_strb        <= '0;
+194                    for (int i = 0; i < LSB_DEPTH; i++)
+195                        lsb_array[i] <= '0;
+196        
+197                end else if (cdb_flush) begin
+                            <font color = "green">-2-</font>  
+198                    for (int i = 0; i < LSB_DEPTH; i++)
+199                        lsb_array[i] <= flush_compact[i];
+200                    write_ptr <= read_ptr + flush_keep_count;
+201        
+202                    if (flush_lw_slot) begin
+                       <font color = "green">-3-</font>  
+203                        lw_slot_valid      <= 1'b0;
+           <font color = "green">                ==></font>
+204                        lw_slot_data_ready <= 1'b0;
+205                    end else if (dcache_resp_valid && lw_slot_valid && !lw_slot_data_ready) begin
+                                <font color = "green">-4-</font>  
+206                        lw_slot.data       <= load_data_aligned;
+           <font color = "green">                ==></font>
+207                        lw_slot_data_ready <= 1'b1;
+208                    end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+209                    lsb_ready <= 1'b0;
+210        
+211                end else begin
+212                    // D-Cache read response
+213                    if (dcache_resp_valid && lw_slot_valid && !lw_slot_data_ready) begin
+                       <font color = "green">-5-</font>  
+214                        if (!lsb_full) begin
+                           <font color = "red">-6-</font>  
+215                            // Fast path: move completed load straight into the buffer
+216                            lsb_array[write_ptr[LSB_INDEX_WIDTH-1:0]] <= '{
+           <font color = "green">                    ==></font>
+217                                rob_tag:  lw_slot.rob_tag,
+218                                rw:       lw_slot.rw,
+219                                addr:     lw_slot.addr,
+220                                phy_addr: lw_slot.phy_addr,
+221                                data:     load_data_aligned,
+222                                strb:     lw_slot.strb
+223                            };
+224                            write_ptr     <= write_ptr + 1;
+225                            lw_slot_valid <= 1'b0;
+226                        end else begin
+227                            // Buffer full: park data in lw_slot until space opens
+228                            lw_slot.data       <= load_data_aligned;
+           <font color = "red">                    ==></font>
+229                            lw_slot_data_ready <= 1'b1;
+230                        end
+231                    end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+232        
+233                    // Deferred lw_slot -> buffer transfer
+234                    if (lw_slot_valid && lw_slot_data_ready && !lsb_full) begin
+                       <font color = "green">-7-</font>  
+235                        lsb_array[write_ptr[LSB_INDEX_WIDTH-1:0]] <= lw_slot;
+           <font color = "green">                ==></font>
+236                        write_ptr          <= write_ptr + 1;
+237                        lw_slot_valid      <= 1'b0;
+238                        lw_slot_data_ready <= 1'b0;
+239                    end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+240        
+241                    // Accept new instruction from LSQ
+242                    if (iss_lsb_rdy && lsb_en) begin
+                       <font color = "green">-8-</font>  
+243                        if (is_load(iss_lsb_opcode)) begin
+                           <font color = "green">-9-</font>  
+244                           lw_slot <= '{
+           <font color = "green">                   ==></font>
+245                                rob_tag:  iss_lsb_rob_tag,
+246                                rw:       1'b1,
+247                                addr:     iss_lsb_addr,
+248                                phy_addr: iss_lsb_phy_addr,
+249                                data:     '0,
+250                                strb:     '0
+251                            };
+252                            lw_slot_opcode     <= iss_lsb_opcode;
+253                            lw_slot_valid      <= 1'b1;
+254                            lw_slot_data_ready <= 1'b0;
+255                        end else begin
+256                            lsb_array[write_ptr[LSB_INDEX_WIDTH-1:0]] <= '{
+           <font color = "green">                    ==></font>
+257                                rob_tag:  iss_lsb_rob_tag,
+258                                rw:       1'b0,
+259                                addr:     iss_lsb_addr,
+260                                phy_addr: iss_lsb_phy_addr,
+261                                data:     '0,
+262                                strb:     store_strb
+263                            };
+264                            write_ptr <= write_ptr + 1;
+265                        end
+266                    end
+                       MISSING_ELSE
+           <font color = "green">            ==></font>
+267                    if(issue_ld_buf && !lsb_empty) begin
+                       <font color = "green">-10-</font>  
+268                        issue_ld_buf_reg <= 1'b1;
+           <font color = "green">                ==></font>
+269                    end else begin
+270                        issue_ld_buf_reg <= 1'b0;
+           <font color = "green">                ==></font>
+271                    end
+272        
+273                    // Issue head entry to CDB
+274                    if (issue_ld_buf_reg && !lsb_empty) begin
+                       <font color = "green">-11-</font>  
+275                        lsb_rob_tag     <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].rob_tag;
+           <font color = "green">                ==></font>
+276                        lsb_rd_phy_addr <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].phy_addr;
+277                        lsb_data        <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].data;
+278                        lsb_rw          <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].rw;
+279                        lsb_sw_addr     <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].addr;
+280                        lsb_sw_strb     <= lsb_array[read_ptr[LSB_INDEX_WIDTH-1:0]].strb;
+281                        read_ptr        <= read_ptr + 1;
+282                        lsb_ready       <= 1'b1;
+283                    end else begin
+284                        lsb_ready       <= 1'b0;
+           <font color = "green">                ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>-2-</th><th nowrap width=80>-3-</th><th nowrap width=80>-4-</th><th nowrap width=80>-5-</th><th nowrap width=80>-6-</th><th nowrap width=80>-7-</th><th nowrap width=80>-8-</th><th nowrap width=80>-9-</th><th nowrap width=80>-10-</th><th nowrap width=80>-11-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>1</td>
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uRed">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Not Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td align=center>0</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center nowrap>-</td>
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<pre class="code"><br clear=all>
+292                if (rst_n) begin
+                   <font color = "green">-1-</font>  
+293                    LSB_BUFFER_OVERFLOW: assert (entry_count <= LSB_DEPTH)
+           <font color = "green">            ==></font>
+294                        else $error("LSB: buffer overflow, entry_count = %0d", entry_count);
+295                    LSB_DCACHE_LATENCY: assert (!(!lw_slot_valid && dcache_resp_ready))
+296                        else $error("LSB: DCACHE is expected to have at least one cycle latency");
+297                end
+                   MISSING_ELSE
+           <font color = "green">        ==></font>
+</pre>
+<br clear=all>
+<span class=repname>Branches:</span>
+<br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=80>-1-</th><th nowrap width=80>Status</th></tr><tr class="uGreen">
+<td align=center>1</td>
+<td>Covered</td>
+</tr><tr class="uGreen">
+<td align=center>0</td>
+<td>Covered</td>
+</tr></table><br clear=all>
+<hr>
+<a name="Assert"></a>
+Assert Coverage for Module : <a href="mod13.html" >LSB</a><br clear=all>
+<table align=left class="noborder">
+<tr>
+<th nowrap width=120></th><th nowrap width=80>Total</th><th nowrap width=80>Attempted</th><th nowrap width=80>Percent</th><th nowrap width=80>Succeeded/Matched</th><th nowrap width=80>Percent</th></tr><tr>
+<td class="wht cl"><a href="#1330116396" >Assertions</a></td>
+<td class="wht cl rt">2</td>
+<td class="s10 cl rt">2</td>
+<td class="s10 cl rt">100.00</td>
+<td class="s10 cl rt">2</td>
+<td class="s10 cl rt">100.00</td>
+</tr><tr>
+<td class="wht cl"><a href="#1280969353" >Cover properties</a></td>
+<td class="wht cl rt">0</td>
+<td class="wht cl rt">0</td>
+<td class="wht cl"></td>
+<td class="wht cl rt">0</td>
+<td class="wht cl"></td>
+</tr><tr>
+<td class="wht cl"><a href="#1887647602" >Cover sequences</a></td>
+<td class="wht cl rt">0</td>
+<td class="wht cl rt">0</td>
+<td class="wht cl"></td>
+<td class="wht cl rt">0</td>
+<td class="wht cl"></td>
+</tr><tr>
+<td class="wht cl"><b>Total</b></td>
+<td class="wht cl rt">2</td>
+<td class="s10 cl rt">2</td>
+<td class="s10 cl rt">100.00</td>
+<td class="s10 cl rt">2</td>
+<td class="s10 cl rt">100.00</td>
+</tr></table><br clear=all>
+<br clear=all>
+<hr>
+<br clear=all>
+<a name="1330116396"></a>
+<b>Assertion Details</b><br clear=all>
+<br clear=all>
+<table align=left class="sortable noborder">
+<tr class="sortablehead">
+<td class="alfsrt">Name</td><td>Attempts</td><td>Real Successes</td><td>Failures</td><td>Incomplete</td></tr><tr>
+<td class="wht cl"><a name="1115657066"></a>
+LSB_BUFFER_OVERFLOW</td>
+<td class="s9 cl rt">559727</td>
+<td class="s9 cl rt">559727</td>
+<td class="s9 cl rt">0</td>
+<td class="wht cl rt">0</td>
+</tr><tr>
+<td class="wht cl"><a name="937731500"></a>
+LSB_DCACHE_LATENCY</td>
+<td class="s9 cl rt">559727</td>
+<td class="s9 cl rt">559727</td>
+<td class="s9 cl rt">0</td>
+<td class="wht cl rt">0</td>
+</tr></table><br clear=all>
+</div>
+</div>
+<div class="ui-layout-center-inner-north">
+<div id="center-bread-crumb" class="breadCrumb module urg-margin-bottom">
+  <ul name="inst_tag_13">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Cond">Cond</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+    <li>
+      <a href="#Assert">Assert</a>    </li>
+  </ul>
+  <ul name="tag_LSB">
+    <li>
+      <a href="#Line">Line</a>    </li>
+    <li>
+      <a href="#Cond">Cond</a>    </li>
+    <li>
+      <a href="#Toggle">Toggle</a>    </li>
+    <li>
+      <a href="#Branch">Branch</a>    </li>
+    <li>
+      <a href="#Assert">Assert</a>    </li>
+  </ul>
+</div>
+</div>
+</div>
+<div class="ui-layout-south">
+<table align=center><tr><td class="s0 cl">0%</td>
+<td class="s1 cl">10%</td>
+<td class="s2 cl">20%</td>
+<td class="s3 cl">30%</td>
+<td class="s4 cl">40%</td>
+<td class="s5 cl">50%</td>
+<td class="s6 cl">60%</td>
+<td class="s7 cl">70%</td>
+<td class="s8 cl">80%</td>
+<td class="s9 cl">90%</td>
+<td class="s10 cl">100%</td></tr></table></div>
+</body>
+</html>
