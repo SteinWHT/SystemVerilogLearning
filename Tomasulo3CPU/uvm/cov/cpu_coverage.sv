@@ -96,6 +96,7 @@ class cpu_baremetal_commit_coverage extends uvm_subscriber #(cpu_commit_tr);
             bins matrix_multiply = {4};
             bins linked_list     = {5};
             bins recursion       = {6};
+            bins csr_trap        = {7};
             bins other           = default;
         }
 
@@ -131,6 +132,7 @@ class cpu_baremetal_commit_coverage extends uvm_subscriber #(cpu_commit_tr);
         if (name == "matrix_multiply") return 4;
         if (name == "linked_list")     return 5;
         if (name == "recursion")       return 6;
+        if (name == "csr_trap")        return 7;
         return 99;
     endfunction
 
@@ -249,6 +251,7 @@ class cpu_spike_trace_coverage extends uvm_component;
             bins matrix_multiply = {4};
             bins linked_list     = {5};
             bins recursion       = {6};
+            bins csr_trap        = {7};
             bins other           = default;
         }
 

@@ -25,6 +25,7 @@ PROGRAMS = [
     "matrix_multiply",
     "linked_list",
     "recursion",
+    "csr_trap",
 ]
 
 CLASS_UNKNOWN = 0
@@ -299,7 +300,7 @@ def build_program(test, bin_dir_arg, spike_base):
 
     cmd = [
         cc,
-        "-march=rv64im",
+        "-march=rv64im_zicsr",
         "-mabi=lp64",
         "-nostdlib",
         "-nostartfiles",
@@ -455,7 +456,7 @@ def run_spike(test, out, spike, spike_base, spike_mem_size, spike_tohost, instru
     trace = out / "spike_commit_trace.txt"
     cmd = [
         str(spike),
-        "--isa=rv64im",
+        "--isa=rv64im_zicsr",
         f"-m0x{spike_base:X}:0x{spike_mem_size:X}",
         "-l",
         "--log-commits",

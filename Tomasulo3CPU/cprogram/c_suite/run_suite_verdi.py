@@ -33,6 +33,7 @@ PROGRAMS = [
     "matrix_multiply",
     "linked_list",
     "recursion",
+    "csr_trap",
 ]
 
 

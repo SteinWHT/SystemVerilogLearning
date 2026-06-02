@@ -21,6 +21,7 @@ PROGRAMS = [
     "matrix_multiply",
     "linked_list",
     "recursion",
+    "csr_trap",
 ]
 
 
@@ -52,7 +53,7 @@ def build_one(test: str, clean: bool, bin_dir: Path | None) -> int:
                 f.unlink()
 
     cflags = [
-        "-march=rv64im",
+        "-march=rv64im_zicsr",
         "-mabi=lp64",
         "-nostdlib",
         "-nostartfiles",
