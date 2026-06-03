@@ -1,0 +1,4 @@
+sudo sysctl -w kernel.yama.ptrace_scope=0
+SYNOPSYS_DOCKER_PRIVILEGED=1 SYNOPSYS_DOCKER_ROOT=1 ./script/run_synopsys.sh
+LD_PRELOAD=/workspace/tools/libsnpsmalloc_shim/libsnpsmalloc_shim.so \
+urg -full64 -dir build/uvm/simv.vdb -report build/uvm_cov_report
