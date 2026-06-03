@@ -97,6 +97,8 @@ class cpu_baremetal_commit_coverage extends uvm_subscriber #(cpu_commit_tr);
             bins linked_list     = {5};
             bins recursion       = {6};
             bins csr_trap        = {7};
+            bins wide_data       = {8};
+            bins deep_recursion  = {9};
             bins other           = default;
         }
 
@@ -109,7 +111,18 @@ class cpu_baremetal_commit_coverage extends uvm_subscriber #(cpu_commit_tr);
             bins other     = {5};
         }
 
-        cross cp_program, cp_commit_kind;
+        cross cp_program, cp_commit_kind {
+            // Compute/memory programs never retire CSR, trap, or mret commits.
+            ignore_bins no_priv_on_compute =
+                (binsof(cp_program.memcpy) || binsof(cp_program.memset) ||
+                 binsof(cp_program.strlen) || binsof(cp_program.strcmp) ||
+                 binsof(cp_program.matrix_multiply) || binsof(cp_program.linked_list) ||
+                 binsof(cp_program.recursion) || binsof(cp_program.wide_data) ||
+                 binsof(cp_program.deep_recursion))
+                &&
+                (binsof(cp_commit_kind.csr) || binsof(cp_commit_kind.trap) ||
+                 binsof(cp_commit_kind.mret));
+        }
     endgroup
 
     function new(string name = "cpu_baremetal_commit_coverage", uvm_component parent = null);
@@ -133,6 +146,8 @@ class cpu_baremetal_commit_coverage extends uvm_subscriber #(cpu_commit_tr);
         if (name == "linked_list")     return 5;
         if (name == "recursion")       return 6;
         if (name == "csr_trap")        return 7;
+        if (name == "wide_data")       return 8;
+        if (name == "deep_recursion")  return 9;
         return 99;
     endfunction
 
@@ -252,6 +267,8 @@ class cpu_spike_trace_coverage extends uvm_component;
             bins linked_list     = {5};
             bins recursion       = {6};
             bins csr_trap        = {7};
+            bins wide_data       = {8};
+            bins deep_recursion  = {9};
             bins other           = default;
         }
 
@@ -268,7 +285,22 @@ class cpu_spike_trace_coverage extends uvm_component;
             bins other  = default;
         }
 
-        cross cp_program, cp_instr_class;
+        cross cp_program, cp_instr_class {
+            ignore_bins no_system_on_compute =
+                (binsof(cp_program.memcpy) || binsof(cp_program.memset) ||
+                 binsof(cp_program.strlen) || binsof(cp_program.strcmp) ||
+                 binsof(cp_program.matrix_multiply) || binsof(cp_program.linked_list) ||
+                 binsof(cp_program.recursion) || binsof(cp_program.wide_data) ||
+                 binsof(cp_program.deep_recursion))
+                &&
+                binsof(cp_instr_class.system);
+
+            ignore_bins no_md_on_csr_trap =
+                binsof(cp_program.csr_trap)
+                &&
+                (binsof(cp_instr_class.mul) || binsof(cp_instr_class.div) ||
+                 binsof(cp_instr_class.word));
+        }
     endgroup
 
     function new(string name = "cpu_spike_trace_coverage", uvm_component parent = null);

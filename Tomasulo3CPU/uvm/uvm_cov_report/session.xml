@@ -1,8 +1,8 @@
-<session version="1.1" release="W-2024.09-SP1" timestp="2026-06-03 00:57:08 GMT">
+<session version="1.1" release="W-2024.09-SP1" timestp="2026-06-03 02:27:13 GMT">
   <info>
-    <attr name="datetime" value="Wed Jun  3 00:57:30 2026
+    <attr name="datetime" value="Wed Jun  3 02:28:11 2026
 "/>
-    <attr name="command" value="urg -full64 -metric line+cond+fsm+tgl+branch+assert+group -dir build/uvm_cov/uvm_csr_trap.vdb build/uvm_cov/uvm_deep_recursion.vdb build/uvm_cov/uvm_linked_list.vdb build/uvm_cov/uvm_matrix_multiply.vdb build/uvm_cov/uvm_memcpy.vdb build/uvm_cov/uvm_memset.vdb build/uvm_cov/uvm_recursion.vdb build/uvm_cov/uvm_rv64ui-add.vdb build/uvm_cov/uvm_rv64ui-addi.vdb build/uvm_cov/uvm_rv64ui-addiw.vdb build/uvm_cov/uvm_rv64ui-addw.vdb build/uvm_cov/uvm_rv64ui-and.vdb build/uvm_cov/uvm_rv64ui-andi.vdb build/uvm_cov/uvm_rv64ui-auipc.vdb build/uvm_cov/uvm_rv64ui-beq.vdb build/uvm_cov/uvm_rv64ui-bge.vdb build/uvm_cov/uvm_rv64ui-bgeu.vdb build/uvm_cov/uvm_rv64ui-blt.vdb build/uvm_cov/uvm_rv64ui-bltu.vdb build/uvm_cov/uvm_rv64ui-bne.vdb build/uvm_cov/uvm_rv64ui-jal.vdb build/uvm_cov/uvm_rv64ui-jalr.vdb build/uvm_cov/uvm_rv64ui-lb.vdb build/uvm_cov/uvm_rv64ui-lbu.vdb build/uvm_cov/uvm_rv64ui-ld.vdb build/uvm_cov/uvm_rv64ui-ld_st.vdb build/uvm_cov/uvm_rv64ui-lh.vdb build/uvm_cov/uvm_rv64ui-lhu.vdb build/uvm_cov/uvm_rv64ui-lui.vdb build/uvm_cov/uvm_rv64ui-lw.vdb build/uvm_cov/uvm_rv64ui-lwu.vdb build/uvm_cov/uvm_rv64ui-or.vdb build/uvm_cov/uvm_rv64ui-ori.vdb build/uvm_cov/uvm_rv64ui-sb.vdb build/uvm_cov/uvm_rv64ui-sd.vdb build/uvm_cov/uvm_rv64ui-sh.vdb build/uvm_cov/uvm_rv64ui-simple.vdb build/uvm_cov/uvm_rv64ui-sll.vdb build/uvm_cov/uvm_rv64ui-slli.vdb build/uvm_cov/uvm_rv64ui-slliw.vdb build/uvm_cov/uvm_rv64ui-sllw.vdb build/uvm_cov/uvm_rv64ui-slt.vdb build/uvm_cov/uvm_rv64ui-slti.vdb build/uvm_cov/uvm_rv64ui-sltiu.vdb build/uvm_cov/uvm_rv64ui-sltu.vdb build/uvm_cov/uvm_rv64ui-sra.vdb build/uvm_cov/uvm_rv64ui-srai.vdb build/uvm_cov/uvm_rv64ui-sraiw.vdb build/uvm_cov/uvm_rv64ui-sraw.vdb build/uvm_cov/uvm_rv64ui-srl.vdb build/uvm_cov/uvm_rv64ui-srli.vdb build/uvm_cov/uvm_rv64ui-srliw.vdb build/uvm_cov/uvm_rv64ui-srlw.vdb build/uvm_cov/uvm_rv64ui-st_ld.vdb build/uvm_cov/uvm_rv64ui-sub.vdb build/uvm_cov/uvm_rv64ui-subw.vdb build/uvm_cov/uvm_rv64ui-sw.vdb build/uvm_cov/uvm_rv64ui-xor.vdb build/uvm_cov/uvm_rv64ui-xori.vdb build/uvm_cov/uvm_rv64um-div.vdb build/uvm_cov/uvm_rv64um-divu.vdb build/uvm_cov/uvm_rv64um-divuw.vdb build/uvm_cov/uvm_rv64um-divw.vdb build/uvm_cov/uvm_rv64um-mul.vdb build/uvm_cov/uvm_rv64um-mulh.vdb build/uvm_cov/uvm_rv64um-mulhsu.vdb build/uvm_cov/uvm_rv64um-mulhu.vdb build/uvm_cov/uvm_rv64um-mulw.vdb build/uvm_cov/uvm_rv64um-rem.vdb build/uvm_cov/uvm_rv64um-remu.vdb build/uvm_cov/uvm_rv64um-remuw.vdb build/uvm_cov/uvm_rv64um-remw.vdb build/uvm_cov/uvm_strcmp.vdb build/uvm_cov/uvm_strlen.vdb build/uvm_cov/uvm_wide_data.vdb -dbname /workspace/build/uvm_cov_merged.vdb -report /workspace/build/uvm_cov_report"/>
+    <attr name="command" value="urg -full64 -metric line+cond+fsm+tgl+branch+assert+group -dir /workspace/build/uvm_cov/uvm_csr_trap.vdb /workspace/build/uvm_cov/uvm_deep_recursion.vdb /workspace/build/uvm_cov/uvm_linked_list.vdb /workspace/build/uvm_cov/uvm_matrix_multiply.vdb /workspace/build/uvm_cov/uvm_memcpy.vdb /workspace/build/uvm_cov/uvm_memset.vdb /workspace/build/uvm_cov/uvm_recursion.vdb /workspace/build/uvm_cov/uvm_rv64ui-add.vdb /workspace/build/uvm_cov/uvm_rv64ui-addi.vdb /workspace/build/uvm_cov/uvm_rv64ui-addiw.vdb /workspace/build/uvm_cov/uvm_rv64ui-addw.vdb /workspace/build/uvm_cov/uvm_rv64ui-and.vdb /workspace/build/uvm_cov/uvm_rv64ui-andi.vdb /workspace/build/uvm_cov/uvm_rv64ui-auipc.vdb /workspace/build/uvm_cov/uvm_rv64ui-beq.vdb /workspace/build/uvm_cov/uvm_rv64ui-bge.vdb /workspace/build/uvm_cov/uvm_rv64ui-bgeu.vdb /workspace/build/uvm_cov/uvm_rv64ui-blt.vdb /workspace/build/uvm_cov/uvm_rv64ui-bltu.vdb /workspace/build/uvm_cov/uvm_rv64ui-bne.vdb /workspace/build/uvm_cov/uvm_rv64ui-jal.vdb /workspace/build/uvm_cov/uvm_rv64ui-jalr.vdb /workspace/build/uvm_cov/uvm_rv64ui-lb.vdb /workspace/build/uvm_cov/uvm_rv64ui-lbu.vdb /workspace/build/uvm_cov/uvm_rv64ui-ld.vdb /workspace/build/uvm_cov/uvm_rv64ui-ld_st.vdb /workspace/build/uvm_cov/uvm_rv64ui-lh.vdb /workspace/build/uvm_cov/uvm_rv64ui-lhu.vdb /workspace/build/uvm_cov/uvm_rv64ui-lui.vdb /workspace/build/uvm_cov/uvm_rv64ui-lw.vdb /workspace/build/uvm_cov/uvm_rv64ui-lwu.vdb /workspace/build/uvm_cov/uvm_rv64ui-or.vdb /workspace/build/uvm_cov/uvm_rv64ui-ori.vdb /workspace/build/uvm_cov/uvm_rv64ui-sb.vdb /workspace/build/uvm_cov/uvm_rv64ui-sd.vdb /workspace/build/uvm_cov/uvm_rv64ui-sh.vdb /workspace/build/uvm_cov/uvm_rv64ui-simple.vdb /workspace/build/uvm_cov/uvm_rv64ui-sll.vdb /workspace/build/uvm_cov/uvm_rv64ui-slli.vdb /workspace/build/uvm_cov/uvm_rv64ui-slliw.vdb /workspace/build/uvm_cov/uvm_rv64ui-sllw.vdb /workspace/build/uvm_cov/uvm_rv64ui-slt.vdb /workspace/build/uvm_cov/uvm_rv64ui-slti.vdb /workspace/build/uvm_cov/uvm_rv64ui-sltiu.vdb /workspace/build/uvm_cov/uvm_rv64ui-sltu.vdb /workspace/build/uvm_cov/uvm_rv64ui-sra.vdb /workspace/build/uvm_cov/uvm_rv64ui-srai.vdb /workspace/build/uvm_cov/uvm_rv64ui-sraiw.vdb /workspace/build/uvm_cov/uvm_rv64ui-sraw.vdb /workspace/build/uvm_cov/uvm_rv64ui-srl.vdb /workspace/build/uvm_cov/uvm_rv64ui-srli.vdb /workspace/build/uvm_cov/uvm_rv64ui-srliw.vdb /workspace/build/uvm_cov/uvm_rv64ui-srlw.vdb /workspace/build/uvm_cov/uvm_rv64ui-st_ld.vdb /workspace/build/uvm_cov/uvm_rv64ui-sub.vdb /workspace/build/uvm_cov/uvm_rv64ui-subw.vdb /workspace/build/uvm_cov/uvm_rv64ui-sw.vdb /workspace/build/uvm_cov/uvm_rv64ui-xor.vdb /workspace/build/uvm_cov/uvm_rv64ui-xori.vdb /workspace/build/uvm_cov/uvm_rv64um-div.vdb /workspace/build/uvm_cov/uvm_rv64um-divu.vdb /workspace/build/uvm_cov/uvm_rv64um-divuw.vdb /workspace/build/uvm_cov/uvm_rv64um-divw.vdb /workspace/build/uvm_cov/uvm_rv64um-mul.vdb /workspace/build/uvm_cov/uvm_rv64um-mulh.vdb /workspace/build/uvm_cov/uvm_rv64um-mulhsu.vdb /workspace/build/uvm_cov/uvm_rv64um-mulhu.vdb /workspace/build/uvm_cov/uvm_rv64um-mulw.vdb /workspace/build/uvm_cov/uvm_rv64um-rem.vdb /workspace/build/uvm_cov/uvm_rv64um-remu.vdb /workspace/build/uvm_cov/uvm_rv64um-remuw.vdb /workspace/build/uvm_cov/uvm_rv64um-remw.vdb /workspace/build/uvm_cov/uvm_strcmp.vdb /workspace/build/uvm_cov/uvm_strlen.vdb /workspace/build/uvm_cov/uvm_wide_data.vdb -dbname /workspace/build/uvm_cov_merged.vdb -report /workspace/build/uvm_cov_report"/>
     <attr name="top_instance" value="tb_top,uvm_custom_install_verdi_recording,uvm_pkg"/>
   </info>
   <hvp>
@@ -18,27 +18,21 @@
   </hvp>
   <old_coverage>
   <scope type="top" name="top">
-    <metric name="Line" value="1791/2360" />
-    <metric name="Cond" value="887/1148" />
+    <metric name="Line" value="1790/2351" />
+    <metric name="Cond" value="887/1138" />
     <metric name="Toggle" value="46448/72440" />
-    <metric name="Branch" value="646/927" />
+    <metric name="Branch" value="646/921" />
     <metric name="Assert" value="14/16" />
-    <metric name="Group" value="71.2037%" />
+    <metric name="Group" value="100%" />
   </scope>
   <scope type="instance" name="top">
   </scope>
   <scope type="group" name="top">
-    <scope type="group" name="cpu_pkg::cpu_spike_trace_coverage::cg_spike_instr_class">
-      <metric name="Group" value="40.2778%" />
-    </scope>
     <scope type="group" name="cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit">
-      <metric name="Group" value="41.6667%" />
-    </scope>
-    <scope type="group" name="cpu_pkg::cpu_baremetal_commit_coverage::cg_baremetal_commit">
-      <metric name="Group" value="77.7778%" />
+      <metric name="Group" value="100%" />
     </scope>
     <scope type="group" name="cpu_pkg::cpu_spike_trace_coverage::cg_spike_instr_class">
-      <metric name="Group" value="96.2963%" />
+      <metric name="Group" value="100%" />
     </scope>
     <scope type="group" name="cpu_pkg::cpu_baremetal_dcache_coverage::cg_baremetal_dcache">
       <metric name="Group" value="100%" />

@@ -1,0 +1,8 @@
+# c_suite regression - 2026-06-03 (VCS, 10 tests)
+# 10/10 PASSED
+
+## PASSED (10)
+csr_trap deep_recursion linked_list matrix_multiply memcpy memset
+recursion strcmp strlen wide_data
+
+## FAILED (0)

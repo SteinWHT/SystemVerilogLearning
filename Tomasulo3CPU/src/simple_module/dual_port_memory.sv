@@ -39,29 +39,34 @@ module dual_port_memory #(
         end
     end
 
-    // Reads: combinational
-    always_comb begin
-        data_out_a = '0;
-        data_out_b = '0;
-
-        if (READBEFOREWRITE) begin
-            if (read_en_a) data_out_a = memory_data[address_a];
-            if (read_en_b) data_out_b = memory_data[address_b];
-        end else begin
-            if (read_en_a) begin
-                if (write_en_b && address_b == address_a)
-                    data_out_a = data_in_b;
-                else
-                    data_out_a = memory_data[address_a];
+    // Reads: combinational.
+    generate
+        if (READBEFOREWRITE) begin : g_read_before_write
+            always_comb begin
+                data_out_a = '0;
+                data_out_b = '0;
+                if (read_en_a) data_out_a = memory_data[address_a];
+                if (read_en_b) data_out_b = memory_data[address_b];
             end
-            if (read_en_b) begin
-                if (write_en_a && address_a == address_b)
-                    data_out_b = data_in_a;
-                else
-                    data_out_b = memory_data[address_b];
+        end else begin : g_write_forward
+            always_comb begin
+                data_out_a = '0;
+                data_out_b = '0;
+                if (read_en_a) begin
+                    if (write_en_b && address_b == address_a)
+                        data_out_a = data_in_b;
+                    else
+                        data_out_a = memory_data[address_a];
+                end
+                if (read_en_b) begin
+                    if (write_en_a && address_a == address_b)
+                        data_out_b = data_in_a;
+                    else
+                        data_out_b = memory_data[address_b];
+                end
             end
         end
-    end
+    endgenerate
 
     // synthesis translate_off
     always_ff @(posedge clk) begin

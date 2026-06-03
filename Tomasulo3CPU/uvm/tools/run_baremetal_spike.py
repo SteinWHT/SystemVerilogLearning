@@ -594,6 +594,11 @@ def main():
     parser.add_argument("--max-cycles", type=int, default=500000)
     parser.add_argument("--reset-hold-cycles", type=int, default=20)
     parser.add_argument("--coverage", action="store_true", help="Pass COV=1 to VCS make flow")
+    parser.add_argument(
+        "--merge-cov",
+        action="store_true",
+        help="After sims, run make uvm-cov-merge-baremetal (C-suite vdbs only; avoids stale arch-test shapes)",
+    )
     parser.add_argument("--no-sim", action="store_true", help="Only build images and Spike trace")
     parser.add_argument("--sim-only", action="store_true", help="Use existing generated artifacts and only launch VCS")
     parser.add_argument("--arch-test", action="store_true", help="Run on pre-built arch_test/build/ ELFs instead of C-suite")
@@ -680,7 +685,13 @@ def main():
         if not args.no_sim:
             run_uvm(test, out, trace, dut_tohost, spike_tohost, args.spike_base, args)
 
-    print(f"\n[DONE] prepared {len(targets)} bare-metal Spike-golden test(s)")
+    print("\n[DONE] prepared {0} bare-metal Spike-golden test(s)".format(len(targets)))
+
+    if args.merge_cov:
+        if not args.coverage:
+            print("[WARN] --merge-cov without --coverage: merging existing vdbs only")
+        run(["make", "uvm-cov-merge-baremetal"], PROJ)
+
     return 0
 
 

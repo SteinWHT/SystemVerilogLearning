@@ -21,15 +21,20 @@ SHELL := /bin/bash
 PROJECT ?= IFQ
 UVM_TEST ?= cpu_int_alu_test
 COV ?= 0
+# VCS -cm: group/covergroups are merged/reported by URG (-metric group), not at compile.
 COV_METRICS ?= line+cond+fsm+tgl+branch+assert
 COV_NAME ?= $(PROJECT)_$(UVM_TEST)
 COV_INPUTS ?= $(PROJ_DIR)/build/uvm_cov/*.vdb
 COV_MERGE_DIR ?= $(PROJ_DIR)/build/uvm_cov_merged.vdb
 COV_REPORT_DIR ?= $(PROJ_DIR)/build/uvm_cov_report
+# C-suite only — use uvm-cov-merge-baremetal after covergroup edits (avoids stale arch-test shapes)
+BAREMETAL_COV_TESTS := csr_trap deep_recursion linked_list matrix_multiply memcpy memset recursion strcmp strlen wide_data
+BAREMETAL_COV_VDBS := $(foreach t,$(BAREMETAL_COV_TESTS),$(PROJ_DIR)/build/uvm_cov/uvm_$(t).vdb)
 URG_LICENSE ?= 27000@127.0.0.1
 SHIM_LIB = $(PROJ_DIR)/tools/libsnpsmalloc_shim/libsnpsmalloc_shim.so
 URG_ENV = SNPSLMD_LICENSE_FILE=$(URG_LICENSE) LM_LICENSE_FILE=$(URG_LICENSE) SYNOPSYS_LICENSE_FILE=$(URG_LICENSE) LD_LIBRARY_PATH= LD_PRELOAD=$(SHIM_LIB)
 URG_METRICS ?= line+cond+fsm+tgl+branch+assert+group
+# Sign-off: score tb_top / tb_top.dut in modlist.html — uvm_pkg and Verdi hooks are TB collateral.
 URG_EXTRA ?=
 URG_OPTS := -full64 -metric $(URG_METRICS) $(URG_EXTRA)
 
@@ -264,6 +269,14 @@ $(SHIM_LIB): $(PROJ_DIR)/tools/libsnpsmalloc_shim/libsnpsmalloc_shim.c
 uvm-cov-merge: $(SHIM_LIB)
 	@mkdir -p $(dir $(COV_REPORT_DIR))
 	$(URG_ENV) urg $(URG_OPTS) -dir $(COV_INPUTS) -dbname $(COV_MERGE_DIR) -report $(COV_REPORT_DIR)
+
+.PHONY: uvm-cov-merge-baremetal
+uvm-cov-merge-baremetal: $(SHIM_LIB)
+	@mkdir -p $(dir $(COV_REPORT_DIR))
+	@for vdb in $(BAREMETAL_COV_VDBS); do \
+		test -d "$$vdb" || (echo "[ERROR] Missing $$vdb — rerun: python3 uvm/tools/run_baremetal_spike.py --coverage all"; exit 1); \
+	done
+	$(URG_ENV) urg $(URG_OPTS) -dir $(BAREMETAL_COV_VDBS) -dbname $(COV_MERGE_DIR) -report $(COV_REPORT_DIR)
 
 .PHONY: uvm-cov-report
 uvm-cov-report: $(SHIM_LIB)
