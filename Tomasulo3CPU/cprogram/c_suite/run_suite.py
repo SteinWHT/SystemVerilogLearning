@@ -21,6 +21,8 @@ PROGRAMS = [
     "linked_list",
     "recursion",
     "csr_trap",
+    "wide_data",
+    "deep_recursion",
 ]
 
 SRC_FILES = [

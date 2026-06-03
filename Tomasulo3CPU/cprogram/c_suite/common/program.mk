@@ -2,7 +2,7 @@ SUITE_ROOT := $(abspath $(CURDIR)/..)
 COMMON_DIR := $(SUITE_ROOT)/common
 ARCH_TEST_DIR := $(abspath $(SUITE_ROOT)/../../arch_test)
 
-ARCH ?= rv64im
+ARCH ?= rv64im_zicsr
 ABI ?= lp64
 
 PYTHON ?= python

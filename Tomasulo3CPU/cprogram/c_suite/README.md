@@ -9,6 +9,9 @@ This suite adds small bare-metal C programs for:
 - `matrix_multiply`
 - `linked_list`
 - `recursion`
+- `csr_trap` (directed: machine-mode CSR R/M/W, `ebreak`/`ecall`/`mret` trap path)
+- `wide_data` (directed: full 64-bit operand toggling across ALU/MUL/DIV and load/store widths)
+- `deep_recursion` (directed: RAS / `sync_lifo` overflow + underflow via deep and mutual recursion)
 
 Each program is self-checking and writes to `tohost`:
 
