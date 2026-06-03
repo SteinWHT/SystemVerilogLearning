@@ -38,7 +38,7 @@ module CPU_c_suite_tb;
     parameter int unsigned W_BYTE_NUM              = DMEM_WIDTH / 8;
 
     localparam int unsigned IMEM_WORDS = 16384;
-    localparam int unsigned DMEM_QWORDS = 8192;
+    localparam int unsigned DMEM_QWORDS = 16384;
 
     logic clk, rst_n;
     logic                    imem_valid;
@@ -251,7 +251,7 @@ module CPU_c_suite_tb;
 
         finished = 0;
         passed   = 0;
-        for (cycles = 0; cycles < 500000; cycles++) begin
+        for (cycles = 0; cycles < 1000000; cycles++) begin
             wait_cycles(1);
             host_val = read_word_at(tohost_addr);
             if (host_val != 32'd0) begin

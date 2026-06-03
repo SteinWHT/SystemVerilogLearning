@@ -15,7 +15,7 @@ localparam int unsigned CPU_TRAP_CAUSE_WIDTH        = 4;
 localparam int unsigned CPU_CSR_ADDR_WIDTH          = 12;
 localparam int unsigned CPU_CSR_CMD_WIDTH           = 3;
 localparam int unsigned CPU_IMEM_WORDS              = 16384;
-localparam int unsigned CPU_DMEM_LINES              = 8192;
+localparam int unsigned CPU_DMEM_LINES              = 16384;
 
 typedef cpu_commit_item #(
     CPU_ROB_INDEX_WIDTH,

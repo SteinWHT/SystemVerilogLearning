@@ -158,13 +158,13 @@ def tool_path(bin_dir, prefix, name):
 
 
 def write_linker_script(path, spike_base):
-    dmem_base = spike_base + 0x400
+    dmem_base = spike_base + 0x1000
     text = f"""OUTPUT_ARCH(riscv)
 ENTRY(_start)
 
 MEMORY {{
     IMEM (rx)  : ORIGIN = 0x{spike_base:016X}, LENGTH = 4K
-    DMEM (rwx) : ORIGIN = 0x{dmem_base:016X}, LENGTH = 2K
+    DMEM (rwx) : ORIGIN = 0x{dmem_base:016X}, LENGTH = 4K
 }}
 
 SECTIONS {{
@@ -194,7 +194,7 @@ SECTIONS {{
     }} > DMEM
 
     . = ALIGN(16);
-    _stack_top = ORIGIN(DMEM);
+    _stack_top = ORIGIN(DMEM) + LENGTH(DMEM);
 
     /DISCARD/ : {{
         *(.comment)

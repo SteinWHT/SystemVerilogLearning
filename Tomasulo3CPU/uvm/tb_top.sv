@@ -35,7 +35,7 @@ module tb_top;
     localparam int unsigned OPCODE_WIDTH            = 7;
     localparam int unsigned W_BYTE_NUM              = DMEM_WIDTH / 8;
     localparam int unsigned IMEM_WORDS              = 16384;
-    localparam int unsigned DMEM_LINES              = 8192;
+    localparam int unsigned DMEM_LINES              = 16384;
 
     logic clk;
     logic rst_n;

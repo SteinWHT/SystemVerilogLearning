@@ -3,7 +3,7 @@ ENTRY(_start)
 
 MEMORY {
     IMEM (rx)  : ORIGIN = 0x00000000, LENGTH = 4K
-    DMEM (rwx) : ORIGIN = 0x00000400, LENGTH = 2K
+    DMEM (rwx) : ORIGIN = 0x00001000, LENGTH = 4K
 }
 
 SECTIONS {
