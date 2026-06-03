@@ -61,6 +61,10 @@ INTERVIEW_GUIDE.md
 /Tomasulo3CPU/script/verdiLog
 /Tomasulo3CPU/script/Dockerfile.synopsys
 /Tomasulo3CPU/script/novas.*
+/script/verdiLog
+/script/Dockerfile.synopsys
+/script/novas.*
+/script/run_synopsys.sh
 /Tomasulo3CPU/build
 /Tomasulo3CPU/build/questa_uvm_lint
 /Tomasulo3CPU/arch_test/build
