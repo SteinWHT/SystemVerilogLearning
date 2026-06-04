@@ -38,6 +38,8 @@ The CPU is split into a **front-end** (fetch, decode, rename, dispatch, commit) 
 
 Combines front-end and back-end with external I-Cache and D-Cache interfaces.
 
+**Note:** Simulation today uses a 1-cycle behavioral D-memory model. A real L1 D-cache is planned as a separate project: [`../L1DCache`](../L1DCache/).
+
 ## Supported Instructions (current)
 
 RV64IM-oriented subset verified with directed `CPU_tb` tests and the [riscv-tests](arch_test/) manifest (65 tests). See [doc/VERIFICATION_STATUS.md](doc/VERIFICATION_STATUS.md).
