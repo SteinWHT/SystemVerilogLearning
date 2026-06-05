@@ -234,6 +234,9 @@ class cpu_baremetal_dcache_coverage extends uvm_subscriber #(cpu_dcache_item#())
         int unsigned access_kind;
         bit          is_tohost;
 
+        if (t.event_kind != cpu_dcache_item#()::DCACHE_REQUEST)
+            return;
+
         access_kind = (t.access == cpu_dcache_item#()::DCACHE_WRITE) ? 1 : 0;
         is_tohost   = (t.addr == cfg.dut_tohost_addr[CPU_DMEM_DEPTH-1:0]);
         cg_baremetal_dcache.sample(access_kind, count_ones(t.strb), is_tohost);

@@ -21,6 +21,7 @@ package cpu_pkg;
     `include "utils/cpu_reg_setup.sv"
 
     `include "scoreboard/cpu_scoreboard.sv"
+    `include "scoreboard/cpu_dcache_scoreboard.sv"
     `include "scoreboard/cpu_spike_scoreboard.sv"
     `include "ref/cpu_ref_model.sv"
     `include "agent/cpu_driver.sv"

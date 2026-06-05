@@ -2,6 +2,7 @@ class cpu_cfg extends uvm_object;
 
     uvm_active_passive_enum is_active         = UVM_ACTIVE;
     bit                     enable_scoreboard = 1;
+    bit                     enable_dcache_scoreboard = 1;
     bit                     enable_spike_scoreboard = 0;
     bit                     enable_coverage   = 0;
     bit                     enable_baremetal_coverage = 0;
@@ -44,6 +45,7 @@ class cpu_cfg extends uvm_object;
     `uvm_object_utils_begin(cpu_cfg)
         `uvm_field_enum(uvm_active_passive_enum, is_active,            UVM_ALL_ON)
         `uvm_field_int(enable_scoreboard,                              UVM_ALL_ON)
+        `uvm_field_int(enable_dcache_scoreboard,                       UVM_ALL_ON)
         `uvm_field_int(enable_spike_scoreboard,                        UVM_ALL_ON)
         `uvm_field_int(enable_coverage,                                UVM_ALL_ON)
         `uvm_field_int(enable_baremetal_coverage,                      UVM_ALL_ON)

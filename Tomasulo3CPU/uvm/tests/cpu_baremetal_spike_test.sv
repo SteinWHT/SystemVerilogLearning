@@ -74,6 +74,7 @@ class cpu_baremetal_spike_test extends cpu_base_test;
         vif.clear_memories();
         vif.load_imem_file(imem_file);
         vif.load_dmem_file(dmem_file);
+        vif.finish_preload();
     endtask
 
     task wait_for_reset_release();
@@ -99,9 +100,21 @@ class cpu_baremetal_spike_test extends cpu_base_test;
         end
     endtask
 
+    task wait_for_final_store_response(output bit completed);
+        completed = 0;
+        for (int unsigned cycle = 0; cycle < 1024; cycle++) begin
+            @(posedge vif.clk);
+            if (vif.dcache_wresp_valid && vif.dcache_wresp_ready) begin
+                completed = 1;
+                return;
+            end
+        end
+    endtask
+
     task run_phase(uvm_phase phase);
         bit finished;
         bit passed;
+        bit final_store_completed;
         int unsigned cycles;
 
         phase.raise_objection(this);
@@ -120,6 +133,13 @@ class cpu_baremetal_spike_test extends cpu_base_test;
         end else begin
             `uvm_info(get_type_name(), $sformatf(
                 "[PASS] %0s DUT tohost=1 after %0d cycles", cfg.bm_test, cycles), UVM_LOW)
+        end
+
+        if (finished) begin
+            wait_for_final_store_response(final_store_completed);
+            if (!final_store_completed)
+                `uvm_error(get_type_name(),
+                    "Timed out waiting for the final tohost store response")
         end
 
         repeat (2) @(posedge vif.clk);

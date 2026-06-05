@@ -29,6 +29,18 @@ See [`Tomasulo3CPU/`](Tomasulo3CPU/) for full architecture documentation, build 
 
 ---
 
+## L1DCache — L1 Data Cache (planned)
+
+Standalone L1 D-cache for the Tomasulo CPU: RTL and tests live in [`L1DCache/`](L1DCache/); integration into Tomasulo testbenches only.
+
+---
+
+## AXISoC — AXI4 Memory Subsystem (in progress)
+
+Step-by-step RTL + UVM project: AXI4-Lite and **full AXI4 burst** memory subsystem. See [`AXISoC/README.md`](AXISoC/README.md).
+
+---
+
 ## BasicModules — Digital Design Building Blocks
 
 Standalone parameterized modules with self-checking testbenches and SVA assertions.

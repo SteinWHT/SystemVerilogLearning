@@ -44,6 +44,7 @@ class cpu_add_test extends cpu_base_test;
         run_add_seq(num_add_instr, 1'b0);
         run_add_seq(num_addw_instr, 1'b1);
 
+        vif.finish_preload();
         wait_for_reset_release();
         drain_pipeline();
 

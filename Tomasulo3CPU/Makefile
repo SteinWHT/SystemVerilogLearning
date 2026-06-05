@@ -133,8 +133,11 @@ USE_DCACHE ?= 0
 ifeq ($(PROJECT),CPU_dcache_c)
 USE_DCACHE := 1
 endif
+ifeq ($(PROJECT),uvm)
+USE_DCACHE := 1
+endif
 ifeq ($(USE_DCACHE),1)
-SRC_FILES += $(DCACHE_FILES)
+SRC_FILES += $(DCACHE_FILES) $(SRC_DIR)/CPU_L1DCache.sv
 endif
 
 # DW IP behavioral stubs for simulators without Synopsys DesignWare

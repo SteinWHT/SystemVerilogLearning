@@ -6,7 +6,8 @@ interface cpu_if #(
     parameter int unsigned DMEM_DEPTH   = 32,
     parameter int unsigned W_BYTE_NUM   = DMEM_WIDTH / 8,
     parameter int unsigned IMEM_WORDS   = 1024,
-    parameter int unsigned DMEM_LINES   = 256
+    parameter int unsigned DMEM_LINES   = 256,
+    parameter int unsigned MEM_IDX_BITS = 16
 )(
     input logic clk,
     input logic rst_n
@@ -35,9 +36,27 @@ interface cpu_if #(
     logic                   dcache_wvalid;
     logic                   dcache_wresp_ready;
 
+    logic                       dcache_mem_init_en;
+    logic [MEM_IDX_BITS-1:0]    dcache_mem_init_idx;
+    logic [DMEM_WIDTH-1:0]      dcache_mem_init_data;
+    logic [31:0]                dcache_hits;
+    logic [31:0]                dcache_misses;
+    logic                       preload_complete;
+
     // Memory images (program/data preload from driver/sequences — not PRF force)
     logic [INSTR_WIDTH-1:0] imem_array [IMEM_WORDS];
     logic [DMEM_WIDTH-1:0]  dmem_array [DMEM_LINES];
+
+    initial begin
+        dcache_mem_init_en   = 1'b0;
+        dcache_mem_init_idx  = '0;
+        dcache_mem_init_data = '0;
+        preload_complete     = 1'b0;
+        for (int unsigned i = 0; i < IMEM_WORDS; i++)
+            imem_array[i] = nop();
+        for (int unsigned i = 0; i < DMEM_LINES; i++)
+            dmem_array[i] = '0;
+    end
 
     task automatic load_instr(
         input logic [IMEM_DEPTH-1:0] byte_addr,
@@ -51,6 +70,12 @@ interface cpu_if #(
         input logic [DMEM_WIDTH-1:0]  data
     );
         dmem_array[line_idx] = data;
+        @(negedge clk);
+        dcache_mem_init_en   = 1'b1;
+        dcache_mem_init_idx  = MEM_IDX_BITS'(line_idx);
+        dcache_mem_init_data = data;
+        @(negedge clk);
+        dcache_mem_init_en   = 1'b0;
     endtask
 
     function automatic logic [INSTR_WIDTH-1:0] nop();
@@ -68,6 +93,7 @@ interface cpu_if #(
     endtask
 
     task automatic clear_memories();
+        preload_complete = 1'b0;
         for (int unsigned i = 0; i < IMEM_WORDS; i++)
             imem_array[i] = nop();
         for (int unsigned i = 0; i < DMEM_LINES; i++)
@@ -80,6 +106,20 @@ interface cpu_if #(
 
     task automatic load_dmem_file(input string path);
         $readmemh(path, dmem_array);
+        @(negedge clk);
+        for (int unsigned i = 0; i < DMEM_LINES; i++) begin
+            dcache_mem_init_en   = 1'b1;
+            dcache_mem_init_idx  = MEM_IDX_BITS'(i);
+            dcache_mem_init_data = dmem_array[i];
+            @(negedge clk);
+        end
+        dcache_mem_init_en   = 1'b0;
+        dcache_mem_init_idx  = '0;
+        dcache_mem_init_data = '0;
+    endtask
+
+    task automatic finish_preload();
+        preload_complete = 1'b1;
     endtask
 
     function automatic logic [DMEM_WIDTH-1:0] read_dmem_line(
@@ -126,12 +166,16 @@ interface cpu_if #(
     modport drv_mp (
         input  clk,
         input  rst_n,
+        input  preload_complete,
+        input  dcache_wresp_valid,
+        input  dcache_wresp_ready,
         import load_instr,
         import write_dmem_line,
         import fill_nops,
         import clear_memories,
         import load_imem_file,
         import load_dmem_file,
+        import finish_preload,
         import read_dmem_line,
         import read_dmem_word32,
         import nop

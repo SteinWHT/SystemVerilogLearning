@@ -4,6 +4,7 @@ class cpu_env extends uvm_env;
     cpu_cfg             cfg;
     cpu_agent           agt;
     cpu_scoreboard      sb;
+    cpu_dcache_scoreboard sb_dcache;
     cpu_spike_scoreboard sb_spike;
     cpu_int_alu_ref_model   rm;
     cpu_coverage        cov_commit;
@@ -29,6 +30,9 @@ class cpu_env extends uvm_env;
 
         if (cfg.enable_scoreboard)
             sb = cpu_scoreboard::type_id::create("sb", this);
+
+        if (cfg.enable_dcache_scoreboard)
+            sb_dcache = cpu_dcache_scoreboard::type_id::create("sb_dcache", this);
 
         if (cfg.enable_spike_scoreboard)
             sb_spike = cpu_spike_scoreboard::type_id::create("sb_spike", this);
@@ -59,6 +63,9 @@ class cpu_env extends uvm_env;
 
         if (cfg.enable_spike_scoreboard)
             agt.mon.ap_commit.connect(sb_spike.imp_commit);
+
+        if (cfg.enable_dcache_scoreboard)
+            agt.dmon.ap_dcache.connect(sb_dcache.imp_dcache);
 
         if (cfg.enable_ref_model && cfg.is_active == UVM_ACTIVE)
             agt.drv.ap_instr.connect(rm.imp_instr);

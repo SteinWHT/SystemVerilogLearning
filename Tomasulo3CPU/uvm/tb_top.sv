@@ -67,7 +67,7 @@ module tb_top;
         .rst_n (rst_n)
     );
 
-    CPU #(
+    CPU_L1DCache #(
         .INSTR_WIDTH             (INSTR_WIDTH),
         .IMEM_DEPTH              (IMEM_DEPTH),
         .IMEM_WIDTH              (IMEM_WIDTH),
@@ -104,20 +104,25 @@ module tb_top;
         .imem_resp_ready    (cpu_vif.imem_resp_ready),
         .imem_req_valid     (cpu_vif.imem_req_valid),
         .imem_addr          (cpu_vif.imem_addr),
-        .dcache_rready      (cpu_vif.dcache_rready),
-        .dcache_rresp_valid (cpu_vif.dcache_rresp_valid),
-        .dcache_rdata       (cpu_vif.dcache_rdata),
-        .dcache_raddr       (cpu_vif.dcache_raddr),
-        .dcache_rvalid      (cpu_vif.dcache_rvalid),
-        .dcache_rresp_ready (cpu_vif.dcache_rresp_ready),
-        .dcache_wready      (cpu_vif.dcache_wready),
-        .dcache_wresp_valid (cpu_vif.dcache_wresp_valid),
-        .dcache_write       (cpu_vif.dcache_write),
-        .dcache_sw_data     (cpu_vif.dcache_sw_data),
-        .dcache_wstrb       (cpu_vif.dcache_wstrb),
-        .dcache_sw_addr     (cpu_vif.dcache_sw_addr),
-        .dcache_wvalid      (cpu_vif.dcache_wvalid),
-        .dcache_wresp_ready (cpu_vif.dcache_wresp_ready)
+        .dcache_mem_init_en  (cpu_vif.dcache_mem_init_en),
+        .dcache_mem_init_idx (cpu_vif.dcache_mem_init_idx),
+        .dcache_mem_init_data(cpu_vif.dcache_mem_init_data),
+        .dcache_hits         (cpu_vif.dcache_hits),
+        .dcache_misses       (cpu_vif.dcache_misses),
+        .dcache_rready       (cpu_vif.dcache_rready),
+        .dcache_rresp_valid  (cpu_vif.dcache_rresp_valid),
+        .dcache_rdata        (cpu_vif.dcache_rdata),
+        .dcache_raddr        (cpu_vif.dcache_raddr),
+        .dcache_rvalid       (cpu_vif.dcache_rvalid),
+        .dcache_rresp_ready  (cpu_vif.dcache_rresp_ready),
+        .dcache_wready       (cpu_vif.dcache_wready),
+        .dcache_wresp_valid  (cpu_vif.dcache_wresp_valid),
+        .dcache_write        (cpu_vif.dcache_write),
+        .dcache_sw_data      (cpu_vif.dcache_sw_data),
+        .dcache_wstrb        (cpu_vif.dcache_wstrb),
+        .dcache_sw_addr      (cpu_vif.dcache_sw_addr),
+        .dcache_wvalid       (cpu_vif.dcache_wvalid),
+        .dcache_wresp_ready  (cpu_vif.dcache_wresp_ready)
     );
 
     // ----------------------------------------------------------------
@@ -140,39 +145,18 @@ module tb_top;
     end
 
     // ----------------------------------------------------------------
-    // D-cache model (1-cycle read / write)
+    // Architectural shadow memory for UVM checking and tohost polling.
+    // The real data path is CPU_L1DCache.u_dcache.
     // ----------------------------------------------------------------
-    assign cpu_vif.dcache_rready = rst_n;
-    assign cpu_vif.dcache_wready = rst_n;
-
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            cpu_vif.dcache_rresp_valid <= 1'b0;
-            cpu_vif.dcache_rdata       <= '0;
-        end else if (cpu_vif.dcache_rvalid && cpu_vif.dcache_rready) begin
-            cpu_vif.dcache_rresp_valid <= 1'b1;
-            cpu_vif.dcache_rdata       <= cpu_vif.dmem_array[cpu_vif.dcache_raddr[15:3]];
-        end else if (cpu_vif.dcache_rresp_valid && cpu_vif.dcache_rresp_ready) begin
-            cpu_vif.dcache_rresp_valid <= 1'b0;
-        end
-    end
-
-    // Plain always is intentional: dmem_array is also initialized/preloaded by
-    // UVM tasks, so it cannot be written from an always_ff block.
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            cpu_vif.dcache_wresp_valid <= 1'b0;
-        end else if (cpu_vif.dcache_wvalid && cpu_vif.dcache_wready) begin
+    always @(posedge clk) begin
+        if (rst_n && cpu_vif.dcache_wvalid && cpu_vif.dcache_wready) begin
             logic [REG_FILE_DATA_WIDTH-1:0] temp_data;
             temp_data = cpu_vif.dmem_array[cpu_vif.dcache_sw_addr[15:3]];
             for (int i = 0; i < W_BYTE_NUM; i++) begin
                 if (cpu_vif.dcache_wstrb[i])
                     temp_data[i*8 +: 8] = cpu_vif.dcache_sw_data[i*8 +: 8];
             end
-            cpu_vif.dmem_array[cpu_vif.dcache_sw_addr[15:3]] <= temp_data;
-            cpu_vif.dcache_wresp_valid <= 1'b1;
-        end else begin
-            cpu_vif.dcache_wresp_valid <= 1'b0;
+            cpu_vif.dmem_array[cpu_vif.dcache_sw_addr[15:3]] = temp_data;
         end
     end
 
@@ -193,26 +177,28 @@ module tb_top;
     ) u_rob_commit_mon (
         .clk              (clk),
         .rst_n            (rst_n),
-        .commit_valid     (dut.front_end.rob.enable),
-        .commit_rob_tag   (dut.front_end.rob.read_ptr[ROB_INDEX_WIDTH-1:0]),
-        .head_curr_phy    (dut.front_end.rob.head.curr_phy),
-        .head_prev_phy    (dut.front_end.rob.head.prev_phy),
-        .head_rd_arch     (dut.front_end.rob.head.rd_addr),
-        .head_rw          (dut.front_end.rob.head.rw),
-        .head_mw          (dut.front_end.rob.head.mw),
-        .head_sw_addr     (dut.front_end.rob.head.sw_addr),
-        .head_sw_strb     (dut.front_end.rob.head.sw_strb),
-        .head_pc          (dut.front_end.rob.head.pc),
-        .head_trap_cause  (dut.front_end.rob.head.trap_cause),
-        .head_mret        (dut.front_end.rob.head.mret_occur),
-        .head_is_csr      (dut.front_end.rob.head.is_csr),
-        .head_csr_addr    (dut.front_end.rob.head.csr_addr),
-        .head_csr_cmd     (dut.front_end.rob.head.csr_cmd),
-        .head_rs1_arch    (dut.front_end.rob.head.rs1_arch),
-        .head_cdb_data    (dut.front_end.rob.head.is_csr ? dut.front_end.rob.csr_rdata : dut.front_end.rob.sim_head_cdb_data)
+        .commit_valid     (dut.u_cpu.front_end.rob.enable),
+        .commit_rob_tag   (dut.u_cpu.front_end.rob.read_ptr[ROB_INDEX_WIDTH-1:0]),
+        .head_curr_phy    (dut.u_cpu.front_end.rob.head.curr_phy),
+        .head_prev_phy    (dut.u_cpu.front_end.rob.head.prev_phy),
+        .head_rd_arch     (dut.u_cpu.front_end.rob.head.rd_addr),
+        .head_rw          (dut.u_cpu.front_end.rob.head.rw),
+        .head_mw          (dut.u_cpu.front_end.rob.head.mw),
+        .head_sw_addr     (dut.u_cpu.front_end.rob.head.sw_addr),
+        .head_sw_strb     (dut.u_cpu.front_end.rob.head.sw_strb),
+        .head_pc          (dut.u_cpu.front_end.rob.head.pc),
+        .head_trap_cause  (dut.u_cpu.front_end.rob.head.trap_cause),
+        .head_mret        (dut.u_cpu.front_end.rob.head.mret_occur),
+        .head_is_csr      (dut.u_cpu.front_end.rob.head.is_csr),
+        .head_csr_addr    (dut.u_cpu.front_end.rob.head.csr_addr),
+        .head_csr_cmd     (dut.u_cpu.front_end.rob.head.csr_cmd),
+        .head_rs1_arch    (dut.u_cpu.front_end.rob.head.rs1_arch),
+        .head_cdb_data    (dut.u_cpu.front_end.rob.head.is_csr ?
+                           dut.u_cpu.front_end.rob.csr_rdata :
+                           dut.u_cpu.front_end.rob.sim_head_cdb_data)
     );
 
-    assign commit_if.rob_commit           = dut.front_end.rob.rob_commit;
+    assign commit_if.rob_commit           = dut.u_cpu.front_end.rob.rob_commit;
     assign commit_if.mon_commit_valid     = u_rob_commit_mon.mon_commit_valid;
     assign commit_if.mon_commit_rob_tag   = u_rob_commit_mon.mon_commit_rob_tag;
     assign commit_if.mon_curr_phy         = u_rob_commit_mon.mon_curr_phy;
@@ -256,17 +242,11 @@ module tb_top;
     always #5 clk = ~clk;
 
     initial begin
-        for (int i = 0; i < IMEM_WORDS; i++)
-            cpu_vif.imem_array[i] = cpu_vif.nop();
-        for (int i = 0; i < DMEM_LINES; i++)
-            cpu_vif.dmem_array[i] = '0;
-    end
-
-    initial begin
         int unsigned reset_hold_cycles;
         rst_n = 1'b0;
         reset_hold_cycles = 3;
         void'($value$plusargs("RESET_HOLD_CYCLES=%d", reset_hold_cycles));
+        wait (cpu_vif.preload_complete === 1'b1);
         repeat (reset_hold_cycles) @(posedge clk);
         rst_n = 1'b1;
     end

@@ -80,3 +80,4 @@ INTERVIEW_GUIDE.md
 /Tomasulo3CPU/tools
 *.fsdb
 *ucli.key
+/L1DCache/doc

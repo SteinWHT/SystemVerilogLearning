@@ -65,6 +65,7 @@ class cpu_int_alu_test extends cpu_base_test;
         run_sub_seq(num_sub_instr,  1'b0);
         run_sub_seq(num_subw_instr, 1'b1);
 
+        vif.finish_preload();
         wait_for_reset_release();
         drain_pipeline();
 

@@ -24,7 +24,7 @@ class cpu_base_test extends uvm_test;
             uvm_config_db#(cpu_cfg)::set(this, "*", "cfg", cfg);
         end
 
-        uvm_config_db#(cpu_drv_vif_t)::set(this, "env.agt*", "vif", vif);
+        uvm_config_db#(cpu_drv_vif_t)::set(this, "env*", "vif", vif);
         uvm_config_db#(cpu_mon_vif_t)::set(this, "env.agt*", "mon_vif", mon_vif);
         uvm_config_db#(cpu_commit_vif_t)::set(this, "env.agt*", "commit_vif", commit_vif);
         uvm_config_db#(cpu_cfg)::set(this, "env*", "cfg", cfg);
