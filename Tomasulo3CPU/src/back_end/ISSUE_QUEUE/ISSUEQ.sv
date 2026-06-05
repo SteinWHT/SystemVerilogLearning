@@ -130,9 +130,9 @@ import riscv_types_pkg::*;
     output logic                                iss_lsb_rdy,
 
     // D-Cache Interface
-    input logic                                 dcache_valid,
+    input logic                                 dcache_ready,
 
-    output logic                                dcache_ready,
+    output logic                                dcache_valid,
     output logic [DMEM_DEPTH-1:0]               dcache_addr
 );
 
@@ -378,8 +378,8 @@ import riscv_types_pkg::*;
         .lsq_ld_st_full(issq_ld_stq_full),
         .lsq_ld_st_two_or_more_vacant(issq_ld_stq_two_or_more_vacant),
 
-        .dcache_valid(dcache_valid),
         .dcache_ready(dcache_ready),
+        .dcache_valid(dcache_valid),
         .dcache_addr(dcache_addr),
 
         .cdb_valid(cdb_valid),

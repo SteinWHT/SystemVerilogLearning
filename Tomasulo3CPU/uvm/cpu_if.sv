@@ -18,20 +18,20 @@ interface cpu_if #(
     logic                   imem_read_rdy;
     logic [IMEM_DEPTH-1:0]  imem_addr;
 
-    logic                   dcache_rvalid;
+    logic                   dcache_rready;
     logic                   dcache_rresp_valid;
     logic [DMEM_WIDTH-1:0]  dcache_rdata;
     logic [DMEM_DEPTH-1:0]  dcache_raddr;
-    logic                   dcache_rready;
+    logic                   dcache_rvalid;
     logic                   dcache_rresp_ready;
 
-    logic                   dcache_wvalid;
+    logic                   dcache_wready;
     logic                   dcache_wresp_valid;
     logic                   dcache_write;
     logic [DMEM_WIDTH-1:0]  dcache_sw_data;
     logic [W_BYTE_NUM-1:0]  dcache_wstrb;
     logic [DMEM_DEPTH-1:0]  dcache_sw_addr;
-    logic                   dcache_wready;
+    logic                   dcache_wvalid;
     logic                   dcache_wresp_ready;
 
     // Memory images (program/data preload from driver/sequences — not PRF force)
@@ -105,19 +105,19 @@ interface cpu_if #(
         input  imem_data,
         output imem_read_rdy,
         output imem_addr,
-        input  dcache_rvalid,
+        input  dcache_rready,
         input  dcache_rresp_valid,
         input  dcache_rdata,
         output dcache_raddr,
-        output dcache_rready,
+        output dcache_rvalid,
         output dcache_rresp_ready,
-        input  dcache_wvalid,
+        input  dcache_wready,
         input  dcache_wresp_valid,
         input  dcache_write,
         input  dcache_sw_data,
         input  dcache_wstrb,
         input  dcache_sw_addr,
-        output dcache_wready,
+        output dcache_wvalid,
         output dcache_wresp_ready
     );
 
@@ -138,19 +138,19 @@ interface cpu_if #(
     modport mon_mp (
         input  clk,
         input  rst_n,
-        input  dcache_rvalid,
+        input  dcache_rready,
         input  dcache_rresp_valid,
         input  dcache_rdata,
         input  dcache_raddr,
-        input  dcache_rready,
+        input  dcache_rvalid,
         input  dcache_rresp_ready,
-        input  dcache_wvalid,
+        input  dcache_wready,
         input  dcache_wresp_valid,
         input  dcache_write,
         input  dcache_sw_data,
         input  dcache_wstrb,
         input  dcache_sw_addr,
-        input  dcache_wready,
+        input  dcache_wvalid,
         input  dcache_wresp_ready
     );
 

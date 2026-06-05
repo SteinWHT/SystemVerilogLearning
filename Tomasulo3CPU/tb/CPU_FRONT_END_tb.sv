@@ -46,11 +46,11 @@ module CPU_FRONT_END_tb;
     logic [IMEM_DEPTH-1:0]   imem_addr;
 
     // D-CACHE interface
-    logic dcache_valid;
+    logic dcache_ready;
     logic dcache_write_done;
     logic [DMEM_DEPTH-1:0] dcache_sw_addr;
     logic [DMEM_WIDTH-1:0] dcache_sw_data;
-    logic dcache_ready;
+    logic dcache_valid;
 
     // Issue Queue interface
     logic issue_intq_full, issue_divq_full, issue_mulq_full, issue_ld_stq_full;
@@ -237,7 +237,7 @@ module CPU_FRONT_END_tb;
     task automatic clear_all_inputs();
         //imem_valid              = 1'b0;
         //imem_data               = '0;
-        dcache_valid            = 1'b0;
+        dcache_ready            = 1'b0;
         dcache_write_done       = 1'b0;
         issue_intq_full         = 1'b0;
         issue_divq_full         = 1'b0;

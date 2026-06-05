@@ -23,7 +23,7 @@ class cpu_dcache_monitor extends uvm_monitor;
                 continue;
             #1step;
 
-            if (vif.dcache_rready && vif.dcache_rvalid) begin
+            if (vif.dcache_rvalid && vif.dcache_rready) begin
                 tr = cpu_dcache_item#()::type_id::create("dcache_read_req");
                 tr.access = cpu_dcache_item#()::DCACHE_READ;
                 tr.addr   = vif.dcache_raddr;
@@ -41,7 +41,7 @@ class cpu_dcache_monitor extends uvm_monitor;
                 ap_dcache.write(tr);
             end
 
-            if (vif.dcache_wready && vif.dcache_wvalid) begin
+            if (vif.dcache_wvalid && vif.dcache_wready) begin
                 tr = cpu_dcache_item#()::type_id::create("dcache_write");
                 tr.access = cpu_dcache_item#()::DCACHE_WRITE;
                 tr.addr   = vif.dcache_sw_addr;

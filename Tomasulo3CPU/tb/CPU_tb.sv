@@ -53,21 +53,21 @@ module CPU_tb;
     logic [IMEM_DEPTH-1:0]   imem_addr;
 
     // D-Cache read interface
-    logic                            dcache_rvalid;
+    logic                            dcache_rready;
     logic                            dcache_rresp_valid;
     logic [REG_FILE_DATA_WIDTH-1:0]  dcache_rdata;
     logic [DMEM_DEPTH-1:0]           dcache_raddr;
-    logic                            dcache_rready;
+    logic                            dcache_rvalid;
     logic                            dcache_rresp_ready;
 
     // D-Cache write interface
-    logic                            dcache_wvalid;
+    logic                            dcache_wready;
     logic                            dcache_wresp_valid;
     logic                            dcache_write;
     logic [DMEM_WIDTH-1:0]           dcache_sw_data;
     logic [W_BYTE_NUM-1:0]           dcache_wstrb;
     logic [DMEM_DEPTH-1:0]           dcache_sw_addr;
-    logic                            dcache_wready;
+    logic                            dcache_wvalid;
     logic                            dcache_wresp_ready;
 
     logic imem_busy;
@@ -111,19 +111,19 @@ module CPU_tb;
         .imem_data         (imem_data),
         .imem_read_rdy     (imem_read_rdy),
         .imem_addr         (imem_addr),
-        .dcache_rvalid     (dcache_rvalid),
+        .dcache_rready     (dcache_rready),
         .dcache_rresp_valid(dcache_rresp_valid),
         .dcache_rdata      (dcache_rdata),
         .dcache_raddr      (dcache_raddr),
-        .dcache_rready     (dcache_rready),
+        .dcache_rvalid     (dcache_rvalid),
         .dcache_rresp_ready(dcache_rresp_ready),
-        .dcache_wvalid     (dcache_wvalid),
+        .dcache_wready     (dcache_wready),
         .dcache_wresp_valid(dcache_wresp_valid),
         .dcache_write      (dcache_write),
         .dcache_sw_data    (dcache_sw_data),
         .dcache_wstrb      (dcache_wstrb),
         .dcache_sw_addr    (dcache_sw_addr),
-        .dcache_wready     (dcache_wready),
+        .dcache_wvalid     (dcache_wvalid),
         .dcache_wresp_ready(dcache_wresp_ready)
     );
 
@@ -288,14 +288,14 @@ module CPU_tb;
     logic [REG_FILE_DATA_WIDTH-1:0] cdb_expected_data_by_rob [ROB_DEPTH];
 
     // Read path
-    assign dcache_rvalid = rst_n;
+    assign dcache_rready = rst_n;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             dcache_rresp_valid <= 1'b0;
             dcache_rdata       <= '0;
         end else begin
-            if (dcache_rready && dcache_rvalid) begin
+            if (dcache_rvalid && dcache_rready) begin
                 dcache_rresp_valid <= 1'b1;
                 dcache_rdata       <= dmem_array[dcache_raddr[DMEM_DEPTH-1:3]];
             end else if (dcache_rresp_valid && dcache_rresp_ready) begin
@@ -307,13 +307,13 @@ module CPU_tb;
     // Write path
     // Plain always is intentional: dmem_array is also initialized/preloaded by
     // testbench tasks, which is illegal for an always_ff-written variable.
-    assign dcache_wvalid = rst_n;
+    assign dcache_wready = rst_n;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             dcache_wresp_valid <= 1'b0;
         end else begin
-            if (dcache_wready && dcache_wvalid) begin
+            if (dcache_wvalid && dcache_wready) begin
                 for (int i = 0; i < W_BYTE_NUM; i++) begin
                     if (dcache_wstrb[i]) begin
                         dmem_array[dcache_sw_addr[DMEM_DEPTH-1:3]][i*8 +: 8] <= dcache_sw_data[i*8 +: 8];
@@ -528,7 +528,7 @@ module CPU_tb;
         $display("\n[Test %0d] Reset state verification", test_num);
         reset_dut();
         check_bit("imem_read_rdy after reset", imem_read_rdy, 1'b1);
-        check_bit("dcache_rready after reset", dcache_rready, 1'b0);
+        check_bit("dcache_rvalid after reset", dcache_rvalid, 1'b0);
         check_bit("no CDB valid", dut.cdb_valid, 1'b0);
 
         // ==============================================================

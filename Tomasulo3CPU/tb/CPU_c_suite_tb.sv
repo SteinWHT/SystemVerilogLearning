@@ -45,19 +45,19 @@ module CPU_c_suite_tb;
     logic [INSTR_WIDTH-1:0]  imem_data;
     logic                    imem_read_rdy;
     logic [IMEM_DEPTH-1:0]   imem_addr;
-    logic                            dcache_rvalid;
+    logic                            dcache_rready;
     logic                            dcache_rresp_valid;
     logic [REG_FILE_DATA_WIDTH-1:0]  dcache_rdata;
     logic [DMEM_DEPTH-1:0]           dcache_raddr;
-    logic                            dcache_rready;
+    logic                            dcache_rvalid;
     logic                            dcache_rresp_ready;
-    logic                            dcache_wvalid;
+    logic                            dcache_wready;
     logic                            dcache_wresp_valid;
     logic                            dcache_write;
     logic [DMEM_WIDTH-1:0]           dcache_sw_data;
     logic [W_BYTE_NUM-1:0]           dcache_wstrb;
     logic [DMEM_DEPTH-1:0]           dcache_sw_addr;
-    logic                            dcache_wready;
+    logic                            dcache_wvalid;
     logic                            dcache_wresp_ready;
 
     CPU #(
@@ -96,19 +96,19 @@ module CPU_c_suite_tb;
         .imem_data         (imem_data),
         .imem_read_rdy     (imem_read_rdy),
         .imem_addr         (imem_addr),
-        .dcache_rvalid     (dcache_rvalid),
+        .dcache_rready     (dcache_rready),
         .dcache_rresp_valid(dcache_rresp_valid),
         .dcache_rdata      (dcache_rdata),
         .dcache_raddr      (dcache_raddr),
-        .dcache_rready     (dcache_rready),
+        .dcache_rvalid     (dcache_rvalid),
         .dcache_rresp_ready(dcache_rresp_ready),
-        .dcache_wvalid     (dcache_wvalid),
+        .dcache_wready     (dcache_wready),
         .dcache_wresp_valid(dcache_wresp_valid),
         .dcache_write      (dcache_write),
         .dcache_sw_data    (dcache_sw_data),
         .dcache_wstrb      (dcache_wstrb),
         .dcache_sw_addr    (dcache_sw_addr),
-        .dcache_wready     (dcache_wready),
+        .dcache_wvalid     (dcache_wvalid),
         .dcache_wresp_ready(dcache_wresp_ready)
     );
 
@@ -134,14 +134,14 @@ module CPU_c_suite_tb;
         end
     end
 
-    assign dcache_rvalid = rst_n;
+    assign dcache_rready = rst_n;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             dcache_rresp_valid <= 1'b0;
             dcache_rdata       <= '0;
         end else begin
-            if (dcache_rready && dcache_rvalid) begin
+            if (dcache_rvalid && dcache_rready) begin
                 dcache_rresp_valid <= 1'b1;
                 dcache_rdata       <= dmem_array[dcache_raddr[15:3]];
             end else if (dcache_rresp_valid && dcache_rresp_ready) begin
@@ -150,13 +150,13 @@ module CPU_c_suite_tb;
         end
     end
 
-    assign dcache_wvalid = rst_n;
+    assign dcache_wready = rst_n;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             dcache_wresp_valid <= 1'b0;
         end else begin
-            if (dcache_wready && dcache_wvalid) begin
+            if (dcache_wvalid && dcache_wready) begin
                 logic [REG_FILE_DATA_WIDTH-1:0] temp_data;
                 temp_data = dmem_array[dcache_sw_addr[15:3]];
                 for (int i = 0; i < W_BYTE_NUM; i++) begin

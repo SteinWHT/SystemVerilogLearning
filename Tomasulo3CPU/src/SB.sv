@@ -20,13 +20,13 @@ module SB #(
     input logic [DMEM_WIDTH-1:0]        rt_sb_data,
 
     // D-CACHE interface
-    input logic                         dcache_valid,
+    input logic                         dcache_ready,
     input logic                         dcache_resp_valid,
 
     output logic [DMEM_DEPTH-1:0]       dcache_sw_addr,
     output logic [W_BYTE_NUM-1:0]       dcache_wstrb,
     output logic [DMEM_WIDTH-1:0]       dcache_sw_data,
-    output logic                        dcache_ready,
+    output logic                        dcache_valid,
     output logic                        dcache_resp_ready,
 
     // SAB interface
@@ -71,7 +71,7 @@ module SB #(
                 sb_entry_sw <= 1'b0;
             end
 
-            if (dcache_valid && !empty) begin
+            if (dcache_ready && !empty) begin
                 read_ptr_lead <= read_ptr_lead + 1;
             end
 
@@ -92,6 +92,6 @@ module SB #(
     assign dcache_sw_data = sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]].sw_data <<
                             {sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]].sw_addr[2:0], 3'b000};
     assign dcache_wstrb = sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]].sw_strb;
-    assign dcache_ready = !empty;
+    assign dcache_valid = !empty;
     assign dcache_resp_ready = (read_ptr_lead != read_ptr_trail);
 endmodule

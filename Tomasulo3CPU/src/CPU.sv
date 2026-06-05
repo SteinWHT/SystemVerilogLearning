@@ -54,23 +54,23 @@ module CPU #(
     output logic [IMEM_DEPTH-1:0]   imem_addr,
 
     // D-Cache read interface
-    input  logic                            dcache_rvalid,
+    input  logic                            dcache_rready,
     input  logic                            dcache_rresp_valid,
     input  logic [REG_FILE_DATA_WIDTH-1:0]  dcache_rdata,
 
     output logic [DMEM_DEPTH-1:0]           dcache_raddr,
-    output logic                            dcache_rready,
+    output logic                            dcache_rvalid,
     output logic                            dcache_rresp_ready,
 
     // D-Cache write interface
-    input  logic                            dcache_wvalid,
+    input  logic                            dcache_wready,
     input  logic                            dcache_wresp_valid,
 
     output logic                            dcache_write,
     output logic [DMEM_WIDTH-1:0]           dcache_sw_data,
     output logic [W_BYTE_NUM-1:0]           dcache_wstrb,
     output logic [DMEM_DEPTH-1:0]           dcache_sw_addr,
-    output logic                            dcache_wready,
+    output logic                            dcache_wvalid,
     output logic                            dcache_wresp_ready
 );
 
@@ -192,13 +192,13 @@ module CPU #(
         .imem_addr                       (imem_addr),
 
         // D-Cache write (SB → D-Cache)
-        .dcache_valid                    (dcache_wvalid),
+        .dcache_ready                    (dcache_wready),
         .dcache_resp_valid               (dcache_wresp_valid),
 
         .dcache_sw_addr                  (dcache_sw_addr),
         .dcache_sw_data                  (dcache_sw_data),
         .dcache_sw_strb                  (dcache_wstrb),
-        .dcache_ready                    (dcache_wready),
+        .dcache_valid                    (dcache_wvalid),
         .dcache_resp_ready               (dcache_wresp_ready),
 
         // Issue queue status from back-end
@@ -344,11 +344,11 @@ module CPU #(
         .sb_entry_sw_rob_tag             (sb_entry_sw_rob_tag),
 
         // D-Cache read
-        .dcache_valid                    (dcache_rvalid),
+        .dcache_ready                    (dcache_rready),
         .dcache_resp_valid               (dcache_rresp_valid),
         .dcache_rdata                    (dcache_rdata),
         .dcache_addr                     (dcache_raddr),
-        .dcache_ready                    (dcache_rready),
+        .dcache_valid                    (dcache_rvalid),
         .dcache_resp_ready               (dcache_rresp_ready),
 
         // Issue queue status to front-end

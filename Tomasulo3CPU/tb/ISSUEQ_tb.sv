@@ -113,7 +113,7 @@ import riscv_types_pkg::*;
     logic                          dcache_read_done;
     logic [DMEM_WIDTH-1:0]         dcache_rdata;
     logic                          dcache_req;
-    logic                          dcache_ready;
+    logic                          dcache_valid;
     logic [DMEM_DEPTH-1:0]         dcache_addr;
 
     logic issue_int;
@@ -133,8 +133,8 @@ import riscv_types_pkg::*;
     assign issue_div_en = issue_div;
     assign issue_mul_en = issue_mul;
 
-    assign dcache_read_done = dcache_ready;
-    assign dcache_read_busy = !dcache_ready;
+    assign dcache_read_done = dcache_valid;
+    assign dcache_read_busy = !dcache_valid;
 
     ISSUEQ #(
         .INSTR_WIDTH            (INSTR_WIDTH),
@@ -256,7 +256,7 @@ import riscv_types_pkg::*;
         .rst_n            (rst_n),
         .dcache_read_done (dcache_read_done),
         .dcache_data      (dcache_rdata),
-        .dcache_ready     (dcache_req),
+        .dcache_valid     (dcache_req),
         .dcache_addr      (dcache_addr),
         .iss_lsb_opcode   (iss_lsb_opcode),
         .iss_lsb_rob_tag  (iss_lsb_rob_tag),
@@ -354,7 +354,7 @@ import riscv_types_pkg::*;
         rob_commit_mem_write = 1'b0;
         iss_rs_data_lsq      = '0;
         dcache_rdata         = '0;
-        dcache_ready         = '0;
+        dcache_valid         = '0;
         cdb_valid            = '0;
         //issue_ld_buf         = 1'b0;
     endtask
@@ -656,7 +656,7 @@ import riscv_types_pkg::*;
         $display("\n[Test 7] LW: LSQ issues to LSB when iss_lsb_ready (no ISSUEUNIT grant)");
         reset_dut();
         dispatch_lw(5'd7, 7'd70, 7'd71, 16'h0100);
-        dcache_ready = 1'b1;
+        dcache_valid = 1'b1;
         repeat (24) begin
             if (iss_rs_phy_addr_ls == 7'd70)
                 iss_rs_data_lsq = 64'h0000_0000_0000_2000;
@@ -672,10 +672,10 @@ import riscv_types_pkg::*;
         if (!iss_lsb_rdy)
             $error("[FAIL] timeout: LSQ did not issue to LSB @ %0t", $time);
         @(posedge clk); #1;
-        dcache_ready = 1'b0;
+        dcache_valid = 1'b0;
         check_bit("D$ request after load enters LSB", dcache_req, 1'b1);
         @(posedge clk); #1;
-        dcache_ready = 1'b1;
+        dcache_valid = 1'b1;
         dcache_rdata     = 64'hCAFEBABE_DEADBEEF;
         @(posedge clk); #1;
         //dcache_read_done = 1'b0;

@@ -70,10 +70,10 @@ module CPU_BACK_END #(
     input logic                                 csr_wr_en,
 
     // D-cache
-    input logic                                 dcache_valid,
+    input logic                                 dcache_ready,
     input logic                                 dcache_resp_valid,
     input logic [DMEM_WIDTH-1:0]                dcache_rdata,
-    output logic                                dcache_ready,
+    output logic                                dcache_valid,
     output logic                                dcache_resp_ready,
     output logic [DMEM_DEPTH-1:0]               dcache_addr,
 
@@ -291,8 +291,8 @@ module CPU_BACK_END #(
         .iss_lsb_addr(iss_lsb_addr),
         .iss_lsb_phy_addr(iss_lsb_phy_addr),
         .iss_lsb_rdy(iss_lsb_rdy),
-        .dcache_valid(dcache_valid),
         .dcache_ready(dcache_ready),
+        .dcache_valid(dcache_valid),
         .dcache_addr(dcache_addr)
     );
 

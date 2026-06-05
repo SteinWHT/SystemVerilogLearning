@@ -58,9 +58,9 @@ import riscv_types_pkg::*;
     output logic                                lsq_ld_st_two_or_more_vacant,
 
     // D-Cache interface
-    input logic                                 dcache_valid,
+    input logic                                 dcache_ready,
 
-    output logic                                dcache_ready,
+    output logic                                dcache_valid,
     output logic [DMEM_DEPTH-1:0]               dcache_addr,
 
     // CDB interface
@@ -270,7 +270,7 @@ import riscv_types_pkg::*;
                     end
                     // 4. for lw: junior counter equals to the match number
                     // 5. for lw: dcache is not busy
-                    if (sel_valid && dcache_valid && junior_counter[i] == match_number[i]) begin
+                    if (sel_valid && dcache_ready && junior_counter[i] == match_number[i]) begin
                         sel_idx = i[LSQ_INDEX_WIDTH-1:0];
                         lw_valid = 1'b1;
                     end
@@ -317,7 +317,7 @@ import riscv_types_pkg::*;
     assign issue_lsq = iss_lsq_rdy & lsb_en;
     assign iss_lsq_rdy = sel_valid & ~cdb_flush;
 
-    assign dcache_ready = iss_lsq_rdy && is_load(q[sel_idx].opcode);
+    assign dcache_valid = iss_lsq_rdy && is_load(q[sel_idx].opcode) && q_ready[sel_idx];
     assign dcache_addr  = q[sel_idx].addr_offset;
 
     always_comb begin

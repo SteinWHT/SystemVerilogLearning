@@ -62,13 +62,13 @@ module CPU_FRONT_END
     output logic [IMEM_DEPTH-1:0]               imem_addr,
 
     // D-CACHE interface
-    input logic                                 dcache_valid,
+    input logic                                 dcache_ready,
     input logic                                 dcache_resp_valid,
 
     output logic [DMEM_DEPTH-1:0]               dcache_sw_addr,
     output logic [DMEM_WIDTH-1:0]               dcache_sw_data,
     output logic [W_BYTE_NUM-1:0]               dcache_sw_strb,
-    output logic                                dcache_ready,
+    output logic                                dcache_valid,
     output logic                                dcache_resp_ready,
 
     // back-end interface
@@ -626,9 +626,9 @@ module CPU_FRONT_END
 
         .rt_sb_data(rt_sb_data),
 
-        .dcache_valid(dcache_valid),
-        .dcache_resp_valid(dcache_resp_valid),
         .dcache_ready(dcache_ready),
+        .dcache_resp_valid(dcache_resp_valid),
+        .dcache_valid(dcache_valid),
         .dcache_resp_ready(dcache_resp_ready),
         .dcache_sw_addr(dcache_sw_addr),
         .dcache_sw_data(dcache_sw_data),

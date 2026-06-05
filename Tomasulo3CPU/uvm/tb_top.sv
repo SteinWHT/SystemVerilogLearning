@@ -103,19 +103,19 @@ module tb_top;
         .imem_data          (cpu_vif.imem_data),
         .imem_read_rdy      (cpu_vif.imem_read_rdy),
         .imem_addr          (cpu_vif.imem_addr),
-        .dcache_rvalid      (cpu_vif.dcache_rvalid),
+        .dcache_rready      (cpu_vif.dcache_rready),
         .dcache_rresp_valid (cpu_vif.dcache_rresp_valid),
         .dcache_rdata       (cpu_vif.dcache_rdata),
         .dcache_raddr       (cpu_vif.dcache_raddr),
-        .dcache_rready      (cpu_vif.dcache_rready),
+        .dcache_rvalid      (cpu_vif.dcache_rvalid),
         .dcache_rresp_ready (cpu_vif.dcache_rresp_ready),
-        .dcache_wvalid      (cpu_vif.dcache_wvalid),
+        .dcache_wready      (cpu_vif.dcache_wready),
         .dcache_wresp_valid (cpu_vif.dcache_wresp_valid),
         .dcache_write       (cpu_vif.dcache_write),
         .dcache_sw_data     (cpu_vif.dcache_sw_data),
         .dcache_wstrb       (cpu_vif.dcache_wstrb),
         .dcache_sw_addr     (cpu_vif.dcache_sw_addr),
-        .dcache_wready      (cpu_vif.dcache_wready),
+        .dcache_wvalid      (cpu_vif.dcache_wvalid),
         .dcache_wresp_ready (cpu_vif.dcache_wresp_ready)
     );
 
@@ -141,14 +141,14 @@ module tb_top;
     // ----------------------------------------------------------------
     // D-cache model (1-cycle read / write)
     // ----------------------------------------------------------------
-    assign cpu_vif.dcache_rvalid = rst_n;
-    assign cpu_vif.dcache_wvalid = rst_n;
+    assign cpu_vif.dcache_rready = rst_n;
+    assign cpu_vif.dcache_wready = rst_n;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             cpu_vif.dcache_rresp_valid <= 1'b0;
             cpu_vif.dcache_rdata       <= '0;
-        end else if (cpu_vif.dcache_rready && cpu_vif.dcache_rvalid) begin
+        end else if (cpu_vif.dcache_rvalid && cpu_vif.dcache_rready) begin
             cpu_vif.dcache_rresp_valid <= 1'b1;
             cpu_vif.dcache_rdata       <= cpu_vif.dmem_array[cpu_vif.dcache_raddr[15:3]];
         end else if (cpu_vif.dcache_rresp_valid && cpu_vif.dcache_rresp_ready) begin
@@ -161,7 +161,7 @@ module tb_top;
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             cpu_vif.dcache_wresp_valid <= 1'b0;
-        end else if (cpu_vif.dcache_wready && cpu_vif.dcache_wvalid) begin
+        end else if (cpu_vif.dcache_wvalid && cpu_vif.dcache_wready) begin
             logic [REG_FILE_DATA_WIDTH-1:0] temp_data;
             temp_data = cpu_vif.dmem_array[cpu_vif.dcache_sw_addr[15:3]];
             for (int i = 0; i < W_BYTE_NUM; i++) begin
