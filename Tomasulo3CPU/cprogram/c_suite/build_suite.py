@@ -24,7 +24,14 @@ PROGRAMS = [
     "csr_trap",
     "wide_data",
     "deep_recursion",
+    "matrix_cache_stress",
+    "fibonacci_stress",
 ]
+
+STRESS_PROGRAMS = {
+    "matrix_cache_stress",
+    "fibonacci_stress",
+}
 
 
 def run_cmd(cmd: list[str], cwd: Path) -> int:
@@ -43,7 +50,8 @@ def build_one(test: str, clean: bool, bin_dir: Path | None) -> int:
     out = ROOT / "build" / test
     elf = out / f"{test}.elf"
     dump = out / f"{test}.dump"
-    link = ROOT / "common" / "link.ld"
+    link_name = "link_stress.ld" if test in STRESS_PROGRAMS else "link.ld"
+    link = ROOT / "common" / link_name
     start = ROOT / "common" / "start.S"
     runtime = ROOT / "common" / "runtime.c"
     main = td / "main.c"

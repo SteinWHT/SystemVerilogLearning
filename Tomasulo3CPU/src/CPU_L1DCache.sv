@@ -27,7 +27,7 @@ module CPU_L1DCache #(
     parameter int unsigned ROB_INDEX_WIDTH         = $clog2(ROB_DEPTH),
     parameter int unsigned SB_DEPTH                = 4,
     parameter int unsigned SB_INDEX_WIDTH          = $clog2(SB_DEPTH),
-    parameter int unsigned ISSUE_QUEUE_DEPTH       = 16,
+    parameter int unsigned ISSUE_QUEUE_DEPTH       = 8,
     parameter int unsigned LSB_DEPTH               = 4,
     parameter int unsigned DIV_CYCLES              = 64,
     parameter int unsigned MUL_CYCLES              = 4,

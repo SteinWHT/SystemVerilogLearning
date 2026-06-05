@@ -99,6 +99,8 @@ class cpu_baremetal_commit_coverage extends uvm_subscriber #(cpu_commit_tr);
             bins csr_trap        = {7};
             bins wide_data       = {8};
             bins deep_recursion  = {9};
+            bins matrix_cache_stress = {10};
+            bins fibonacci_stress    = {11};
             bins other           = default;
         }
 
@@ -118,7 +120,9 @@ class cpu_baremetal_commit_coverage extends uvm_subscriber #(cpu_commit_tr);
                  binsof(cp_program.strlen) || binsof(cp_program.strcmp) ||
                  binsof(cp_program.matrix_multiply) || binsof(cp_program.linked_list) ||
                  binsof(cp_program.recursion) || binsof(cp_program.wide_data) ||
-                 binsof(cp_program.deep_recursion))
+                 binsof(cp_program.deep_recursion) ||
+                 binsof(cp_program.matrix_cache_stress) ||
+                 binsof(cp_program.fibonacci_stress))
                 &&
                 (binsof(cp_commit_kind.csr) || binsof(cp_commit_kind.trap) ||
                  binsof(cp_commit_kind.mret));
@@ -148,6 +152,8 @@ class cpu_baremetal_commit_coverage extends uvm_subscriber #(cpu_commit_tr);
         if (name == "csr_trap")        return 7;
         if (name == "wide_data")       return 8;
         if (name == "deep_recursion")  return 9;
+        if (name == "matrix_cache_stress") return 10;
+        if (name == "fibonacci_stress")    return 11;
         return 99;
     endfunction
 
@@ -272,6 +278,8 @@ class cpu_spike_trace_coverage extends uvm_component;
             bins csr_trap        = {7};
             bins wide_data       = {8};
             bins deep_recursion  = {9};
+            bins matrix_cache_stress = {10};
+            bins fibonacci_stress    = {11};
             bins other           = default;
         }
 
@@ -294,7 +302,9 @@ class cpu_spike_trace_coverage extends uvm_component;
                  binsof(cp_program.strlen) || binsof(cp_program.strcmp) ||
                  binsof(cp_program.matrix_multiply) || binsof(cp_program.linked_list) ||
                  binsof(cp_program.recursion) || binsof(cp_program.wide_data) ||
-                 binsof(cp_program.deep_recursion))
+                 binsof(cp_program.deep_recursion) ||
+                 binsof(cp_program.matrix_cache_stress) ||
+                 binsof(cp_program.fibonacci_stress))
                 &&
                 binsof(cp_instr_class.system);
 

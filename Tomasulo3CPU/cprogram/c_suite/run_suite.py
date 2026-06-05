@@ -23,6 +23,8 @@ PROGRAMS = [
     "csr_trap",
     "wide_data",
     "deep_recursion",
+    "matrix_cache_stress",
+    "fibonacci_stress",
 ]
 
 SRC_FILES = [

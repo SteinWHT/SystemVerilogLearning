@@ -11,7 +11,7 @@ module CPU_BACK_END #(
     parameter int unsigned DMEM_DEPTH             = 32,
     parameter int unsigned ROB_DEPTH              = 16,
     parameter int unsigned ROB_INDEX_WIDTH        = $clog2(ROB_DEPTH),
-    parameter int unsigned ISSUE_QUEUE_DEPTH      = 16,
+    parameter int unsigned ISSUE_QUEUE_DEPTH      = 8,
     parameter int unsigned SB_DEPTH               = 4,
     parameter int unsigned LSB_DEPTH              = 4,
     parameter int unsigned BPB_PC_BITS            = 2,

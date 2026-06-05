@@ -28,7 +28,7 @@ COV_INPUTS ?= $(PROJ_DIR)/build/uvm_cov/*.vdb
 COV_MERGE_DIR ?= $(PROJ_DIR)/build/uvm_cov_merged.vdb
 COV_REPORT_DIR ?= $(PROJ_DIR)/build/uvm_cov_report
 # C-suite only — use uvm-cov-merge-baremetal after covergroup edits (avoids stale arch-test shapes)
-BAREMETAL_COV_TESTS := csr_trap deep_recursion linked_list matrix_multiply memcpy memset recursion strcmp strlen wide_data
+BAREMETAL_COV_TESTS := csr_trap deep_recursion fibonacci_stress linked_list matrix_cache_stress matrix_multiply memcpy memset recursion strcmp strlen wide_data
 BAREMETAL_COV_VDBS := $(foreach t,$(BAREMETAL_COV_TESTS),$(PROJ_DIR)/build/uvm_cov/uvm_$(t).vdb)
 URG_LICENSE ?= 27000@127.0.0.1
 SHIM_LIB = $(PROJ_DIR)/tools/libsnpsmalloc_shim/libsnpsmalloc_shim.so

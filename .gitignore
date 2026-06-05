@@ -75,6 +75,7 @@ INTERVIEW_GUIDE.md
 /Interview
 /Tomasulo3CPU/backup
 /Tomasulo3CPU/synth/WORK_ASAP7
+/Tomasulo3CPU/tb/dw_ip_stubs.sv
 *\work_lint
 *.do
 /Tomasulo3CPU/tools

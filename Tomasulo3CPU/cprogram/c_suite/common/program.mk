@@ -13,7 +13,8 @@ SIZE := riscv-none-elf-size
 
 CFLAGS := -march=$(ARCH) -mabi=$(ABI) -nostdlib -nostartfiles -ffreestanding \
           -fno-builtin -O1 -Wall -Wextra -Wno-unused-parameter
-LDFLAGS := -T $(COMMON_DIR)/link.ld -nostdlib
+LINKER ?= $(COMMON_DIR)/link.ld
+LDFLAGS := -T $(LINKER) -nostdlib
 
 PROGRAM ?= unknown
 BUILD_DIR := $(SUITE_ROOT)/build/$(PROGRAM)

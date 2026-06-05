@@ -28,7 +28,14 @@ PROGRAMS = [
     "csr_trap",
     "wide_data",
     "deep_recursion",
+    "matrix_cache_stress",
+    "fibonacci_stress",
 ]
+
+STRESS_PROGRAMS = {
+    "matrix_cache_stress",
+    "fibonacci_stress",
+}
 
 CLASS_UNKNOWN = 0
 CLASS_ALU = 1
@@ -157,14 +164,18 @@ def tool_path(bin_dir, prefix, name):
     return str(path)
 
 
-def write_linker_script(path, spike_base):
-    dmem_base = spike_base + 0x1000
+def write_linker_script(path, spike_base, test):
+    stress = test in STRESS_PROGRAMS
+    dmem_offset = 0x4000 if stress else 0x1000
+    imem_length = "16K" if stress else "4K"
+    dmem_length = "48K" if stress else "4K"
+    dmem_base = spike_base + dmem_offset
     text = f"""OUTPUT_ARCH(riscv)
 ENTRY(_start)
 
 MEMORY {{
-    IMEM (rx)  : ORIGIN = 0x{spike_base:016X}, LENGTH = 4K
-    DMEM (rwx) : ORIGIN = 0x{dmem_base:016X}, LENGTH = 4K
+    IMEM (rx)  : ORIGIN = 0x{spike_base:016X}, LENGTH = {imem_length}
+    DMEM (rwx) : ORIGIN = 0x{dmem_base:016X}, LENGTH = {dmem_length}
 }}
 
 SECTIONS {{
@@ -297,7 +308,7 @@ def build_program(test, bin_dir_arg, spike_base):
     start = out / "start_spike.S"
     elf = out / f"{test}.elf"
     dump = out / f"{test}.dump"
-    write_linker_script(link, spike_base)
+    write_linker_script(link, spike_base, test)
     write_start_file(start)
 
     cmd = [
@@ -551,7 +562,7 @@ def clean_current_coverage_db():
         print("[COV] removed stale {0}".format(src))
 
 
-def run_uvm(test, out, trace, dut_tohost, spike_tohost, spike_base, args):
+def run_uvm(test, out, trace, dut_tohost, spike_tohost, spike_base, args, max_cycles):
     plusargs = " ".join(
         [
             f"+BM_TEST={test}",
@@ -562,7 +573,7 @@ def run_uvm(test, out, trace, dut_tohost, spike_tohost, spike_base, args):
             f"+DUT_TOHOST_ADDR={dut_tohost:X}",
             f"+SPIKE_TOHOST_ADDR={spike_tohost:X}",
             f"+SPIKE_BASE={spike_base:X}",
-            f"+MAX_CYCLES={args.max_cycles}",
+            f"+MAX_CYCLES={max_cycles}",
             f"+RESET_HOLD_CYCLES={args.reset_hold_cycles}",
         ]
     )
@@ -630,14 +641,31 @@ def main():
 
     if args.sim_only:
         for test in targets:
+            max_cycles = args.max_cycles
+            if test in STRESS_PROGRAMS and max_cycles == 500000:
+                max_cycles = 3000000
             out, trace = require_generated_artifacts(test)
             spike_tohost, dut_tohost, spike_base = read_generated_meta(out)
-            run_uvm(test, out, trace, dut_tohost, spike_tohost, spike_base, args)
+            run_uvm(test, out, trace, dut_tohost, spike_tohost, spike_base, args, max_cycles)
         print(f"\n[DONE] ran {len(targets)} generated bare-metal UVM test(s)")
         return 0
 
     spike = resolve_spike(args.spike)
     for test in targets:
+        spike_mem_size = args.spike_mem_size
+        spike_instructions = args.spike_instructions
+        spike_timeout = args.spike_timeout
+        max_cycles = args.max_cycles
+        if test in STRESS_PROGRAMS:
+            if spike_mem_size == 0x4000:
+                spike_mem_size = 0x10000
+            if spike_instructions == 200000:
+                spike_instructions = 600000
+            if spike_timeout == 60:
+                spike_timeout = 180
+            if max_cycles == 500000:
+                max_cycles = 3000000
+
         if args.arch_test:
             test_dir = arch_test_build / test
             out = BUILD_ROOT / test
@@ -677,13 +705,16 @@ def main():
             out,
             spike,
             args.spike_base,
-            args.spike_mem_size,
+            spike_mem_size,
             spike_tohost,
-            args.spike_instructions,
-            args.spike_timeout,
+            spike_instructions,
+            spike_timeout,
         )
         if not args.no_sim:
-            run_uvm(test, out, trace, dut_tohost, spike_tohost, args.spike_base, args)
+            run_uvm(
+                test, out, trace, dut_tohost, spike_tohost,
+                args.spike_base, args, max_cycles
+            )
 
     print("\n[DONE] prepared {0} bare-metal Spike-golden test(s)".format(len(targets)))
 

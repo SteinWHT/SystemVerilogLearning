@@ -26,6 +26,7 @@ PROJECT = "CPU_dcache_c"
 PROGRAMS = [
     "memcpy", "memset", "strlen", "strcmp", "matrix_multiply",
     "linked_list", "recursion", "csr_trap", "wide_data", "deep_recursion",
+    "matrix_cache_stress", "fibonacci_stress",
 ]
 
 

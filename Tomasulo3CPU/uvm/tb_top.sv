@@ -26,7 +26,7 @@ module tb_top;
     localparam int unsigned NUM_CHECKPOINT          = 8;
     localparam int unsigned SB_DEPTH                = 4;
     localparam int unsigned SB_INDEX_WIDTH          = $clog2(SB_DEPTH);
-    localparam int unsigned ISSUE_QUEUE_DEPTH       = 16;
+    localparam int unsigned ISSUE_QUEUE_DEPTH       = 8;
     localparam int unsigned LSB_DEPTH               = 4;
     localparam int unsigned DIV_CYCLES              = 64;
     localparam int unsigned MUL_CYCLES              = 4;

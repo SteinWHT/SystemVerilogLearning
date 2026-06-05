@@ -12,6 +12,11 @@ This suite adds small bare-metal C programs for:
 - `csr_trap` (directed: machine-mode CSR R/M/W, `ebreak`/`ecall`/`mret` trap path)
 - `wide_data` (directed: full 64-bit operand toggling across ALU/MUL/DIV and load/store widths)
 - `deep_recursion` (directed: RAS / `sync_lifo` overflow + underflow via deep and mutual recursion)
+- `matrix_cache_stress` (matrix multiply plus a 24 KiB pressure region to force L1D capacity misses and dirty writebacks)
+- `fibonacci_stress` (256-level memoized Fibonacci with retained stack frames and a wide no-inline call graph)
+
+The two stress tests use `common/link_stress.ld`: 16 KiB IMEM and 48 KiB
+DMEM. The original tests retain the smaller 4 KiB + 4 KiB layout.
 
 Each program is self-checking and writes to `tohost`:
 
