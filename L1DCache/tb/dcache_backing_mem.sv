@@ -35,6 +35,9 @@ module dcache_backing_mem #(
         if (!rst_n) begin
             pending_q <= 1'b0;
             rdata_q   <= '0;
+            // Allow testbench preload while the CPU/cache are held in reset.
+            if (init_en)
+                mem[init_idx] <= init_data;
         end else begin
             pending_q <= 1'b0;
             if (init_en) begin

@@ -479,7 +479,10 @@ import riscv_types_pkg::*;
 
             ifq_wait_after_empty       <= 1'b1;
         end else begin
-            ifq_wait_after_empty        <= ifetch_empty;
+            if(stall && ifq_wait_after_empty) begin
+                ifq_wait_after_empty <= 1'b1;
+            end else
+                ifq_wait_after_empty        <= ifetch_empty;
             if (!stage1_valid) begin
                 // On flush, we need to invalidate the instruction in stage 2
                 stage2_valid                <= 1'b0;

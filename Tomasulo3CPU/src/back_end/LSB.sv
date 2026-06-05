@@ -83,9 +83,6 @@ import riscv_types_pkg::*;
     assign lsb_en = !lsb_full && !lw_slot_valid && !cdb_flush;
     assign ready_ld_buf  = !lsb_empty && !cdb_flush;
 
-    // D-Cache request: active while lw_slot awaits data
-    assign dcache_resp_ready = lw_slot_valid && !lw_slot_data_ready;
-
     // ----------------------------------------------------------------
     //  Flush compaction (combinational pre-computation)
     //  Keeps entries whose ROB depth <= cdb_rob_depth (older or same
@@ -183,6 +180,7 @@ import riscv_types_pkg::*;
             read_ptr           <= '0;
             lw_slot_valid      <= 1'b0;
             lw_slot_data_ready <= 1'b0;
+            dcache_resp_ready  <= 1'b0;
             lw_slot            <= '0;
             lsb_ready          <= 1'b0;
             lsb_rob_tag        <= '0;
@@ -199,9 +197,18 @@ import riscv_types_pkg::*;
                 lsb_array[i] <= flush_compact[i];
             write_ptr <= read_ptr + flush_keep_count;
 
+            // Drain the cache read response if it lands during the flush. Done
+            // independently of flush_lw_slot so a flushed load whose read is
+            // still in flight acks the held response instead of deadlocking the
+            // cache (which holds rresp asserted until rresp_ready).
+            if (dcache_resp_valid && dcache_resp_ready)
+                dcache_resp_ready <= 1'b0;
+
             if (flush_lw_slot) begin
                 lw_slot_valid      <= 1'b0;
                 lw_slot_data_ready <= 1'b0;
+                // dcache_resp_ready is intentionally NOT cleared here: the read
+                // is still outstanding and must be drained (handled above).
             end else if (dcache_resp_valid && lw_slot_valid && !lw_slot_data_ready) begin
                 lw_slot.data       <= load_data_aligned;
                 lw_slot_data_ready <= 1'b1;
@@ -209,6 +216,11 @@ import riscv_types_pkg::*;
             lsb_ready <= 1'b0;
 
         end else begin
+            // Drain the cache read response: normal consume, buffer-full park,
+            // or a response whose load was flushed while its read was in flight.
+            if (dcache_resp_valid && dcache_resp_ready)
+                dcache_resp_ready <= 1'b0;
+
             // D-Cache read response
             if (dcache_resp_valid && lw_slot_valid && !lw_slot_data_ready) begin
                 if (!lsb_full) begin
@@ -252,6 +264,7 @@ import riscv_types_pkg::*;
                     lw_slot_opcode     <= iss_lsb_opcode;
                     lw_slot_valid      <= 1'b1;
                     lw_slot_data_ready <= 1'b0;
+                    dcache_resp_ready  <= 1'b1;
                 end else begin
                     lsb_array[write_ptr[LSB_INDEX_WIDTH-1:0]] <= '{
                         rob_tag:  iss_lsb_rob_tag,
@@ -292,8 +305,6 @@ import riscv_types_pkg::*;
         if (rst_n) begin
             LSB_BUFFER_OVERFLOW: assert (entry_count <= LSB_DEPTH)
                 else $error("LSB: buffer overflow, entry_count = %0d", entry_count);
-            LSB_DCACHE_LATENCY: assert (!(!lw_slot_valid && dcache_resp_ready))
-                else $error("LSB: DCACHE is expected to have at least one cycle latency");
         end
     end
     // synthesis translate_on

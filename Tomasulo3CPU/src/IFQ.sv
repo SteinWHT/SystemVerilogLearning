@@ -18,12 +18,15 @@ module IFQ #(
     input  logic                        clk,
     input  logic                        rst_n,
 
-    // I-CACHE interface
-    input  logic [IMEM_WIDTH-1:0]       imem_data,
-    input  logic                        imem_valid,
-
+    // I-CACHE interface (valid/ready handshake)
+    // Request channel: IFQ -> I-CACHE
     output logic [IMEM_DEPTH-1:0]       imem_addr,
-    output logic                        imem_read_rdy,
+    output logic                        imem_req_valid,
+
+    // Response channel: I-CACHE -> IFQ
+    input  logic [IMEM_WIDTH-1:0]       imem_resp_data,
+    input  logic                        imem_resp_valid,
+    output logic                        imem_resp_ready,
 
     // DISPATCH interface
     input  logic                        dis_ren,
@@ -58,6 +61,11 @@ module IFQ #(
 
     logic full, empty, flush;
 
+    // Response handshake fires when the I-CACHE presents valid data and the
+    // IFQ has room to accept it. Using an explicit ready avoids silently
+    // dropping an in-flight response when the queue becomes full.
+    logic imem_resp_fire;
+
     logic [IMEM_DEPTH-1:0] pc;
     logic [IMEM_DEPTH-1:0] pc_plus4;
     logic [IMEM_DEPTH-1:0] imem_pc;
@@ -76,6 +84,8 @@ module IFQ #(
     assign full  = |(wr_target_mask & full_array);
     assign empty = empty_array[rd_way];
 
+    assign imem_resp_fire = imem_resp_valid && imem_resp_ready;
+
     // Compute per-FIFO write enables and data routing
     always_comb begin
         write_en_array = '0;
@@ -85,8 +95,8 @@ module IFQ #(
         for (int i = 0; i < OneTimeInstrNum; i++) begin
             automatic logic [NumWaysWidth-1:0] target;
             target = wr_way + NumWaysWidth'(i);
-            write_en_array[target] = imem_valid && !full && !dis_jmpbr;
-            data_in_array[target]  = imem_data[i * INSTR_WIDTH +: INSTR_WIDTH];
+            write_en_array[target] = imem_resp_fire;
+            data_in_array[target]  = imem_resp_data[i * INSTR_WIDTH +: INSTR_WIDTH];
         end
 
         read_en_array[rd_way] = dis_ren && !empty && !dis_jmpbr;
@@ -128,7 +138,7 @@ module IFQ #(
                     pc      <= {dis_jmpbr_addr, 1'b0};
                 end
             end else begin
-                if (imem_valid && !full) begin
+                if (imem_resp_fire) begin
                     wr_way  <= wr_way + NumWaysWidth'(OneTimeInstrNum);
                     imem_pc <= imem_pc + IMEM_DEPTH'(OneTimeInstrNum * (InstrBytes));
                 end
@@ -148,8 +158,11 @@ module IFQ #(
     // The pc here is one cycle before, we need to subtract 4 to get the correct PC for the current instruction
     assign ifq_pc        = pc - 4;
     assign ifq_pc_plus4  = pc;
-    assign imem_addr     = imem_pc;
-    assign imem_read_rdy = !full && !dis_jmpbr;
+    assign imem_addr       = imem_pc;
+    // Request a fetch whenever there is room and we are not flushing.
+    assign imem_req_valid  = !full && !dis_jmpbr;
+    // Accept a response under the same condition (queue has room, no flush).
+    assign imem_resp_ready = !full && !dis_jmpbr;
 
     // synthesis translate_off
     initial begin

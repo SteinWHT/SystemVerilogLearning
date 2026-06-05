@@ -54,12 +54,13 @@ module CPU_FRONT_END
     input  logic clk,
     input  logic rst_n,
 
-    // I-CACHE interface
-    input  logic                                imem_valid,
-    input  logic [INSTR_WIDTH-1:0]              imem_data,
-
-    output logic                                imem_read_rdy,
+    // I-CACHE interface (valid/ready handshake)
     output logic [IMEM_DEPTH-1:0]               imem_addr,
+    output logic                                imem_req_valid,
+
+    input  logic [INSTR_WIDTH-1:0]              imem_resp_data,
+    input  logic                                imem_resp_valid,
+    output logic                                imem_resp_ready,
 
     // D-CACHE interface
     input logic                                 dcache_ready,
@@ -267,10 +268,11 @@ module CPU_FRONT_END
         .clk(clk),
         .rst_n(rst_n),
 
-        .imem_data(imem_data),
-        .imem_valid(imem_valid),
         .imem_addr(imem_addr),
-        .imem_read_rdy(imem_read_rdy),
+        .imem_req_valid(imem_req_valid),
+        .imem_resp_data(imem_resp_data),
+        .imem_resp_valid(imem_resp_valid),
+        .imem_resp_ready(imem_resp_ready),
 
         .dis_ren(dis_ren),
         .dis_jmpbr(dis_jmpbr),

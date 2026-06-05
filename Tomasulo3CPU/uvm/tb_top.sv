@@ -99,9 +99,10 @@ module tb_top;
     ) dut (
         .clk                (clk),
         .rst_n              (rst_n),
-        .imem_valid         (cpu_vif.imem_valid),
-        .imem_data          (cpu_vif.imem_data),
-        .imem_read_rdy      (cpu_vif.imem_read_rdy),
+        .imem_resp_valid    (cpu_vif.imem_resp_valid),
+        .imem_resp_data     (cpu_vif.imem_resp_data),
+        .imem_resp_ready    (cpu_vif.imem_resp_ready),
+        .imem_req_valid     (cpu_vif.imem_req_valid),
         .imem_addr          (cpu_vif.imem_addr),
         .dcache_rready      (cpu_vif.dcache_rready),
         .dcache_rresp_valid (cpu_vif.dcache_rresp_valid),
@@ -124,16 +125,16 @@ module tb_top;
     // ----------------------------------------------------------------
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            cpu_vif.imem_valid <= 1'b1;
-            cpu_vif.imem_data  <= '0;
+            cpu_vif.imem_resp_valid <= 1'b1;
+            cpu_vif.imem_resp_data  <= '0;
         end else begin
-            if (cpu_vif.imem_read_rdy) begin
-                cpu_vif.imem_valid <= 1'b1;
+            if (cpu_vif.imem_req_valid) begin
+                cpu_vif.imem_resp_valid <= 1'b1;
             end else begin
-                cpu_vif.imem_valid <= 1'b0;
+                cpu_vif.imem_resp_valid <= 1'b0;
             end
-            if (cpu_vif.imem_read_rdy && cpu_vif.imem_valid) begin
-                cpu_vif.imem_data <= cpu_vif.imem_array[cpu_vif.imem_addr[15:2]];
+            if (cpu_vif.imem_req_valid && cpu_vif.imem_resp_valid) begin
+                cpu_vif.imem_resp_data <= cpu_vif.imem_array[cpu_vif.imem_addr[15:2]];
             end
         end
     end

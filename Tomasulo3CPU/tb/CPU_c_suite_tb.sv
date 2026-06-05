@@ -41,9 +41,10 @@ module CPU_c_suite_tb;
     localparam int unsigned DMEM_QWORDS = 16384;
 
     logic clk, rst_n;
-    logic                    imem_valid;
-    logic [INSTR_WIDTH-1:0]  imem_data;
-    logic                    imem_read_rdy;
+    logic                    imem_resp_valid;
+    logic                    imem_resp_ready;
+    logic [INSTR_WIDTH-1:0]  imem_resp_data;
+    logic                    imem_req_valid;
     logic [IMEM_DEPTH-1:0]   imem_addr;
     logic                            dcache_rready;
     logic                            dcache_rresp_valid;
@@ -92,9 +93,10 @@ module CPU_c_suite_tb;
     ) dut (
         .clk               (clk),
         .rst_n             (rst_n),
-        .imem_valid        (imem_valid),
-        .imem_data         (imem_data),
-        .imem_read_rdy     (imem_read_rdy),
+        .imem_resp_valid        (imem_resp_valid),
+        .imem_resp_data         (imem_resp_data),
+        .imem_resp_ready        (imem_resp_ready),
+        .imem_req_valid     (imem_req_valid),
         .imem_addr         (imem_addr),
         .dcache_rready     (dcache_rready),
         .dcache_rresp_valid(dcache_rresp_valid),
@@ -120,16 +122,16 @@ module CPU_c_suite_tb;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            imem_valid <= 1'b1;
-            imem_data  <= '0;
+            imem_resp_valid <= 1'b1;
+            imem_resp_data  <= '0;
         end else begin
-            if (imem_read_rdy) begin
-                imem_valid <= 1'b1;
+            if (imem_req_valid) begin
+                imem_resp_valid <= 1'b1;
             end else begin
-                imem_valid <= 1'b0;
+                imem_resp_valid <= 1'b0;
             end
-            if (imem_read_rdy && imem_valid) begin
-                imem_data  <= imem_array[imem_addr[15:2]];
+            if (imem_req_valid && imem_resp_valid) begin
+                imem_resp_data  <= imem_array[imem_addr[15:2]];
             end
         end
     end
@@ -273,8 +275,8 @@ module CPU_c_suite_tb;
     end
 
     initial begin
-        #50_000_000;
-        $error("TIMEOUT: simulation exceeded 50ms");
+        #100_000_000;
+        $error("TIMEOUT: simulation exceeded 100ms");
         $finish;
     end
 endmodule

@@ -78,3 +78,5 @@ INTERVIEW_GUIDE.md
 *\work_lint
 *.do
 /Tomasulo3CPU/tools
+*.fsdb
+*ucli.key

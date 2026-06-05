@@ -112,6 +112,31 @@ SRC_FILES := \
 	$(SRC_DIR)/CSR.sv \
 	$(SRC_DIR)/CPU.sv \
 
+# ---- L1 D-cache (sibling L1DCache project) ----
+# Enable with USE_DCACHE=1 (auto-enabled for PROJECT=CPU_dcache_c).  The cache
+# replaces the inline behavioural dmem in the data-memory testbench.
+L1DCACHE_DIR ?= $(PROJ_DIR)/../L1DCache
+DCACHE_FILES := \
+	$(L1DCACHE_DIR)/rtl/dcache_pkg.sv \
+	$(L1DCACHE_DIR)/rtl/dcache_if.sv \
+	$(L1DCACHE_DIR)/rtl/dcache_plru.sv \
+	$(L1DCACHE_DIR)/rtl/dcache_tag_ram.sv \
+	$(L1DCACHE_DIR)/rtl/dcache_data_ram.sv \
+	$(L1DCACHE_DIR)/rtl/dcache_mshr.sv \
+	$(L1DCACHE_DIR)/rtl/dcache_refill.sv \
+	$(L1DCACHE_DIR)/rtl/dcache_core.sv \
+	$(L1DCACHE_DIR)/rtl/dcache_top.sv \
+	$(L1DCACHE_DIR)/tb/dcache_backing_mem.sv \
+	$(L1DCACHE_DIR)/integration/dcache_tomasulo_wrap.sv
+
+USE_DCACHE ?= 0
+ifeq ($(PROJECT),CPU_dcache_c)
+USE_DCACHE := 1
+endif
+ifeq ($(USE_DCACHE),1)
+SRC_FILES += $(DCACHE_FILES)
+endif
+
 # DW IP behavioral stubs for simulators without Synopsys DesignWare
 DW_STUB_FILE := $(TB_DIR)/dw_ip_stubs.sv
 

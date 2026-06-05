@@ -40,9 +40,10 @@ module CPU_FRONT_END_tb;
     logic clk, rst_n;
 
     // I-CACHE interface
-    logic                    imem_valid;
-    logic [INSTR_WIDTH-1:0]  imem_data;
-    logic                    imem_read_rdy;
+    logic                    imem_resp_valid;
+    logic                    imem_resp_ready;
+    logic [INSTR_WIDTH-1:0]  imem_resp_data;
+    logic                    imem_req_valid;
     logic [IMEM_DEPTH-1:0]   imem_addr;
 
     // D-CACHE interface
@@ -219,14 +220,14 @@ module CPU_FRONT_END_tb;
     // 1-cycle latency I-cache model
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            imem_valid <= 1'b0;
-            imem_data  <= '0;
+            imem_resp_valid <= 1'b0;
+            imem_resp_data  <= '0;
         end else begin
-            if (imem_read_rdy) begin
-                imem_valid <= 1'b1;
-                imem_data  <= imem_array[imem_addr[IMEM_DEPTH-1:2]];
+            if (imem_req_valid) begin
+                imem_resp_valid <= 1'b1;
+                imem_resp_data  <= imem_array[imem_addr[IMEM_DEPTH-1:2]];
             end else begin
-                imem_valid <= 1'b0;
+                imem_resp_valid <= 1'b0;
             end
         end
     end
@@ -235,8 +236,8 @@ module CPU_FRONT_END_tb;
     // Helper tasks
     // ----------------------------------------------------------------
     task automatic clear_all_inputs();
-        //imem_valid              = 1'b0;
-        //imem_data               = '0;
+        //imem_resp_valid              = 1'b0;
+        //imem_resp_data               = '0;
         dcache_ready            = 1'b0;
         dcache_write_done       = 1'b0;
         issue_intq_full         = 1'b0;
@@ -372,7 +373,7 @@ module CPU_FRONT_END_tb;
         check_bit("dis_div_issue_en after reset", dis_div_issue_en, 1'b0);
         check_bit("dis_mul_issue_en after reset", dis_mul_issue_en, 1'b0);
         check_bit("dis_ld_st_issue_en after reset", dis_ld_st_issue_en, 1'b0);
-        check_bit("imem_read_rdy after reset", imem_read_rdy, 1'b1);
+        check_bit("imem_req_valid after reset", imem_req_valid, 1'b1);
 
         // ==============================================================
         // Test 2: Single ADD instruction end-to-end

@@ -134,12 +134,19 @@ module dcache_core (
     assign stat_misses = misses_q;
 
     // ---------------------------------------------------------------- handshakes
-    assign accept_read  = rvalid && rready;
-    assign accept_write = wvalid && wready && !rvalid;   // load priority
-
+    // Single port, load priority. The cache is free to accept a new access only
+    // in IDLE with no resolve/miss/response in flight.
     assign rready = (state_q == ST_IDLE) && !resolve_pending && !mshr_busy
                     && !rf_busy && !hold_rresp && !hold_wresp;
-    assign wready = rready;
+
+    // wready must reflect load priority: a store can only be accepted when the
+    // cache is free AND no load is competing this cycle. Tying wready=rready
+    // would assert ready for a store the cache silently drops whenever a load
+    // arrives at the same time (valid/ready violation).
+    assign wready = rready && !rvalid;
+
+    assign accept_read  = rvalid && rready;
+    assign accept_write = wvalid && wready;   // wready already encodes load priority
 
     assign rresp_valid = hold_rresp;
     assign rdata       = hold_rdata;

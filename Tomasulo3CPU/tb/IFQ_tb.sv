@@ -16,10 +16,11 @@ module IFQ_tb;
 
     logic                       clk;
     logic                       rst_n;
-    logic [IMEM_WIDTH-1:0]      imem_data;
-    logic                       imem_valid;
+    logic [IMEM_WIDTH-1:0]      imem_resp_data;
+    logic                       imem_resp_valid;
+    logic                       imem_resp_ready;
     logic [IMEM_DEPTH-1:0]      imem_addr;
-    logic                       imem_read_rdy;
+    logic                       imem_req_valid;
     logic                       dis_ren;
     logic                       dis_jmpbr;
     logic [IMEM_WIDTH_WORD-1:0] dis_jmpbr_addr;
@@ -58,8 +59,8 @@ module IFQ_tb;
     // ---- helper tasks ----
     task automatic reset_dut();
         rst_n            = 0;
-        imem_valid       = 0;
-        imem_data        = '0;
+        imem_resp_valid       = 0;
+        imem_resp_data        = '0;
         dis_ren          = 0;
         dis_jmpbr        = 0;
         dis_jmpbr_addr   = '0;
@@ -71,10 +72,10 @@ module IFQ_tb;
 
     // Feed one instruction (drives for exactly 1 cycle)
     task automatic feed_one(logic [INSTR_WIDTH-1:0] instr);
-        imem_data  = instr;
-        imem_valid = 1;
+        imem_resp_data  = instr;
+        imem_resp_valid = 1;
         @(posedge clk); #1;
-        imem_valid = 0;
+        imem_resp_valid = 0;
     endtask
 
     // Read head instruction. IFQ/sync_fifo expose the current head before the read edge.
@@ -114,7 +115,7 @@ module IFQ_tb;
         reset_dut();
         check("empty after reset",     ifq_empty,  1);
         check("imem_addr after reset",  imem_addr,  '0);
-        check("imem_read_rdy after rst", imem_read_rdy, 1);
+        check("imem_req_valid after rst", imem_req_valid, 1);
 
         // ------------------------------------------------
         // Test 2 : Write 1 -> read 1
@@ -156,11 +157,11 @@ module IFQ_tb;
 
         // write 0x3333 while reading 0x1111
         check("head before simul", ifq_instr_out, 32'h1111_1111);
-        imem_data  = 32'h3333_3333;
-        imem_valid = 1;
+        imem_resp_data  = 32'h3333_3333;
+        imem_resp_valid = 1;
         dis_ren    = 1;
         @(posedge clk); #1;
-        imem_valid = 0;
+        imem_resp_valid = 0;
         dis_ren    = 0;
 
         check("head after simul",  ifq_instr_out, 32'h2222_2222);
@@ -178,13 +179,13 @@ module IFQ_tb;
         for (int i = 0; i < DEPTH; i++) feed_one(32'hB000_0000 + i);
 
         check("not empty when full", ifq_empty, 0);
-        check("read_rdy 0 when full", imem_read_rdy, 0);
+        check("read_rdy 0 when full", imem_req_valid, 0);
 
         // one more write should be ignored
-        imem_data  = 32'hBAD0_FACE;
-        imem_valid = 1;
+        imem_resp_data  = 32'hBAD0_FACE;
+        imem_resp_valid = 1;
         @(posedge clk); #1;
-        imem_valid = 0;
+        imem_resp_valid = 0;
 
         // drain and verify ordering
         for (int i = 0; i < DEPTH; i++) begin
@@ -232,12 +233,12 @@ module IFQ_tb;
         dis_jmpbr           = 1;
         dis_jmpbr_addr_valid = 0;
         dis_ren             = 1;
-        imem_data           = 32'hFFFF_FFFF;
-        imem_valid          = 1;
+        imem_resp_data           = 32'hFFFF_FFFF;
+        imem_resp_valid          = 1;
         @(posedge clk); #1;
         dis_jmpbr   = 0;
         dis_ren     = 0;
-        imem_valid  = 0;
+        imem_resp_valid  = 0;
 
         // queue should still hold original two entries
         check("stall: head unchanged", ifq_instr_out, 32'h0000_0001);

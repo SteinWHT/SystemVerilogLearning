@@ -13,9 +13,10 @@ interface cpu_if #(
 );
 
     // DUT-facing buses (driven/sampled by tb memory models)
-    logic                   imem_valid;
-    logic [IMEM_WIDTH-1:0]  imem_data;
-    logic                   imem_read_rdy;
+    logic                   imem_resp_valid;
+    logic                   imem_resp_ready;
+    logic [IMEM_WIDTH-1:0]  imem_resp_data;
+    logic                   imem_req_valid;
     logic [IMEM_DEPTH-1:0]  imem_addr;
 
     logic                   dcache_rready;
@@ -101,9 +102,10 @@ interface cpu_if #(
     modport dut_mp (
         input  clk,
         input  rst_n,
-        input  imem_valid,
-        input  imem_data,
-        output imem_read_rdy,
+        input  imem_resp_valid,
+        input  imem_resp_data,
+        output imem_resp_ready,
+        output imem_req_valid,
         output imem_addr,
         input  dcache_rready,
         input  dcache_rresp_valid,
