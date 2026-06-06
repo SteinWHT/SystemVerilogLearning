@@ -7,7 +7,7 @@
 #   make sim PROJECT=axi_sys
 #   make clean
 #
-# Simulator priority: vlog/vsim (Questa) > vcs > iverilog
+# Simulator priority: vlog/vsim (Questa) > vcs > Verilator > iverilog
 
 SHELL := /bin/bash
 .SHELLFLAGS := -o pipefail -c
@@ -36,10 +36,18 @@ RTL_FULL := \
 	$(PROJ_DIR)/tb/axi_burst_master_bfm.sv \
 	$(PROJ_DIR)/sva/axi_assertions.sv
 
+RTL_DCACHE_AXI := \
+	$(PROJ_DIR)/../L1DCache/rtl/dcache_pkg.sv \
+	$(RTL_FULL) \
+	$(PROJ_DIR)/../L1DCache/integration/dcache_axi_master_bridge.sv
+
 LITE_PROJECTS := axi_lite_sram axi_lite_sys
 FULL_PROJECTS := axi_sram axi_sys
+DCACHE_AXI_PROJECTS := dcache_axi_bridge
 
-ifeq ($(filter $(PROJECT),$(FULL_PROJECTS)),$(PROJECT))
+ifeq ($(filter $(PROJECT),$(DCACHE_AXI_PROJECTS)),$(PROJECT))
+  RTL_COMMON := $(RTL_DCACHE_AXI)
+else ifeq ($(filter $(PROJECT),$(FULL_PROJECTS)),$(PROJECT))
   RTL_COMMON := $(RTL_FULL)
 else
   RTL_COMMON := $(RTL_LITE)
@@ -51,6 +59,7 @@ VCS_TIMESCALE := -timescale=1ns/1ps
 
 QUESTA := $(shell command -v vlog 2>/dev/null)
 VCS    := $(shell command -v vcs 2>/dev/null)
+VERILATOR := $(shell command -v verilator 2>/dev/null)
 IVERILOG := $(shell command -v iverilog 2>/dev/null)
 
 .PHONY: sim gui clean help
@@ -59,16 +68,26 @@ help:
 	@echo "Targets: sim, gui, clean"
 	@echo "Lite:  PROJECT=axi_lite_sram | axi_lite_sys"
 	@echo "Full:  PROJECT=axi_sram | axi_sys"
+	@echo "Integration: PROJECT=dcache_axi_bridge"
 
 sim: $(BUILD_DIR)
 ifeq ($(QUESTA),)
 ifeq ($(VCS),)
+ifeq ($(VERILATOR),)
 ifeq ($(IVERILOG),)
-	$(error No simulator found: install Questa (vlog/vsim), VCS, or iverilog)
+	$(error No simulator found: install Questa, VCS, Verilator, or iverilog)
 else
 	@echo "==> iverilog (limited SV; Questa/VCS recommended)"
 	cd $(BUILD_DIR) && iverilog -g2012 -o sim.vvp \
 		$(RTL_COMMON) $(TB_FILE) && vvp sim.vvp
+endif
+else
+	@echo "==> Verilator ($(PROJECT))"
+	verilator --binary --timing --assert -Wall -Wno-fatal \
+		-Wno-UNUSEDSIGNAL \
+		--top-module $(TOP_MODULE) --Mdir $(BUILD_DIR)/obj_dir \
+		$(TIMESCALE_FILE) $(RTL_COMMON) $(TB_FILE)
+	$(BUILD_DIR)/obj_dir/V$(TOP_MODULE)
 endif
 else
 	@echo "==> VCS"

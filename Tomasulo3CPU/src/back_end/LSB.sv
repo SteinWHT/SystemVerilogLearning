@@ -214,6 +214,7 @@ import riscv_types_pkg::*;
                 lw_slot_data_ready <= 1'b1;
             end
             lsb_ready <= 1'b0;
+            issue_ld_buf_reg <= 1'b0;
 
         end else begin
             // Drain the cache read response: normal consume, buffer-full park,

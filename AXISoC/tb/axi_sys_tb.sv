@@ -1,62 +1,62 @@
-// System test: 2 AXI4 masters, interconnect, burst SRAM.
-
-// `timescale: see tb/timescale.v
-
-import axi_pkg::*;
-
 module axi_sys_tb;
 
+    import axi_pkg::*;
+
+    localparam int unsigned ADDR_WIDTH = 32;
     localparam int unsigned DATA_WIDTH = 64;
-    localparam int unsigned SRAM_DEPTH   = 1024;
-    localparam int unsigned STRB_WIDTH   = DATA_WIDTH / 8;
+    localparam int unsigned ID_WIDTH   = 4;
+    localparam int unsigned SRAM_DEPTH = 2048;
 
     logic clk;
     logic rst_n;
 
-    axi_if #(.DATA_WIDTH(DATA_WIDTH)) m0_bus (clk, rst_n);
-    axi_if #(.DATA_WIDTH(DATA_WIDTH)) m1_bus (clk, rst_n);
+    axi_if #(.ADDR_WIDTH(ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH),
+             .ID_WIDTH(ID_WIDTH)) m0_bus (clk, rst_n);
+    axi_if #(.ADDR_WIDTH(ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH),
+             .ID_WIDTH(ID_WIDTH)) m1_bus (clk, rst_n);
 
     axi_full_soc_top #(
+        .ADDR_WIDTH (ADDR_WIDTH),
         .DATA_WIDTH (DATA_WIDTH),
+        .ID_WIDTH   (ID_WIDTH),
         .SRAM_DEPTH (SRAM_DEPTH)
     ) dut (
-        .clk   (clk),
-        .rst_n (rst_n),
-        .m0    (m0_bus),
-        .m1    (m1_bus)
+        .clk                (clk),
+        .rst_n              (rst_n),
+        .sram_init_en       (1'b0),
+        .sram_init_word_idx ('0),
+        .sram_init_data     ('0),
+        .m0                 (m0_bus),
+        .m1                 (m1_bus)
     );
 
-    axi_burst_master_bfm #(.DATA_WIDTH(DATA_WIDTH), .MAX_BEATS(32)) bfm0 (
+    axi_burst_master_bfm #(
+        .ADDR_WIDTH(ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH),
+        .ID_WIDTH(ID_WIDTH), .DEFAULT_ID(1)
+    ) bfm0 (
         .clk(clk), .rst_n(rst_n), .bus(m0_bus)
     );
-    axi_burst_master_bfm #(.DATA_WIDTH(DATA_WIDTH), .MAX_BEATS(32)) bfm1 (
+
+    axi_burst_master_bfm #(
+        .ADDR_WIDTH(ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH),
+        .ID_WIDTH(ID_WIDTH), .DEFAULT_ID(9)
+    ) bfm1 (
         .clk(clk), .rst_n(rst_n), .bus(m1_bus)
     );
 
-    logic [63:0] shadow [0:SRAM_DEPTH-1];
+    axi_assertions #(.ADDR_WIDTH(ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH),
+                     .ID_WIDTH(ID_WIDTH)) u_m0_assert (
+        .clk(clk), .rst_n(rst_n), .bus(m0_bus)
+    );
+    axi_assertions #(.ADDR_WIDTH(ADDR_WIDTH), .DATA_WIDTH(DATA_WIDTH),
+                     .ID_WIDTH(ID_WIDTH)) u_m1_assert (
+        .clk(clk), .rst_n(rst_n), .bus(m1_bus)
+    );
     int unsigned pass_cnt;
     int unsigned fail_cnt;
 
-    function automatic int unsigned addr_idx(input logic [63:0] addr);
-        return addr_to_idx(addr[31:0], DATA_WIDTH);
-    endfunction
-
-    task automatic shadow_write_burst(
-        input logic [63:0]            base_addr,
-        input logic [7:0]             len,
-        input axi_burst_e             burst,
-        input logic [63:0]            data[]
-    );
-        logic [63:0] cur;
-        cur = base_addr;
-        for (int i = 0; i <= int'(len); i++) begin
-            shadow[addr_idx(cur)] = data[i];
-            cur = burst_next_addr(cur[31:0], byte_lsb(DATA_WIDTH), 2'(burst));
-        end
-    endtask
-
-    task automatic check(input string name, input bit ok);
-        if (ok) begin
+    task automatic check(input string name, input bit passed);
+        if (passed) begin
             pass_cnt++;
             $display("[PASS] %s", name);
         end else begin
@@ -66,71 +66,92 @@ module axi_sys_tb;
     endtask
 
     initial begin
-        pass_cnt = 0;
-        fail_cnt = 0;
-        foreach (shadow[i]) shadow[i] = '0;
-        clk   = 1'b0;
-        rst_n = 1'b0;
+        clk = 1'b0;
         forever #5 clk = ~clk;
     end
 
     initial begin
-        logic [63:0] wr[];
-        logic [63:0] rd[];
-        bit          ok;
-        int unsigned i;
+        logic [DATA_WIDTH-1:0] wr0[];
+        logic [DATA_WIDTH-1:0] wr1[];
+        logic [DATA_WIDTH-1:0] rd0[];
+        logic [DATA_WIDTH-1:0] rd1[];
+        bit ok0;
+        bit ok1;
 
-        @(posedge clk);
+        pass_cnt = 0;
+        fail_cnt = 0;
+        rst_n    = 1'b0;
         repeat (4) @(posedge clk);
+        @(negedge clk);
         rst_n = 1'b1;
         bfm0.wait_reset_release();
         bfm1.wait_reset_release();
         bfm0.drive_idle();
         bfm1.drive_idle();
 
-        // Master 0 burst
-        wr = new[4];
-        for (i = 0; i < 4; i++)
-            wr[i] = 64'hC000 + i;
-        bfm0.write_burst(64'h000, 8'd3, AXI_BURST_INCR, wr, ok);
-        shadow_write_burst(64'h000, 8'd3, AXI_BURST_INCR, wr);
-        check("m0_burst_write", ok);
-
-        // Master 1 burst
-        wr = new[4];
-        for (i = 0; i < 4; i++)
-            wr[i] = 64'hD000 + i;
-        bfm1.write_burst(64'h080, 8'd3, AXI_BURST_INCR, wr, ok);
-        shadow_write_burst(64'h080, 8'd3, AXI_BURST_INCR, wr);
-        check("m1_burst_write", ok);
-
-        // Read back m0
-        bfm0.read_burst(64'h000, 8'd3, AXI_BURST_INCR, rd, ok);
-        ok = ok && (rd.size() == 4);
-        for (i = 0; i < 4; i++)
-            ok = ok && (rd[i] == shadow[addr_idx(64'h000 + i * 8)]);
-        check("m0_burst_read", ok);
-
-        // Read back m1
-        bfm1.read_burst(64'h080, 8'd3, AXI_BURST_INCR, rd, ok);
-        ok = ok && (rd.size() == 4);
-        for (i = 0; i < 4; i++)
-            ok = ok && (rd[i] == shadow[addr_idx(64'h080 + i * 8)]);
-        check("m1_burst_read", ok);
-
-        // Alternating single beats
-        for (i = 0; i < 10; i++) begin
-            wr = new[1];
-            wr[0] = 64'hE000 + i;
-            bfm0.write_burst(64'h200 + i * 8, 8'd0, AXI_BURST_INCR, wr, ok);
-            shadow[addr_idx(64'h200 + i * 8)] = wr[0];
-            wr[0] = 64'hF000 + i;
-            bfm1.write_burst(64'h400 + i * 8, 8'd0, AXI_BURST_INCR, wr, ok);
-            shadow[addr_idx(64'h400 + i * 8)] = wr[0];
+        wr0 = new[8];
+        wr1 = new[8];
+        foreach (wr0[i]) begin
+            wr0[i] = 64'h1000 + 64'(i);
+            wr1[i] = 64'h2000 + 64'(i);
         end
-        check("alt_single_beats", 1'b1);
+        fork
+            bfm0.write_burst(32'h0000, 8'd7, AXI_BURST_INCR, wr0, ok0);
+            bfm1.write_burst(32'h0100, 8'd7, AXI_BURST_INCR, wr1, ok1);
+        join
+        check("concurrent_master_writes", ok0 && ok1);
 
-        repeat (16) @(posedge clk);
+        fork
+            bfm0.read_burst(32'h0000, 8'd7, AXI_BURST_INCR, rd0, ok0);
+            bfm1.read_burst(32'h0100, 8'd7, AXI_BURST_INCR, rd1, ok1);
+        join
+        foreach (wr0[i]) begin
+            ok0 = ok0 && rd0[i] == wr0[i];
+            ok1 = ok1 && rd1[i] == wr1[i];
+        end
+        check("concurrent_master_reads_with_ids", ok0 && ok1);
+
+        wr0 = new[4];
+        foreach (wr0[i])
+            wr0[i] = 64'h3000 + 64'(i);
+        fork
+            bfm0.write_burst(32'h0200, 8'd3, AXI_BURST_INCR, wr0, ok0);
+            bfm0.read_burst(32'h0000, 8'd3, AXI_BURST_INCR, rd0, ok1);
+        join
+        foreach (rd0[i])
+            ok1 = ok1 && rd0[i] == (64'h1000 + 64'(i));
+        check("same_master_simultaneous_aw_ar", ok0 && ok1);
+
+        fork
+            begin
+                for (int i = 0; i < 16; i++) begin
+                    wr0 = new[1];
+                    wr0[0] = 64'h4000 + 64'(i);
+                    bfm0.write_burst(32'h0400 + 32'(i * 8), 8'd0,
+                                     AXI_BURST_INCR, wr0, ok0);
+                    if (!ok0)
+                        break;
+                end
+            end
+            begin
+                for (int i = 0; i < 16; i++) begin
+                    wr1 = new[1];
+                    wr1[0] = 64'h5000 + 64'(i);
+                    bfm1.write_burst(32'h0600 + 32'(i * 8), 8'd0,
+                                     AXI_BURST_INCR, wr1, ok1);
+                    if (!ok1)
+                        break;
+                end
+            end
+        join
+        check("round_robin_contention_no_starvation", ok0 && ok1);
+
+        bfm0.read_burst(32'h0478, 8'd0, AXI_BURST_INCR, rd0, ok0);
+        bfm1.read_burst(32'h0678, 8'd0, AXI_BURST_INCR, rd1, ok1);
+        check("contention_data_integrity",
+              ok0 && ok1 && rd0[0] == 64'h400f && rd1[0] == 64'h500f);
+
+        repeat (5) @(posedge clk);
         $display("SUMMARY pass=%0d fail=%0d", pass_cnt, fail_cnt);
         if (fail_cnt != 0)
             $fatal(1, "axi_sys_tb failed");

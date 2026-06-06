@@ -1,11 +1,4 @@
-// 2-master / 1-slave full AXI4 interconnect (round-robin, single-flight).
-
-import axi_pkg::*;
-
-module axi_xbar_2x1 #(
-    parameter int unsigned ADDR_WIDTH = AXI_ADDR_WIDTH,
-    parameter int unsigned DATA_WIDTH = AXI_DATA_WIDTH
-) (
+module axi_xbar_2x1 (
     input  logic clk,
     input  logic rst_n,
     axi_if.slave  s0,
@@ -13,114 +6,240 @@ module axi_xbar_2x1 #(
     axi_if.master m
 );
 
-    logic locked;
-    logic owner;
-    logic txn_write;
-    logic rr_ptr;
+    typedef enum logic [1:0] {
+        X_IDLE,
+        X_ADDR,
+        X_WRITE,
+        X_READ
+    } xbar_state_e;
 
-    logic s0_req;
-    logic s1_req;
-    logic pick_s0;
-    logic pick_s1;
-    logic grant_s0;
-    logic grant_s1;
+    xbar_state_e state;
+    logic        owner;
+    logic        txn_write;
+    logic        rr_owner;
+    logic        prefer_read;
+    logic        s0_req;
+    logic        s1_req;
+    logic        choose_owner;
+    logic        choose_write;
 
-    logic wr_active;
-    logic rd_active;
-    logic wr_done;
-    logic rd_done;
-
-    assign s0_req = s0.awvalid || s0.wvalid || s0.arvalid;
-    assign s1_req = s1.awvalid || s1.wvalid || s1.arvalid;
+    assign s0_req = s0.awvalid || s0.arvalid;
+    assign s1_req = s1.awvalid || s1.arvalid;
 
     always_comb begin
-        pick_s0 = 1'b0;
-        pick_s1 = 1'b0;
-        if (!locked) begin
-            if (s0_req && !s1_req)
-                pick_s0 = 1'b1;
-            else if (s1_req && !s0_req)
-                pick_s1 = 1'b1;
-            else if (s0_req && s1_req) begin
-                if (rr_ptr == 1'b0)
-                    pick_s0 = 1'b1;
-                else
-                    pick_s1 = 1'b1;
-            end
+        choose_owner = 1'b0;
+        if (s0_req && s1_req)
+            choose_owner = rr_owner;
+        else if (s1_req)
+            choose_owner = 1'b1;
+
+        if (!choose_owner) begin
+            if (s0.awvalid && s0.arvalid)
+                choose_write = !prefer_read;
+            else
+                choose_write = s0.awvalid;
+        end else begin
+            if (s1.awvalid && s1.arvalid)
+                choose_write = !prefer_read;
+            else
+                choose_write = s1.awvalid;
         end
     end
 
-    assign grant_s0 = locked ? !owner : pick_s0;
-    assign grant_s1 = locked ?  owner : pick_s1;
+    always_comb begin
+        m.awid     = '0;
+        m.awaddr   = '0;
+        m.awlen    = '0;
+        m.awsize   = '0;
+        m.awburst  = '0;
+        m.awlock   = 1'b0;
+        m.awcache  = '0;
+        m.awprot   = '0;
+        m.awqos    = '0;
+        m.awregion = '0;
+        m.awvalid  = 1'b0;
+        m.wdata    = '0;
+        m.wstrb    = '0;
+        m.wlast    = 1'b0;
+        m.wvalid   = 1'b0;
+        m.bready   = 1'b0;
+        m.arid     = '0;
+        m.araddr   = '0;
+        m.arlen    = '0;
+        m.arsize   = '0;
+        m.arburst  = '0;
+        m.arlock   = 1'b0;
+        m.arcache  = '0;
+        m.arprot   = '0;
+        m.arqos    = '0;
+        m.arregion = '0;
+        m.arvalid  = 1'b0;
+        m.rready   = 1'b0;
 
-    assign wr_active = locked && txn_write;
-    assign rd_active = locked && !txn_write;
-    assign wr_done   = wr_active && m.bvalid && m.bready;
-    assign rd_done   = rd_active && m.rvalid && m.rready && m.rlast;
+        s0.awready = 1'b0;
+        s0.wready  = 1'b0;
+        s0.bid      = m.bid;
+        s0.bresp    = m.bresp;
+        s0.bvalid   = 1'b0;
+        s0.arready  = 1'b0;
+        s0.rid      = m.rid;
+        s0.rdata    = m.rdata;
+        s0.rresp    = m.rresp;
+        s0.rlast    = m.rlast;
+        s0.rvalid   = 1'b0;
 
-    // AW
-    assign m.awaddr  = grant_s1 ? s1.awaddr  : s0.awaddr;
-    assign m.awlen   = grant_s1 ? s1.awlen   : s0.awlen;
-    assign m.awsize  = grant_s1 ? s1.awsize  : s0.awsize;
-    assign m.awburst = grant_s1 ? s1.awburst : s0.awburst;
-    assign m.awprot  = grant_s1 ? s1.awprot  : s0.awprot;
-    assign m.awvalid = (grant_s0 && s0.awvalid) || (grant_s1 && s1.awvalid);
+        s1.awready = 1'b0;
+        s1.wready  = 1'b0;
+        s1.bid      = m.bid;
+        s1.bresp    = m.bresp;
+        s1.bvalid   = 1'b0;
+        s1.arready  = 1'b0;
+        s1.rid      = m.rid;
+        s1.rdata    = m.rdata;
+        s1.rresp    = m.rresp;
+        s1.rlast    = m.rlast;
+        s1.rvalid   = 1'b0;
 
-    // W
-    assign m.wdata   = grant_s1 ? s1.wdata   : s0.wdata;
-    assign m.wstrb   = grant_s1 ? s1.wstrb   : s0.wstrb;
-    assign m.wlast   = grant_s1 ? s1.wlast   : s0.wlast;
-    assign m.wvalid  = (grant_s0 && s0.wvalid) || (grant_s1 && s1.wvalid);
+        if (rst_n) begin
+            case (state)
+                X_ADDR: begin
+                    if (txn_write) begin
+                        if (!owner) begin
+                            m.awid     = s0.awid;
+                            m.awaddr   = s0.awaddr;
+                            m.awlen    = s0.awlen;
+                            m.awsize   = s0.awsize;
+                            m.awburst  = s0.awburst;
+                            m.awlock   = s0.awlock;
+                            m.awcache  = s0.awcache;
+                            m.awprot   = s0.awprot;
+                            m.awqos    = s0.awqos;
+                            m.awregion = s0.awregion;
+                            m.awvalid  = s0.awvalid;
+                            s0.awready = m.awready;
+                        end else begin
+                            m.awid     = s1.awid;
+                            m.awaddr   = s1.awaddr;
+                            m.awlen    = s1.awlen;
+                            m.awsize   = s1.awsize;
+                            m.awburst  = s1.awburst;
+                            m.awlock   = s1.awlock;
+                            m.awcache  = s1.awcache;
+                            m.awprot   = s1.awprot;
+                            m.awqos    = s1.awqos;
+                            m.awregion = s1.awregion;
+                            m.awvalid  = s1.awvalid;
+                            s1.awready = m.awready;
+                        end
+                    end else begin
+                        if (!owner) begin
+                            m.arid     = s0.arid;
+                            m.araddr   = s0.araddr;
+                            m.arlen    = s0.arlen;
+                            m.arsize   = s0.arsize;
+                            m.arburst  = s0.arburst;
+                            m.arlock   = s0.arlock;
+                            m.arcache  = s0.arcache;
+                            m.arprot   = s0.arprot;
+                            m.arqos    = s0.arqos;
+                            m.arregion = s0.arregion;
+                            m.arvalid  = s0.arvalid;
+                            s0.arready = m.arready;
+                        end else begin
+                            m.arid     = s1.arid;
+                            m.araddr   = s1.araddr;
+                            m.arlen    = s1.arlen;
+                            m.arsize   = s1.arsize;
+                            m.arburst  = s1.arburst;
+                            m.arlock   = s1.arlock;
+                            m.arcache  = s1.arcache;
+                            m.arprot   = s1.arprot;
+                            m.arqos    = s1.arqos;
+                            m.arregion = s1.arregion;
+                            m.arvalid  = s1.arvalid;
+                            s1.arready = m.arready;
+                        end
+                    end
+                end
 
-    assign m.bready  = (grant_s0 && s0.bready) || (grant_s1 && s1.bready);
+                X_WRITE: begin
+                    if (!owner) begin
+                        m.wdata    = s0.wdata;
+                        m.wstrb    = s0.wstrb;
+                        m.wlast    = s0.wlast;
+                        m.wvalid   = s0.wvalid;
+                        s0.wready  = m.wready;
+                        s0.bvalid  = m.bvalid;
+                        m.bready   = s0.bready;
+                    end else begin
+                        m.wdata    = s1.wdata;
+                        m.wstrb    = s1.wstrb;
+                        m.wlast    = s1.wlast;
+                        m.wvalid   = s1.wvalid;
+                        s1.wready  = m.wready;
+                        s1.bvalid  = m.bvalid;
+                        m.bready   = s1.bready;
+                    end
+                end
 
-    // AR
-    assign m.araddr  = grant_s1 ? s1.araddr  : s0.araddr;
-    assign m.arlen   = grant_s1 ? s1.arlen   : s0.arlen;
-    assign m.arsize  = grant_s1 ? s1.arsize  : s0.arsize;
-    assign m.arburst = grant_s1 ? s1.arburst : s0.arburst;
-    assign m.arprot  = grant_s1 ? s1.arprot  : s0.arprot;
-    assign m.arvalid = (grant_s0 && s0.arvalid) || (grant_s1 && s1.arvalid);
+                X_READ: begin
+                    if (!owner) begin
+                        s0.rvalid = m.rvalid;
+                        m.rready  = s0.rready;
+                    end else begin
+                        s1.rvalid = m.rvalid;
+                        m.rready  = s1.rready;
+                    end
+                end
 
-    assign m.rready  = (grant_s0 && s0.rready) || (grant_s1 && s1.rready);
-
-    assign s0.awready = grant_s0 && m.awready;
-    assign s0.wready  = grant_s0 && m.wready;
-    assign s0.arready = grant_s0 && m.arready;
-    assign s1.awready = grant_s1 && m.awready;
-    assign s1.wready  = grant_s1 && m.wready;
-    assign s1.arready = grant_s1 && m.arready;
-
-    assign s0.bvalid = grant_s0 && m.bvalid;
-    assign s0.bresp  = m.bresp;
-    assign s1.bvalid = grant_s1 && m.bvalid;
-    assign s1.bresp  = m.bresp;
-
-    assign s0.rvalid = grant_s0 && m.rvalid;
-    assign s0.rdata  = m.rdata;
-    assign s0.rresp  = m.rresp;
-    assign s0.rlast  = m.rlast;
-    assign s1.rvalid = grant_s1 && m.rvalid;
-    assign s1.rdata  = m.rdata;
-    assign s1.rresp  = m.rresp;
-    assign s1.rlast  = m.rlast;
+                default: begin
+                end
+            endcase
+        end
+    end
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            locked    <= 1'b0;
-            owner     <= 1'b0;
-            txn_write <= 1'b0;
-            rr_ptr    <= 1'b0;
+            state       <= X_IDLE;
+            owner       <= 1'b0;
+            txn_write   <= 1'b0;
+            rr_owner    <= 1'b0;
+            prefer_read <= 1'b0;
         end else begin
-            if (wr_done || rd_done) begin
-                locked <= 1'b0;
-                rr_ptr <= owner;
-            end else if (!locked && (pick_s0 || pick_s1)) begin
-                locked    <= 1'b1;
-                owner     <= pick_s1;
-                txn_write <= (pick_s1 && (s1.awvalid || s1.wvalid)) ||
-                             (pick_s0 && (s0.awvalid || s0.wvalid));
-            end
+            case (state)
+                X_IDLE: begin
+                    if (s0_req || s1_req) begin
+                        owner     <= choose_owner;
+                        txn_write <= choose_write;
+                        state     <= X_ADDR;
+                    end
+                end
+
+                X_ADDR: begin
+                    if (txn_write && m.awvalid && m.awready)
+                        state <= X_WRITE;
+                    else if (!txn_write && m.arvalid && m.arready)
+                        state <= X_READ;
+                end
+
+                X_WRITE: begin
+                    if (m.bvalid && m.bready) begin
+                        rr_owner    <= ~owner;
+                        prefer_read <= 1'b1;
+                        state       <= X_IDLE;
+                    end
+                end
+
+                X_READ: begin
+                    if (m.rvalid && m.rready && m.rlast) begin
+                        rr_owner    <= ~owner;
+                        prefer_read <= 1'b0;
+                        state       <= X_IDLE;
+                    end
+                end
+
+                default: state <= X_IDLE;
+            endcase
         end
     end
 

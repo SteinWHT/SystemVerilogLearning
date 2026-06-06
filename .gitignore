@@ -68,7 +68,7 @@ INTERVIEW_GUIDE.md
 /Tomasulo3CPU/build
 /Tomasulo3CPU/build/questa_uvm_lint
 /Tomasulo3CPU/arch_test/build
-/obj_dir
+*obj_dir
 /Tomasulo3CPU/src/temp.sv
 /Tomasulo3CPU/teroshdl.project.windows.json
 

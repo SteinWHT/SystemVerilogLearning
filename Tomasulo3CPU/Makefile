@@ -129,8 +129,21 @@ DCACHE_FILES := \
 	$(L1DCACHE_DIR)/tb/dcache_backing_mem.sv \
 	$(L1DCACHE_DIR)/integration/dcache_tomasulo_wrap.sv
 
+# ---- Full AXI4 memory subsystem (sibling AXISoC project) ----
+AXISOC_DIR ?= $(PROJ_DIR)/../AXISoC
+AXI_FILES := \
+	$(AXISOC_DIR)/rtl/pkg/axi_pkg.sv \
+	$(AXISOC_DIR)/rtl/intf/axi_if.sv \
+	$(AXISOC_DIR)/rtl/slave/axi_sram.sv \
+	$(AXISOC_DIR)/rtl/interconnect/axi_xbar_2x1.sv \
+	$(AXISOC_DIR)/rtl/top/axi_full_soc_top.sv \
+	$(L1DCACHE_DIR)/integration/dcache_axi_master_bridge.sv
+
 USE_DCACHE ?= 0
 ifeq ($(PROJECT),CPU_dcache_c)
+USE_DCACHE := 1
+endif
+ifeq ($(PROJECT),CPU_dcache_axi)
 USE_DCACHE := 1
 endif
 ifeq ($(PROJECT),uvm)
@@ -138,6 +151,14 @@ USE_DCACHE := 1
 endif
 ifeq ($(USE_DCACHE),1)
 SRC_FILES += $(DCACHE_FILES) $(SRC_DIR)/CPU_L1DCache.sv
+endif
+
+USE_AXI ?= 0
+ifeq ($(PROJECT),CPU_dcache_axi)
+USE_AXI := 1
+endif
+ifeq ($(USE_AXI),1)
+SRC_FILES += $(AXI_FILES) $(SRC_DIR)/CPU_L1DCache_AXI.sv
 endif
 
 # DW IP behavioral stubs for simulators without Synopsys DesignWare

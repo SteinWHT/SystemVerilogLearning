@@ -1,16 +1,13 @@
-// Shared types and helpers for AXISoC (AXI4-Lite + full AXI4).
-
 package axi_pkg;
 
     localparam int unsigned AXI_ADDR_WIDTH  = 32;
     localparam int unsigned AXI_DATA_WIDTH  = 64;
-    localparam int unsigned AXI_STRB_WIDTH  = AXI_DATA_WIDTH / 8;
-    localparam int unsigned AXI_PROT_WIDTH  = 3;
+    localparam int unsigned AXI_ID_WIDTH    = 4;
     localparam int unsigned AXI_LEN_WIDTH   = 8;
     localparam int unsigned AXI_SIZE_WIDTH  = 3;
     localparam int unsigned AXI_BURST_WIDTH = 2;
 
-    localparam int unsigned AXI_PAGE_BYTES  = 4096;
+    typedef logic [63:0] axi_addr_max_t;
 
     typedef enum logic [1:0] {
         AXI_RESP_OKAY   = 2'b00,
@@ -25,127 +22,158 @@ package axi_pkg;
         AXI_BURST_WRAP  = 2'b10
     } axi_burst_e;
 
-    function automatic int unsigned byte_lsb(int unsigned data_width);
+    function automatic bit is_power_of_two(input int unsigned value);
+        return (value != 0) && ((value & (value - 1)) == 0);
+    endfunction
+
+    function automatic int unsigned byte_lsb(input int unsigned data_width);
         return $clog2(data_width / 8);
     endfunction
 
-    function automatic int unsigned bytes_per_beat(input logic [AXI_SIZE_WIDTH-1:0] axsize);
-        return (1 << axsize);
+    function automatic int unsigned bytes_per_beat(
+        input logic [AXI_SIZE_WIDTH-1:0] axsize
+    );
+        return 1 << axsize;
+    endfunction
+
+    function automatic int unsigned burst_beats(
+        input logic [AXI_LEN_WIDTH-1:0] axlen
+    );
+        return int'(axlen) + 1;
+    endfunction
+
+    function automatic bit wrap_len_legal(
+        input logic [AXI_LEN_WIDTH-1:0] axlen
+    );
+        int unsigned beats;
+        beats = burst_beats(axlen);
+        return (beats == 2) || (beats == 4) || (beats == 8) || (beats == 16);
     endfunction
 
     function automatic bit addr_aligned_to_size(
-        input logic [AXI_ADDR_WIDTH-1:0] addr,
-        input logic [AXI_SIZE_WIDTH-1:0] axsize
+        input axi_addr_max_t                    addr,
+        input logic [AXI_SIZE_WIDTH-1:0]        axsize
     );
-        logic [AXI_ADDR_WIDTH-1:0] mask;
-        int unsigned lsb;
-        lsb  = axsize;
-        mask = (logic'(64'h1) << lsb) - 1;
-        return ((addr & mask) == '0);
+        axi_addr_max_t mask;
+        mask = axi_addr_max_t'(bytes_per_beat(axsize));
+        mask = mask - 1;
+        return (addr & mask) == '0;
     endfunction
 
-    function automatic bit addr_aligned(
-        input logic [AXI_ADDR_WIDTH-1:0] addr,
-        input int unsigned               data_width
+    function automatic axi_addr_max_t burst_next_addr(
+        input axi_addr_max_t                    addr,
+        input logic [AXI_LEN_WIDTH-1:0]         axlen,
+        input logic [AXI_SIZE_WIDTH-1:0]        axsize,
+        input logic [AXI_BURST_WIDTH-1:0]       axburst
     );
-        return addr_aligned_to_size(addr, byte_lsb(data_width));
-    endfunction
+        axi_addr_max_t beat_bytes;
+        axi_addr_max_t wrap_bytes;
+        axi_addr_max_t wrap_base;
+        axi_addr_max_t next_addr;
 
-    function automatic bit addr_in_range(
-        input logic [AXI_ADDR_WIDTH-1:0] addr,
-        input int unsigned               data_width,
-        input int unsigned               sram_depth
-    );
-        int unsigned idx;
-        idx = addr_to_idx(addr, data_width);
-        return (idx < sram_depth);
-    endfunction
+        beat_bytes = axi_addr_max_t'(bytes_per_beat(axsize));
+        next_addr  = addr + beat_bytes;
 
-    function automatic int unsigned addr_to_idx(
-        input logic [AXI_ADDR_WIDTH-1:0] addr,
-        input int unsigned               data_width
-    );
-        return int'(addr >> byte_lsb(data_width));
-    endfunction
-
-    function automatic logic [AXI_ADDR_WIDTH-1:0] burst_next_addr(
-        input logic [AXI_ADDR_WIDTH-1:0]    addr,
-        input logic [AXI_SIZE_WIDTH-1:0]    axsize,
-        input logic [AXI_BURST_WIDTH-1:0]   axburst
-    );
-        if (axburst == 2'b01)
-            burst_next_addr = addr + (logic'(1) << axsize);
-        else
-            burst_next_addr = addr;
+        case (axburst)
+            AXI_BURST_FIXED: burst_next_addr = addr;
+            AXI_BURST_INCR:  burst_next_addr = next_addr;
+            AXI_BURST_WRAP: begin
+                wrap_bytes = axi_addr_max_t'(burst_beats(axlen) *
+                                             bytes_per_beat(axsize));
+                wrap_base  = (addr / wrap_bytes) * wrap_bytes;
+                if (next_addr >= (wrap_base + wrap_bytes))
+                    burst_next_addr = wrap_base;
+                else
+                    burst_next_addr = next_addr;
+            end
+            default: burst_next_addr = addr;
+        endcase
     endfunction
 
     function automatic bit burst_crosses_4k(
-        input logic [AXI_ADDR_WIDTH-1:0]    addr,
-        input logic [AXI_LEN_WIDTH-1:0]     axlen,
-        input logic [AXI_SIZE_WIDTH-1:0]    axsize,
-        input logic [AXI_BURST_WIDTH-1:0]   axburst
+        input axi_addr_max_t                    addr,
+        input logic [AXI_LEN_WIDTH-1:0]         axlen,
+        input logic [AXI_SIZE_WIDTH-1:0]        axsize,
+        input logic [AXI_BURST_WIDTH-1:0]       axburst
     );
-        logic [AXI_ADDR_WIDTH-1:0] end_addr;
-        logic [AXI_ADDR_WIDTH-1:0] cur;
-        int unsigned             num_beats;
-        int unsigned             num_bytes;
-        num_beats = int'(axlen) + 1;
-        num_bytes = num_beats * bytes_per_beat(axsize);
-        if (num_bytes == 0)
-            return 1'b0;
-        end_addr = addr + logic'(num_bytes - 1);
-        if ((addr >> 12) != (end_addr >> 12))
-            return 1'b1;
-        // Per-beat start address check (catches INCR crossing at 4KB boundary).
-        cur = addr;
-        for (int i = 0; i < num_beats; i++) begin
-            if ((cur >> 12) != (addr >> 12))
+        axi_addr_max_t cur;
+        axi_addr_max_t beat_end;
+        axi_addr_max_t page;
+        int unsigned beats;
+
+        cur   = addr;
+        page  = addr >> 12;
+        beats = burst_beats(axlen);
+        for (int i = 0; i < beats; i++) begin
+            beat_end = cur + axi_addr_max_t'(bytes_per_beat(axsize)) - 1;
+            if ((cur >> 12) != page || (beat_end >> 12) != page)
                 return 1'b1;
-            if (i != num_beats - 1)
-                cur = burst_next_addr(cur, axsize, axburst);
+            cur = burst_next_addr(cur, axlen, axsize, axburst);
         end
         return 1'b0;
     endfunction
 
     function automatic bit burst_addr_in_range(
-        input logic [AXI_ADDR_WIDTH-1:0]    addr,
-        input logic [AXI_LEN_WIDTH-1:0]     axlen,
-        input logic [AXI_SIZE_WIDTH-1:0]    axsize,
-        input logic [AXI_BURST_WIDTH-1:0]   axburst,
-        input int unsigned                  data_width,
-        input int unsigned                  sram_depth
+        input axi_addr_max_t                    addr,
+        input logic [AXI_LEN_WIDTH-1:0]         axlen,
+        input logic [AXI_SIZE_WIDTH-1:0]        axsize,
+        input logic [AXI_BURST_WIDTH-1:0]       axburst,
+        input int unsigned                      data_width,
+        input int unsigned                      sram_depth
     );
-        logic [AXI_ADDR_WIDTH-1:0] cur;
-        cur = addr;
-        for (int i = 0; i <= int'(axlen); i++) begin
-            if (!addr_in_range(cur, data_width, sram_depth))
+        axi_addr_max_t cur;
+        axi_addr_max_t beat_end;
+        axi_addr_max_t memory_bytes;
+        int unsigned beats;
+
+        cur          = addr;
+        beats        = burst_beats(axlen);
+        memory_bytes = axi_addr_max_t'(sram_depth) *
+                       (axi_addr_max_t'(data_width) / 8);
+        for (int i = 0; i < beats; i++) begin
+            beat_end = cur + axi_addr_max_t'(bytes_per_beat(axsize));
+            if (cur >= memory_bytes || beat_end > memory_bytes)
                 return 1'b0;
-            cur = burst_next_addr(cur, axsize, axburst);
+            cur = burst_next_addr(cur, axlen, axsize, axburst);
         end
         return 1'b1;
     endfunction
 
     function automatic axi_resp_e check_burst(
-        input logic [AXI_ADDR_WIDTH-1:0]    addr,
-        input logic [AXI_LEN_WIDTH-1:0]     axlen,
-        input logic [AXI_SIZE_WIDTH-1:0]    axsize,
-        input logic [AXI_BURST_WIDTH-1:0]   axburst,
-        input int unsigned                  data_width,
-        input int unsigned                  sram_depth
+        input axi_addr_max_t                    addr,
+        input logic [AXI_LEN_WIDTH-1:0]         axlen,
+        input logic [AXI_SIZE_WIDTH-1:0]        axsize,
+        input logic [AXI_BURST_WIDTH-1:0]       axburst,
+        input int unsigned                      data_width,
+        input int unsigned                      sram_depth
     );
-        if (axburst == 2'b10)
+        if (!is_power_of_two(data_width / 8))
             return AXI_RESP_SLVERR;
-        if (axburst != 2'b00 && axburst != 2'b01)
+        if (bytes_per_beat(axsize) > (data_width / 8))
             return AXI_RESP_SLVERR;
-        if (bytes_per_beat(axsize) != (data_width / 8))
+        if (axburst == 2'b11)
+            return AXI_RESP_SLVERR;
+        if (axburst == AXI_BURST_WRAP && !wrap_len_legal(axlen))
             return AXI_RESP_SLVERR;
         if (!addr_aligned_to_size(addr, axsize))
             return AXI_RESP_SLVERR;
         if (burst_crosses_4k(addr, axlen, axsize, axburst))
             return AXI_RESP_SLVERR;
-        if (!burst_addr_in_range(addr, axlen, axsize, axburst, data_width, sram_depth))
+        if (!burst_addr_in_range(addr, axlen, axsize, axburst,
+                                 data_width, sram_depth))
             return AXI_RESP_DECERR;
         return AXI_RESP_OKAY;
+    endfunction
+
+    function automatic axi_resp_e merge_resp(
+        input axi_resp_e current_resp,
+        input axi_resp_e new_resp
+    );
+        if (current_resp == AXI_RESP_DECERR || new_resp == AXI_RESP_DECERR)
+            return AXI_RESP_DECERR;
+        if (current_resp == AXI_RESP_SLVERR || new_resp == AXI_RESP_SLVERR)
+            return AXI_RESP_SLVERR;
+        return current_resp;
     endfunction
 
 endpackage
