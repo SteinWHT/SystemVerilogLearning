@@ -20,7 +20,9 @@ SHELL := /bin/bash
 
 PROJECT ?= IFQ
 UVM_TEST ?= cpu_int_alu_test
+UVM_DUT ?= legacy
 COV ?= 0
+COV_DUT ?= legacy
 # VCS -cm: group/covergroups are merged/reported by URG (-metric group), not at compile.
 COV_METRICS ?= line+cond+fsm+tgl+branch+assert
 COV_NAME ?= $(PROJECT)_$(UVM_TEST)
@@ -29,12 +31,12 @@ COV_MERGE_DIR ?= $(PROJ_DIR)/build/uvm_cov_merged.vdb
 COV_REPORT_DIR ?= $(PROJ_DIR)/build/uvm_cov_report
 # C-suite only — use uvm-cov-merge-baremetal after covergroup edits (avoids stale arch-test shapes)
 BAREMETAL_COV_TESTS := csr_trap deep_recursion fibonacci_stress linked_list matrix_cache_stress matrix_multiply memcpy memset recursion strcmp strlen wide_data
-BAREMETAL_COV_VDBS := $(foreach t,$(BAREMETAL_COV_TESTS),$(PROJ_DIR)/build/uvm_cov/uvm_$(t).vdb)
+BAREMETAL_COV_VDBS := $(foreach t,$(BAREMETAL_COV_TESTS),$(PROJ_DIR)/build/uvm_cov/uvm_$(COV_DUT)_$(t).vdb)
 URG_LICENSE ?= 27000@127.0.0.1
 SHIM_LIB = $(PROJ_DIR)/tools/libsnpsmalloc_shim/libsnpsmalloc_shim.so
 URG_ENV = SNPSLMD_LICENSE_FILE=$(URG_LICENSE) LM_LICENSE_FILE=$(URG_LICENSE) SYNOPSYS_LICENSE_FILE=$(URG_LICENSE) LD_LIBRARY_PATH= LD_PRELOAD=$(SHIM_LIB)
 URG_METRICS ?= line+cond+fsm+tgl+branch+assert+group
-# Sign-off: score tb_top / tb_top.dut in modlist.html — uvm_pkg and Verdi hooks are TB collateral.
+# Sign-off: score the selected UVM top/DUT in modlist.html; UVM package and Verdi hooks are TB collateral.
 URG_EXTRA ?=
 URG_OPTS := -full64 -metric $(URG_METRICS) $(URG_EXTRA)
 
@@ -44,6 +46,9 @@ SRC_DIR   := $(PROJ_DIR)/src
 TB_DIR    := $(PROJ_DIR)/tb
 UVM_DIR   := $(PROJ_DIR)/uvm
 BUILD_DIR := $(PROJ_DIR)/build/$(PROJECT)
+ifeq ($(PROJECT),uvm)
+BUILD_DIR := $(PROJ_DIR)/build/uvm_$(UVM_DUT)
+endif
 UVM_INC_DIRS := \
 	+incdir+$(UVM_DIR) \
 	+incdir+$(UVM_DIR)/agent \
@@ -71,6 +76,9 @@ DW_SIM_FILES := \
 # ---- derived names ----
 TOP_MODULE := $(PROJECT)_tb
 FSDB_FILE  := $(PROJECT).fsdb
+ifeq ($(PROJECT),uvm)
+FSDB_FILE := uvm_$(UVM_DUT).fsdb
+endif
 
 # ============================================================
 #  Manually add RTL source files here
@@ -157,6 +165,13 @@ USE_AXI ?= 0
 ifeq ($(PROJECT),CPU_dcache_axi)
 USE_AXI := 1
 endif
+ifeq ($(PROJECT),uvm)
+ifeq ($(UVM_DUT),axi)
+USE_AXI := 1
+else ifneq ($(UVM_DUT),legacy)
+$(error Unsupported UVM_DUT '$(UVM_DUT)'; use legacy or axi)
+endif
+endif
 ifeq ($(USE_AXI),1)
 SRC_FILES += $(AXI_FILES) $(SRC_DIR)/CPU_L1DCache_AXI.sv
 endif
@@ -165,13 +180,19 @@ endif
 DW_STUB_FILE := $(TB_DIR)/dw_ip_stubs.sv
 
 ifeq ($(PROJECT),uvm)
+ifeq ($(UVM_DUT),axi)
+TOP_MODULE := tb_top_axi
+UVM_TOP_FILE := $(UVM_DIR)/tb_top_axi.sv
+else
 TOP_MODULE := tb_top
+UVM_TOP_FILE := $(UVM_DIR)/tb_top.sv
+endif
 TB_FILES := \
 	$(UVM_DIR)/cpu_if.sv \
 	$(UVM_DIR)/cpu_commit_if.sv \
 	$(TB_DIR)/rob_commit_bind.sv \
 	$(UVM_DIR)/cpu_pkg.sv \
-	$(UVM_DIR)/tb_top.sv
+	$(UVM_TOP_FILE)
 else
 TB_FILES := \
 	$(TB_DIR)/$(PROJECT)_tb.sv
@@ -228,8 +249,8 @@ all: sim
 .PHONY: check
 check:
 ifeq ($(PROJECT),uvm)
-	@test -f "$(UVM_DIR)/tb_top.sv" || \
-		(echo "[ERROR] Missing UVM TB top: $(UVM_DIR)/tb_top.sv"; exit 1)
+	@test -f "$(UVM_TOP_FILE)" || \
+		(echo "[ERROR] Missing UVM TB top: $(UVM_TOP_FILE)"; exit 1)
 	@for file in $(TB_FILES); do \
 		test -f "$$file" || \
 			(echo "[ERROR] Missing UVM/TB file: $$file"; exit 1); \
@@ -300,7 +321,7 @@ gui: sim
 		$(VERDI_FILES) \
 		-top $(TOP_MODULE) &
 
-.PHONY: uvm uvm-compile uvm-gui
+.PHONY: uvm uvm-compile uvm-gui uvm-axi uvm-axi-compile uvm-axi-gui
 uvm:
 	$(MAKE) PROJECT=uvm sim
 
@@ -309,6 +330,15 @@ uvm-compile:
 
 uvm-gui:
 	$(MAKE) PROJECT=uvm gui
+
+uvm-axi:
+	$(MAKE) PROJECT=uvm UVM_DUT=axi sim
+
+uvm-axi-compile:
+	$(MAKE) PROJECT=uvm UVM_DUT=axi compile
+
+uvm-axi-gui:
+	$(MAKE) PROJECT=uvm UVM_DUT=axi gui
 
 $(SHIM_LIB): $(PROJ_DIR)/tools/libsnpsmalloc_shim/libsnpsmalloc_shim.c
 	@mkdir -p $(dir $@)

@@ -98,6 +98,19 @@ def run(cmd, cwd, capture=False, timeout=None):
     )
 
 
+def format_exception(exc):
+    if isinstance(exc, subprocess.CalledProcessError):
+        return "command exited with status {0}: {1}".format(
+            exc.returncode, " ".join(str(arg) for arg in exc.cmd)
+        )
+    if isinstance(exc, subprocess.TimeoutExpired):
+        return "command timed out after {0}s: {1}".format(
+            exc.timeout, " ".join(str(arg) for arg in exc.cmd)
+        )
+    text = str(exc).strip()
+    return text if text else exc.__class__.__name__
+
+
 def _which(name):
     found = shutil.which(name)
     return Path(found).resolve() if found else None
@@ -538,14 +551,129 @@ def require_generated_artifacts(test):
     return out, out / "spike_commit_trace.txt"
 
 
-def preserve_coverage_db(test):
-    src = PROJ / "build" / "uvm" / "simv.vdb"
-    dst = COV_ROOT / ("uvm_{0}.vdb".format(test))
+def uvm_build_dir(dut):
+    return PROJ / "build" / f"uvm_{dut}"
+
+
+def uvm_test_log_paths(out, dut):
+    log_dir = out / "logs"
+    return {
+        "sim": log_dir / f"uvm_{dut}_sim.log",
+        "screen": log_dir / f"uvm_{dut}_screen.log",
+        "compile": log_dir / f"uvm_{dut}_compile.log",
+    }
+
+
+def clear_current_uvm_logs(dut):
+    build_dir = uvm_build_dir(dut)
+    for name in ("sim.log", "sim_screen.log", "compile.log"):
+        path = build_dir / name
+        if path.is_file():
+            path.unlink()
+
+
+def preserve_uvm_logs(out, dut):
+    build_dir = uvm_build_dir(dut)
+    paths = uvm_test_log_paths(out, dut)
+    sources = {
+        "sim": build_dir / "sim.log",
+        "screen": build_dir / "sim_screen.log",
+        "compile": build_dir / "compile.log",
+    }
+    paths["sim"].parent.mkdir(parents=True, exist_ok=True)
+    for kind, source in sources.items():
+        destination = paths[kind]
+        if destination.exists():
+            destination.unlink()
+        if source.is_file():
+            shutil.copy2(str(source), str(destination))
+    return paths
+
+
+def best_uvm_log(out, dut):
+    paths = uvm_test_log_paths(out, dut)
+    for kind in ("sim", "screen", "compile"):
+        if paths[kind].is_file():
+            return paths[kind]
+    return None
+
+
+def analyze_uvm_log(path):
+    if not path.is_file():
+        return False, "simulator log was not produced"
+
+    text = path.read_text(encoding="utf-8", errors="replace")
+    severity_counts = {}
+    for severity, count in re.findall(r"UVM_(ERROR|FATAL)\s*:\s*(\d+)", text):
+        severity_counts[severity] = int(count)
+
+    detail_lines = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if (
+            "[FAIL]" in stripped
+            or ("UVM_ERROR" in stripped and not re.search(r"UVM_ERROR\s*:\s*\d+", stripped))
+            or ("UVM_FATAL" in stripped and not re.search(r"UVM_FATAL\s*:\s*\d+", stripped))
+        ):
+            if stripped not in detail_lines:
+                detail_lines.append(stripped)
+        if len(detail_lines) == 3:
+            break
+
+    error_count = severity_counts.get("ERROR", 0)
+    fatal_count = severity_counts.get("FATAL", 0)
+    if error_count or fatal_count or detail_lines:
+        reason = "UVM_ERROR={0} UVM_FATAL={1}".format(error_count, fatal_count)
+        if detail_lines:
+            reason += "; " + " | ".join(detail_lines)
+        return False, reason
+
+    if "UVM Report Summary" not in text:
+        return False, "UVM report summary missing; simulation may have terminated early"
+
+    return True, "UVM_ERROR=0 UVM_FATAL=0"
+
+
+def summarize_failure(exc, log):
+    reason = format_exception(exc)
+    if log is None or not log.is_file():
+        return reason
+
+    if log.name.endswith("_sim.log"):
+        passed, log_reason = analyze_uvm_log(log)
+        if not passed and log_reason not in reason:
+            return reason + "; " + log_reason
+        return reason
+
+    text = log.read_text(encoding="utf-8", errors="replace")
+    details = []
+    for line in reversed(text.splitlines()):
+        stripped = line.strip()
+        lowered = stripped.lower()
+        if (
+            "%error" in lowered
+            or "error-" in lowered
+            or "fatal" in lowered
+            or "error:" in lowered
+        ):
+            if stripped and stripped not in details:
+                details.append(stripped)
+        if len(details) == 3:
+            break
+    if details:
+        reason += "; " + " | ".join(reversed(details))
+    return reason
+
+
+def preserve_coverage_db(test, dut):
+    src = uvm_build_dir(dut) / "simv.vdb"
+    dst = COV_ROOT / ("uvm_{0}_{1}.vdb".format(dut, test))
 
     if not src.is_dir():
         raise RuntimeError(
             "Coverage was requested, but VCS did not create {0}. "
-            "Check that the run used COV=1 and that build/uvm/sim.log contains -cm options.".format(src)
+            "Check that the run used COV=1 and that the selected UVM build log "
+            "contains -cm options.".format(src)
         )
 
     COV_ROOT.mkdir(parents=True, exist_ok=True)
@@ -555,8 +683,8 @@ def preserve_coverage_db(test):
     print("[COV] saved {0}".format(dst))
 
 
-def clean_current_coverage_db():
-    src = PROJ / "build" / "uvm" / "simv.vdb"
+def clean_current_coverage_db(dut):
+    src = uvm_build_dir(dut) / "simv.vdb"
     if src.exists():
         shutil.rmtree(str(src))
         print("[COV] removed stale {0}".format(src))
@@ -581,16 +709,73 @@ def run_uvm(test, out, trace, dut_tohost, spike_tohost, spike_base, args, max_cy
         "make",
         "uvm",
         "USE_DW=1",
+        f"UVM_DUT={args.dut}",
         "UVM_TEST=cpu_baremetal_spike_test",
         f"COV={1 if args.coverage else 0}",
-        f"COV_NAME=uvm_{test}",
+        f"COV_NAME=uvm_{args.dut}_{test}",
         f"PLUSARGS={plusargs}",
     ]
+    clear_current_uvm_logs(args.dut)
     if args.coverage:
-        clean_current_coverage_db()
-    run(cmd, PROJ)
+        clean_current_coverage_db(args.dut)
+    try:
+        run(cmd, PROJ)
+    finally:
+        paths = preserve_uvm_logs(out, args.dut)
+
+    passed, reason = analyze_uvm_log(paths["sim"])
+    if not passed:
+        raise RuntimeError("{0}; see {1}".format(reason, paths["sim"]))
+
     if args.coverage:
-        preserve_coverage_db(test)
+        preserve_coverage_db(test, args.dut)
+    return paths
+
+
+def print_regression_summary(results, dut, no_sim):
+    passed = sum(1 for result in results if result["status"] == "PASS")
+    prepared = sum(1 for result in results if result["status"] == "PREPARED")
+    failed = sum(1 for result in results if result["status"] == "FAIL")
+    lines = [
+        "",
+        "=" * 78,
+        "Bare-metal regression summary: DUT={0}".format(dut),
+        "=" * 78,
+    ]
+
+    for result in results:
+        line = "[{0:8}] {1}".format(result["status"], result["test"])
+        if result.get("stage"):
+            line += " stage={0}".format(result["stage"])
+        lines.append(line)
+        if result.get("reason"):
+            lines.append("           {0}".format(result["reason"]))
+        if result.get("log"):
+            lines.append("           log: {0}".format(result["log"]))
+
+    lines.extend(
+        [
+            "-" * 78,
+            "Total={0} Passed={1} Prepared={2} Failed={3}".format(
+                len(results), passed, prepared, failed
+            ),
+        ]
+    )
+    if failed:
+        lines.append("Failed tests: {0}".format(
+            ", ".join(result["test"] for result in results if result["status"] == "FAIL")
+        ))
+    elif no_sim:
+        lines.append("All requested test artifacts were prepared successfully.")
+    else:
+        lines.append("All requested simulations passed.")
+
+    summary_path = BUILD_ROOT / "regression_summary_{0}.txt".format(dut)
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+    summary_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    lines.append("Summary file: {0}".format(summary_path))
+    print("\n".join(lines))
+    return failed
 
 
 def main():
@@ -602,8 +787,14 @@ def main():
     parser.add_argument("--spike-mem-size", type=lambda s: int(s, 0), default=0x4000)
     parser.add_argument("--spike-instructions", type=int, default=200000)
     parser.add_argument("--spike-timeout", type=int, default=60)
-    parser.add_argument("--max-cycles", type=int, default=500000)
+    parser.add_argument("--max-cycles", type=int, default=1000000)
     parser.add_argument("--reset-hold-cycles", type=int, default=20)
+    parser.add_argument(
+        "--dut",
+        choices=("legacy", "axi"),
+        default="legacy",
+        help="Select CPU_L1DCache (legacy) or CPU_L1DCache_AXI (axi)",
+    )
     parser.add_argument("--coverage", action="store_true", help="Pass COV=1 to VCS make flow")
     parser.add_argument(
         "--merge-cov",
@@ -613,6 +804,11 @@ def main():
     parser.add_argument("--no-sim", action="store_true", help="Only build images and Spike trace")
     parser.add_argument("--sim-only", action="store_true", help="Use existing generated artifacts and only launch VCS")
     parser.add_argument("--arch-test", action="store_true", help="Run on pre-built arch_test/build/ ELFs instead of C-suite")
+    parser.add_argument(
+        "--fail-fast",
+        action="store_true",
+        help="Stop after the first failed test instead of completing the regression",
+    )
     args = parser.parse_args()
 
     arch_test_build = PROJ / "arch_test" / "build"
@@ -639,19 +835,11 @@ def main():
     if args.no_sim and args.sim_only:
         raise SystemExit("--no-sim and --sim-only cannot be used together")
 
-    if args.sim_only:
-        for test in targets:
-            max_cycles = args.max_cycles
-            if test in STRESS_PROGRAMS and max_cycles == 500000:
-                max_cycles = 3000000
-            out, trace = require_generated_artifacts(test)
-            spike_tohost, dut_tohost, spike_base = read_generated_meta(out)
-            run_uvm(test, out, trace, dut_tohost, spike_tohost, spike_base, args, max_cycles)
-        print(f"\n[DONE] ran {len(targets)} generated bare-metal UVM test(s)")
-        return 0
-
-    spike = resolve_spike(args.spike)
+    results = []
+    spike = None if args.sim_only else resolve_spike(args.spike)
     for test in targets:
+        out = BUILD_ROOT / test
+        stage = "setup"
         spike_mem_size = args.spike_mem_size
         spike_instructions = args.spike_instructions
         spike_timeout = args.spike_timeout
@@ -663,67 +851,132 @@ def main():
                 spike_instructions = 600000
             if spike_timeout == 60:
                 spike_timeout = 180
-            if max_cycles == 500000:
+            if max_cycles == 1000000:
                 max_cycles = 3000000
 
-        if args.arch_test:
-            test_dir = arch_test_build / test
-            out = BUILD_ROOT / test
-            out.mkdir(parents=True, exist_ok=True)
-            
-            elf_files = list(test_dir.glob("*.elf"))
-            if not elf_files:
-                raise RuntimeError(f"No .elf found in {test_dir}")
-            src_elf = elf_files[0]
-            
-            shutil.copy2(src_elf, out / f"{test}.elf")
-            shutil.copy2(test_dir / "imem.hex", out / "imem.hex")
-            shutil.copy2(test_dir / "dmem.hex", out / "dmem.hex")
-            
-            meta_text = (test_dir / "meta.txt").read_text(encoding="utf-8")
-            m = re.search(r"TOHOST_ADDR=0x([0-9a-fA-F]+)", meta_text)
-            if not m:
-                raise RuntimeError(f"Bad meta.txt in {test_dir}")
-            spike_tohost = int(m.group(1), 16)
-            dut_tohost = spike_tohost - args.spike_base
-            
-            (out / "meta.txt").write_text(
-                "\n".join([
-                    f"BM_TEST={test}",
-                    f"SPIKE_BASE=0x{args.spike_base:X}",
-                    f"SPIKE_TOHOST_ADDR=0x{spike_tohost:X}",
-                    f"DUT_TOHOST_ADDR=0x{dut_tohost:X}",
-                    ""
-                ]),
-                encoding="utf-8"
-            )
-        else:
-            out, spike_tohost, dut_tohost = build_program(test, args.bin_dir, args.spike_base)
-            
-        trace = run_spike(
-            test,
-            out,
-            spike,
-            args.spike_base,
-            spike_mem_size,
-            spike_tohost,
-            spike_instructions,
-            spike_timeout,
-        )
-        if not args.no_sim:
-            run_uvm(
-                test, out, trace, dut_tohost, spike_tohost,
-                args.spike_base, args, max_cycles
-            )
+        try:
+            if args.sim_only:
+                stage = "artifacts"
+                out, trace = require_generated_artifacts(test)
+                spike_tohost, dut_tohost, spike_base = read_generated_meta(out)
+            else:
+                stage = "build"
+                if args.arch_test:
+                    test_dir = arch_test_build / test
+                    out.mkdir(parents=True, exist_ok=True)
 
-    print("\n[DONE] prepared {0} bare-metal Spike-golden test(s)".format(len(targets)))
+                    elf_files = list(test_dir.glob("*.elf"))
+                    if not elf_files:
+                        raise RuntimeError(f"No .elf found in {test_dir}")
+                    src_elf = elf_files[0]
+
+                    shutil.copy2(src_elf, out / f"{test}.elf")
+                    shutil.copy2(test_dir / "imem.hex", out / "imem.hex")
+                    shutil.copy2(test_dir / "dmem.hex", out / "dmem.hex")
+
+                    meta_text = (test_dir / "meta.txt").read_text(encoding="utf-8")
+                    m = re.search(r"TOHOST_ADDR=0x([0-9a-fA-F]+)", meta_text)
+                    if not m:
+                        raise RuntimeError(f"Bad meta.txt in {test_dir}")
+                    spike_tohost = int(m.group(1), 16)
+                    dut_tohost = spike_tohost - args.spike_base
+
+                    (out / "meta.txt").write_text(
+                        "\n".join([
+                            f"BM_TEST={test}",
+                            f"SPIKE_BASE=0x{args.spike_base:X}",
+                            f"SPIKE_TOHOST_ADDR=0x{spike_tohost:X}",
+                            f"DUT_TOHOST_ADDR=0x{dut_tohost:X}",
+                            ""
+                        ]),
+                        encoding="utf-8"
+                    )
+                else:
+                    out, spike_tohost, dut_tohost = build_program(
+                        test, args.bin_dir, args.spike_base
+                    )
+
+                stage = "spike"
+                trace = run_spike(
+                    test,
+                    out,
+                    spike,
+                    args.spike_base,
+                    spike_mem_size,
+                    spike_tohost,
+                    spike_instructions,
+                    spike_timeout,
+                )
+
+            if args.no_sim:
+                results.append({
+                    "test": test,
+                    "status": "PREPARED",
+                    "stage": "artifacts",
+                })
+                print("[PREPARED] {0}".format(test))
+                continue
+
+            stage = "uvm"
+            log_paths = run_uvm(
+                test, out, trace, dut_tohost, spike_tohost,
+                args.spike_base if not args.sim_only else spike_base,
+                args, max_cycles
+            )
+            results.append({
+                "test": test,
+                "status": "PASS",
+                "stage": stage,
+                "log": str(log_paths["sim"]),
+            })
+            print("[PASS] {0}; log: {1}".format(test, log_paths["sim"]))
+        except KeyboardInterrupt:
+            log = best_uvm_log(out, args.dut)
+            results.append({
+                "test": test,
+                "status": "FAIL",
+                "stage": stage,
+                "reason": "interrupted by user",
+                "log": str(log) if log else "",
+            })
+            print_regression_summary(results, args.dut, args.no_sim)
+            return 130
+        except Exception as exc:
+            log = best_uvm_log(out, args.dut)
+            result = {
+                "test": test,
+                "status": "FAIL",
+                "stage": stage,
+                "reason": summarize_failure(exc, log),
+                "log": str(log) if log else "",
+            }
+            results.append(result)
+            print("[FAIL] {0} stage={1}: {2}".format(
+                test, stage, result["reason"]
+            ))
+            if log:
+                print("       log: {0}".format(log))
+            if args.fail_fast:
+                break
 
     if args.merge_cov:
-        if not args.coverage:
-            print("[WARN] --merge-cov without --coverage: merging existing vdbs only")
-        run(["make", "uvm-cov-merge-baremetal"], PROJ)
+        if any(result["status"] == "FAIL" for result in results):
+            print("[WARN] Skipping coverage merge because the regression has failures")
+        else:
+            try:
+                if not args.coverage:
+                    print("[WARN] --merge-cov without --coverage: merging existing vdbs only")
+                run(["make", "uvm-cov-merge-baremetal", f"COV_DUT={args.dut}"], PROJ)
+            except Exception as exc:
+                results.append({
+                    "test": "coverage_merge",
+                    "status": "FAIL",
+                    "stage": "coverage",
+                    "reason": format_exception(exc),
+                })
 
-    return 0
+    failed = print_regression_summary(results, args.dut, args.no_sim)
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

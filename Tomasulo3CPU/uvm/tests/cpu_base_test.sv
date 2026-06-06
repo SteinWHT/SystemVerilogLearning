@@ -44,4 +44,18 @@ class cpu_base_test extends uvm_test;
         // Derived tests raise/drop objections and start sequences here.
     endtask
 
+    function void report_phase(uvm_phase phase);
+        super.report_phase(phase);
+
+        if (vif.memory_error)
+            `uvm_error(get_type_name(),
+                "Memory subsystem reported a sticky protocol/error response")
+
+        `uvm_info(get_type_name(), $sformatf(
+            "D-cache statistics: hits=%0d misses=%0d backend=%s",
+            vif.dcache_hits, vif.dcache_misses,
+            (cfg.memory_backend == cpu_cfg::CPU_MEM_AXI) ? "AXI" : "legacy"),
+            UVM_LOW)
+    endfunction
+
 endclass

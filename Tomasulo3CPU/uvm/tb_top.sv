@@ -50,8 +50,9 @@ module tb_top;
         .IMEM_WORDS  (IMEM_WORDS),
         .DMEM_LINES  (DMEM_LINES)
     ) cpu_vif (
-        .clk   (clk),
-        .rst_n (rst_n)
+        .clk            (clk),
+        .rst_n          (rst_n),
+        .use_axi_memory (1'b0)
     );
 
     cpu_commit_if #(
@@ -124,6 +125,8 @@ module tb_top;
         .dcache_wvalid       (cpu_vif.dcache_wvalid),
         .dcache_wresp_ready  (cpu_vif.dcache_wresp_ready)
     );
+
+    assign cpu_vif.memory_error = 1'b0;
 
     // ----------------------------------------------------------------
     // I-cache model (1-cycle latency)
@@ -259,6 +262,7 @@ module tb_top;
         cfg = cpu_cfg::type_id::create("cfg");
         cfg.imem_words = IMEM_WORDS;
         cfg.dmem_lines = DMEM_LINES;
+        cfg.memory_backend = cpu_cfg::CPU_MEM_LEGACY;
 
         uvm_config_db#(cpu_drv_vif_t)::set(null, "uvm_test_top", "vif", cpu_vif);
         uvm_config_db#(cpu_mon_vif_t)::set(null, "uvm_test_top", "mon_vif", cpu_vif);

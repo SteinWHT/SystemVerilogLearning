@@ -317,7 +317,7 @@ import riscv_types_pkg::*;
     assign issue_lsq = iss_lsq_rdy & lsb_en;
     assign iss_lsq_rdy = sel_valid & ~cdb_flush;
 
-    assign dcache_valid = iss_lsq_rdy && is_load(q[sel_idx].opcode) && q_ready[sel_idx];
+    assign dcache_valid = issue_lsq && is_load(q[sel_idx].opcode);
     assign dcache_addr  = q[sel_idx].addr_offset;
 
     always_comb begin
