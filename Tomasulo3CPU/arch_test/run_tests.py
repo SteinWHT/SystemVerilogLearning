@@ -122,7 +122,7 @@ def run_one(test_dir: Path, sim: str, timeout_s: int) -> bool:
                 [
                     "make",
                     "sim",
-                    "USE_DW=0",
+                    "USE_DW=1",
                     "PROJECT=CPU_riscv_tests",
                     f"PLUSARGS={plusargs}",
                 ],

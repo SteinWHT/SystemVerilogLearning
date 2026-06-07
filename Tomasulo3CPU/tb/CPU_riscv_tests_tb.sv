@@ -172,10 +172,19 @@ module CPU_riscv_tests_tb;
         end else begin
             if (dcache_wvalid && dcache_wready) begin
                 logic [REG_FILE_DATA_WIDTH-1:0] temp_data;
+                logic [MEM_ADDR_BITS-1:0] aligned_addr;
                 temp_data = dmem_array[dcache_sw_addr[15:3]];
+                aligned_addr = {dcache_sw_addr[MEM_ADDR_BITS-1:3], 3'b000};
                 for (int i = 0; i < W_BYTE_NUM; i++) begin
                     if (dcache_wstrb[i]) begin
                         temp_data[i*8 +: 8] = dcache_sw_data[i*8 +: 8];
+                        // The architectural-test memory is coherent between
+                        // its data and instruction ports. FENCE.I controls
+                        // when the CPU refetches these updated instruction
+                        // bytes; the memory model supplies the updated bytes.
+                        imem_array[(aligned_addr + MEM_ADDR_BITS'(i)) >> 2]
+                                  [(i % 4)*8 +: 8] <=
+                            dcache_sw_data[i*8 +: 8];
                     end
                 end
                 dmem_array[dcache_sw_addr[15:3]] <= temp_data;
