@@ -40,6 +40,8 @@ import riscv_types_pkg::*;
     // ROB interface
     input logic [ROB_INDEX_WIDTH-1:0]           rob_tag,
     input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
+    input logic                                 rob_fence_pending,
+    input logic [ROB_INDEX_WIDTH-1:0]           rob_fence_tag,
     input logic                                 rob_commit_mem_write,
 
     // --------------------------------------------------------
@@ -209,6 +211,7 @@ import riscv_types_pkg::*;
     // depth = rob_tag - rob_top_ptr (unsigned mod 2^N, smaller = older)
     logic [LSQ_DEPTH-1:0] q_ready;
     logic [ROB_INDEX_WIDTH-1:0] entry_depth [LSQ_DEPTH];
+    logic [ROB_INDEX_WIDTH-1:0] fence_depth;
     logic [LSQ_INDEX_WIDTH-1:0] sel_idx;
     logic                       sel_valid, sw_valid, lw_valid;
     logic debug_sw, debug_lw, debug_in;
@@ -220,6 +223,7 @@ import riscv_types_pkg::*;
     // 4. for lw: junior counter equals to the match number
     // 5. for lw: dcache is not busy
     always_comb begin
+        fence_depth = rob_fence_tag - rob_top_ptr;
         for (int i = 0; i < LSQ_DEPTH; i++) begin
             q_ready[i]     = q_valid[i] & wk_rs_rdy[i] && q[i].addr_rdy;
             entry_depth[i] = q_valid[i] ? (q[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_top_ptr) :
@@ -257,6 +261,12 @@ import riscv_types_pkg::*;
                     end
                 end else begin
                     debug_lw = 1'b1;
+                    // A load younger than the oldest in-flight fence cannot
+                    // observe memory until that fence commits.
+                    if (rob_fence_pending &&
+                        (entry_depth[i] > fence_depth)) begin
+                        sel_valid = 1'b0;
+                    end
                     for (int j = 0; j < LSQ_DEPTH; j++) begin
                         // 3. for lw: older sw should not have the same address
                         if(q_valid[j] && (j != i) && is_store(q[j].opcode) &&

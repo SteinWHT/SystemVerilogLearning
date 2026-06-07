@@ -30,6 +30,7 @@ module RISC_V_DECODER
     output csr_addr_t                   csr_addr,
     output logic                        trap_inst,
     output logic                        mret_inst,
+    output rob_opclass_t                rob_opclass,
     // In risc-v 64, using $1 or $5 as the jump target register is common.
     // I will modify the name later when starting realize more instructions.
     output logic                        jr31_inst
@@ -286,6 +287,17 @@ module RISC_V_DECODER
                 endcase
             end
 
+            // MISC-MEM (FENCE / FENCE.I)
+            OP_MISC_MEM: begin
+                unique case (funct3)
+                    // The non-funct3 fields are hints or reserved for future
+                    // standard use. Ignore them for forward compatibility.
+                    FUNCT3_FENCE:   instr_type = INSTR_FENCE;
+                    FUNCT3_FENCE_I: instr_type = INSTR_FENCE_I;
+                    default:        instr_type = INSTR_NONE;
+                endcase
+            end
+
             default: instr_type = INSTR_NONE;
         endcase
     end
@@ -302,6 +314,7 @@ module RISC_V_DECODER
         csr_addr = '0;
         trap_inst = 0;
         mret_inst = 0;
+        rob_opclass = ROB_ALU;
         rd_arch_addr = 0;
         rs_arch_addr = 0;
         rt_arch_addr = 0;
@@ -315,9 +328,17 @@ module RISC_V_DECODER
             INSTR_DIVW, INSTR_DIVUW, INSTR_REMW, INSTR_REMUW,
             INSTR_ADDI, INSTR_SLTI, INSTR_SLTIU, INSTR_XORI, INSTR_ORI, INSTR_ANDI,
             INSTR_ADDIW, INSTR_SLLIW, INSTR_SRLIW, INSTR_SRAIW,
-            INSTR_SLLI, INSTR_SRLI, INSTR_SRAI,
-            INSTR_LW, INSTR_LD, INSTR_LB, INSTR_LH, INSTR_LBU, INSTR_LHU, INSTR_LWU: begin
+            INSTR_SLLI, INSTR_SRLI, INSTR_SRAI: begin
                 rw = 1;
+                rd_arch_addr = rd;
+                rs_arch_addr = rs;
+                rt_arch_addr = rt;
+                imm = imm_i;
+            end
+            INSTR_LW, INSTR_LD, INSTR_LB, INSTR_LH,
+            INSTR_LBU, INSTR_LHU, INSTR_LWU: begin
+                rw = 1;
+                rob_opclass = ROB_LOAD;
                 rd_arch_addr = rd;
                 rs_arch_addr = rs;
                 rt_arch_addr = rt;
@@ -325,23 +346,27 @@ module RISC_V_DECODER
             end
             INSTR_SD, INSTR_SW, INSTR_SB, INSTR_SH: begin
                 mw = 1;
+                rob_opclass = ROB_STORE;
                 rs_arch_addr = rs;
                 rt_arch_addr = rt;
                 imm = imm_s;
             end
             INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU, INSTR_BGE, INSTR_BGEU: begin
                 branch = 1;
+                rob_opclass = ROB_CONTROL;
                 rs_arch_addr = rs;
                 rt_arch_addr = rt;
                 imm = imm_b;
             end
             INSTR_JAL: begin
+                rob_opclass = ROB_CONTROL;
                 jal_inst = 1;
                 imm = imm_j;
                 rw = 1;
                 rd_arch_addr = rd;
             end
             INSTR_JALR: begin
+                rob_opclass = ROB_CONTROL;
                 if (rs == 5'd1) begin
                     jr31_inst = 1;
                     imm = imm_i;
@@ -369,6 +394,7 @@ module RISC_V_DECODER
             end
             INSTR_CSRRW, INSTR_CSRRS, INSTR_CSRRC: begin
                 rw = 1;
+                rob_opclass = ROB_CSR;
                 csr_inst = 1;
                 csr_addr = csr;
                 rd_arch_addr = rd;
@@ -384,6 +410,7 @@ module RISC_V_DECODER
             end
             INSTR_CSRRWI, INSTR_CSRRSI, INSTR_CSRRCI: begin
                 rw = 1;
+                rob_opclass = ROB_CSR;
                 csr_inst = 1;
                 csr_addr = csr;
                 rd_arch_addr = rd;
@@ -398,10 +425,18 @@ module RISC_V_DECODER
                 endcase
             end
             INSTR_ECALL, INSTR_EBREAK: begin
+                rob_opclass = ROB_TRAP;
                 trap_inst = 1;
             end
             INSTR_MRET: begin
+                rob_opclass = ROB_MRET;
                 mret_inst = 1;
+            end
+            INSTR_FENCE: begin
+                rob_opclass = ROB_FENCE;
+            end
+            INSTR_FENCE_I: begin
+                rob_opclass = ROB_FENCE_I;
             end
             default: begin
                 rw = 0;
@@ -415,6 +450,7 @@ module RISC_V_DECODER
                 csr_addr = '0;
                 trap_inst = 0;
                 mret_inst = 0;
+                rob_opclass = ROB_ALU;
                 rd_arch_addr = 0;
                 rs_arch_addr = 0;
                 rt_arch_addr = 0;

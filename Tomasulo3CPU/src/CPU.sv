@@ -132,6 +132,8 @@ module CPU #(
     logic                                rob_commit_mem_write;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_curr_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0]  rt_sb_phy_addr;
+    logic                                rob_fence_pending;
+    logic [ROB_INDEX_WIDTH-1:0]          rob_fence_tag;
 
     // SB / SAB interface (front-end → back-end)
     logic [SB_INDEX_WIDTH-1:0]           sb_flush_sw_tag;
@@ -269,7 +271,9 @@ module CPU #(
         .rob_bottom_ptr_out              (rob_bottom_ptr),
         .rob_top_ptr_out                 (rob_top_ptr),
         .rob_commit_mem_write_out        (rob_commit_mem_write),
-        .rob_commit_curr_phy_addr_out    (rob_commit_curr_phy_addr)
+        .rob_commit_curr_phy_addr_out    (rob_commit_curr_phy_addr),
+        .rob_fence_pending_out           (rob_fence_pending),
+        .rob_fence_tag_out               (rob_fence_tag)
     );
 
     // ----------------------------------------------------------------
@@ -301,6 +305,8 @@ module CPU #(
         .rst_n                           (rst_n),
 
         .rob_top_ptr                     (rob_top_ptr),
+        .rob_fence_pending               (rob_fence_pending),
+        .rob_fence_tag                   (rob_fence_tag),
 
         // Dispatch from front-end
         .dis_int_issq_en                 (dis_int_issue_en),

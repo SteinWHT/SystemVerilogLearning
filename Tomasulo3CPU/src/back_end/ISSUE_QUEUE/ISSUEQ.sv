@@ -118,6 +118,8 @@ import riscv_types_pkg::*;
     // ROB Interface
     input logic [ROB_INDEX_WIDTH-1:0]           rob_tag,
     input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
+    input logic                                 rob_fence_pending,
+    input logic [ROB_INDEX_WIDTH-1:0]           rob_fence_tag,
     input logic                                 rob_commit_mem_write,
 
     // LSB Interface
@@ -362,6 +364,8 @@ import riscv_types_pkg::*;
 
         .rob_tag(rob_tag),
         .rob_top_ptr(rob_top_ptr),
+        .rob_fence_pending(rob_fence_pending),
+        .rob_fence_tag(rob_fence_tag),
         .rob_commit_mem_write(rob_commit_mem_write),
 
         // --------------------------------------------------------

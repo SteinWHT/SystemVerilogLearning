@@ -138,7 +138,9 @@ module CPU_FRONT_END
     output logic [ROB_INDEX_WIDTH-1:0]          rob_bottom_ptr_out,
     output logic [ROB_INDEX_WIDTH-1:0]          rob_top_ptr_out,
     output logic                                rob_commit_mem_write_out,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_curr_phy_addr_out
+    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_curr_phy_addr_out,
+    output logic                                rob_fence_pending_out,
+    output logic [ROB_INDEX_WIDTH-1:0]          rob_fence_tag_out
 );
     // ------------------------------------------------------------
     // INTERFACE
@@ -163,19 +165,16 @@ module CPU_FRONT_END
 
     // DISPATCH <-> ROB
     logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_sw_rt_phy_addr;
-    logic dis_inst_sw;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_pre_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_phy_addr;
     logic dis_inst_valid;
     logic [ARCH_REG_WIDTH-1:0] dis_rob_rd_arch_addr;
+    rob_opclass_t dis_rob_opclass;
 
     // DISPATCH CSR/trap -> ROB
-    logic dis_csr_inst;
     csr_cmd_e dis_csr_cmd;
     csr_addr_t dis_csr_addr;
-    logic dis_trap_inst;
     trap_cause_t dis_trap_cause;
-    logic dis_mret_inst;
     logic [ARCH_REG_WIDTH-1:0] dis_csr_rs1_arch_addr;
 
     // BPB interface
@@ -217,7 +216,9 @@ module CPU_FRONT_END
     logic rob_reg_write;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] rob_commit_curr_phy_addr;
     logic [PHY_REGISTER_FILE_WIDTH-1:0] rob_commit_pre_phy_addr;
-    logic rob_csr_committed;
+    logic rob_serializing_committed;
+    logic rob_fence_pending;
+    logic [ROB_INDEX_WIDTH-1:0] rob_fence_tag;
 
     // ROB -> CSR interface
     logic csr_commit_valid;
@@ -241,9 +242,13 @@ module CPU_FRONT_END
     // ROB trap flush
     logic trap_commit_flush;
     logic [IMEM_DEPTH-1:0] trap_redirect_pc;
+    logic fence_i_commit_flush;
+    logic [IMEM_DEPTH-1:0] fence_i_redirect_pc;
 
     // SB interface
     logic sb_full;
+    logic sb_empty;
+    logic sb_drained;
 
     // RBA
     logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rba_new_rd_phy_addr;
@@ -251,8 +256,13 @@ module CPU_FRONT_END
     // Combined flush: CDB branch mispredict OR trap commit flush
     logic combined_flush;
     logic [IMEM_DEPTH-1:0] combined_flush_addr;
+    logic dispatch_flush;
+    logic [IMEM_DEPTH-1:0] dispatch_flush_addr;
     assign combined_flush = cdb_flush || trap_commit_flush;
     assign combined_flush_addr = trap_commit_flush ? trap_redirect_pc : cdb_branch_addr;
+    assign dispatch_flush = combined_flush || fence_i_commit_flush;
+    assign dispatch_flush_addr = fence_i_commit_flush ?
+                                 fence_i_redirect_pc : combined_flush_addr;
 
     // ------------------------------------------------------------
     // SUB MODULES
@@ -326,9 +336,9 @@ module CPU_FRONT_END
         .dis_frl_rd_phy_addr(dis_frl_rd_phy_addr),
         .dis_frl_read(dis_frl_read),
 
-        .cdb_valid(cdb_valid || trap_commit_flush),
-        .cdb_branch_addr(combined_flush_addr),
-        .cdb_flush(combined_flush),
+        .cdb_valid(cdb_valid || trap_commit_flush || fence_i_commit_flush),
+        .cdb_branch_addr(dispatch_flush_addr),
+        .cdb_flush(dispatch_flush),
 
         .frat_full(frat_full),
         .frat_rs_phy_addr(frat_rs_phy_addr),
@@ -366,20 +376,17 @@ module CPU_FRONT_END
 
         .rob_full(rob_full),
         .rob_two_or_more_vacant(rob_two_or_more_vacant),
-        .rob_csr_committed(rob_csr_committed),
+        .rob_serializing_committed(rob_serializing_committed),
         .dis_pre_phy_addr(dis_pre_phy_addr),
         .dis_new_phy_addr(dis_new_phy_addr),
         .dis_rob_rd_arch_addr(dis_rob_rd_arch_addr),
         .dis_inst_valid(dis_inst_valid),
         .dis_pc(dis_pc),
-        .dis_csr_inst(dis_csr_inst),
+        .dis_rob_opclass(dis_rob_opclass),
         .dis_csr_cmd(dis_csr_cmd),
         .dis_csr_addr(dis_csr_addr),
-        .dis_trap_inst(dis_trap_inst),
         .dis_trap_cause(dis_trap_cause),
-        .dis_mret_inst(dis_mret_inst),
         .dis_csr_rs1_arch_addr(dis_csr_rs1_arch_addr),
-        .dis_inst_sw(dis_inst_sw),
         .dis_sw_rt_phy_addr(dis_sw_rt_phy_addr),
         .dis_rba_new_rd_phy_addr(dis_rba_new_rd_phy_addr),
         .dis_rba_reg_write(dis_reg_write)
@@ -510,19 +517,16 @@ module CPU_FRONT_END
         .rst_n(rst_n),
 
         .dis_sw_rt_phy_addr(dis_sw_rt_phy_addr),
-        .dis_inst_sw(dis_inst_sw),
         .dis_pre_phy_addr(dis_pre_phy_addr),
         .dis_new_phy_addr(dis_new_phy_addr),
         .dis_inst_valid(dis_inst_valid),
         .dis_rob_rd_arch_addr(dis_rob_rd_arch_addr),
         .dis_reg_write(dis_reg_write),
         .dis_pc(dis_pc),
-        .dis_csr_inst(dis_csr_inst),
+        .dis_rob_opclass(dis_rob_opclass),
         .dis_csr_cmd(dis_csr_cmd),
         .dis_csr_addr(dis_csr_addr),
-        .dis_trap_inst(dis_trap_inst),
         .dis_trap_cause(dis_trap_cause),
-        .dis_mret_inst(dis_mret_inst),
         .dis_csr_rs1_arch_addr(dis_csr_rs1_arch_addr),
 
         .rrat_csr_rs1_phy(rrat_csr_rs1_phy),
@@ -540,6 +544,7 @@ module CPU_FRONT_END
         .rt_sb_phy_addr(rt_sb_phy_addr),
 
         .sb_full(sb_full),
+        .sb_drained(sb_drained),
         .rob_sw_addr(rob_sw_addr),
         .rob_sw_strb(rob_sw_strb),
         .rob_commit_mem_write(rob_commit_mem_write),
@@ -552,7 +557,9 @@ module CPU_FRONT_END
         .rob_commit_curr_phy_addr(rob_commit_curr_phy_addr),
 
         .rob_commit_pre_phy_addr(rob_commit_pre_phy_addr),
-        .rob_csr_committed(rob_csr_committed),
+        .rob_serializing_committed(rob_serializing_committed),
+        .rob_fence_pending(rob_fence_pending),
+        .rob_fence_tag(rob_fence_tag),
 
         .csr_commit_valid(csr_commit_valid),
         .csr_commit_addr(csr_commit_addr),
@@ -573,7 +580,9 @@ module CPU_FRONT_END
         .csr_wr_en(csr_wr_en),
 
         .trap_commit_flush(trap_commit_flush),
-        .trap_redirect_pc(trap_redirect_pc)
+        .trap_redirect_pc(trap_redirect_pc),
+        .fence_i_commit_flush(fence_i_commit_flush),
+        .fence_i_redirect_pc(fence_i_redirect_pc)
     );
 
     // CSR
@@ -643,7 +652,8 @@ module CPU_FRONT_END
         .sb_entry_sw_rob_tag(sb_entry_sw_rob_tag),
 
         .full(sb_full),
-        .empty(sb_empty)
+        .empty(sb_empty),
+        .drained(sb_drained)
     );
 
     // RBA
@@ -673,4 +683,6 @@ module CPU_FRONT_END
     assign rob_top_ptr_out             = rob_top_ptr;
     assign rob_commit_mem_write_out    = rob_commit_mem_write;
     assign rob_commit_curr_phy_addr_out = rob_commit_curr_phy_addr;
+    assign rob_fence_pending_out       = rob_fence_pending;
+    assign rob_fence_tag_out           = rob_fence_tag;
 endmodule

@@ -1,20 +1,18 @@
 // 32 entries
 // ROB Entry Format for instruction:
-// curr_phy         prev_phy        rd_addr         rw          mw          compl       sw_addr     total
-// 6bits            6bits           5bits           1bit        1bit        1bit        32bits      64bits
+// curr_phy, prev_phy, rd_addr, rw, opclass, completed, store metadata,
+// PC, and CSR/trap metadata are stored per entry.
 // curr_phy: the current physical register index with stored data
 // prev_phy: the previous physical register index with stored data
 // rd_addr: the architectural address of the destination register
 // rw: 1: register write for load instruction, integer and JAL instructions
-// mw: 1: memory write for store instruction
+// opclass: commit-time instruction behavior
 // compl: 1 for completed, 0 for not completed
 // sw_addr: the 32 bits of the store address
 // pc: the program counter of the instruction
 // trap_cause: non-zero for synchronous trap (ECALL/EBREAK/…), encodes mcause
-// is_csr: 1 for CSR instruction, 0 for non-CSR instruction
 // csr_addr: the address of the CSR
 // csr_cmd: the command of the CSR
-// mret_occur: 1 for MRET instruction
 // rs1_arch: architectural register address for CSR rs1 (used for zimm and RRAT lookup)
 
 // read ptr = top ptr -> commit from the top
@@ -40,19 +38,16 @@ module ROB
 
     // DISPATCH interface
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_sw_rt_phy_addr,
-    input logic                                 dis_inst_sw,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_pre_phy_addr,
     input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_phy_addr,
     input logic                                 dis_inst_valid,
     input logic [ARCH_REG_WIDTH-1:0]            dis_rob_rd_arch_addr,
     input logic                                 dis_reg_write,
     input logic [IMEM_DEPTH-1:0]                dis_pc,
-    input logic                                 dis_csr_inst,
+    input rob_opclass_t                         dis_rob_opclass,
     input csr_cmd_e                             dis_csr_cmd,
     input csr_addr_t                            dis_csr_addr,
-    input logic                                 dis_trap_inst,
     input trap_cause_t                          dis_trap_cause,
-    input logic                                 dis_mret_inst,
     input logic [ARCH_REG_WIDTH-1:0]            dis_csr_rs1_arch_addr,
 
     // RRAT-resolved physical register for CSR rs1 (combinational from RRAT)
@@ -74,6 +69,7 @@ module ROB
 
     // SB interface
     input logic sb_full,
+    input logic sb_drained,
     output logic [DMEM_DEPTH-1:0]               rob_sw_addr,
     output logic [W_BYTE_NUM-1:0]               rob_sw_strb,
     output logic                                rob_commit_mem_write,
@@ -91,7 +87,9 @@ module ROB
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_pre_phy_addr,
 
     // DISPATCH csr_stall release
-    output logic                                rob_csr_committed,
+    output logic                                rob_serializing_committed,
+    output logic                                rob_fence_pending,
+    output logic [ROB_INDEX_WIDTH-1:0]          rob_fence_tag,
 
     // CSR module interface (active during commit of CSR/trap/mret entries)
     output logic                                csr_commit_valid,
@@ -117,7 +115,11 @@ module ROB
     // Trap flush: redirect front-end after ECALL/EBREAK/MRET commit
     // TODO: flush other parts, not only dispatch
     output logic                                trap_commit_flush,
-    output logic [IMEM_DEPTH-1:0]               trap_redirect_pc
+    output logic [IMEM_DEPTH-1:0]               trap_redirect_pc,
+
+    // FENCE.I redirects fetch after all prior stores are globally complete.
+    output logic                                fence_i_commit_flush,
+    output logic [IMEM_DEPTH-1:0]               fence_i_redirect_pc
 );
 
     typedef struct packed {
@@ -125,14 +127,12 @@ module ROB
         logic [PHY_REGISTER_FILE_WIDTH-1:0] prev_phy;
         logic [ARCH_REG_WIDTH-1:0]          rd_addr;
         logic                               rw;
-        logic                               mw;
+        rob_opclass_t                       opclass;
         logic                               compl;
         logic [DMEM_DEPTH-1:0]              sw_addr;
         logic [W_BYTE_NUM-1:0]              sw_strb;
         logic [IMEM_DEPTH-1:0]              pc;
         trap_cause_t                        trap_cause;
-        logic                               mret_occur;
-        logic                               is_csr;
         csr_addr_t                          csr_addr;
         csr_cmd_e                           csr_cmd;
         logic [ARCH_REG_WIDTH-1:0]          rs1_arch;
@@ -142,17 +142,25 @@ module ROB
     // the bottom_ptr and top_ptr are the pointers to the ROB_array
     // 5 bits for bottom_ptr and top_ptr, extra bit for overflow protection
     logic [ROB_INDEX_WIDTH:0] write_ptr, read_ptr, flush_ptr;
+    logic [ROB_INDEX_WIDTH:0] rob_count;
     logic empty, full;
 
     rob_entry_t head;
     assign head = ROB_array[read_ptr[ROB_INDEX_WIDTH-1:0]];
+    assign rob_count = write_ptr - read_ptr;
 
     logic enable;
     logic head_has_trap;
-    assign head_has_trap = (head.trap_cause != TRAP_CAUSE_NONE);
+    assign head_has_trap = (head.opclass == ROB_TRAP);
 
-    logic head_is_csr_or_trap;
-    assign head_is_csr_or_trap = head.is_csr || head_has_trap || head.mret_occur;
+    logic head_is_mret;
+    assign head_is_mret = (head.opclass == ROB_MRET);
+
+    logic head_is_serializing;
+    assign head_is_serializing = (head.opclass == ROB_CSR) ||
+                                 (head.opclass == ROB_TRAP) ||
+                                 (head.opclass == ROB_MRET) ||
+                                 (head.opclass == ROB_FENCE_I);
 
     // FIFO to store the ROB entries
     // Since we need to modify the ROB entry, we need to have access to the ROB entry,
@@ -166,97 +174,26 @@ module ROB
             end
         end else begin
             if (dis_inst_valid && !full) begin
-                if (dis_inst_sw) begin
-                    ROB_array[write_ptr[ROB_INDEX_WIDTH-1:0]] <= '{
-                        curr_phy:   dis_sw_rt_phy_addr,
-                        prev_phy:   '0,
-                        rd_addr:    '0,
-                        rw:         1'b0,
-                        mw:         1'b1,
-                        compl:      1'b0,
-                        sw_addr:    '0,
-                        sw_strb:    '0,
-                        pc:         dis_pc,
-                        trap_cause: TRAP_CAUSE_NONE,
-                        mret_occur: 1'b0,
-                        is_csr:     1'b0,
-                        csr_addr:   '0,
-                        csr_cmd:    CSR_CMD_NONE,
-                        rs1_arch:   '0
-                    };
-                end else if (dis_csr_inst) begin
-                    ROB_array[write_ptr[ROB_INDEX_WIDTH-1:0]] <= '{
-                        curr_phy:   dis_new_phy_addr,
-                        prev_phy:   dis_pre_phy_addr,
-                        rd_addr:    dis_rob_rd_arch_addr,
-                        rw:         dis_reg_write,
-                        mw:         1'b0,
-                        compl:      1'b1,
-                        sw_addr:    '0,
-                        sw_strb:    '0,
-                        pc:         dis_pc,
-                        trap_cause: TRAP_CAUSE_NONE,
-                        mret_occur: 1'b0,
-                        is_csr:     1'b1,
-                        csr_addr:   dis_csr_addr,
-                        csr_cmd:    dis_csr_cmd,
-                        rs1_arch:   dis_csr_rs1_arch_addr
-                    };
-                end else if (dis_trap_inst) begin
-                    ROB_array[write_ptr[ROB_INDEX_WIDTH-1:0]] <= '{
-                        curr_phy:   '0,
-                        prev_phy:   '0,
-                        rd_addr:    '0,
-                        rw:         1'b0,
-                        mw:         1'b0,
-                        compl:      1'b1,
-                        sw_addr:    '0,
-                        sw_strb:    '0,
-                        pc:         dis_pc,
-                        trap_cause: dis_trap_cause,
-                        mret_occur: 1'b0,
-                        is_csr:     1'b0,
-                        csr_addr:   '0,
-                        csr_cmd:    CSR_CMD_NONE,
-                        rs1_arch:   '0
-                    };
-                end else if (dis_mret_inst) begin
-                    ROB_array[write_ptr[ROB_INDEX_WIDTH-1:0]] <= '{
-                        curr_phy:   '0,
-                        prev_phy:   '0,
-                        rd_addr:    '0,
-                        rw:         1'b0,
-                        mw:         1'b0,
-                        compl:      1'b1,
-                        sw_addr:    '0,
-                        sw_strb:    '0,
-                        pc:         dis_pc,
-                        trap_cause: TRAP_CAUSE_NONE,
-                        mret_occur: 1'b1,
-                        is_csr:     1'b0,
-                        csr_addr:   '0,
-                        csr_cmd:    CSR_CMD_NONE,
-                        rs1_arch:   '0
-                    };
-                end else begin
-                    ROB_array[write_ptr[ROB_INDEX_WIDTH-1:0]] <= '{
-                        curr_phy:   dis_new_phy_addr,
-                        prev_phy:   dis_pre_phy_addr,
-                        rd_addr:    dis_rob_rd_arch_addr,
-                        rw:         dis_reg_write,
-                        mw:         1'b0,
-                        compl:      1'b0,
-                        sw_addr:    '0,
-                        sw_strb:    '0,
-                        pc:         dis_pc,
-                        trap_cause: TRAP_CAUSE_NONE,
-                        mret_occur: 1'b0,
-                        is_csr:     1'b0,
-                        csr_addr:   '0,
-                        csr_cmd:    CSR_CMD_NONE,
-                        rs1_arch:   '0
-                    };
-                end
+                ROB_array[write_ptr[ROB_INDEX_WIDTH-1:0]] <= '{
+                    curr_phy:   (dis_rob_opclass == ROB_STORE) ?
+                                dis_sw_rt_phy_addr : dis_new_phy_addr,
+                    prev_phy:   dis_pre_phy_addr,
+                    rd_addr:    dis_rob_rd_arch_addr,
+                    rw:         dis_reg_write,
+                    opclass:    dis_rob_opclass,
+                    compl:      (dis_rob_opclass == ROB_CSR) ||
+                                (dis_rob_opclass == ROB_FENCE) ||
+                                (dis_rob_opclass == ROB_FENCE_I) ||
+                                (dis_rob_opclass == ROB_TRAP) ||
+                                (dis_rob_opclass == ROB_MRET),
+                    sw_addr:    '0,
+                    sw_strb:    '0,
+                    pc:         dis_pc,
+                    trap_cause: dis_trap_cause,
+                    csr_addr:   dis_csr_addr,
+                    csr_cmd:    dis_csr_cmd,
+                    rs1_arch:   dis_csr_rs1_arch_addr
+                };
                 write_ptr <= write_ptr + 1;
             end
 
@@ -265,7 +202,7 @@ module ROB
             end
 
             if (cdb_valid) begin
-                if (ROB_array[cdb_rob_tag].mw) begin
+                if (ROB_array[cdb_rob_tag].opclass == ROB_STORE) begin
                     ROB_array[cdb_rob_tag].sw_addr <= cdb_sw_addr;
                     ROB_array[cdb_rob_tag].sw_strb <= cdb_sw_strb;
                 end
@@ -297,8 +234,9 @@ module ROB
     // SB interface
     assign rob_sw_addr = head.sw_addr;
     assign rob_sw_strb = head.sw_strb;
-    assign rob_commit_mem_write = head.mw && enable;
-    assign rt_sb_phy_addr = head.is_csr ? rrat_csr_rs1_phy : head.curr_phy;
+    assign rob_commit_mem_write = (head.opclass == ROB_STORE) && enable;
+    assign rt_sb_phy_addr = (head.opclass == ROB_CSR) ?
+                            rrat_csr_rs1_phy : head.curr_phy;
 
     // CFC interface
     assign rob_top_ptr = read_ptr[ROB_INDEX_WIDTH-1:0];
@@ -307,16 +245,16 @@ module ROB
     // RRAT interface
     assign rob_commit_rd_arch_addr = head.rd_addr;
     assign rob_reg_write = head.rw && enable;
-    assign rob_commit_curr_phy_addr = head.is_csr ? head.curr_phy : head.curr_phy;
+    assign rob_commit_curr_phy_addr = head.curr_phy;
 
     // FRL interface
     assign rob_commit_pre_phy_addr = head.prev_phy;
 
     // DISPATCH csr_stall release
-    assign rob_csr_committed = enable && head_is_csr_or_trap;
+    assign rob_serializing_committed = enable && head_is_serializing;
 
     // CSR commit-time execution signals (active combinationally at head)
-    assign csr_commit_valid   = enable && head.is_csr;
+    assign csr_commit_valid   = enable && (head.opclass == ROB_CSR);
     assign csr_commit_addr    = head.csr_addr;
     assign csr_commit_cmd     = head.csr_cmd;
     assign csr_commit_rs1_is_x0 = (head.rs1_arch == ARCH_REG_WIDTH'(0));
@@ -325,17 +263,37 @@ module ROB
     assign ecall_commit  = enable && (head.trap_cause == TRAP_CAUSE_ECALL_M);
     assign ebreak_commit = enable && (head.trap_cause == TRAP_CAUSE_EBREAK);
 
-    assign mret_commit   = enable && head.mret_occur;
+    assign mret_commit   = enable && head_is_mret;
     assign trap_commit_pc = head.pc;
 
     // CSR write-back to PRF for CSR instructions
     assign csr_wr_phy_addr = head.curr_phy;
     assign csr_wr_data     = csr_rdata;
-    assign csr_wr_en       = enable && head.is_csr && head.rw;
+    assign csr_wr_en       = enable && (head.opclass == ROB_CSR) && head.rw;
 
     // Trap/MRET flush and redirect
-    assign trap_commit_flush = enable && (head_has_trap || head.mret_occur);
+    assign trap_commit_flush = enable && (head_has_trap || head_is_mret);
     assign trap_redirect_pc  = csr_redirect_pc[IMEM_DEPTH-1:0];
+    assign fence_i_commit_flush = enable && (head.opclass == ROB_FENCE_I);
+    assign fence_i_redirect_pc  = head.pc + IMEM_DEPTH'(4);
+
+    // The oldest in-flight fence is the load-issue ordering boundary.
+    always_comb begin
+        rob_fence_pending = 1'b0;
+        rob_fence_tag = '0;
+        for (int i = ROB_DEPTH - 1; i >= 0; i--) begin
+            if ((ROB_INDEX_WIDTH + 1)'(i) < rob_count) begin
+                if ((ROB_array[read_ptr[ROB_INDEX_WIDTH-1:0] +
+                               ROB_INDEX_WIDTH'(i)].opclass == ROB_FENCE) ||
+                    (ROB_array[read_ptr[ROB_INDEX_WIDTH-1:0] +
+                               ROB_INDEX_WIDTH'(i)].opclass == ROB_FENCE_I)) begin
+                    rob_fence_pending = 1'b1;
+                    rob_fence_tag = read_ptr[ROB_INDEX_WIDTH-1:0] +
+                                    ROB_INDEX_WIDTH'(i);
+                end
+            end
+        end
+    end
 
     always_comb begin
         enable = 1'b0;
@@ -345,8 +303,12 @@ module ROB
         // commit from the top rule:
         // 1. the ROB entry is completed
         // 2. the ROB is not empty (avoid flushing the ROB)
-        // 3. MW is 0 or (MW is 1 and SB is not full)
-        if (head.compl && !empty && (!head.mw || (!sb_full && head.mw))) begin
+        // 3. A store requires SB space.
+        // 4. FENCE/FENCE.I require every older committed store response.
+        if (head.compl && !empty &&
+            ((head.opclass != ROB_STORE) || !sb_full) &&
+            (((head.opclass != ROB_FENCE) &&
+              (head.opclass != ROB_FENCE_I)) || sb_drained)) begin
             enable = 1'b1;
         end
 

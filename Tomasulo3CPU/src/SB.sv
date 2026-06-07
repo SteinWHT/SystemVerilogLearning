@@ -37,7 +37,8 @@ module SB #(
     output logic [ROB_INDEX_WIDTH-1:0]  sb_entry_sw_rob_tag,
 
     output logic                        full,
-    output logic                        empty
+    output logic                        empty,
+    output logic                        drained
 );
     typedef struct packed {
         logic [DMEM_DEPTH-1:0]              sw_addr;
@@ -87,6 +88,7 @@ module SB #(
 
     assign empty = (write_ptr[SB_INDEX_WIDTH] == read_ptr_lead[SB_INDEX_WIDTH]) && (write_ptr[SB_INDEX_WIDTH-1:0] == read_ptr_lead[SB_INDEX_WIDTH-1:0]);
     assign full = ((write_ptr[SB_INDEX_WIDTH] != read_ptr_trail[SB_INDEX_WIDTH]) && (write_ptr[SB_INDEX_WIDTH-1:0] == read_ptr_trail[SB_INDEX_WIDTH-1:0]));
+    assign drained = (write_ptr == read_ptr_trail);
 
     assign dcache_sw_addr = sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]].sw_addr;
     assign dcache_sw_data = sb_array[read_ptr_lead[SB_INDEX_WIDTH-1:0]].sw_data <<

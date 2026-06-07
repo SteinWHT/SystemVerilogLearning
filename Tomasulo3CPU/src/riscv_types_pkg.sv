@@ -92,8 +92,24 @@ package riscv_types_pkg;
         INSTR_CSRRSI,
         INSTR_CSRRCI,
         INSTR_MRET,
+        INSTR_FENCE,
+        INSTR_FENCE_I,
         INSTR_NONE
     } instr_e;
+
+    // ROB operation class. Branches and jumps share commit behavior, so they
+    // use one control class.
+    typedef enum logic [3:0] {
+        ROB_ALU,
+        ROB_LOAD,
+        ROB_STORE,
+        ROB_CONTROL,
+        ROB_CSR,
+        ROB_FENCE,
+        ROB_FENCE_I,
+        ROB_TRAP,
+        ROB_MRET
+    } rob_opclass_t;
 
     // Align with the ISSUE_QUEUE.sv
     // ================================================================

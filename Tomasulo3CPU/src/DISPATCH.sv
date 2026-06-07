@@ -112,22 +112,18 @@ import riscv_types_pkg::*;
     // input logic [ROB_INDEX_WIDTH-1:0]               rob_bottom_ptr,
     input logic                                     rob_full,
     input logic                                     rob_two_or_more_vacant,
-    input logic                                     rob_csr_committed,
+    input logic                                     rob_serializing_committed,
 
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      dis_pre_phy_addr,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      dis_new_phy_addr,
     output logic [ARCH_REG_WIDTH-1:0]               dis_rob_rd_arch_addr,
     output logic                                    dis_inst_valid,
     output logic [IMEM_DEPTH-1:0]                   dis_pc,
-    output logic                                    dis_csr_inst,
+    output rob_opclass_t                            dis_rob_opclass,
     output csr_cmd_e                                dis_csr_cmd,
     output csr_addr_t                               dis_csr_addr,
-    output logic                                    dis_trap_inst,
     output trap_cause_t                             dis_trap_cause,
-    output logic                                    dis_mret_inst,
     output logic [ARCH_REG_WIDTH-1:0]               dis_csr_rs1_arch_addr,
-    // output logic dis_reg_write,
-    output logic                                    dis_inst_sw,
     output logic [PHY_REGISTER_FILE_WIDTH-1:0]      dis_sw_rt_phy_addr,
 
     // RBA interface
@@ -150,6 +146,7 @@ import riscv_types_pkg::*;
     csr_cmd_e stage1_dis_csr_cmd;
     csr_addr_t stage1_dis_csr_addr;
     instr_e stage1_dis_instr_type;
+    rob_opclass_t stage1_dis_rob_opclass;
     logic [ARCH_REG_WIDTH-1:0] stage1_rd_arch_addr;
     logic [ARCH_REG_WIDTH-1:0] stage1_rs_arch_addr;
     logic [ARCH_REG_WIDTH-1:0] stage1_rt_arch_addr;
@@ -174,14 +171,13 @@ import riscv_types_pkg::*;
     // Stage 2: write to ROB and issue queues
     // ------------------------------------------------------
     logic [XLEN-1:0] stage2_dis_imm;
-    logic stage2_dis_mem_write, stage2_dis_reg_write, stage2_dis_branch,
-          stage2_dis_jr_inst, stage2_dis_jal_inst, stage2_dis_jr31_inst,
-          stage2_dis_csr_inst, stage2_dis_trap_inst,
-          stage2_dis_mret_inst;
+    logic stage2_dis_reg_write, stage2_dis_branch,
+          stage2_dis_jr_inst, stage2_dis_jal_inst, stage2_dis_jr31_inst;
     trap_cause_t stage2_dis_trap_cause;
     csr_cmd_e stage2_dis_csr_cmd;
     csr_addr_t stage2_dis_csr_addr;
     instr_e stage2_dis_instr_type;
+    rob_opclass_t stage2_dis_rob_opclass;
     logic [ARCH_REG_WIDTH-1:0] stage2_rd_arch_addr;
     logic [IMEM_DEPTH-1:0] stage2_pc_plus4, stage2_pc;
     logic stage2_valid;
@@ -225,7 +221,8 @@ import riscv_types_pkg::*;
                    .csr_cmd(stage1_dis_csr_cmd),
                    .csr_addr(stage1_dis_csr_addr),
                    .trap_inst(stage1_dis_trap_inst),
-                   .mret_inst(stage1_dis_mret_inst)
+                   .mret_inst(stage1_dis_mret_inst),
+                   .rob_opclass(stage1_dis_rob_opclass)
                  );
 
     always_comb begin
@@ -301,8 +298,8 @@ import riscv_types_pkg::*;
     // jalr $rs1 ($rs1 != $31) until the value of $rs1 is ready in CDB
     // jr -> 1 bit flag register(jr_stall) + 5-bit internal register(jr_rob_tag)
     // if jr_rob_tag is on the CDB and valid, then we can clear the jr_stall flag and proceed with dispatching the jr instruction
-    // CSR/trap/mret serialization: stall dispatch after dispatching one
-    // until the ROB commits it. Cleared by rob_csr_committed or flush.
+    // CSR/trap/mret/FENCE.I serialization: stall dispatch after dispatching
+    // one until the ROB commits it. FENCE.I then redirects fetch to PC+4.
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             jr_stall <= 1'b0;
@@ -313,10 +310,12 @@ import riscv_types_pkg::*;
                 else if ((stage1_valid && stage1_dis_jr_inst && !jr_stall))
                     jr_stall <= 1'b1;
 
-                if (rob_csr_committed || (cdb_valid && cdb_flush))
+                if (rob_serializing_committed || (cdb_valid && cdb_flush))
                     csr_stall <= 1'b0;
                 else if (stage1_valid && !csr_stall &&
-                        (stage1_dis_csr_inst || stage1_dis_trap_inst || stage1_dis_mret_inst))
+                        (stage1_dis_csr_inst || stage1_dis_trap_inst ||
+                         stage1_dis_mret_inst ||
+                         (stage1_dis_rob_opclass == ROB_FENCE_I)))
                     csr_stall <= 1'b1;
         end
     end
@@ -360,7 +359,8 @@ import riscv_types_pkg::*;
             end
             INSTR_CSRRW, INSTR_CSRRS, INSTR_CSRRC,
             INSTR_CSRRWI, INSTR_CSRRSI, INSTR_CSRRCI,
-            INSTR_ECALL, INSTR_EBREAK, INSTR_MRET: begin
+            INSTR_ECALL, INSTR_EBREAK, INSTR_MRET,
+            INSTR_FENCE, INSTR_FENCE_I: begin
                 stage1_dis_rob_only = 1'b1;
             end
             default: begin
@@ -450,8 +450,8 @@ import riscv_types_pkg::*;
             stage2_dis_jr31_inst        <= '0;
 
             stage2_dis_instr_type       <= INSTR_NONE;
+            stage2_dis_rob_opclass      <= ROB_ALU;
             stage2_dis_imm              <= '0;
-            stage2_dis_mem_write        <= '0;
             stage2_dis_reg_write        <= '0;
             stage2_rd_arch_addr         <= '0;
 
@@ -469,13 +469,10 @@ import riscv_types_pkg::*;
             stage2_ras_address          <= '0;
             stage2_rs_arch_addr         <= '0;
 
-            stage2_dis_csr_inst        <= '0;
             stage2_dis_csr_cmd         <= CSR_CMD_NONE;
             stage2_dis_csr_addr        <= '0;
 
-            stage2_dis_trap_inst       <= '0;
             stage2_dis_trap_cause      <= TRAP_CAUSE_NONE;
-            stage2_dis_mret_inst       <= '0;
 
             ifq_wait_after_empty       <= 1'b1;
         end else begin
@@ -500,8 +497,8 @@ import riscv_types_pkg::*;
                 stage2_dis_jr31_inst        <= stage1_dis_jr31_inst;
 
                 stage2_dis_instr_type       <= stage1_dis_instr_type;
+                stage2_dis_rob_opclass      <= stage1_dis_rob_opclass;
                 stage2_dis_imm              <= stage1_dis_imm;
-                stage2_dis_mem_write        <= stage1_dis_mem_write;
                 stage2_dis_reg_write        <= stage1_reg_write;
                 stage2_rd_arch_addr         <= stage1_rd_arch_addr;
 
@@ -520,12 +517,9 @@ import riscv_types_pkg::*;
                 stage2_ras_address          <= ras_addr;
                 stage2_rs_arch_addr         <= stage1_rs_arch_addr;
 
-                stage2_dis_csr_inst         <= stage1_dis_csr_inst;
                 stage2_dis_csr_cmd          <= stage1_dis_csr_cmd;
                 stage2_dis_csr_addr         <= stage1_dis_csr_addr;
-                stage2_dis_trap_inst        <= stage1_dis_trap_inst;
                 stage2_dis_trap_cause       <= stage1_dis_trap_cause;
-                stage2_dis_mret_inst        <= stage1_dis_mret_inst;
             end
         end
     end
@@ -547,7 +541,6 @@ import riscv_types_pkg::*;
     assign dis_new_phy_addr = dis_frl_rd_phy_addr;
     assign dis_rob_rd_arch_addr = stage2_rd_arch_addr;
     assign dis_inst_valid = stage2_fire;
-    assign dis_inst_sw = stage2_dis_mem_write;
     assign dis_sw_rt_phy_addr = stage2_rt_phy_addr;
     // ISSUE QUEUE
     assign dis_rs_phy_addr = stage2_rs_phy_addr;
@@ -569,12 +562,10 @@ import riscv_types_pkg::*;
     assign dis_ld_st_issue_en = stage2_fire && stage2_dis_ld_st_issue_en;
     // CSR / trap outputs to ROB
     assign dis_pc = stage2_pc;
-    assign dis_csr_inst = stage2_dis_csr_inst;
+    assign dis_rob_opclass = stage2_dis_rob_opclass;
     assign dis_csr_cmd = stage2_dis_csr_cmd;
     assign dis_csr_addr = stage2_dis_csr_addr;
-    assign dis_trap_inst = stage2_dis_trap_inst;
     assign dis_trap_cause = stage2_dis_trap_cause;
-    assign dis_mret_inst = stage2_dis_mret_inst;
     assign dis_csr_rs1_arch_addr = stage2_rs_arch_addr;
     // RBA
     assign dis_rba_new_rd_phy_addr = dis_frl_rd_phy_addr;

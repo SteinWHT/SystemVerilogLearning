@@ -26,6 +26,8 @@ module CPU_BACK_END #(
     input logic rst_n,
 
     input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
+    input logic                                 rob_fence_pending,
+    input logic [ROB_INDEX_WIDTH-1:0]           rob_fence_tag,
 
     // DISPATCH -> issue queues
     input logic                                 dis_int_issq_en,
@@ -284,6 +286,8 @@ module CPU_BACK_END #(
         .sb_entry_sw_rob_tag(sb_entry_sw_rob_tag),
         .rob_tag(rob_tag),
         .rob_top_ptr(rob_top_ptr),
+        .rob_fence_pending(rob_fence_pending),
+        .rob_fence_tag(rob_fence_tag),
         .rob_commit_mem_write(rob_commit_mem_write),
         .lsb_en(lsb_en),
         .iss_lsb_opcode(iss_lsb_opcode),

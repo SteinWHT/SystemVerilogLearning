@@ -57,6 +57,12 @@ package riscv_funct_pkg;
     localparam logic [2:0] FUNCT3_CSRRCI = 3'b111;
 
     // ================================================================
+    // Funct3 — FENCE / FENCE.I (OP_MISC_MEM)
+    // ================================================================
+    localparam logic [2:0] FUNCT3_FENCE   = 3'b000;
+    localparam logic [2:0] FUNCT3_FENCE_I = 3'b001;
+
+    // ================================================================
     // Funct12 — SYSTEM privilege instructions
     // ================================================================
     localparam logic [11:0] FUNCT12_ECALL  = 12'h000;
