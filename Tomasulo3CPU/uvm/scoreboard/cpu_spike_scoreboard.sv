@@ -3,6 +3,8 @@
 class cpu_spike_scoreboard extends uvm_scoreboard;
     `uvm_component_utils(cpu_spike_scoreboard)
 
+    localparam bit [63:0] DUT_RELOC_WINDOW = 64'h0000_0000_0001_0000;
+
     uvm_analysis_imp_spike_commit #(cpu_commit_tr, cpu_spike_scoreboard) imp_commit;
 
     cpu_cfg                 cfg;
@@ -61,6 +63,24 @@ class cpu_spike_scoreboard extends uvm_scoreboard;
             $sformatf("Loaded %0d Spike expected commits from %0s", exp_q.size(), path), UVM_LOW)
     endfunction
 
+    protected function bit is_relocated_writeback(
+        input bit [63:0] exp_data,
+        input bit [63:0] act_data
+    );
+        logic [63:0] negative_magnitude;
+        bit in_normalized_window;
+
+        negative_magnitude = (~act_data) + 64'd1;
+        in_normalized_window =
+            (act_data <= DUT_RELOC_WINDOW) ||
+            ((act_data[63:32] == 32'hffff_ffff) &&
+             act_data[31] &&
+             (negative_magnitude <= DUT_RELOC_WINDOW));
+
+        return ((exp_data - act_data) == cfg.spike_base) &&
+               in_normalized_window;
+    endfunction
+
     virtual function void write_spike_commit(cpu_commit_tr act);
         cpu_spike_commit_item exp;
         bit act_rw_eff;
@@ -105,9 +125,9 @@ class cpu_spike_scoreboard extends uvm_scoreboard;
                 mismatches++;
             end
             if (act.cdb_data !== exp.rd_data) begin
-                logic [63:0] diff = exp.rd_data - act.cdb_data;
-                if (diff == cfg.spike_base && act.cdb_data <= 64'h10000) begin
-                    // Include the one-past-end initial stack pointer at 0x10000.
+                if (is_relocated_writeback(exp.rd_data, act.cdb_data)) begin
+                    // Include the one-past-end stack pointer and negative AUIPC
+                    // results in the DUT's normalized 64 KiB address window.
                 end else begin
                     `uvm_error(get_type_name(), $sformatf(
                         "Writeback mismatch idx=%0d rd=x%0d exp=0x%016h act=0x%016h exp_item=%0s act=%0s",

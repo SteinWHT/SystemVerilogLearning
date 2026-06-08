@@ -9,7 +9,8 @@ module icache_axi_master_bridge #(
     parameter int unsigned ADDR_WIDTH    = axi_pkg::AXI_ADDR_WIDTH,
     parameter int unsigned DATA_WIDTH    = axi_pkg::AXI_DATA_WIDTH,
     parameter int unsigned ID_WIDTH      = axi_pkg::AXI_ID_WIDTH,
-    parameter int unsigned AXI_ID        = 1
+    parameter int unsigned AXI_ID        = 1,
+    parameter logic [ADDR_WIDTH-1:0] BASE_ADDR = '0
 ) (
     input  logic                     clk,
     input  logic                     rst_n,
@@ -90,6 +91,8 @@ module icache_axi_master_bridge #(
             $fatal(1, "icache_axi_master_bridge: AXI address is too narrow");
         if (ID_WIDTH == 0)
             $fatal(1, "icache_axi_master_bridge: ID_WIDTH must be >= 1");
+        if ((BASE_ADDR % STRB_WIDTH) != 0)
+            $fatal(1, "icache_axi_master_bridge: BASE_ADDR must be word aligned");
     end
 
     always_ff @(posedge clk or negedge rst_n) begin
@@ -103,7 +106,7 @@ module icache_axi_master_bridge #(
             unique case (state_q)
                 BR_IDLE: begin
                     if (mem_req) begin
-                        addr_q  <= ADDR_WIDTH'(mem_idx) << BYTE_LSB;
+                        addr_q  <= BASE_ADDR + (ADDR_WIDTH'(mem_idx) << BYTE_LSB);
                         wdata_q <= mem_wdata;
                         if (mem_we)
                             state_q <= BR_WRITE_ADDR;

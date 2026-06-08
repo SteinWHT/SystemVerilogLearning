@@ -23,6 +23,16 @@ The same UVM package, tests, agents, D-cache scoreboard, and Spike flow support:
 The shared `cpu_if` selects the correct preload port while keeping one
 architectural shadow memory for scoreboards and `tohost` polling.
 
+For the AXI backend, UVM keeps instruction and data storage independent:
+
+- D-memory occupies SRAM word indices `0` through `16383`.
+- I-memory starts at SRAM word index `32768` (byte address `0x40000`).
+- L1I translates CPU fetch addresses into the I-memory window; L1D addresses
+  remain unchanged.
+
+This avoids requiring I/D cache coherency when directed tests preload operands
+and instructions at the same CPU-visible address.
+
 Compile or run the legacy system:
 
 ```sh

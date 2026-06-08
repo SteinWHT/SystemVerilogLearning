@@ -7,7 +7,8 @@ interface cpu_if #(
     parameter int unsigned W_BYTE_NUM   = DMEM_WIDTH / 8,
     parameter int unsigned IMEM_WORDS   = 1024,
     parameter int unsigned DMEM_LINES   = 256,
-    parameter int unsigned MEM_IDX_BITS = 16
+    parameter int unsigned MEM_IDX_BITS = 16,
+    parameter int unsigned AXI_IMEM_BASE_WORD = 32768
 )(
     input logic clk,
     input logic rst_n,
@@ -19,6 +20,7 @@ interface cpu_if #(
     logic                   imem_resp_ready;
     logic [IMEM_WIDTH-1:0]  imem_resp_data;
     logic                   imem_req_valid;
+    logic                   imem_req_ready;
     logic [IMEM_DEPTH-1:0]  imem_addr;
 
     logic                   dcache_rready;
@@ -52,7 +54,15 @@ interface cpu_if #(
     logic [INSTR_WIDTH-1:0] imem_array [IMEM_WORDS];
     logic [DMEM_WIDTH-1:0]  dmem_array [DMEM_LINES];
 
+    localparam int unsigned AXI_INSTRS_PER_WORD = DMEM_WIDTH / INSTR_WIDTH;
+
     initial begin
+        if (INSTR_WIDTH == 0 || DMEM_WIDTH < INSTR_WIDTH ||
+            (DMEM_WIDTH % INSTR_WIDTH) != 0)
+            $fatal(1, "cpu_if: AXI word must contain a whole number of instructions");
+        if (use_axi_memory && DMEM_LINES > AXI_IMEM_BASE_WORD)
+            $fatal(1, "cpu_if: D-memory image overlaps AXI instruction window");
+
         dcache_mem_init_en   = 1'b0;
         dcache_mem_init_idx  = '0;
         dcache_mem_init_data = '0;
@@ -66,11 +76,43 @@ interface cpu_if #(
             dmem_array[i] = '0;
     end
 
+    task automatic write_axi_word(
+        input int unsigned           word_idx,
+        input logic [DMEM_WIDTH-1:0] data
+    );
+        @(negedge clk);
+        axi_mem_init_en       = 1'b1;
+        axi_mem_init_word_idx = DMEM_DEPTH'(word_idx);
+        axi_mem_init_data     = data;
+        @(negedge clk);
+        axi_mem_init_en       = 1'b0;
+    endtask
+
     task automatic load_instr(
         input logic [IMEM_DEPTH-1:0] byte_addr,
         input logic [INSTR_WIDTH-1:0] instr
     );
-        imem_array[byte_addr[IMEM_DEPTH-1:2]] = instr;
+        int unsigned instr_idx;
+        int unsigned first_instr_idx;
+        int unsigned axi_word_idx;
+        logic [DMEM_WIDTH-1:0] packed_word;
+
+        instr_idx = int'(byte_addr / (INSTR_WIDTH / 8));
+        if (instr_idx >= IMEM_WORDS)
+            $fatal(1, "cpu_if.load_instr: byte address 0x%0h is outside IMEM", byte_addr);
+
+        imem_array[instr_idx] = instr;
+        if (use_axi_memory) begin
+            axi_word_idx = AXI_IMEM_BASE_WORD + (instr_idx / AXI_INSTRS_PER_WORD);
+            first_instr_idx = (instr_idx / AXI_INSTRS_PER_WORD) * AXI_INSTRS_PER_WORD;
+            packed_word = '0;
+            for (int unsigned lane = 0; lane < AXI_INSTRS_PER_WORD; lane++) begin
+                if ((first_instr_idx + lane) < IMEM_WORDS)
+                    packed_word[lane*INSTR_WIDTH +: INSTR_WIDTH] =
+                        imem_array[first_instr_idx + lane];
+            end
+            write_axi_word(axi_word_idx, packed_word);
+        end
     endtask
 
     task automatic write_dmem_line(
@@ -78,19 +120,16 @@ interface cpu_if #(
         input logic [DMEM_WIDTH-1:0]  data
     );
         dmem_array[line_idx] = data;
-        @(negedge clk);
         if (use_axi_memory) begin
-            axi_mem_init_en       = 1'b1;
-            axi_mem_init_word_idx = DMEM_DEPTH'(line_idx);
-            axi_mem_init_data     = data;
+            write_axi_word(line_idx, data);
         end else begin
+            @(negedge clk);
             dcache_mem_init_en   = 1'b1;
             dcache_mem_init_idx  = MEM_IDX_BITS'(line_idx);
             dcache_mem_init_data = data;
+            @(negedge clk);
+            dcache_mem_init_en = 1'b0;
         end
-        @(negedge clk);
-        dcache_mem_init_en   = 1'b0;
-        axi_mem_init_en      = 1'b0;
     endtask
 
     function automatic logic [INSTR_WIDTH-1:0] nop();
@@ -118,23 +157,37 @@ interface cpu_if #(
     endtask
 
     task automatic load_imem_file(input string path);
+        logic [DMEM_WIDTH-1:0] packed_word;
+
         $readmemh(path, imem_array);
+        if (use_axi_memory) begin
+            for (int unsigned i = 0; i < IMEM_WORDS; i += AXI_INSTRS_PER_WORD) begin
+                packed_word = '0;
+                for (int unsigned lane = 0; lane < AXI_INSTRS_PER_WORD; lane++) begin
+                    if ((i + lane) < IMEM_WORDS)
+                        packed_word[lane*INSTR_WIDTH +: INSTR_WIDTH] =
+                            imem_array[i + lane];
+                end
+                write_axi_word(
+                    AXI_IMEM_BASE_WORD + (i / AXI_INSTRS_PER_WORD),
+                    packed_word
+                );
+            end
+        end
     endtask
 
     task automatic load_dmem_file(input string path);
         $readmemh(path, dmem_array);
-        @(negedge clk);
         for (int unsigned i = 0; i < DMEM_LINES; i++) begin
             if (use_axi_memory) begin
-                axi_mem_init_en       = 1'b1;
-                axi_mem_init_word_idx = DMEM_DEPTH'(i);
-                axi_mem_init_data     = dmem_array[i];
+                write_axi_word(i, dmem_array[i]);
             end else begin
+                @(negedge clk);
                 dcache_mem_init_en   = 1'b1;
                 dcache_mem_init_idx  = MEM_IDX_BITS'(i);
                 dcache_mem_init_data = dmem_array[i];
+                @(negedge clk);
             end
-            @(negedge clk);
         end
         dcache_mem_init_en   = 1'b0;
         dcache_mem_init_idx  = '0;
@@ -172,6 +225,7 @@ interface cpu_if #(
         input  imem_resp_data,
         output imem_resp_ready,
         output imem_req_valid,
+        input  imem_req_ready,
         output imem_addr,
         input  dcache_rready,
         input  dcache_rresp_valid,

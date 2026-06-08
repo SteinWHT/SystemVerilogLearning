@@ -35,7 +35,8 @@ module CPU_L1DCache_AXI #(
     parameter int unsigned AXI_ADDR_WIDTH          = axi_pkg::AXI_ADDR_WIDTH,
     parameter int unsigned AXI_DATA_WIDTH          = axi_pkg::AXI_DATA_WIDTH,
     parameter int unsigned AXI_ID_WIDTH            = axi_pkg::AXI_ID_WIDTH,
-    parameter int unsigned AXI_SRAM_DEPTH          = dcache_pkg::MEM_DEPTH
+    parameter int unsigned AXI_SRAM_DEPTH          = dcache_pkg::MEM_DEPTH,
+    parameter logic [AXI_ADDR_WIDTH-1:0] ICACHE_AXI_BASE_ADDR = '0
 ) (
     input  logic                            clk,
     input  logic                            rst_n,
@@ -128,6 +129,8 @@ module CPU_L1DCache_AXI #(
             $fatal(1, "CPU_L1DCache_AXI: CPU, cache, and AXI data widths must match");
         if (DMEM_DEPTH < ADDR_WIDTH)
             $fatal(1, "CPU_L1DCache_AXI: CPU data address width is too narrow");
+        if (IMEM_WIDTH == 0 || (IMEM_WIDTH % INSTR_WIDTH) != 0)
+            $fatal(1, "CPU_L1DCache_AXI: IMEM_WIDTH must contain a whole number of instructions");
     end
 
     CPU #(
@@ -232,7 +235,7 @@ module CPU_L1DCache_AXI #(
     );
 
     icache_top #(
-        .FETCH_INSTR_NUM (4)
+        .FETCH_INSTR_NUM (IMEM_WIDTH / INSTR_WIDTH)
     ) u_icache (
         .clk             (clk),
         .rst_n           (rst_n),
@@ -259,7 +262,8 @@ module CPU_L1DCache_AXI #(
         .ADDR_WIDTH    (AXI_ADDR_WIDTH),
         .DATA_WIDTH    (AXI_DATA_WIDTH),
         .ID_WIDTH      (AXI_ID_WIDTH),
-        .AXI_ID        (1) // Separate AXI ID
+        .AXI_ID        (1), // Separate AXI ID
+        .BASE_ADDR     (ICACHE_AXI_BASE_ADDR)
     ) u_icache_axi_bridge (
         .clk          (clk),
         .rst_n        (rst_n),

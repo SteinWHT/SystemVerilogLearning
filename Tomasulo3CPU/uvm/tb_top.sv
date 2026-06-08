@@ -186,17 +186,20 @@ module tb_top;
         .head_prev_phy    (dut.u_cpu.front_end.rob.head.prev_phy),
         .head_rd_arch     (dut.u_cpu.front_end.rob.head.rd_addr),
         .head_rw          (dut.u_cpu.front_end.rob.head.rw),
-        .head_mw          (dut.u_cpu.front_end.rob.head.mw),
+        .head_mw          (dut.u_cpu.front_end.rob.head.opclass ==
+                           riscv_types_pkg::ROB_STORE),
         .head_sw_addr     (dut.u_cpu.front_end.rob.head.sw_addr),
         .head_sw_strb     (dut.u_cpu.front_end.rob.head.sw_strb),
         .head_pc          (dut.u_cpu.front_end.rob.head.pc),
         .head_trap_cause  (dut.u_cpu.front_end.rob.head.trap_cause),
-        .head_mret        (dut.u_cpu.front_end.rob.head.mret_occur),
-        .head_is_csr      (dut.u_cpu.front_end.rob.head.is_csr),
+        .head_mret        (dut.u_cpu.front_end.rob.head_is_mret),
+        .head_is_csr      (dut.u_cpu.front_end.rob.head.opclass ==
+                           riscv_types_pkg::ROB_CSR),
         .head_csr_addr    (dut.u_cpu.front_end.rob.head.csr_addr),
         .head_csr_cmd     (dut.u_cpu.front_end.rob.head.csr_cmd),
         .head_rs1_arch    (dut.u_cpu.front_end.rob.head.rs1_arch),
-        .head_cdb_data    (dut.u_cpu.front_end.rob.head.is_csr ?
+        .head_cdb_data    ((dut.u_cpu.front_end.rob.head.opclass ==
+                            riscv_types_pkg::ROB_CSR) ?
                            dut.u_cpu.front_end.rob.csr_rdata :
                            dut.u_cpu.front_end.rob.sim_head_cdb_data)
     );

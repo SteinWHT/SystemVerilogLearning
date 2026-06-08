@@ -54,11 +54,16 @@ class cpu_add_item extends cpu_base_item;
 
     virtual function void calculate_expected_result();
         bit [31:0] addw_result;
+        bit [63:0] lhs;
+        bit [63:0] rhs;
+
+        lhs = (rs1 == 5'd0) ? 64'd0 : rs1_data;
+        rhs = (rs2 == 5'd0) ? 64'd0 : rs2_data;
         if (is_addw) begin
-            addw_result     = rs1_data[31:0] + rs2_data[31:0];
+            addw_result     = lhs[31:0] + rhs[31:0];
             expected_result = {{32{addw_result[31]}}, addw_result};
         end else begin
-            expected_result = rs1_data + rs2_data;
+            expected_result = lhs + rhs;
         end
     endfunction
 

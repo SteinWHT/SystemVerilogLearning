@@ -142,7 +142,6 @@ class cpu_baremetal_spike_test extends cpu_base_test;
                     "Timed out waiting for the final tohost store response")
         end
 
-        repeat (2) @(posedge vif.clk);
         phase.drop_objection(this);
     endtask
 endclass
