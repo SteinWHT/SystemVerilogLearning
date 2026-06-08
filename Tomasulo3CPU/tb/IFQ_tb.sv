@@ -21,6 +21,8 @@ module IFQ_tb;
     logic                       imem_resp_ready;
     logic [IMEM_DEPTH-1:0]      imem_addr;
     logic                       imem_req_valid;
+    logic                       imem_req_ready;
+    assign imem_req_ready = 1'b1;
     logic                       dis_ren;
     logic                       dis_jmpbr;
     logic [IMEM_WIDTH_WORD-1:0] dis_jmpbr_addr;
@@ -115,7 +117,7 @@ module IFQ_tb;
         reset_dut();
         check("empty after reset",     ifq_empty,  1);
         check("imem_addr after reset",  imem_addr,  '0);
-        check("imem_req_valid after rst", imem_req_valid, 1);
+        check("imem_req_valid after rst", imem_req_valid, 0); // outstanding request is active
 
         // ------------------------------------------------
         // Test 2 : Write 1 -> read 1
@@ -124,8 +126,8 @@ module IFQ_tb;
         feed_one(32'hDEAD_BEEF);
         check("not empty",    ifq_empty,     0);
         check("head instr",   ifq_instr_out, 32'hDEAD_BEEF);
-        check("pc",           ifq_pc,        64'd0);
-        check("pc+4",         ifq_pc_plus4,  64'd4);
+        check("pc",           ifq_pc,        64'hffff_ffff_ffff_fffc);
+        check("pc+4",         ifq_pc_plus4,  64'd0);
 
         read_one(rdata);
         check("read data",    rdata,         32'hDEAD_BEEF);
@@ -141,7 +143,7 @@ module IFQ_tb;
 
         for (int i = 0; i < 8; i++) begin
             check($sformatf("order[%0d] instr", i), ifq_instr_out, 32'hA000_0000 + i);
-            check($sformatf("order[%0d] pc+4",  i), ifq_pc_plus4,  64'(4*(i+2)));
+            check($sformatf("order[%0d] pc+4",  i), ifq_pc_plus4,  64'(4*(i+1)));
             // i+2 because we already consumed 1 instr (test2) + i instrs read so far:
             // head_pc = (1+i)*4, pc+4 = (2+i)*4
             read_one(rdata);
@@ -217,8 +219,8 @@ module IFQ_tb;
         // feed at new PC
         feed_one(32'h1234_5678);
         check("new instr",   ifq_instr_out, 32'h1234_5678);
-        check("pc flush",    ifq_pc,        64'h200);
-        check("pc+4 flush",  ifq_pc_plus4,  64'h204);
+        check("pc flush",    ifq_pc,        64'h1fc);
+        check("pc+4 flush",  ifq_pc_plus4,  64'h200);
         read_one(rdata);
 
         // ------------------------------------------------
@@ -258,8 +260,8 @@ module IFQ_tb;
         for (int i = 0; i < 4; i++) feed_one(32'hC000_0000 + i);
 
         for (int i = 0; i < 4; i++) begin
-            check($sformatf("pc[%0d]",   i), ifq_pc,      64'(4*i));
-            check($sformatf("pc+4[%0d]", i), ifq_pc_plus4, 64'(4*(i+1)));
+            check($sformatf("pc[%0d]",   i), ifq_pc,      (i == 0) ? 64'hffff_ffff_ffff_fffc : 64'(4*i - 4));
+            check($sformatf("pc+4[%0d]", i), ifq_pc_plus4, 64'(4*i));
             read_one(rdata);
         end
 

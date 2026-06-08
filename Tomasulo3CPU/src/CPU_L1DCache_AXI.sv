@@ -1,13 +1,10 @@
 `timescale 1ns/1ps
 
-// Tomasulo CPU + L1 D-cache + shared AXI4 SRAM subsystem.
-//
-// dma_axi is the second upstream master slot. It can be tied idle today and
-// connected to a DMA AXI master later without changing the CPU/cache path.
+// Tomasulo CPU + L1 D-cache + L1 I-cache + shared AXI4 SRAM subsystem.
 module CPU_L1DCache_AXI #(
     parameter int unsigned INSTR_WIDTH             = 32,
     parameter int unsigned IMEM_DEPTH              = 64,
-    parameter int unsigned IMEM_WIDTH              = 32,
+    parameter int unsigned IMEM_WIDTH              = 128, // Default to 128 (4 instructions)
     parameter int unsigned IMEM_DEPTH_WORD         = IMEM_DEPTH - 1,
     parameter int unsigned XLEN                    = 64,
     parameter int unsigned ARCH_REG_COUNT          = 32,
@@ -43,9 +40,11 @@ module CPU_L1DCache_AXI #(
     input  logic                            clk,
     input  logic                            rst_n,
 
+    // Expose ports for testbench observability
     output logic [IMEM_DEPTH-1:0]           imem_addr,
     output logic                            imem_req_valid,
-    input  logic [INSTR_WIDTH-1:0]          imem_resp_data,
+    output logic                            imem_req_ready,
+    input  logic [IMEM_WIDTH-1:0]           imem_resp_data,
     input  logic                            imem_resp_valid,
     output logic                            imem_resp_ready,
 
@@ -53,7 +52,7 @@ module CPU_L1DCache_AXI #(
     input  logic [AXI_ADDR_WIDTH-1:0]       axi_mem_init_word_idx,
     input  logic [AXI_DATA_WIDTH-1:0]       axi_mem_init_data,
 
-    axi_if.slave                            dma_axi,
+    axi_if.slave                            dma_axi, // Unused internally; kept for port compatibility
 
     output logic [31:0]                     dcache_hits,
     output logic [31:0]                     dcache_misses,
@@ -76,18 +75,53 @@ module CPU_L1DCache_AXI #(
 );
     import dcache_pkg::*;
 
+    // L1 D-Cache internal memory interfaces
     logic        mem_req;
     logic        mem_we;
     mem_idx_t    mem_idx;
     cache_word_t mem_wdata;
     cache_word_t mem_rdata;
     logic        mem_ack;
+    logic        dcache_axi_error_internal;
 
+    // L1 I-Cache internal memory interfaces
+    logic        imem_mem_req;
+    logic        imem_mem_we;
+    icache_pkg::mem_idx_t    imem_mem_idx;
+    icache_pkg::mem_word_t   imem_mem_wdata;
+    icache_pkg::mem_word_t   imem_mem_rdata;
+    logic        imem_mem_ack;
+    logic        icache_axi_error_internal;
+
+    // CPU instruction fetch internal interfaces
+    logic [IMEM_DEPTH-1:0]   cpu_imem_addr;
+    logic                            cpu_imem_req_valid;
+    logic                            cpu_imem_req_ready;
+    logic [IMEM_WIDTH-1:0]           cpu_imem_resp_data;
+    logic                            cpu_imem_resp_valid;
+    logic                            cpu_imem_resp_ready;
+
+    // AXI busses
     axi_if #(
         .ADDR_WIDTH (AXI_ADDR_WIDTH),
         .DATA_WIDTH (AXI_DATA_WIDTH),
         .ID_WIDTH   (AXI_ID_WIDTH)
     ) cpu_axi (clk, rst_n);
+
+    axi_if #(
+        .ADDR_WIDTH (AXI_ADDR_WIDTH),
+        .DATA_WIDTH (AXI_DATA_WIDTH),
+        .ID_WIDTH   (AXI_ID_WIDTH)
+    ) icache_axi (clk, rst_n);
+
+    // Combine AXI errors into dcache_axi_error output
+    assign dcache_axi_error = dcache_axi_error_internal || icache_axi_error_internal;
+
+    // Drive boundary debug ports
+    assign imem_addr       = cpu_imem_addr;
+    assign imem_req_valid  = cpu_imem_req_valid;
+    assign imem_req_ready  = cpu_imem_req_ready;
+    assign imem_resp_ready = cpu_imem_resp_ready;
 
     initial begin
         if (DMEM_WIDTH != WORD_BITS || AXI_DATA_WIDTH != WORD_BITS)
@@ -130,11 +164,12 @@ module CPU_L1DCache_AXI #(
     ) u_cpu (
         .clk                (clk),
         .rst_n              (rst_n),
-        .imem_addr          (imem_addr),
-        .imem_req_valid     (imem_req_valid),
-        .imem_resp_data     (imem_resp_data),
-        .imem_resp_valid    (imem_resp_valid),
-        .imem_resp_ready    (imem_resp_ready),
+        .imem_addr          (cpu_imem_addr),
+        .imem_req_valid     (cpu_imem_req_valid),
+        .imem_req_ready     (cpu_imem_req_ready),
+        .imem_resp_data     (cpu_imem_resp_data),
+        .imem_resp_valid    (cpu_imem_resp_valid),
+        .imem_resp_ready    (cpu_imem_resp_ready),
         .dcache_rready      (dcache_rready),
         .dcache_rresp_valid (dcache_rresp_valid),
         .dcache_rdata       (dcache_rdata),
@@ -192,8 +227,50 @@ module CPU_L1DCache_AXI #(
         .mem_wdata    (mem_wdata),
         .mem_rdata    (mem_rdata),
         .mem_ack      (mem_ack),
-        .error_sticky (dcache_axi_error),
+        .error_sticky (dcache_axi_error_internal),
         .axi          (cpu_axi)
+    );
+
+    icache_top #(
+        .FETCH_INSTR_NUM (4)
+    ) u_icache (
+        .clk             (clk),
+        .rst_n           (rst_n),
+        .req_valid       (cpu_imem_req_valid),
+        .req_ready       (cpu_imem_req_ready),
+        .req_addr        (cpu_imem_addr[31:0]),
+        .resp_valid      (cpu_imem_resp_valid),
+        .resp_ready      (cpu_imem_resp_ready),
+        .resp_data       (cpu_imem_resp_data),
+        .resp_valid_mask (),
+        .inv_all         (1'b0), // Tying off fence.i hook for now
+        .mem_req         (imem_mem_req),
+        .mem_we          (imem_mem_we),
+        .mem_idx         (imem_mem_idx),
+        .mem_wdata       (imem_mem_wdata),
+        .mem_rdata       (imem_mem_rdata),
+        .mem_ack         (imem_mem_ack),
+        .stat_hits       (),
+        .stat_misses     ()
+    );
+
+    icache_axi_master_bridge #(
+        .MEM_IDX_WIDTH (icache_pkg::MEM_IDX_BITS),
+        .ADDR_WIDTH    (AXI_ADDR_WIDTH),
+        .DATA_WIDTH    (AXI_DATA_WIDTH),
+        .ID_WIDTH      (AXI_ID_WIDTH),
+        .AXI_ID        (1) // Separate AXI ID
+    ) u_icache_axi_bridge (
+        .clk          (clk),
+        .rst_n        (rst_n),
+        .mem_req      (imem_mem_req),
+        .mem_we       (imem_mem_we),
+        .mem_idx      (imem_mem_idx),
+        .mem_wdata    (imem_mem_wdata),
+        .mem_rdata    (imem_mem_rdata),
+        .mem_ack      (imem_mem_ack),
+        .error_sticky (icache_axi_error_internal),
+        .axi          (icache_axi)
     );
 
     axi_full_soc_top #(
@@ -208,7 +285,7 @@ module CPU_L1DCache_AXI #(
         .sram_init_word_idx (axi_mem_init_word_idx),
         .sram_init_data     (axi_mem_init_data),
         .m0                 (cpu_axi),
-        .m1                 (dma_axi)
+        .m1                 (icache_axi) // Connect I-Cache AXI instead of DMA AXI
     );
 
 endmodule

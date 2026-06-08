@@ -50,7 +50,8 @@ module CPU #(
     // I-Cache interface (valid/ready handshake)
     output logic [IMEM_DEPTH-1:0]   imem_addr,
     output logic                    imem_req_valid,
-    input  logic [INSTR_WIDTH-1:0]  imem_resp_data,
+    input  logic                    imem_req_ready,
+    input  logic [IMEM_WIDTH-1:0]  imem_resp_data,
     input  logic                    imem_resp_valid,
     output logic                    imem_resp_ready,
 
@@ -191,6 +192,7 @@ module CPU #(
         // I-Cache
         .imem_addr                       (imem_addr),
         .imem_req_valid                  (imem_req_valid),
+        .imem_req_ready                  (imem_req_ready),
         .imem_resp_data                  (imem_resp_data),
         .imem_resp_valid                 (imem_resp_valid),
         .imem_resp_ready                 (imem_resp_ready),

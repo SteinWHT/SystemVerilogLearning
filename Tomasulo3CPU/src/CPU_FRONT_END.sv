@@ -57,8 +57,9 @@ module CPU_FRONT_END
     // I-CACHE interface (valid/ready handshake)
     output logic [IMEM_DEPTH-1:0]               imem_addr,
     output logic                                imem_req_valid,
+    input  logic                                imem_req_ready,
 
-    input  logic [INSTR_WIDTH-1:0]              imem_resp_data,
+    input  logic [IMEM_WIDTH-1:0]               imem_resp_data,
     input  logic                                imem_resp_valid,
     output logic                                imem_resp_ready,
 
@@ -280,6 +281,7 @@ module CPU_FRONT_END
 
         .imem_addr(imem_addr),
         .imem_req_valid(imem_req_valid),
+        .imem_req_ready(imem_req_ready),
         .imem_resp_data(imem_resp_data),
         .imem_resp_valid(imem_resp_valid),
         .imem_resp_ready(imem_resp_ready),
@@ -301,13 +303,8 @@ module CPU_FRONT_END
         .XLEN(REG_FILE_DATA_WIDTH),
         .INSTR_WIDTH(INSTR_WIDTH),
         .IMEM_DEPTH(IMEM_DEPTH),
-        .IMEM_WIDTH(IMEM_WIDTH),
-        .DMEM_DEPTH(DMEM_DEPTH),
-        .DMEM_WIDTH(DMEM_WIDTH),
         .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
-        .ROB_DEPTH(ROB_DEPTH),
-        .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
         .BPB_PC_BITS(BPB_PC_BITS),
         .OPCODE_WIDTH(OPCODE_WIDTH)
     ) dispatch (

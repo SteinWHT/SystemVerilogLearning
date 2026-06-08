@@ -2,7 +2,7 @@
 
 This directory runs the official **[riscv-software-src/riscv-tests](https://github.com/riscv-software-src/riscv-tests)** ISA suite on the full CPU in simulation.
 
-**Status (manifest regression):** See [doc/VERIFICATION_STATUS.md](../doc/VERIFICATION_STATUS.md) for the full verification picture. Manifests: 52× `rv64ui` + 13× `rv64um` = 65 tests.
+**Status (manifest regression):** See [doc/VERIFICATION_STATUS.md](../doc/VERIFICATION_STATUS.md) for the full verification picture. Manifests: 53× `rv64ui` + 13× `rv64um` = 66 tests.
 
 ## One-time setup
 
@@ -81,10 +81,28 @@ Use forward slashes in hex paths on Windows. Read `TOHOST_ADDR` from each test�
 
 | File | Suite |
 |------|--------|
-| `manifest_rv64ui.txt` | Integer user ISA (52 tests) |
+| `manifest_rv64ui.txt` | Integer user ISA (53 tests) |
 | `manifest_rv64um.txt` | M extension: MUL / DIV / REM + variants (13 tests) |
 
-Excluded from manifest (not implemented or out of scope): `fence_i`, `ma_data`.
+Excluded from manifest (not implemented or out of scope): `ma_data`.
+
+## Fence verification
+
+Build and run the official self-modifying-code test inside the Synopsys
+container:
+
+```bash
+python3 arch_test/build_tests.py fence_i
+python3 arch_test/run_tests.py fence_i --sim vcs
+```
+
+Run the focused ordering tests:
+
+```bash
+make sim PROJECT=ROB_fence USE_DW=1
+make sim PROJECT=SB_fence USE_DW=1
+make sim PROJECT=LSQ_fence USE_DW=1
+```
 
 ## Utilities
 

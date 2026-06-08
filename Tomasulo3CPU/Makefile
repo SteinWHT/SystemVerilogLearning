@@ -137,6 +137,10 @@ DCACHE_FILES := \
 	$(L1DCACHE_DIR)/tb/dcache_backing_mem.sv \
 	$(L1DCACHE_DIR)/integration/dcache_tomasulo_wrap.sv
 
+# ---- L1 I-cache (sibling L1ICache project) ----
+L1ICACHE_DIR ?= $(PROJ_DIR)/../L1ICache
+ICACHE_FILES := 	$(L1ICACHE_DIR)/rtl/icache_pkg.sv 	$(L1ICACHE_DIR)/rtl/icache_if.sv 	$(L1ICACHE_DIR)/rtl/icache_plru.sv 	$(L1ICACHE_DIR)/rtl/icache_tag_ram.sv 	$(L1ICACHE_DIR)/rtl/icache_data_ram.sv 	$(L1ICACHE_DIR)/rtl/icache_mshr.sv 	$(L1ICACHE_DIR)/rtl/icache_refill.sv 	$(L1ICACHE_DIR)/rtl/icache_core.sv 	$(L1ICACHE_DIR)/rtl/icache_top.sv 	$(L1ICACHE_DIR)/rtl/icache_axi_master_bridge.sv
+
 # ---- Full AXI4 memory subsystem (sibling AXISoC project) ----
 AXISOC_DIR ?= $(PROJ_DIR)/../AXISoC
 AXI_FILES := \
@@ -173,7 +177,7 @@ $(error Unsupported UVM_DUT '$(UVM_DUT)'; use legacy or axi)
 endif
 endif
 ifeq ($(USE_AXI),1)
-SRC_FILES += $(AXI_FILES) $(SRC_DIR)/CPU_L1DCache_AXI.sv
+SRC_FILES += $(AXI_FILES) $(ICACHE_FILES) $(SRC_DIR)/CPU_L1DCache_AXI.sv
 endif
 
 # DW IP behavioral stubs for simulators without Synopsys DesignWare
@@ -196,6 +200,9 @@ TB_FILES := \
 else
 TB_FILES := \
 	$(TB_DIR)/$(PROJECT)_tb.sv
+ifneq ($(findstring CPU,$(PROJECT)),)
+TB_FILES += $(TB_DIR)/rob_commit_bind.sv
+endif
 endif
 
 # ---- VCS options ----

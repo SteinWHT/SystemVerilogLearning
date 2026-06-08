@@ -17,15 +17,10 @@ import riscv_types_pkg::*;
     parameter int unsigned XLEN = 64,
     parameter int unsigned INSTR_WIDTH = 32,
     parameter int unsigned IMEM_DEPTH = 64,
-    parameter int unsigned IMEM_WIDTH = 32,
     parameter int unsigned IMEM_DEPTH_WORD = IMEM_DEPTH - 1,
-    parameter int unsigned DMEM_DEPTH = 64,
-    parameter int unsigned DMEM_WIDTH = 64,
     parameter int unsigned ARCH_REG_COUNT = 32,
     parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
-    parameter int unsigned ROB_DEPTH = 32,
-    parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
     parameter int unsigned BPB_PC_BITS = 3,
     parameter int unsigned OPCODE_WIDTH = 7
    ) (
@@ -385,44 +380,47 @@ import riscv_types_pkg::*;
     // FRAT is full (no more checkpoints for branch instructions) && (is_branch or jr)
     // if jr
     // if the instruction can be issued but the corresponding issue queue is full, we should also stall
+    logic normal_stall;
     always_comb begin
-        stall = '0;
+        normal_stall = '0;
 
         if(ifetch_empty) begin
-           stall = 1'b1;
+           normal_stall = 1'b1;
         end else if (rob_full) begin
-            stall = 1'b1;
+            normal_stall = 1'b1;
         // check when the second stage is non-valid
         end else if (!rob_two_or_more_vacant && stage2_valid) begin
-            stall = 1'b1;
+            normal_stall = 1'b1;
         end else if (frat_full && stage1_dis_branch) begin
-            stall = 1'b1;
+            normal_stall = 1'b1;
         end else if (dis_frl_empty && stage1_reg_write) begin
-            stall = 1'b1;
+            normal_stall = 1'b1;
         end else if (stage1_needs_issue_entry && !stage1_issue_entry_available) begin
-            stall = 1'b1;
+            normal_stall = 1'b1;
         end else if ((stage2_dis_int_issue_en && stage1_dis_int_issue_en &&
                 !issue_intq_two_or_more_vacant) || (stage2_dis_int_issue_en &&
                 issue_intq_full)) begin
-            stall = 1'b1;
+            normal_stall = 1'b1;
         end else if ((stage2_dis_div_issue_en && stage1_dis_div_issue_en &&
                 !issue_divq_two_or_more_vacant) || (stage2_dis_div_issue_en &&
                 issue_divq_full)) begin
-            stall = 1'b1;
+            normal_stall = 1'b1;
         end else if ((stage2_dis_mul_issue_en && stage1_dis_mul_issue_en &&
                 !issue_mulq_two_or_more_vacant) || (stage2_dis_mul_issue_en &&
                 issue_mulq_full)) begin
-            stall = 1'b1;
+            normal_stall = 1'b1;
         end else if ((stage2_dis_ld_st_issue_en && stage1_dis_ld_st_issue_en &&
                 !issue_ld_stq_two_or_more_vacant) || (stage2_dis_ld_st_issue_en &&
                 issue_ld_stq_full)) begin
-            stall = 1'b1;
+            normal_stall = 1'b1;
         end else if (dis_jmpbr) begin
-            stall = 1'b1;
+            normal_stall = 1'b1;
         end else if (csr_stall) begin
-            stall = 1'b1;
+            normal_stall = 1'b1;
         end
     end
+
+    assign stall = normal_stall || ifq_wait_after_empty;
 
     // Rename forwarding: FRAT updates on the clock edge after stage2 dispatch,
     // so the instruction in stage1 must see stage2's newly allocated physical
@@ -477,7 +475,11 @@ import riscv_types_pkg::*;
             ifq_wait_after_empty       <= 1'b1;
         end else begin
             if(stall && ifq_wait_after_empty) begin
-                ifq_wait_after_empty <= 1'b1;
+                if (normal_stall) begin
+                    ifq_wait_after_empty <= 1'b1;
+                end else begin
+                    ifq_wait_after_empty <= ifetch_empty;
+                end
             end else
                 ifq_wait_after_empty        <= ifetch_empty;
             if (!stage1_valid) begin

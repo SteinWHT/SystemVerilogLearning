@@ -1,5 +1,5 @@
 # rv64ui tests supported by Tomasulo3CPU (one name per line, without rv64ui-p- prefix)
-# Excluded: fence_i (self-modifying code), ma_data (misaligned focus)
+# Excluded: ma_data (misaligned focus)
 add
 addi
 addiw
@@ -13,6 +13,7 @@ bgeu
 blt
 bltu
 bne
+fence_i
 simple
 jal
 jalr

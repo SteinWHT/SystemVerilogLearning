@@ -48,7 +48,7 @@ def compile_test(bin_dir: Path, prefix: str, suite: str, test: str) -> Path:
     gcc = tool_path(bin_dir, prefix, "gcc")
     cmd = [
         gcc,
-        "-march=rv64im_zicsr",
+        "-march=rv64im_zicsr_zifencei",
         "-mabi=lp64",
         "-static",
         "-mcmodel=medany",

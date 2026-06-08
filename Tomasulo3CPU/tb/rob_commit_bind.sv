@@ -117,6 +117,7 @@ module rob_commit_monitor
             lat_cdb_data     <= '0;
             lat_commit_count <= 0;
         end else if (commit_valid) begin
+            $display("[COMMIT] pc=0x%h rd=%0d val=0x%h count=%0d", head_pc, head_rd_arch, head_cdb_data, lat_commit_count);
             lat_valid        <= 1'b1;
             lat_rob_tag      <= commit_rob_tag;
             lat_curr_phy     <= head_curr_phy;
@@ -162,15 +163,15 @@ bind ROB rob_commit_monitor #(
     .head_prev_phy    (head.prev_phy),
     .head_rd_arch     (head.rd_addr),
     .head_rw          (head.rw),
-    .head_mw          (head.mw),
+    .head_mw          (head.opclass == ROB_STORE),
     .head_sw_addr     (head.sw_addr),
     .head_sw_strb     (head.sw_strb),
     .head_pc          (head.pc),
     .head_trap_cause  (head.trap_cause),
-    .head_mret        (head.mret_occur),
-    .head_is_csr      (head.is_csr),
+    .head_mret        (head_is_mret),
+    .head_is_csr      (head.opclass == ROB_CSR),
     .head_csr_addr    (head.csr_addr),
     .head_csr_cmd     (head.csr_cmd),
     .head_rs1_arch    (head.rs1_arch),
-    .head_cdb_data    (head.is_csr ? csr_rdata : sim_head_cdb_data)
+    .head_cdb_data    ((head.opclass == ROB_CSR) ? csr_rdata : sim_head_cdb_data)
 );

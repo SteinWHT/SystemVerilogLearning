@@ -25,7 +25,8 @@ module CPU_dcache_axi_tb;
 
     logic [IMEM_DEPTH-1:0]  imem_addr;
     logic                   imem_req_valid;
-    logic [INSTR_WIDTH-1:0] imem_resp_data;
+    logic                   imem_req_ready;
+    logic [127:0]           imem_resp_data;
     logic                   imem_resp_valid;
     logic                   imem_resp_ready;
 
@@ -72,6 +73,7 @@ module CPU_dcache_axi_tb;
         .rst_n              (rst_n),
         .imem_addr          (imem_addr),
         .imem_req_valid     (imem_req_valid),
+        .imem_req_ready     (imem_req_ready),
         .imem_resp_data     (imem_resp_data),
         .imem_resp_valid    (imem_resp_valid),
         .imem_resp_ready    (imem_resp_ready),
@@ -133,16 +135,9 @@ module CPU_dcache_axi_tb;
     logic [INSTR_WIDTH-1:0] imem_array [IMEM_WORDS];
     logic [63:0]            dmem_seed [SEED_WORDS];
 
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            imem_resp_valid <= 1'b1;
-            imem_resp_data  <= '0;
-        end else begin
-            imem_resp_valid <= imem_req_valid;
-            if (imem_req_valid && imem_resp_valid)
-                imem_resp_data <= imem_array[imem_addr[15:2]];
-        end
-    end
+    // Instruction memory emulation is removed since CPU fetches directly from AXI SRAM via L1 I-Cache.
+    assign imem_resp_valid = 1'b0;
+    assign imem_resp_data  = '0;
 
     function automatic logic [63:0] peek_qword(input logic [63:0] byte_addr);
         cache_set_t  set;
@@ -191,6 +186,14 @@ module CPU_dcache_axi_tb;
             dmem_seed[i] = '0;
         $readmemh(imem_file, imem_array);
         $readmemh(dmem_file, dmem_seed);
+
+        // Copy instructions into the data seed memory (each 64-bit word holds 2 instructions)
+        // Only copy the first 128 instructions to avoid overlapping data at 0x200 (word index 64)
+        for (int i = 0; i < 128; i += 2) begin
+            dmem_seed[i/2][31:0]  = imem_array[i];
+            dmem_seed[i/2][63:32] = imem_array[i+1];
+        end
+
         @(negedge clk);
         for (int i = 0; i < SEED_WORDS; i++) begin
             axi_mem_init_en       = 1'b1;

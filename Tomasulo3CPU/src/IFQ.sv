@@ -22,6 +22,7 @@ module IFQ #(
     // Request channel: IFQ -> I-CACHE
     output logic [IMEM_DEPTH-1:0]       imem_addr,
     output logic                        imem_req_valid,
+    input  logic                        imem_req_ready,
 
     // Response channel: I-CACHE -> IFQ
     input  logic [IMEM_WIDTH-1:0]       imem_resp_data,
@@ -61,9 +62,9 @@ module IFQ #(
 
     logic full, empty, flush;
 
-    // Response handshake fires when the I-CACHE presents valid data and the
-    // IFQ has room to accept it. Using an explicit ready avoids silently
-    // dropping an in-flight response when the queue becomes full.
+    logic outstanding_req;
+    logic discard_req;
+    logic imem_req_fire;
     logic imem_resp_fire;
 
     logic [IMEM_DEPTH-1:0] pc;
@@ -72,6 +73,7 @@ module IFQ #(
 
     assign flush   = dis_jmpbr && dis_jmpbr_addr_valid;
     assign pc_plus4 = pc + IMEM_DEPTH'(InstrBytes);
+    assign imem_req_fire = imem_req_valid && imem_req_ready;
 
     // full: any FIFO is full
     logic [NUM_WAYS-1:0] wr_target_mask;
@@ -84,7 +86,7 @@ module IFQ #(
     assign full  = |(wr_target_mask & full_array);
     assign empty = empty_array[rd_way];
 
-    assign imem_resp_fire = imem_resp_valid && imem_resp_ready;
+    assign imem_resp_fire = imem_resp_valid && imem_resp_ready && !discard_req;
 
     // Compute per-FIFO write enables and data routing
     always_comb begin
@@ -129,7 +131,27 @@ module IFQ #(
             wr_way  <= '0;
             pc      <= '0;
             imem_pc <= '0;
+            outstanding_req <= 1'b0;
+            discard_req     <= 1'b0;
         end else begin
+            if (flush) begin
+                if (outstanding_req && !(imem_resp_valid && imem_resp_ready)) begin
+                    discard_req <= 1'b1;
+                end else begin
+                    discard_req <= 1'b0;
+                end
+                if (imem_resp_valid && imem_resp_ready) begin
+                    outstanding_req <= 1'b0;
+                end
+            end else begin
+                if (imem_req_fire) begin
+                    outstanding_req <= 1'b1;
+                end else if (imem_resp_valid && imem_resp_ready) begin
+                    outstanding_req <= 1'b0;
+                    discard_req     <= 1'b0;
+                end
+            end
+
             if (dis_jmpbr) begin
                 if (dis_jmpbr_addr_valid) begin
                     rd_way  <= '0;
@@ -139,8 +161,10 @@ module IFQ #(
                 end
             end else begin
                 if (imem_resp_fire) begin
-                    wr_way  <= wr_way + NumWaysWidth'(OneTimeInstrNum);
-                    imem_pc <= imem_pc + IMEM_DEPTH'(OneTimeInstrNum * (InstrBytes));
+                    wr_way  <= wr_way + OneTimeInstrNum[NumWaysWidth-1:0];
+                    if (!discard_req) begin
+                        imem_pc <= imem_pc + IMEM_DEPTH'(OneTimeInstrNum * (InstrBytes));
+                    end
                 end
 
                 if (dis_ren && !empty) begin
@@ -153,16 +177,13 @@ module IFQ #(
 
     assign ifq_instr_out = instr_out_array[rd_way];
     assign ifq_empty     = empty;
-    // Since the data should arrive at the same cycle.
-    // Namely next cycle ptr will be latched in this cycle posedge
-    // The pc here is one cycle before, we need to subtract 4 to get the correct PC for the current instruction
-    assign ifq_pc        = pc - 4;
-    assign ifq_pc_plus4  = pc;
+    assign ifq_pc        = pc;
+    assign ifq_pc_plus4  = pc_plus4;
     assign imem_addr       = imem_pc;
-    // Request a fetch whenever there is room and we are not flushing.
-    assign imem_req_valid  = !full && !dis_jmpbr;
-    // Accept a response under the same condition (queue has room, no flush).
-    assign imem_resp_ready = !full && !dis_jmpbr;
+    // Request a fetch whenever there is room, no flush, and no outstanding request.
+    assign imem_req_valid  = !outstanding_req && !full && !dis_jmpbr;
+    // Accept a response under the same condition (queue has room, no flush) OR if draining a flushed request.
+    assign imem_resp_ready = discard_req ? imem_resp_valid : (!full && !dis_jmpbr);
 
     // synthesis translate_off
     initial begin

@@ -1,7 +1,6 @@
 // Tomasulo3CPU adaptation of riscv-tests env/p/riscv_test.h
 // - Code linked at 0x0 (see link_tomasulo.ld)
 // - No PMP/SATP/mhartid/medeleg (CSRs not implemented in core)
-// - No fence in RVTEST_PASS (FENCE opcode not modeled)
 // - Simpler reset: program mtvec then jump to test code
 
 #ifndef _ENV_PHYSICAL_SINGLE_CORE_H
@@ -198,6 +197,7 @@ rvtest_code_begin:
         unimp
 
 #define RVTEST_PASS                                                     \
+        fence;                                                          \
         li TESTNUM, 1;                                                  \
         li a7, 93;                                                      \
         li a0, 0;                                                       \
@@ -205,6 +205,7 @@ rvtest_code_begin:
 
 #define TESTNUM gp
 #define RVTEST_FAIL                                                     \
+        fence;                                                          \
 1:      beqz TESTNUM, 1b;                                               \
         sll TESTNUM, TESTNUM, 1;                                        \
         or TESTNUM, TESTNUM, 1;                                         \

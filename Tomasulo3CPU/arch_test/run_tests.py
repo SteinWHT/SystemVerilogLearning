@@ -11,23 +11,22 @@ Usage:
   python run_tests.py          # all built tests
 """
 
-from __future__ import annotations
-
 import argparse
 import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import List
 
 ROOT = Path(__file__).resolve().parent
 PROJ = ROOT.parent
 BUILD = ROOT / "build"
 
 
-def list_built_tests() -> list[str]:
+def list_built_tests() -> List[str]:
     if not BUILD.is_dir():
         return []
-    out: list[str] = []
+    out = []
     for d in sorted(BUILD.iterdir()):
         if d.is_dir() and (d / "imem.hex").is_file() and (d / "meta.txt").is_file():
             out.append(d.name)
@@ -47,7 +46,7 @@ def _hex_path(p: Path) -> str:
     return p.resolve().as_posix()
 
 
-def run_questa_direct(test_dir: Path, tohost: int, timeout_s: int) -> subprocess.CompletedProcess:
+def run_questa_direct(test_dir: Path, tohost: int, timeout_s: int):
     """Run Questa without make (Windows-friendly)."""
     import os
     from shutil import which
@@ -76,8 +75,8 @@ def run_questa_direct(test_dir: Path, tohost: int, timeout_s: int) -> subprocess
             f"+TEST_NAME={test_dir.name}",
         ],
         cwd=build,
-        capture_output=True,
-        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         timeout=timeout_s,
     )
 
@@ -105,8 +104,8 @@ def run_one(test_dir: Path, sim: str, timeout_s: int) -> bool:
                         f"PLUSARGS={plusargs}",
                     ],
                     cwd=PROJ,
-                    capture_output=True,
-                    text=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                     timeout=timeout_s,
                 )
             else:
@@ -127,14 +126,17 @@ def run_one(test_dir: Path, sim: str, timeout_s: int) -> bool:
                     f"PLUSARGS={plusargs}",
                 ],
                 cwd=PROJ,
-                capture_output=True,
-                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 timeout=timeout_s,
             )
     except subprocess.TimeoutExpired:
         print(f"[TIMEOUT] {test_dir.name}")
         return False
-    log = result.stdout + result.stderr
+    
+    stdout = result.stdout.decode('utf-8', errors='ignore') if result.stdout else ""
+    stderr = result.stderr.decode('utf-8', errors='ignore') if result.stderr else ""
+    log = stdout + stderr
     if result.returncode == 0 and "[PASS]" in log and "riscv_test PASS" in log:
         print(f"[PASS] {test_dir.name}")
         return True
@@ -166,7 +168,7 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.tests:
-        dirs: list[Path] = []
+        dirs = []
         for t in args.tests:
             if (BUILD / t).is_dir():
                 dirs.append(BUILD / t)

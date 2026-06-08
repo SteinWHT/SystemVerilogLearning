@@ -82,3 +82,4 @@ INTERVIEW_GUIDE.md
 *.fsdb
 *ucli.key
 /L1DCache/doc
+/L1ICache/build
