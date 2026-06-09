@@ -23,6 +23,9 @@ Standalone **L1 D-cache**: RTL, directed testbenches, and a Tomasulo integration
 - 64-bit word CPU access with byte strobe and correct word-within-line select/merge  
 - Tree PLRU replacement, lowest-invalid-way allocation, single MSHR  
 - **8-beat burst** refill and dirty writeback over a 64-bit memory bus  
+- **Clean-all (`flush_req`/`flush_done`)** port: walks every line, writes back
+  all dirty data, and clears the dirty bits — used by the CPU's FENCE.I
+  controller to make stores visible to the I-cache (I/D coherence)  
 - Split load/store valid/ready ports (`dcache_if` / `dcache_top`)  
 - Hit/miss statistics on `dcache_top`  
 - All geometry derived from `dcache_pkg.sv` (retarget by changing a few localparams)

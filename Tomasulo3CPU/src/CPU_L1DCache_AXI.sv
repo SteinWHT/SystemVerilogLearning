@@ -102,6 +102,14 @@ module CPU_L1DCache_AXI #(
     logic                            cpu_imem_resp_valid;
     logic                            cpu_imem_resp_ready;
 
+    // FENCE.I cache-coherence handshake (CPU <-> coherence controller <-> caches)
+    logic        fence_i_coh_start;
+    logic        fence_i_coh_done;
+    logic        dcache_flush_req;
+    logic        dcache_flush_busy;
+    logic        dcache_flush_done;
+    logic        icache_inv_all;
+
     // AXI busses
     axi_if #(
         .ADDR_WIDTH (AXI_ADDR_WIDTH),
@@ -163,7 +171,8 @@ module CPU_L1DCache_AXI #(
         .MUL_CYCLES              (MUL_CYCLES),
         .INT_CYCLES              (INT_CYCLES),
         .LD_ST_CYCLES            (LD_ST_CYCLES),
-        .OPCODE_WIDTH            (OPCODE_WIDTH)
+        .OPCODE_WIDTH            (OPCODE_WIDTH),
+        .FENCE_I_COHERENCE       (1'b1)
     ) u_cpu (
         .clk                (clk),
         .rst_n              (rst_n),
@@ -173,6 +182,8 @@ module CPU_L1DCache_AXI #(
         .imem_resp_data     (cpu_imem_resp_data),
         .imem_resp_valid    (cpu_imem_resp_valid),
         .imem_resp_ready    (cpu_imem_resp_ready),
+        .fence_i_coh_start  (fence_i_coh_start),
+        .fence_i_coh_done   (fence_i_coh_done),
         .dcache_rready      (dcache_rready),
         .dcache_rresp_valid (dcache_rresp_valid),
         .dcache_rdata       (dcache_rdata),
@@ -205,6 +216,9 @@ module CPU_L1DCache_AXI #(
         .wstrb       (dcache_wstrb),
         .wresp_valid (dcache_wresp_valid),
         .wresp_ready (dcache_wresp_ready),
+        .flush_req   (dcache_flush_req),
+        .flush_busy  (dcache_flush_busy),
+        .flush_done  (dcache_flush_done),
         .mem_req     (mem_req),
         .mem_we      (mem_we),
         .mem_idx     (mem_idx),
@@ -246,7 +260,7 @@ module CPU_L1DCache_AXI #(
         .resp_ready      (cpu_imem_resp_ready),
         .resp_data       (cpu_imem_resp_data),
         .resp_valid_mask (),
-        .inv_all         (1'b0), // Tying off fence.i hook for now
+        .inv_all         (icache_inv_all), // Driven by FENCE.I coherence controller
         .mem_req         (imem_mem_req),
         .mem_we          (imem_mem_we),
         .mem_idx         (imem_mem_idx),
@@ -275,6 +289,18 @@ module CPU_L1DCache_AXI #(
         .mem_ack      (imem_mem_ack),
         .error_sticky (icache_axi_error_internal),
         .axi          (icache_axi)
+    );
+
+    // FENCE.I coherence: clean the write-back D$ to shared memory, then
+    // invalidate the I$, before the FENCE.I commits and fetch is redirected.
+    cache_coherence_ctrl u_coherence (
+        .clk               (clk),
+        .rst_n             (rst_n),
+        .coh_start         (fence_i_coh_start),
+        .dcache_flush_req  (dcache_flush_req),
+        .dcache_flush_done (dcache_flush_done),
+        .icache_inv_all    (icache_inv_all),
+        .coh_done          (fence_i_coh_done)
     );
 
     axi_full_soc_top #(

@@ -92,6 +92,10 @@ module dcache_tomasulo_wrap #(
         .wresp_valid (dcache_wresp_valid),
         .wresp_ready (dcache_wresp_ready),
 
+        .flush_req   (1'b0),
+        .flush_busy  (),
+        .flush_done  (),
+
         .mem_req     (mem_req),
         .mem_we      (mem_we),
         .mem_idx     (mem_idx),

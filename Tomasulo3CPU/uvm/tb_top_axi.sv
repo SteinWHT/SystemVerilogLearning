@@ -39,9 +39,16 @@ module tb_top_axi;
     localparam int unsigned AXI_ADDR_WIDTH          = 32;
     localparam int unsigned AXI_DATA_WIDTH          = 64;
     localparam int unsigned AXI_ID_WIDTH            = 4;
-    localparam int unsigned AXI_IMEM_BASE_WORD      = 32768;
+    // Unified (von Neumann) address space: the L1I and L1D share one AXI SRAM and
+    // address it identically (no instruction-window offset). This restores real
+    // I/D aliasing, so self-modifying code must use FENCE.I for coherence.
+    localparam int unsigned AXI_IMEM_BASE_WORD      = 0;
     localparam logic [AXI_ADDR_WIDTH-1:0] AXI_IMEM_BASE_ADDR =
         AXI_ADDR_WIDTH'(AXI_IMEM_BASE_WORD * (AXI_DATA_WIDTH / 8));
+    // Directed (active) tests place code from address 0 upward; keep their LD/ST
+    // operand-scratch pool in the upper half of D-memory so it never aliases the
+    // instruction stream now that the two views share one memory.
+    localparam int unsigned SETUP_DMEM_LINE         = IMEM_WORDS / 2;
 
     logic clk;
     logic rst_n;
@@ -81,6 +88,14 @@ module tb_top_axi;
         .DATA_WIDTH (AXI_DATA_WIDTH),
         .ID_WIDTH   (AXI_ID_WIDTH)
     ) dma_axi (
+        .clk   (clk),
+        .rst_n (rst_n)
+    );
+
+    // FENCE.I I$/D$ coherence observation (+ embedded ordering SVA).
+    cpu_coherence_if #(
+        .IMEM_DEPTH (IMEM_DEPTH)
+    ) coh_if (
         .clk   (clk),
         .rst_n (rst_n)
     );
@@ -151,6 +166,19 @@ module tb_top_axi;
     );
 
     assign cpu_vif.memory_error = dcache_axi_error;
+
+    // Route the internal coherence handshake out to the observation interface.
+    assign coh_if.coh_start         = dut.fence_i_coh_start;
+    assign coh_if.coh_done          = dut.fence_i_coh_done;
+    assign coh_if.flush_req         = dut.dcache_flush_req;
+    assign coh_if.flush_busy        = dut.dcache_flush_busy;
+    assign coh_if.flush_done        = dut.dcache_flush_done;
+    assign coh_if.inv_all           = dut.icache_inv_all;
+    assign coh_if.mem_req           = dut.mem_req;
+    assign coh_if.mem_we            = dut.mem_we;
+    assign coh_if.mem_ack           = dut.mem_ack;
+    assign coh_if.fence_commit      = dut.u_cpu.front_end.rob.fence_i_commit_flush;
+    assign coh_if.fence_redirect_pc = dut.u_cpu.front_end.rob.fence_i_redirect_pc;
 
     assign dma_axi.awid     = '0;
     assign dma_axi.awaddr   = '0;
@@ -291,12 +319,15 @@ module tb_top_axi;
         cfg = cpu_cfg::type_id::create("cfg");
         cfg.imem_words = IMEM_WORDS;
         cfg.dmem_lines = DMEM_LINES;
+        cfg.setup_dmem_line = SETUP_DMEM_LINE;
         cfg.memory_backend = cpu_cfg::CPU_MEM_AXI;
         cfg.drain_cycles = 1000;
+        cfg.enable_coherence_checker = 1'b1;
 
         uvm_config_db#(cpu_drv_vif_t)::set(null, "uvm_test_top", "vif", cpu_vif);
         uvm_config_db#(cpu_mon_vif_t)::set(null, "uvm_test_top", "mon_vif", cpu_vif);
         uvm_config_db#(cpu_commit_vif_t)::set(null, "uvm_test_top", "commit_vif", commit_if);
+        uvm_config_db#(cpu_coh_vif_t)::set(null, "uvm_test_top", "coh_vif", coh_if);
         uvm_config_db#(cpu_cfg)::set(null, "uvm_test_top", "cfg", cfg);
 
         begin

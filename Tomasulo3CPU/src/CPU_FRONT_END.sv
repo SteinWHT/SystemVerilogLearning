@@ -49,10 +49,17 @@ module CPU_FRONT_END
     parameter int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH),
 
     // ISSUEQ
-    parameter int unsigned OPCODE_WIDTH = 7
+    parameter int unsigned OPCODE_WIDTH = 7,
+
+    // Cache coherence (FENCE.I-driven I$/D$ synchronization)
+    parameter bit FENCE_I_COHERENCE = 1'b0
 ) (
     input  logic clk,
     input  logic rst_n,
+
+    // Cache-coherence handshake (active when FENCE_I_COHERENCE=1)
+    output logic                                fence_i_coh_start,
+    input  logic                                fence_i_coh_done,
 
     // I-CACHE interface (valid/ready handshake)
     output logic [IMEM_DEPTH-1:0]               imem_addr,
@@ -508,7 +515,8 @@ module CPU_FRONT_END
         .IMEM_DEPTH(IMEM_DEPTH),
         .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
         .ARCH_REG_COUNT(ARCH_REG_COUNT),
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH)
+        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .FENCE_I_COHERENCE(FENCE_I_COHERENCE)
     ) rob (
         .clk(clk),
         .rst_n(rst_n),
@@ -579,7 +587,9 @@ module CPU_FRONT_END
         .trap_commit_flush(trap_commit_flush),
         .trap_redirect_pc(trap_redirect_pc),
         .fence_i_commit_flush(fence_i_commit_flush),
-        .fence_i_redirect_pc(fence_i_redirect_pc)
+        .fence_i_redirect_pc(fence_i_redirect_pc),
+        .fence_i_coh_start(fence_i_coh_start),
+        .fence_i_coh_done(fence_i_coh_done)
     );
 
     // CSR

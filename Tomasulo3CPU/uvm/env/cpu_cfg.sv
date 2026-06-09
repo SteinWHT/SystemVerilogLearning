@@ -10,6 +10,8 @@ class cpu_cfg extends uvm_object;
     bit                     enable_coverage   = 0;
     bit                     enable_baremetal_coverage = 0;
     bit                     enable_ref_model  = 0;
+    // FENCE.I I$/D$ coherence checking (AXI DUT only; tb_top_axi sets it).
+    bit                     enable_coherence_checker = 0;
     bit                     enable_operand_setup   = 1;
     real                    coverage_goal_pct = 100.0;
 
@@ -54,6 +56,7 @@ class cpu_cfg extends uvm_object;
         `uvm_field_int(enable_coverage,                                UVM_ALL_ON)
         `uvm_field_int(enable_baremetal_coverage,                      UVM_ALL_ON)
         `uvm_field_int(enable_ref_model,                               UVM_ALL_ON)
+        `uvm_field_int(enable_coherence_checker,                       UVM_ALL_ON)
         `uvm_field_int(enable_operand_setup,                           UVM_ALL_ON)
         `uvm_field_real(coverage_goal_pct,                             UVM_ALL_ON)
         `uvm_field_int(setup_dmem_line,                                UVM_ALL_ON | UVM_DEC)

@@ -6,6 +6,7 @@ class cpu_base_test extends uvm_test;
     cpu_drv_vif_t                 vif;
     cpu_mon_vif_t                 mon_vif;
     cpu_commit_vif_t              commit_vif;
+    cpu_coh_vif_t                 coh_vif;
     function new(string name = "cpu_base_test", uvm_component parent = null);
         super.new(name, parent);
     endfunction
@@ -23,6 +24,10 @@ class cpu_base_test extends uvm_test;
             cfg = cpu_cfg::type_id::create("cfg");
             uvm_config_db#(cpu_cfg)::set(this, "*", "cfg", cfg);
         end
+
+        // Coherence observation is optional: only the AXI DUT publishes it.
+        if (uvm_config_db#(cpu_coh_vif_t)::get(this, "", "coh_vif", coh_vif))
+            uvm_config_db#(cpu_coh_vif_t)::set(this, "env*", "coh_vif", coh_vif);
 
         uvm_config_db#(cpu_drv_vif_t)::set(this, "env*", "vif", vif);
         uvm_config_db#(cpu_mon_vif_t)::set(this, "env.agt*", "mon_vif", mon_vif);

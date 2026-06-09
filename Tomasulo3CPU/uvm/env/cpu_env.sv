@@ -6,6 +6,8 @@ class cpu_env extends uvm_env;
     cpu_scoreboard      sb;
     cpu_dcache_scoreboard sb_dcache;
     cpu_spike_scoreboard sb_spike;
+    cpu_coherence_monitor    mon_coh;
+    cpu_coherence_scoreboard sb_coh;
     cpu_int_alu_ref_model   rm;
     cpu_coverage        cov_commit;
     cpu_instr_coverage  cov_instr;
@@ -37,6 +39,11 @@ class cpu_env extends uvm_env;
         if (cfg.enable_spike_scoreboard)
             sb_spike = cpu_spike_scoreboard::type_id::create("sb_spike", this);
 
+        if (cfg.enable_coherence_checker) begin
+            mon_coh = cpu_coherence_monitor::type_id::create("mon_coh", this);
+            sb_coh  = cpu_coherence_scoreboard::type_id::create("sb_coh", this);
+        end
+
         if (cfg.enable_ref_model)
             rm = cpu_int_alu_ref_model::type_id::create("rm", this);
 
@@ -66,6 +73,9 @@ class cpu_env extends uvm_env;
 
         if (cfg.enable_dcache_scoreboard)
             agt.dmon.ap_dcache.connect(sb_dcache.imp_dcache);
+
+        if (cfg.enable_coherence_checker)
+            mon_coh.ap_coh.connect(sb_coh.analysis_export);
 
         if (cfg.enable_ref_model && cfg.is_active == UVM_ACTIVE)
             agt.drv.ap_instr.connect(rm.imp_instr);

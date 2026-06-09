@@ -21,6 +21,11 @@ module dcache_top (
     output logic                       wresp_valid,
     input  logic                       wresp_ready,
 
+    // Clean-all (FENCE.I / coherence) control
+    input  logic                       flush_req,
+    output logic                       flush_busy,
+    output logic                       flush_done,
+
     // 64-bit memory bus
     output logic                       mem_req,
     output logic                       mem_we,
@@ -49,6 +54,9 @@ module dcache_top (
         .wstrb       (wstrb),
         .wresp_valid (wresp_valid),
         .wresp_ready (wresp_ready),
+        .flush_req   (flush_req),
+        .flush_busy  (flush_busy),
+        .flush_done  (flush_done),
         .mem_req     (mem_req),
         .mem_we      (mem_we),
         .mem_idx     (mem_idx),

@@ -205,6 +205,10 @@ crossbar:
 - Transactions are not reordered.
 - The cache bridge emits only single-beat, full-width transfers.
 - Exclusive accesses, atomic operations, and multiple slaves are not present.
+- I/D coherence is software-managed via `FENCE.I` (the RISC-V contract): a
+  committed FENCE.I cleans the write-back D-cache to the shared SRAM, then
+  invalidates the I-cache, then redirects fetch. There is no hardware snoop
+  between the two L1 caches.
 - Clock-domain crossing is outside the current scope.
 - The DMA port is verified with a BFM but no DMA RTL master is connected yet.
 

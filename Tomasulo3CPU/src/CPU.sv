@@ -42,7 +42,10 @@ module CPU #(
     parameter int unsigned INT_CYCLES              = 1,
     parameter int unsigned LD_ST_CYCLES            = 1,
 
-    parameter int unsigned OPCODE_WIDTH            = 7
+    parameter int unsigned OPCODE_WIDTH            = 7,
+
+    // Enable FENCE.I-driven I$/D$ coherence handshake (see fence_i_coh_* ports).
+    parameter bit FENCE_I_COHERENCE                = 1'b0
 ) (
     input  logic clk,
     input  logic rst_n,
@@ -54,6 +57,10 @@ module CPU #(
     input  logic [IMEM_WIDTH-1:0]  imem_resp_data,
     input  logic                    imem_resp_valid,
     output logic                    imem_resp_ready,
+
+    // Cache-coherence handshake
+    output logic                    fence_i_coh_start,
+    input  logic                    fence_i_coh_done,
 
     // D-Cache read interface
     input  logic                            dcache_rready,
@@ -184,10 +191,15 @@ module CPU #(
         .ROB_INDEX_WIDTH         (ROB_INDEX_WIDTH),
         .SB_DEPTH                (SB_DEPTH),
         .SB_INDEX_WIDTH          (SB_INDEX_WIDTH),
-        .OPCODE_WIDTH            (OPCODE_WIDTH)
+        .OPCODE_WIDTH            (OPCODE_WIDTH),
+        .FENCE_I_COHERENCE      (FENCE_I_COHERENCE)
     ) front_end (
         .clk                             (clk),
         .rst_n                           (rst_n),
+
+        // Cache coherence handshake
+        .fence_i_coh_start               (fence_i_coh_start),
+        .fence_i_coh_done                (fence_i_coh_done),
 
         // I-Cache
         .imem_addr                       (imem_addr),

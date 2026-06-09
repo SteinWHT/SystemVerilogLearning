@@ -60,7 +60,11 @@ interface cpu_if #(
         if (INSTR_WIDTH == 0 || DMEM_WIDTH < INSTR_WIDTH ||
             (DMEM_WIDTH % INSTR_WIDTH) != 0)
             $fatal(1, "cpu_if: AXI word must contain a whole number of instructions");
-        if (use_axi_memory && DMEM_LINES > AXI_IMEM_BASE_WORD)
+        // AXI_IMEM_BASE_WORD == 0 selects a unified (von Neumann) memory: the I and
+        // D views share one address space, so overlap is expected (and is exactly
+        // what FENCE.I coherence must handle). A non-zero base keeps the legacy
+        // split instruction window, where the D image must stay below it.
+        if (use_axi_memory && AXI_IMEM_BASE_WORD != 0 && DMEM_LINES > AXI_IMEM_BASE_WORD)
             $fatal(1, "cpu_if: D-memory image overlaps AXI instruction window");
 
         dcache_mem_init_en   = 1'b0;

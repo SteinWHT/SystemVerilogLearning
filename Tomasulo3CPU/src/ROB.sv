@@ -31,7 +31,12 @@ module ROB
     parameter int unsigned ARCH_REG_COUNT = 32,
     parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
     parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
-    parameter int unsigned W_BYTE_NUM = DMEM_WIDTH / 8
+    parameter int unsigned W_BYTE_NUM = DMEM_WIDTH / 8,
+    // When set, FENCE.I commit is held until the external cache-coherence
+    // controller reports the I$/D$ have been synchronized (D$ cleaned to
+    // memory, I$ invalidated). Disabled by default so unit testbenches and
+    // non-coherent systems keep their original single-cycle FENCE.I commit.
+    parameter bit FENCE_I_COHERENCE = 1'b0
 ) (
     input logic clk,
     input logic rst_n,
@@ -119,7 +124,15 @@ module ROB
 
     // FENCE.I redirects fetch after all prior stores are globally complete.
     output logic                                fence_i_commit_flush,
-    output logic [IMEM_DEPTH-1:0]               fence_i_redirect_pc
+    output logic [IMEM_DEPTH-1:0]               fence_i_redirect_pc,
+
+    // Cache-coherence handshake for FENCE.I (used when FENCE_I_COHERENCE=1).
+    //   fence_i_coh_start : a FENCE.I is at the head, completed, and the store
+    //                       buffer is drained — safe to begin I$/D$ sync.
+    //   fence_i_coh_done  : the coherence controller has finished the sync;
+    //                       FENCE.I may now commit and redirect fetch.
+    output logic                                fence_i_coh_start,
+    input  logic                                fence_i_coh_done
 );
 
     typedef struct packed {
@@ -277,6 +290,11 @@ module ROB
     assign fence_i_commit_flush = enable && (head.opclass == ROB_FENCE_I);
     assign fence_i_redirect_pc  = head.pc + IMEM_DEPTH'(4);
 
+    // Ready to synchronize the caches: a completed FENCE.I is at the head and
+    // every older store has drained out of the store buffer into the D$.
+    assign fence_i_coh_start = FENCE_I_COHERENCE && head.compl && !empty &&
+                               (head.opclass == ROB_FENCE_I) && sb_drained;
+
     // The oldest in-flight fence is the load-issue ordering boundary.
     always_comb begin
         rob_fence_pending = 1'b0;
@@ -305,10 +323,13 @@ module ROB
         // 2. the ROB is not empty (avoid flushing the ROB)
         // 3. A store requires SB space.
         // 4. FENCE/FENCE.I require every older committed store response.
+        // 5. With coherence enabled, FENCE.I also waits for the I$/D$ sync.
         if (head.compl && !empty &&
             ((head.opclass != ROB_STORE) || !sb_full) &&
             (((head.opclass != ROB_FENCE) &&
-              (head.opclass != ROB_FENCE_I)) || sb_drained)) begin
+              (head.opclass != ROB_FENCE_I)) || sb_drained) &&
+            ((head.opclass != ROB_FENCE_I) || !FENCE_I_COHERENCE ||
+              fence_i_coh_done)) begin
             enable = 1'b1;
         end
 

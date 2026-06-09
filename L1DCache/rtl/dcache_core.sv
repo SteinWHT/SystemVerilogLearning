@@ -32,6 +32,15 @@ module dcache_core (
     output logic                       wresp_valid,
     input  logic                       wresp_ready,
 
+    // Clean-all (FENCE.I / coherence) port:
+    //   While flush_req is held, the cache stops accepting CPU accesses, walks
+    //   every (set, way), writes back each valid+dirty line to the shared
+    //   backing memory, and clears its dirty bit (the line stays valid). When
+    //   the whole array has been cleaned, flush_done pulses for one cycle.
+    input  logic                       flush_req,
+    output logic                       flush_busy,
+    output logic                       flush_done,
+
     // 64-bit memory bus
     output logic                       mem_req,
     output logic                       mem_we,
@@ -49,7 +58,9 @@ module dcache_core (
         ST_IDLE        = 3'd0,
         ST_MISS_WB     = 3'd1,
         ST_MISS_FILL   = 3'd2,
-        ST_MISS_FINISH = 3'd3
+        ST_MISS_FINISH = 3'd3,
+        ST_FLUSH_SCAN  = 3'd4,   // examine the current (set, way)
+        ST_FLUSH_WB    = 3'd5    // burst-write a dirty line back to memory
     } core_state_e;
 
     core_state_e       state_q;
@@ -127,6 +138,34 @@ module dcache_core (
     logic              accept_read;
     logic              accept_write;
 
+    // ---------------------------------------------------------------- clean-all
+    logic              flush_active;
+    cache_set_t        flush_set;
+    cache_way_t        flush_way;
+    logic              flush_done_q;
+
+    // Metadata of the way currently being examined (tag array is read at
+    // flush_set during a clean, so these select the way within that set).
+    logic              flush_way_valid;
+    logic              flush_way_dirty;
+    cache_tag_t        flush_way_tag;
+    cache_line_t       rf_write_line;
+    mem_idx_t          flush_wb_widx;
+
+    wire               flush_is_last = (flush_set == cache_set_t'(NUM_SETS-1)) &&
+                                       (flush_way == cache_way_t'(NUM_WAYS-1));
+    wire   cache_way_t flush_next_way = flush_way + cache_way_t'(1);
+    wire   cache_set_t flush_next_set = (flush_way == cache_way_t'(NUM_WAYS-1)) ?
+                                        (flush_set + cache_set_t'(1)) : flush_set;
+
+    assign flush_busy      = flush_active;
+    assign flush_done      = flush_done_q;
+    assign flush_way_valid = tag_valid[int'(flush_way)];
+    assign flush_way_dirty = tag_dirty[int'(flush_way)];
+    assign flush_way_tag   = tag_flat[int'(flush_way)*TAG_BITS +: TAG_BITS];
+    assign flush_wb_widx   = addr_to_line_base_widx(
+                                 set_tag_to_addr(flush_set, flush_way_tag));
+
     // ---------------------------------------------------------------- stats
     logic [31:0]       hits_q;
     logic [31:0]       misses_q;
@@ -137,7 +176,8 @@ module dcache_core (
     // Single port, load priority. The cache is free to accept a new access only
     // in IDLE with no resolve/miss/response in flight.
     assign rready = (state_q == ST_IDLE) && !resolve_pending && !mshr_busy
-                    && !rf_busy && !hold_rresp && !hold_wresp;
+                    && !rf_busy && !hold_rresp && !hold_wresp
+                    && !flush_req && !flush_active;
 
     // wready must reflect load priority: a store can only be accepted when the
     // cache is free AND no load is competing this cycle. Tying wready=rready
@@ -155,8 +195,16 @@ module dcache_core (
     assign lookup_set  = addr_to_set(lookup_addr);
     assign lookup_tag  = addr_to_tag(lookup_addr);
     assign lookup_wsel = addr_to_word_sel(lookup_addr);
-    assign tag_read_set = (state_q == ST_IDLE) ? lookup_set : mshr_set;
+    assign tag_read_set = flush_active ? flush_set :
+                          (state_q == ST_IDLE) ? lookup_set : mshr_set;
     assign data_rd_way  = lookup_hit ? hit_way : alloc_way;
+
+    // Data-array read port: the clean-all walk reads (flush_set, flush_way);
+    // normal operation reads the looked-up line.
+    cache_set_t data_r_set;
+    cache_way_t data_r_way;
+    assign data_r_set = flush_active ? flush_set : lookup_set;
+    assign data_r_way = flush_active ? flush_way : data_rd_way;
 
     // ---------------------------------------------------------------- arrays
     dcache_tag_ram u_tag (
@@ -174,8 +222,8 @@ module dcache_core (
 
     dcache_data_ram u_data (
         .clk    (clk),
-        .r_set  (lookup_set),
-        .r_way  (data_rd_way),
+        .r_set  (data_r_set),
+        .r_way  (data_r_way),
         .r_line (line_rdata),
         .w_en   (data_w_en),
         .w_set  (data_w_set),
@@ -225,7 +273,7 @@ module dcache_core (
         .start_read  (rf_start_read),
         .start_write (rf_start_write),
         .base_widx   (rf_base_widx),
-        .write_line  (mshr_victim_data),
+        .write_line  (rf_write_line),
         .busy        (rf_busy),
         .done        (rf_done),
         .read_line   (rf_read_line),
@@ -266,6 +314,9 @@ module dcache_core (
         victim_meta.dirty = tag_dirty[int'(alloc_way)];
         victim_meta.tag   = tag_flat[int'(alloc_way)*TAG_BITS +: TAG_BITS];
     end
+
+    // Writeback source: the line being cleaned, or the miss victim.
+    assign rf_write_line = flush_active ? line_rdata : mshr_victim_data;
 
     // datapath comb
     cache_line_t fill_line;
@@ -358,6 +409,29 @@ module dcache_core (
                 mshr_dealloc   = 1'b1;
             end
 
+            ST_FLUSH_SCAN: begin
+                // Start a writeback for a valid+dirty line; the refill engine
+                // latches rf_write_line (= line_rdata) and base address now.
+                if (flush_way_valid && flush_way_dirty) begin
+                    rf_start_write = 1'b1;
+                    rf_base_widx   = flush_wb_widx;
+                end
+            end
+
+            ST_FLUSH_WB: begin
+                rf_base_widx = flush_wb_widx;
+                // On writeback completion, clear the dirty bit (keep the line
+                // valid so it stays cached after the clean).
+                if (rf_done) begin
+                    tag_w_en          = 1'b1;
+                    tag_w_set         = flush_set;
+                    tag_w_way         = flush_way;
+                    tag_w_entry.valid = 1'b1;
+                    tag_w_entry.dirty = 1'b0;
+                    tag_w_entry.tag   = flush_way_tag;
+                end
+            end
+
             default: ;
         endcase
     end
@@ -376,7 +450,12 @@ module dcache_core (
             hold_rdata      <= '0;
             hits_q          <= '0;
             misses_q        <= '0;
+            flush_active    <= 1'b0;
+            flush_set       <= '0;
+            flush_way       <= '0;
+            flush_done_q    <= 1'b0;
         end else begin
+            flush_done_q <= 1'b0;
             if (hold_rresp && rresp_ready)
                 hold_rresp <= 1'b0;
             if (hold_wresp && wresp_ready)
@@ -411,6 +490,12 @@ module dcache_core (
                             else
                                 state_q <= ST_MISS_FILL;
                         end
+                    end else if (flush_req) begin
+                        // Begin a full clean-all walk from (set 0, way 0).
+                        flush_active <= 1'b1;
+                        flush_set    <= '0;
+                        flush_way    <= '0;
+                        state_q      <= ST_FLUSH_SCAN;
                     end
                 end
 
@@ -432,6 +517,35 @@ module dcache_core (
                         hold_wresp <= 1'b1;
                     end
                     state_q <= ST_IDLE;
+                end
+
+                ST_FLUSH_SCAN: begin
+                    if (flush_way_valid && flush_way_dirty) begin
+                        // Writeback launched this cycle; wait for it to finish.
+                        state_q <= ST_FLUSH_WB;
+                    end else if (flush_is_last) begin
+                        flush_active <= 1'b0;
+                        flush_done_q <= 1'b1;
+                        state_q      <= ST_IDLE;
+                    end else begin
+                        flush_set <= flush_next_set;
+                        flush_way <= flush_next_way;
+                    end
+                end
+
+                ST_FLUSH_WB: begin
+                    if (rf_done) begin
+                        // Dirty bit cleared via the tag write in the comb block.
+                        if (flush_is_last) begin
+                            flush_active <= 1'b0;
+                            flush_done_q <= 1'b1;
+                            state_q      <= ST_IDLE;
+                        end else begin
+                            flush_set <= flush_next_set;
+                            flush_way <= flush_next_way;
+                            state_q   <= ST_FLUSH_SCAN;
+                        end
+                    end
                 end
 
                 default: state_q <= ST_IDLE;

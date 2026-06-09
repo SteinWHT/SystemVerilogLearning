@@ -177,7 +177,9 @@ $(error Unsupported UVM_DUT '$(UVM_DUT)'; use legacy or axi)
 endif
 endif
 ifeq ($(USE_AXI),1)
-SRC_FILES += $(AXI_FILES) $(ICACHE_FILES) $(SRC_DIR)/CPU_L1DCache_AXI.sv
+SRC_FILES += $(AXI_FILES) $(ICACHE_FILES) \
+	$(SRC_DIR)/cache_coherence_ctrl.sv \
+	$(SRC_DIR)/CPU_L1DCache_AXI.sv
 endif
 
 # DW IP behavioral stubs for simulators without Synopsys DesignWare
@@ -194,6 +196,7 @@ endif
 TB_FILES := \
 	$(UVM_DIR)/cpu_if.sv \
 	$(UVM_DIR)/cpu_commit_if.sv \
+	$(UVM_DIR)/cpu_coherence_if.sv \
 	$(TB_DIR)/rob_commit_bind.sv \
 	$(UVM_DIR)/cpu_pkg.sv \
 	$(UVM_TOP_FILE)

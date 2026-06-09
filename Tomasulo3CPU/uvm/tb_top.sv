@@ -48,7 +48,10 @@ module tb_top;
         .DMEM_DEPTH  (DMEM_DEPTH),
         .W_BYTE_NUM  (W_BYTE_NUM),
         .IMEM_WORDS  (IMEM_WORDS),
-        .DMEM_LINES  (DMEM_LINES)
+        .DMEM_LINES  (DMEM_LINES),
+        // Match the vif typedef (unified memory). Unused on the legacy backend
+        // (use_axi_memory=0), but keeps the virtual-interface type compatible.
+        .AXI_IMEM_BASE_WORD (0)
     ) cpu_vif (
         .clk            (clk),
         .rst_n          (rst_n),
