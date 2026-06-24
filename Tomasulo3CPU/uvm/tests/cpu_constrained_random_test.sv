@@ -25,6 +25,14 @@ class cpu_constrained_random_test extends cpu_base_test;
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
 
+        // Legacy DUT only: the generator places code at PC 0 and its data region
+        // low in the same memory, which matches the legacy behavioural I-cache /
+        // unified dmem. The AXI DUT uses a split instruction window, so this test
+        // is not meaningful there (run it with UVM_DUT=legacy).
+        if (cfg.memory_backend != cpu_cfg::CPU_MEM_LEGACY)
+            `uvm_fatal(get_type_name(),
+                "cpu_constrained_random_test supports the legacy DUT only (use UVM_DUT=legacy)")
+
         // Active stimulus, but lay instructions contiguously (no operand-setup
         // prologue) so the program flows as a coherent RV64IM image.
         cfg.is_active                = UVM_ACTIVE;

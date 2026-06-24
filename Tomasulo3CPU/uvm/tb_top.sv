@@ -107,6 +107,7 @@ module tb_top;
         .imem_resp_data     (cpu_vif.imem_resp_data),
         .imem_resp_ready    (cpu_vif.imem_resp_ready),
         .imem_req_valid     (cpu_vif.imem_req_valid),
+        .imem_req_ready     (cpu_vif.imem_req_ready),
         .imem_addr          (cpu_vif.imem_addr),
         .dcache_mem_init_en  (cpu_vif.dcache_mem_init_en),
         .dcache_mem_init_idx (cpu_vif.dcache_mem_init_idx),
@@ -134,22 +135,18 @@ module tb_top;
     // ----------------------------------------------------------------
     // I-cache model (1-cycle latency)
     // ----------------------------------------------------------------
-    // Clean 1-cycle synchronous-read I-cache model: a response (valid + data)
-    // appears exactly one cycle after an accepted request. NOTE: resp_valid must
-    // reset to 0 (no outstanding request yet) and data must update on every
-    // request — the previous model reset valid=1 with data=0 and gated the data
-    // update on resp_valid, so the core latched a 0x00000000 phantom as its first
-    // instruction. That phantom decodes to INSTR_NONE, which DISPATCH puts in the
-    // ROB but no issue queue (default case, rob_only=0), so the ROB head never
-    // completes and nothing ever commits (commit_seen=0).
+    assign cpu_vif.imem_req_ready = 1'b1;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             cpu_vif.imem_resp_valid <= 1'b0;
             cpu_vif.imem_resp_data  <= '0;
-        end else begin
-            cpu_vif.imem_resp_valid <= cpu_vif.imem_req_valid;
-            if (cpu_vif.imem_req_valid)
-                cpu_vif.imem_resp_data <= cpu_vif.imem_array[cpu_vif.imem_addr[15:2]];
+        end else if (cpu_vif.imem_resp_valid && cpu_vif.imem_resp_ready) begin
+            // Outstanding response consumed (normal accept or flush-discard drain).
+            cpu_vif.imem_resp_valid <= 1'b0;
+        end else if (cpu_vif.imem_req_valid && cpu_vif.imem_req_ready &&
+                     !cpu_vif.imem_resp_valid) begin
+            cpu_vif.imem_resp_valid <= 1'b1;
+            cpu_vif.imem_resp_data  <= cpu_vif.imem_array[cpu_vif.imem_addr[15:2]];
         end
     end
 

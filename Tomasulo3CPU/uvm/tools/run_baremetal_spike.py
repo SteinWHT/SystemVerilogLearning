@@ -732,6 +732,111 @@ def run_uvm(test, out, trace, dut_tohost, spike_tohost, spike_base, args, max_cy
     return paths
 
 
+# ----------------------------------------------------------------------------
+# Constrained-random regression (legacy DUT only).
+#
+# Unlike the C-suite flow, the constrained-random test generates its program
+# inside the UVM environment (cpu_rand_program) and self-checks by polling its
+# own tohost cell, so there is no Spike trace / imem.hex / dmem.hex to prepare.
+# It therefore has no --no-sim "prepare" stage and is run straight through VCS.
+# ----------------------------------------------------------------------------
+RANDOM_TEST = "constrained_random"
+
+
+def build_random_plusargs(args, max_cycles):
+    parts = [
+        f"+MAX_CYCLES={max_cycles}",
+        f"+RESET_HOLD_CYCLES={args.reset_hold_cycles}",
+    ]
+    knobs = [
+        ("CR_NUM_INSTR", args.cr_num_instr),
+        ("CR_RAW_PCT", args.cr_raw_pct),
+        ("CR_WAW_PCT", args.cr_waw_pct),
+        ("CR_LOAD_USE_PCT", args.cr_load_use_pct),
+        ("CR_BRANCH_CLUSTER_PCT", args.cr_branch_cluster_pct),
+        ("CR_BRANCH_CLUSTER_SIZE", args.cr_branch_cluster_size),
+        ("CR_DEP_WINDOW", args.cr_dep_window),
+        ("CR_SEED", args.cr_seed),
+    ]
+    for name, value in knobs:
+        if value is not None:
+            parts.append(f"+{name}={value}")
+    return " ".join(parts)
+
+
+def run_random_uvm(out, args, max_cycles):
+    out.mkdir(parents=True, exist_ok=True)
+    plusargs = build_random_plusargs(args, max_cycles)
+    cmd = [
+        "make",
+        "uvm",
+        "USE_DW=1",
+        f"UVM_DUT={args.dut}",
+        "UVM_TEST=cpu_constrained_random_test",
+        f"ENABLE_SPIKE_DPI={1 if args.enable_spike_dpi else 0}",
+        f"COV={1 if args.coverage else 0}",
+        f"COV_NAME=uvm_{args.dut}_{RANDOM_TEST}",
+        f"PLUSARGS={plusargs}",
+    ]
+    clear_current_uvm_logs(args.dut)
+    if args.coverage:
+        clean_current_coverage_db(args.dut)
+    try:
+        run(cmd, PROJ)
+    finally:
+        paths = preserve_uvm_logs(out, args.dut)
+
+    passed, reason = analyze_uvm_log(paths["sim"])
+    if not passed:
+        raise RuntimeError("{0}; see {1}".format(reason, paths["sim"]))
+
+    if args.coverage:
+        preserve_coverage_db(RANDOM_TEST, args.dut)
+    return paths
+
+
+def run_random_regression(args):
+    out = BUILD_ROOT / RANDOM_TEST
+    stage = "uvm"
+    results = []
+    try:
+        log_paths = run_random_uvm(out, args, args.max_cycles)
+        results.append({
+            "test": RANDOM_TEST,
+            "status": "PASS",
+            "stage": stage,
+            "log": str(log_paths["sim"]),
+        })
+        print("[PASS] {0}; log: {1}".format(RANDOM_TEST, log_paths["sim"]))
+    except KeyboardInterrupt:
+        log = best_uvm_log(out, args.dut)
+        results.append({
+            "test": RANDOM_TEST,
+            "status": "FAIL",
+            "stage": stage,
+            "reason": "interrupted by user",
+            "log": str(log) if log else "",
+        })
+        print_regression_summary(results, args.dut, False)
+        return 130
+    except Exception as exc:
+        log = best_uvm_log(out, args.dut)
+        result = {
+            "test": RANDOM_TEST,
+            "status": "FAIL",
+            "stage": stage,
+            "reason": summarize_failure(exc, log),
+            "log": str(log) if log else "",
+        }
+        results.append(result)
+        print("[FAIL] {0} stage={1}: {2}".format(RANDOM_TEST, stage, result["reason"]))
+        if log:
+            print("       log: {0}".format(log))
+
+    failed = print_regression_summary(results, args.dut, False)
+    return 1 if failed else 0
+
+
 def print_regression_summary(results, dut, no_sim):
     passed = sum(1 for result in results if result["status"] == "PASS")
     prepared = sum(1 for result in results if result["status"] == "PREPARED")
@@ -779,7 +884,11 @@ def print_regression_summary(results, dut, no_sim):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Build C-suite tests, run Spike, and launch Spike-golden UVM.")
+    parser = argparse.ArgumentParser(
+        description="Build C-suite tests, run Spike, and launch Spike-golden UVM. "
+                    "With --random, instead run the self-checking constrained-random "
+                    "UVM test on the legacy DUT (no Spike trace / C build needed)."
+    )
     parser.add_argument("tests", nargs="*", help="C-suite test names or 'all'")
     parser.add_argument("--bin-dir", type=Path, default=None, help="RISC-V toolchain bin directory")
     parser.add_argument("--spike", type=Path, default=None, help="Spike executable")
@@ -795,6 +904,26 @@ def main():
         default="legacy",
         help="Select CPU_L1DCache (legacy) or CPU_L1DCache_AXI (axi)",
     )
+    parser.add_argument(
+        "--random",
+        action="store_true",
+        help="Run the constrained-random UVM test (cpu_constrained_random_test) "
+             "instead of the C-suite. Legacy DUT only.",
+    )
+    parser.add_argument(
+        "--enable-spike-dpi",
+        action="store_true",
+        help="With --random, build/link the Spike DPI-C co-sim (ENABLE_SPIKE_DPI=1) "
+             "for lockstep checking. Requires libspike_cosim.so in the VCS environment.",
+    )
+    parser.add_argument("--cr-num-instr", type=int, default=None, help="[--random] body instruction count")
+    parser.add_argument("--cr-seed", type=int, default=None, help="[--random] generator seed")
+    parser.add_argument("--cr-raw-pct", type=int, default=None, help="[--random] RAW dependency density %%")
+    parser.add_argument("--cr-waw-pct", type=int, default=None, help="[--random] WAW reuse density %%")
+    parser.add_argument("--cr-load-use-pct", type=int, default=None, help="[--random] load-use density %%")
+    parser.add_argument("--cr-branch-cluster-pct", type=int, default=None, help="[--random] branch-cluster probability %%")
+    parser.add_argument("--cr-branch-cluster-size", type=int, default=None, help="[--random] branches per cluster")
+    parser.add_argument("--cr-dep-window", type=int, default=None, help="[--random] producer look-back window")
     parser.add_argument("--coverage", action="store_true", help="Pass COV=1 to VCS make flow")
     parser.add_argument(
         "--merge-cov",
@@ -810,6 +939,15 @@ def main():
         help="Stop after the first failed test instead of completing the regression",
     )
     args = parser.parse_args()
+
+    if args.random:
+        if args.dut != "legacy":
+            raise SystemExit("--random runs on the legacy DUT only; pass --dut legacy (the default)")
+        if args.no_sim:
+            raise SystemExit("--random has no build artifacts to prepare; drop --no-sim")
+        if args.arch_test:
+            raise SystemExit("--random and --arch-test are mutually exclusive")
+        return run_random_regression(args)
 
     arch_test_build = PROJ / "arch_test" / "build"
     built_tests = []
