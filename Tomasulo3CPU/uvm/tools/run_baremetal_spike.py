@@ -634,6 +634,23 @@ def analyze_uvm_log(path):
     return True, "UVM_ERROR=0 UVM_FATAL=0"
 
 
+# Both the bare-metal test ("... DUT tohost=1 after 2638 cycles") and the
+# constrained-random test ("tohost reached after 244 cycles ...") report the
+# cycle count the same way: "after <N> cycles". Pull the last such reading so a
+# trailing PASS line wins over any earlier diagnostic.
+CYCLES_RE = re.compile(r"after\s+(\d+)\s+cycles")
+
+
+def extract_uvm_cycles(path):
+    if path is None or not path.is_file():
+        return None
+    text = path.read_text(encoding="utf-8", errors="replace")
+    matches = CYCLES_RE.findall(text)
+    if not matches:
+        return None
+    return int(matches[-1])
+
+
 def summarize_failure(exc, log):
     reason = format_exception(exc)
     if log is None or not log.is_file():
@@ -801,13 +818,19 @@ def run_random_regression(args):
     results = []
     try:
         log_paths = run_random_uvm(out, args, args.max_cycles)
+        cycles = extract_uvm_cycles(log_paths["sim"])
         results.append({
             "test": RANDOM_TEST,
             "status": "PASS",
             "stage": stage,
             "log": str(log_paths["sim"]),
+            "cycles": cycles,
         })
-        print("[PASS] {0}; log: {1}".format(RANDOM_TEST, log_paths["sim"]))
+        print("[PASS] {0}; {1}log: {2}".format(
+            RANDOM_TEST,
+            "cycles={0}; ".format(cycles) if cycles is not None else "",
+            log_paths["sim"],
+        ))
     except KeyboardInterrupt:
         log = best_uvm_log(out, args.dut)
         results.append({
@@ -834,6 +857,7 @@ def run_random_regression(args):
             print("       log: {0}".format(log))
 
     failed = print_regression_summary(results, args.dut, False)
+    write_cycles_report(results, args.dut)
     return 1 if failed else 0
 
 
@@ -881,6 +905,30 @@ def print_regression_summary(results, dut, no_sim):
     lines.append("Summary file: {0}".format(summary_path))
     print("\n".join(lines))
     return failed
+
+
+def write_cycles_report(results, dut):
+    """Emit 'cycles_<dut>.txt': one '<test> <cycles>' line per simulated test.
+
+    Only tests that ran to tohost (a recorded cycle count) are listed; build- or
+    artifact-stage failures and prepare-only (--no-sim) runs have no cycle number.
+    """
+    rows = [
+        (result["test"], result["cycles"])
+        for result in results
+        if result.get("cycles") is not None
+    ]
+    if not rows:
+        return None
+
+    report_path = BUILD_ROOT / "cycles_{0}.txt".format(dut)
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(
+        "".join("{0} {1}\n".format(test, cycles) for test, cycles in rows),
+        encoding="utf-8",
+    )
+    print("[CYCLES] wrote {0} ({1} test(s))".format(report_path, len(rows)))
+    return report_path
 
 
 def main():
@@ -1061,13 +1109,19 @@ def main():
                 args.spike_base if not args.sim_only else spike_base,
                 args, max_cycles
             )
+            cycles = extract_uvm_cycles(log_paths["sim"])
             results.append({
                 "test": test,
                 "status": "PASS",
                 "stage": stage,
                 "log": str(log_paths["sim"]),
+                "cycles": cycles,
             })
-            print("[PASS] {0}; log: {1}".format(test, log_paths["sim"]))
+            print("[PASS] {0}; {1}log: {2}".format(
+                test,
+                "cycles={0}; ".format(cycles) if cycles is not None else "",
+                log_paths["sim"],
+            ))
         except KeyboardInterrupt:
             log = best_uvm_log(out, args.dut)
             results.append({
@@ -1114,6 +1168,7 @@ def main():
                 })
 
     failed = print_regression_summary(results, args.dut, args.no_sim)
+    write_cycles_report(results, args.dut)
     return 1 if failed else 0
 
 
