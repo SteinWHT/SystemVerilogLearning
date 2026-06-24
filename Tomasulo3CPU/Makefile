@@ -59,7 +59,42 @@ UVM_INC_DIRS := \
 	+incdir+$(UVM_DIR)/scoreboard \
 	+incdir+$(UVM_DIR)/ref \
 	+incdir+$(UVM_DIR)/cov \
-	+incdir+$(UVM_DIR)/utils
+	+incdir+$(UVM_DIR)/utils \
+	+incdir+$(UVM_DIR)/dpi
+
+# ---- Spike DPI-C golden model (constrained-random lockstep co-sim) ----
+# Enable with ENABLE_SPIKE_DPI=1, e.g.
+#   make uvm UVM_TEST=cpu_constrained_random_test ENABLE_SPIKE_DPI=1
+#
+# The shim and Spike are C++17. If the default `g++` is too old (e.g. it
+# rejects `-std=c++17`), point CXX at the same C++17 compiler that built Spike:
+#   make spike-cosim-lib ENABLE_SPIKE_DPI=1 CXX=g++-9
+# or override the standard flag for compilers that only know the old spelling:
+#   make spike-cosim-lib ENABLE_SPIKE_DPI=1 SPIKE_CXXSTD=c++1z
+# IMPORTANT: this .so is dlopen'd by simv at *run* time, so build it in the
+# same environment VCS runs in (e.g. inside the Docker container), with a
+# C++17 compiler. To keep the .so loadable on an old system libstdc++, link the
+# C++ runtime statically:
+#   make spike-cosim-lib ENABLE_SPIKE_DPI=1 \
+#     CXX=/data/tools/Xilinx/Vitis_HLS/2024.1/tps/lnx64/gcc-9.3.0/bin/g++-9.3.0 \
+#     SPIKE_EXTRA_LDFLAGS="-static-libstdc++ -static-libgcc"
+ENABLE_SPIKE_DPI ?= 0
+CXX              ?= g++
+SPIKE_CXXSTD     ?= c++17
+SPIKE_CXXFLAGS   ?=
+SPIKE_EXTRA_LDFLAGS ?=
+SPIKE_SRC_DIR    := $(PROJ_DIR)/tools/riscv-isa-sim
+SPIKE_LIB_DIR    := $(SPIKE_SRC_DIR)/build
+SPIKE_COSIM_DIR  := $(UVM_DIR)/tools/spike_cosim
+SPIKE_COSIM_LIB  := $(SPIKE_COSIM_DIR)/libspike_cosim.so
+SPIKE_LDFLAGS    := -L$(SPIKE_COSIM_DIR) -lspike_cosim \
+	-Wl,-rpath,$(SPIKE_COSIM_DIR) -Wl,-rpath,$(SPIKE_LIB_DIR)
+SPIKE_DPI_PKG    :=
+SPIKE_DPI_DEP    :=
+ifeq ($(ENABLE_SPIKE_DPI),1)
+SPIKE_DPI_PKG    := $(UVM_DIR)/dpi/cpu_spike_dpi_pkg.sv
+SPIKE_DPI_DEP    := $(SPIKE_COSIM_LIB)
+endif
 
 # ---- Synopsys DesignWare simulation library ----
 # Override these from the command line if your Synopsys install moves:
@@ -198,6 +233,7 @@ TB_FILES := \
 	$(UVM_DIR)/cpu_commit_if.sv \
 	$(UVM_DIR)/cpu_coherence_if.sv \
 	$(TB_DIR)/rob_commit_bind.sv \
+	$(SPIKE_DPI_PKG) \
 	$(UVM_DIR)/cpu_pkg.sv \
 	$(UVM_TOP_FILE)
 else
@@ -220,6 +256,9 @@ VCS_OPTS := \
 
 ifeq ($(PROJECT),uvm)
 VCS_OPTS += -ntb_opts uvm $(UVM_INC_DIRS)
+ifeq ($(ENABLE_SPIKE_DPI),1)
+VCS_OPTS += +define+CPU_SPIKE_DPI -LDFLAGS "$(SPIKE_LDFLAGS)"
+endif
 endif
 
 ifeq ($(USE_DW),1)
@@ -279,8 +318,21 @@ ifeq ($(USE_DW),1)
 endif
 
 # ---- compile ----
+# ---- Spike DPI-C golden-model shared library ----
+$(SPIKE_COSIM_LIB): $(SPIKE_COSIM_DIR)/spike_cosim.cc $(SPIKE_COSIM_DIR)/spike_cosim.h
+	@echo "  Building Spike DPI-C co-sim library"
+	@test -d "$(SPIKE_LIB_DIR)" || \
+		(echo "[ERROR] Spike not built at $(SPIKE_LIB_DIR). Build tools/riscv-isa-sim first."; exit 1)
+	$(CXX) -std=$(SPIKE_CXXSTD) -O2 -fPIC -shared $(SPIKE_CXXFLAGS) -I$(SPIKE_SRC_DIR) \
+		-o $@ $(SPIKE_COSIM_DIR)/spike_cosim.cc \
+		-L$(SPIKE_LIB_DIR) -lriscv -ldisasm -lsoftfloat -lfesvr -lfdt \
+		-Wl,-rpath,$(SPIKE_LIB_DIR) $(SPIKE_EXTRA_LDFLAGS)
+
+.PHONY: spike-cosim-lib
+spike-cosim-lib: $(SPIKE_COSIM_LIB)
+
 .PHONY: compile
-compile: check
+compile: check $(SPIKE_DPI_DEP)
 	@mkdir -p $(BUILD_DIR)
 	@echo "============================================"
 	@echo "  Project: $(PROJECT)"

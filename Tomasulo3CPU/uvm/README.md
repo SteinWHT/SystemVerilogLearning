@@ -11,7 +11,8 @@
 - `ref/` reference-model hooks
 - `cov/` functional coverage
 - `utils/` shared types, parameters, encoders, and setup helpers
-- `tools/` regression helpers
+- `dpi/` SystemVerilog import package for the Spike DPI-C co-sim
+- `tools/` regression helpers and the `spike_cosim/` C++ DPI shim
 
 ## DUT Backends
 
@@ -87,6 +88,76 @@ The generic form is `make uvm UVM_DUT=legacy|axi`. Separate build directories
 (`build/uvm_legacy` and `build/uvm_axi`) prevent stale elaboration artifacts
 from crossing between the two DUTs. Every test fails on the AXI bridge's sticky
 error status and reports D-cache hit/miss statistics.
+
+## Constrained-Random Flow (DPI-C Spike co-simulation)
+
+`cpu_constrained_random_test` exercises the CPU with a procedurally generated
+RV64IM + Zicsr program of *configurable hazard density* and checks every commit
+in lockstep against Spike running as an in-process golden model over DPI-C. No
+external trace files are produced: the DUT and Spike step the identical image
+together and the scoreboard compares architectural state instruction by
+instruction.
+
+### Pieces
+
+- `utils/cpu_isa_encoder.sv` — single source of truth for RV64IM+Zicsr encoding
+  (opcode/funct3/funct7, instruction format, operand usage, access width).
+- `items/cpu_instr_item.sv` — a fully-resolved generic instruction item; the
+  encoder fixes the 32-bit word so the IMEM image and Spike see the same bytes.
+- `seq/cpu_rand_program.sv` — the generator. It emits a prologue (data pointer +
+  seeded GPRs), a weighted-random body, and a `tohost` epilogue. Control flow is
+  forward-only by construction, which guarantees termination.
+- `seq/cpu_rand_program_seq.sv` — streams the generated stream to the driver.
+- `tools/spike_cosim/` — the C++ DPI shim that wraps a Spike `processor_t` over a
+  flat memory `simif_t` (no MMIO), with `dpi/cpu_spike_dpi_pkg.sv` exposing it.
+- `scoreboard/cpu_spike_dpi_scoreboard.sv` — preloads Spike with the program +
+  data and compares PC, register writes, and store addresses each commit.
+- `cov/cpu_hazard_coverage.sv` — opcode/class mix plus hazard-kind and
+  producer-distance coverage.
+
+### Hazard knobs
+
+All percentages are `0..100` and overridable on the command line:
+
+| Plusarg | `cpu_cfg` field | Meaning |
+| --- | --- | --- |
+| `+CR_NUM_INSTR=<n>` | `cr_num_instr` | body instruction count |
+| `+CR_RAW_PCT=<p>` | `cr_raw_pct` | RAW source-dependency density |
+| `+CR_WAW_PCT=<p>` | `cr_waw_pct` | WAW destination-reuse density |
+| `+CR_LOAD_USE_PCT=<p>` | `cr_load_use_pct` | load-use density |
+| `+CR_BRANCH_CLUSTER_PCT=<p>` | `cr_branch_cluster_pct` | chance to open a branch cluster |
+| `+CR_BRANCH_CLUSTER_SIZE=<n>` | `cr_branch_cluster_size` | branches per cluster |
+| `+CR_DEP_WINDOW=<n>` | `cr_dep_window` | producer look-back window |
+| `+CR_SEED=<n>` | — | generator seed (`srandom`) for reproducibility |
+
+### Build and run
+
+The DPI-C path is opt-in. Build Spike under `tools/riscv-isa-sim` (its libraries
+are expected in `tools/riscv-isa-sim/build`, overridable via `SPIKE_SRC_DIR` /
+`SPIKE_LIB_DIR`) and set `ENABLE_SPIKE_DPI=1`; the Makefile compiles
+`tools/spike_cosim/spike_cosim.cc`, links it against the Spike libraries, and
+defines `CPU_SPIKE_DPI` so the DPI package, scoreboard, and env wiring are
+included:
+
+```sh
+make uvm-compile ENABLE_SPIKE_DPI=1 UVM_TEST=cpu_constrained_random_test
+make uvm ENABLE_SPIKE_DPI=1 UVM_TEST=cpu_constrained_random_test \
+  PLUSARGS="+CR_NUM_INSTR=400 +CR_RAW_PCT=60 +CR_WAW_PCT=30 \
+            +CR_LOAD_USE_PCT=40 +CR_BRANCH_CLUSTER_PCT=20 +CR_SEED=1"
+```
+
+The shim is C++17. If the default `g++` is too old (it rejects `-std=c++17`),
+point `CXX` at the C++17 compiler that built Spike — ideally the *same* one, to
+keep the libstdc++ ABI consistent:
+
+```sh
+make spike-cosim-lib ENABLE_SPIKE_DPI=1 CXX=g++-9
+```
+
+`SPIKE_CXXSTD` overrides the standard flag for compilers that only know the
+older spelling (`SPIKE_CXXSTD=c++1z`). Set `SPIKE_COSIM_LOG=<file>` to capture
+Spike's commit log (it defaults to `/dev/null`). Without `ENABLE_SPIKE_DPI=1`
+the package compiles unchanged and the DPI components are simply excluded.
 
 ## Spike-Golden Bare-Metal Flow
 

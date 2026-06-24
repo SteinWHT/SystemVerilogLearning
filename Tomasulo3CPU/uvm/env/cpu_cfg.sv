@@ -7,6 +7,9 @@ class cpu_cfg extends uvm_object;
     bit                     enable_scoreboard = 1;
     bit                     enable_dcache_scoreboard = 1;
     bit                     enable_spike_scoreboard = 0;
+    // Online (DPI-C) Spike lockstep golden model + scoreboard / coverage.
+    bit                     enable_spike_dpi  = 0;
+    bit                     enable_hazard_coverage = 0;
     bit                     enable_coverage   = 0;
     bit                     enable_baremetal_coverage = 0;
     bit                     enable_ref_model  = 0;
@@ -47,12 +50,34 @@ class cpu_cfg extends uvm_object;
     typedef enum bit { CPU_SB_MATCH_PC, CPU_SB_MATCH_FIFO } sb_match_mode_e;
     sb_match_mode_e         sb_match_mode     = CPU_SB_MATCH_PC;
 
+    // ------------------------------------------------------------------
+    // Constrained-random program / hazard-density knobs (cpu_rand_program).
+    // ------------------------------------------------------------------
+    int unsigned            cr_num_instr           = 200;
+    int unsigned            cr_raw_pct             = 40;
+    int unsigned            cr_waw_pct             = 20;
+    int unsigned            cr_load_use_pct        = 30;
+    int unsigned            cr_branch_cluster_pct  = 15;
+    int unsigned            cr_branch_cluster_size = 3;
+    int unsigned            cr_dep_window          = 6;
+    bit [63:0]              cr_data_base           = 64'h0000_8000;
+    int unsigned            cr_data_bytes          = 512;
+    bit [63:0]              cr_tohost_addr         = 64'h0000_8000;
+
+    // Spike DPI golden model configuration.
+    string                  spike_isa              = "rv64im_zicsr";
+    string                  spike_priv             = "m";
+    bit [63:0]              spike_mem_base         = 64'h0;
+    int unsigned            spike_mem_size         = 32'h0010_0000; // 1 MiB
+
     `uvm_object_utils_begin(cpu_cfg)
         `uvm_field_enum(uvm_active_passive_enum, is_active,            UVM_ALL_ON)
         `uvm_field_enum(memory_backend_e, memory_backend,              UVM_ALL_ON)
         `uvm_field_int(enable_scoreboard,                              UVM_ALL_ON)
         `uvm_field_int(enable_dcache_scoreboard,                       UVM_ALL_ON)
         `uvm_field_int(enable_spike_scoreboard,                        UVM_ALL_ON)
+        `uvm_field_int(enable_spike_dpi,                               UVM_ALL_ON)
+        `uvm_field_int(enable_hazard_coverage,                         UVM_ALL_ON)
         `uvm_field_int(enable_coverage,                                UVM_ALL_ON)
         `uvm_field_int(enable_baremetal_coverage,                      UVM_ALL_ON)
         `uvm_field_int(enable_ref_model,                               UVM_ALL_ON)
@@ -73,6 +98,20 @@ class cpu_cfg extends uvm_object;
         `uvm_field_int(spike_base,                                     UVM_ALL_ON | UVM_HEX)
         `uvm_field_int(max_cycles,                                     UVM_ALL_ON | UVM_DEC)
         `uvm_field_enum(sb_match_mode_e, sb_match_mode,                UVM_ALL_ON)
+        `uvm_field_int(cr_num_instr,                                   UVM_ALL_ON | UVM_DEC)
+        `uvm_field_int(cr_raw_pct,                                     UVM_ALL_ON | UVM_DEC)
+        `uvm_field_int(cr_waw_pct,                                     UVM_ALL_ON | UVM_DEC)
+        `uvm_field_int(cr_load_use_pct,                                UVM_ALL_ON | UVM_DEC)
+        `uvm_field_int(cr_branch_cluster_pct,                          UVM_ALL_ON | UVM_DEC)
+        `uvm_field_int(cr_branch_cluster_size,                         UVM_ALL_ON | UVM_DEC)
+        `uvm_field_int(cr_dep_window,                                  UVM_ALL_ON | UVM_DEC)
+        `uvm_field_int(cr_data_base,                                   UVM_ALL_ON | UVM_HEX)
+        `uvm_field_int(cr_data_bytes,                                  UVM_ALL_ON | UVM_DEC)
+        `uvm_field_int(cr_tohost_addr,                                 UVM_ALL_ON | UVM_HEX)
+        `uvm_field_string(spike_isa,                                   UVM_ALL_ON)
+        `uvm_field_string(spike_priv,                                  UVM_ALL_ON)
+        `uvm_field_int(spike_mem_base,                                 UVM_ALL_ON | UVM_HEX)
+        `uvm_field_int(spike_mem_size,                                 UVM_ALL_ON | UVM_HEX)
     `uvm_object_utils_end
 
     function new(string name = "cpu_cfg");

@@ -6,6 +6,10 @@ class cpu_env extends uvm_env;
     cpu_scoreboard      sb;
     cpu_dcache_scoreboard sb_dcache;
     cpu_spike_scoreboard sb_spike;
+`ifdef CPU_SPIKE_DPI
+    cpu_spike_dpi_scoreboard sb_dpi;
+`endif
+    cpu_hazard_coverage cov_hazard;
     cpu_coherence_monitor    mon_coh;
     cpu_coherence_scoreboard sb_coh;
     cpu_int_alu_ref_model   rm;
@@ -39,6 +43,14 @@ class cpu_env extends uvm_env;
         if (cfg.enable_spike_scoreboard)
             sb_spike = cpu_spike_scoreboard::type_id::create("sb_spike", this);
 
+`ifdef CPU_SPIKE_DPI
+        if (cfg.enable_spike_dpi)
+            sb_dpi = cpu_spike_dpi_scoreboard::type_id::create("sb_dpi", this);
+`endif
+
+        if (cfg.enable_hazard_coverage)
+            cov_hazard = cpu_hazard_coverage::type_id::create("cov_hazard", this);
+
         if (cfg.enable_coherence_checker) begin
             mon_coh = cpu_coherence_monitor::type_id::create("mon_coh", this);
             sb_coh  = cpu_coherence_scoreboard::type_id::create("sb_coh", this);
@@ -70,6 +82,14 @@ class cpu_env extends uvm_env;
 
         if (cfg.enable_spike_scoreboard)
             agt.mon.ap_commit.connect(sb_spike.imp_commit);
+
+`ifdef CPU_SPIKE_DPI
+        if (cfg.enable_spike_dpi)
+            agt.mon.ap_commit.connect(sb_dpi.imp_commit);
+`endif
+
+        if (cfg.enable_hazard_coverage && cfg.is_active == UVM_ACTIVE)
+            agt.drv.ap_instr.connect(cov_hazard.analysis_export);
 
         if (cfg.enable_dcache_scoreboard)
             agt.dmon.ap_dcache.connect(sb_dcache.imp_dcache);
