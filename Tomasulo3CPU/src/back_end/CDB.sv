@@ -5,10 +5,10 @@
 
 module CDB #(
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
-    parameter int unsigned IMEM_DEPTH = 64,
+    parameter int unsigned PC_WIDTH = 64,
     parameter int unsigned DMEM_WIDTH = 64,
-    parameter int unsigned DMEM_DEPTH = 32,
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned DMEM_ADDR_WIDTH = 32,
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
     parameter int unsigned ROB_DEPTH = 32,
     parameter int unsigned BPB_PC_BITS = 3,
@@ -22,29 +22,29 @@ module CDB #(
 
     output logic                                cdb_valid,
     output logic [ROB_INDEX_WIDTH-1:0]          cdb_rob_tag,
-    output logic [DMEM_DEPTH-1:0]               cdb_sw_addr,
+    output logic [DMEM_ADDR_WIDTH-1:0]          cdb_sw_addr,
     output logic [W_BYTE_NUM-1:0]               cdb_sw_strb,
     output logic                                cdb_flush,
 
     // PRF interface
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  cdb_rd_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        cdb_rd_phy_addr,
     output logic [REG_FILE_DATA_WIDTH-1:0]      cdb_rd_data,
     output logic                                cdb_reg_write,
 
     // RBA interface
-    //input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,
-    //input logic                                 cdb_reg_write,
+    //input logic [PHY_REG_IDX_WIDTH-1:0]       cdb_rd_phy_addr,
+    //input logic                               cdb_reg_write,
 
     // ISSUEQ interface
-    // output logic                                cdb_flush,
+    // output logic                             cdb_flush,
     output logic [ROB_INDEX_WIDTH-1:0]          cdb_rob_depth,
-    //output logic [PHY_REGISTER_FILE_WIDTH-1:0]  cdb_rd_phy_addr,
-    // output logic                               cdb_reg_write,
+    //output logic [PHY_REG_IDX_WIDTH-1:0]      cdb_rd_phy_addr,
+    // output logic                             cdb_reg_write,
 
     // EXE interface
     input logic                                 exe_valid,
     input logic [ROB_INDEX_WIDTH-1:0]           exe_rob_tag,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   exe_rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         exe_rd_phy_addr,
     input logic [REG_FILE_DATA_WIDTH-1:0]       exe_rd_data,
     input logic                                 exe_reg_write,
     input logic                                 exe_branch_mispredicted,
@@ -53,14 +53,14 @@ module CDB #(
     input logic                                 exe_jr31_inst,
     input logic                                 exe_jal_inst,
     input logic [BPB_PC_BITS-1:0]               exe_branch_pc_bits,
-    input logic [IMEM_DEPTH-1:0]                exe_branch_other_addr,
+    input logic [PC_WIDTH-1:0]                  exe_branch_other_addr,
 
     // LSB interface
     input logic [ROB_INDEX_WIDTH-1:0]           lsb_rob_tag,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   lsb_rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         lsb_rd_phy_addr,
     input logic [REG_FILE_DATA_WIDTH-1:0]       lsb_data,
     input logic                                 lsb_rw,
-    input logic [DMEM_DEPTH-1:0]                lsb_sw_addr,
+    input logic [DMEM_ADDR_WIDTH-1:0]           lsb_sw_addr,
     input logic [W_BYTE_NUM-1:0]                lsb_sw_strb,
     input logic                                 lsb_ready,
 
@@ -68,7 +68,7 @@ module CDB #(
     //output  logic [ROB_INDEX_WIDTH-1:0]       cdb_rob_depth,
 
     //output logic [ROB_INDEX_WIDTH-1:0]               cdb_rob_depth,
-    //output logic [PHY_REGISTER_FILE_WIDTH-1:0]       cdb_rd_phy_addr,
+    //output logic [PHY_REG_IDX_WIDTH-1:0]       cdb_rd_phy_addr,
     //output logic                                     cdb_phy_reg_write,
     //output logic [REG_FILE_DATA_WIDTH-1:0]           cdb_rd_data,
     //output logic                                     cdb_reg_write,
@@ -80,27 +80,27 @@ module CDB #(
 
     // DISPATCH interface
     //output  logic                                    cdb_valid,
-    output  logic [IMEM_DEPTH-1:0]              cdb_branch_addr
+    output  logic [PC_WIDTH-1:0]                cdb_branch_addr
     //output  logic                                    cdb_flush,
 );
     logic valid;
     typedef struct packed {
-        logic [ROB_INDEX_WIDTH-1:0] rob_tag;
-        logic [DMEM_DEPTH-1:0] addr;
+        logic [ROB_INDEX_WIDTH-1:0]     rob_tag;
+        logic [DMEM_ADDR_WIDTH-1:0]     addr;
         logic [REG_FILE_DATA_WIDTH-1:0] data;
-        logic rw;
-        logic flush;
-        logic branch;
-        logic [BPB_PC_BITS-1:0] branch_pc;
-        logic [IMEM_DEPTH-1:0] branch_addr;
-        logic [DMEM_DEPTH-1:0] sw_addr;
-        logic [W_BYTE_NUM-1:0] sw_strb;
+        logic                           rw;
+        logic                           flush;
+        logic                           branch;
+        logic [BPB_PC_BITS-1:0]         branch_pc;
+        logic [PC_WIDTH-1:0]            branch_addr;
+        logic [DMEM_ADDR_WIDTH-1:0]     sw_addr;
+        logic [W_BYTE_NUM-1:0]          sw_strb;
     } cdb_entry_t;
 
     cdb_entry_t cdb_entry;
 
     logic flush;
-    logic [IMEM_DEPTH-1:0] branch_other_addr;
+    logic [PC_WIDTH-1:0] branch_other_addr;
     always_comb begin
         flush = 1'b0;
         branch_other_addr = '0;

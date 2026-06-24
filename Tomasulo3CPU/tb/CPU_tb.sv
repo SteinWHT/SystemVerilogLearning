@@ -12,21 +12,21 @@ module CPU_tb;
     // Parameters
     // ----------------------------------------------------------------
     parameter int unsigned INSTR_WIDTH             = 32;
-    parameter int unsigned IMEM_DEPTH              = 64;
+    parameter int unsigned PC_WIDTH              = 64;
     parameter int unsigned IMEM_WIDTH              = 32;
-    parameter int unsigned IMEM_DEPTH_WORD         = IMEM_DEPTH - 1;
+    parameter int unsigned PC_WORD_WIDTH         = PC_WIDTH - 1;
     parameter int unsigned ARCH_REG_COUNT          = 32;
     parameter int unsigned ARCH_REG_WIDTH          = $clog2(ARCH_REG_COUNT);
     parameter int unsigned REG_FILE_DATA_WIDTH     = 64;
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7;
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7;
     parameter int unsigned DMEM_WIDTH              = 64;
-    parameter int unsigned DMEM_DEPTH              = 32;
+    parameter int unsigned DMEM_ADDR_WIDTH              = 32;
     parameter int unsigned BPB_PC_BITS             = 3;
     parameter int unsigned NUM_WAYS                = 4;
     parameter int unsigned IFQ_DEPTH               = 16;
     parameter int unsigned RAS_DEPTH               = 4;
-    parameter int unsigned FRL_SIZE                = 128;
-    parameter int unsigned FRL_PTR_WIDTH           = $clog2(FRL_SIZE);
+    parameter int unsigned FRL_DEPTH                = 128;
+    parameter int unsigned FRL_PTR_WIDTH           = $clog2(FRL_DEPTH);
     parameter int unsigned NUM_CHECKPOINT          = 8;
     parameter int unsigned ROB_DEPTH               = 16;
     parameter int unsigned ROB_INDEX_WIDTH         = $clog2(ROB_DEPTH);
@@ -51,13 +51,13 @@ module CPU_tb;
     logic                    imem_resp_ready;
     logic [INSTR_WIDTH-1:0]  imem_resp_data;
     logic                    imem_req_valid;
-    logic [IMEM_DEPTH-1:0]   imem_addr;
+    logic [PC_WIDTH-1:0]   imem_addr;
 
     // D-Cache read interface
     logic                            dcache_rready;
     logic                            dcache_rresp_valid;
     logic [REG_FILE_DATA_WIDTH-1:0]  dcache_rdata;
-    logic [DMEM_DEPTH-1:0]           dcache_raddr;
+    logic [DMEM_ADDR_WIDTH-1:0]           dcache_raddr;
     logic                            dcache_rvalid;
     logic                            dcache_rresp_ready;
 
@@ -67,7 +67,7 @@ module CPU_tb;
     logic                            dcache_write;
     logic [DMEM_WIDTH-1:0]           dcache_sw_data;
     logic [W_BYTE_NUM-1:0]           dcache_wstrb;
-    logic [DMEM_DEPTH-1:0]           dcache_sw_addr;
+    logic [DMEM_ADDR_WIDTH-1:0]           dcache_sw_addr;
     logic                            dcache_wvalid;
     logic                            dcache_wresp_ready;
 
@@ -78,20 +78,20 @@ module CPU_tb;
     // ----------------------------------------------------------------
     CPU #(
         .INSTR_WIDTH             (INSTR_WIDTH),
-        .IMEM_DEPTH              (IMEM_DEPTH),
+        .PC_WIDTH              (PC_WIDTH),
         .IMEM_WIDTH              (IMEM_WIDTH),
-        .IMEM_DEPTH_WORD         (IMEM_DEPTH_WORD),
+        .PC_WORD_WIDTH         (PC_WORD_WIDTH),
         .ARCH_REG_COUNT          (ARCH_REG_COUNT),
         .ARCH_REG_WIDTH          (ARCH_REG_WIDTH),
         .REG_FILE_DATA_WIDTH     (REG_FILE_DATA_WIDTH),
-        .PHY_REGISTER_FILE_WIDTH (PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH (PHY_REG_IDX_WIDTH),
         .DMEM_WIDTH              (DMEM_WIDTH),
-        .DMEM_DEPTH              (DMEM_DEPTH),
+        .DMEM_ADDR_WIDTH              (DMEM_ADDR_WIDTH),
         .BPB_PC_BITS             (BPB_PC_BITS),
         .NUM_WAYS                (NUM_WAYS),
         .IFQ_DEPTH               (IFQ_DEPTH),
         .RAS_DEPTH               (RAS_DEPTH),
-        .FRL_SIZE                (FRL_SIZE),
+        .FRL_DEPTH                (FRL_DEPTH),
         .FRL_PTR_WIDTH           (FRL_PTR_WIDTH),
         .NUM_CHECKPOINT          (NUM_CHECKPOINT),
         .ROB_DEPTH               (ROB_DEPTH),
@@ -268,7 +268,7 @@ module CPU_tb;
         end else begin
             if (imem_req_valid) begin
                 imem_resp_valid <= 1'b1;
-                imem_resp_data  <= imem_array[imem_addr[IMEM_DEPTH-1:2]];
+                imem_resp_data  <= imem_array[imem_addr[PC_WIDTH-1:2]];
             end else begin
                 imem_resp_valid <= 1'b0;
             end
@@ -299,7 +299,7 @@ module CPU_tb;
         end else begin
             if (dcache_rvalid && dcache_rready) begin
                 dcache_rresp_valid <= 1'b1;
-                dcache_rdata       <= dmem_array[dcache_raddr[DMEM_DEPTH-1:3]];
+                dcache_rdata       <= dmem_array[dcache_raddr[DMEM_ADDR_WIDTH-1:3]];
             end else if (dcache_rresp_valid && dcache_rresp_ready) begin
                 dcache_rresp_valid <= 1'b0;
             end
@@ -318,7 +318,7 @@ module CPU_tb;
             if (dcache_wvalid && dcache_wready) begin
                 for (int i = 0; i < W_BYTE_NUM; i++) begin
                     if (dcache_wstrb[i]) begin
-                        dmem_array[dcache_sw_addr[DMEM_DEPTH-1:3]][i*8 +: 8] <= dcache_sw_data[i*8 +: 8];
+                        dmem_array[dcache_sw_addr[DMEM_ADDR_WIDTH-1:3]][i*8 +: 8] <= dcache_sw_data[i*8 +: 8];
                     end
                 end
                 dcache_wresp_valid <= 1'b1;
@@ -332,17 +332,17 @@ module CPU_tb;
     // Helper tasks
     // ----------------------------------------------------------------
     task automatic load_instr(
-        input logic [IMEM_DEPTH-1:0] addr,
+        input logic [PC_WIDTH-1:0] addr,
         input logic [INSTR_WIDTH-1:0] instr
     );
-        imem_array[addr[IMEM_DEPTH-1:2]] = instr;
+        imem_array[addr[PC_WIDTH-1:2]] = instr;
     endtask
 
     task automatic load_dmem(
-        input logic [DMEM_DEPTH-1:0] addr,
+        input logic [DMEM_ADDR_WIDTH-1:0] addr,
         input logic [REG_FILE_DATA_WIDTH-1:0] data
     );
-        dmem_array[addr[DMEM_DEPTH-1:3]] = data;
+        dmem_array[addr[DMEM_ADDR_WIDTH-1:3]] = data;
     endtask
 
     task automatic reset_dut();
@@ -474,7 +474,7 @@ module CPU_tb;
 
     // Check PRF value by reading through the back-end's PRF
     function automatic logic [REG_FILE_DATA_WIDTH-1:0] read_prf(
-        input logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_addr
+        input logic [PHY_REG_IDX_WIDTH-1:0] phy_addr
     );
         return dut.back_end.prf.prf_data_array[phy_addr];
     endfunction
@@ -483,7 +483,7 @@ module CPU_tb;
     function automatic logic [REG_FILE_DATA_WIDTH-1:0] read_arch_reg(
         input logic [ARCH_REG_WIDTH-1:0] arch_addr
     );
-        logic [PHY_REGISTER_FILE_WIDTH-1:0] phy;
+        logic [PHY_REG_IDX_WIDTH-1:0] phy;
         phy = dut.front_end.rrat.rrat_array[arch_addr];
         return dut.back_end.prf.prf_data_array[phy];
     endfunction
@@ -935,7 +935,7 @@ module CPU_tb;
         $display("\n[Test %0d] Pipeline throughput: 8 independent ADDI", test_num);
         reset_dut();
         for (int i = 0; i < 8; i++) begin
-            load_instr(IMEM_DEPTH'(i * 4),
+            load_instr(PC_WIDTH'(i * 4),
                        encode_i(12'(i + 1), 5'd0, FUNCT3_ADD_SUB, 5'(i + 1), OP_IMM));
         end
 
@@ -1035,7 +1035,7 @@ module CPU_tb;
         $display("\n[Test %0d] ROB capacity stress", test_num);
         reset_dut();
         for (int i = 0; i < ROB_DEPTH + 4; i++) begin
-            load_instr(IMEM_DEPTH'(i * 4),
+            load_instr(PC_WIDTH'(i * 4),
                        encode_i(12'(i + 1), 5'd0, FUNCT3_ADD_SUB, 5'((i % 30) + 1), OP_IMM));
         end
 

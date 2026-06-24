@@ -1,10 +1,10 @@
 class cpu_commit_item #(
     int unsigned ROB_INDEX_WIDTH         = 4,
-    int unsigned DMEM_DEPTH              = 32,
-    int unsigned IMEM_DEPTH              = 64,
+    int unsigned DMEM_ADDR_WIDTH              = 32,
+    int unsigned PC_WIDTH              = 64,
     int unsigned REG_FILE_DATA_WIDTH     = 64,
     int unsigned ARCH_REG_WIDTH          = 5,
-    int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    int unsigned PHY_REG_IDX_WIDTH = 7,
     int unsigned W_BYTE_NUM              = 8,
     int unsigned TRAP_CAUSE_WIDTH        = 4,
     int unsigned CSR_ADDR_WIDTH          = 12,
@@ -17,15 +17,15 @@ class cpu_commit_item #(
     time                                commit_time;
 
     // rob_entry_t payload (see Tomasulo3CPU/src/ROB.sv)
-    bit [PHY_REGISTER_FILE_WIDTH-1:0] curr_phy;
-    bit [PHY_REGISTER_FILE_WIDTH-1:0] prev_phy;
+    bit [PHY_REG_IDX_WIDTH-1:0] curr_phy;
+    bit [PHY_REG_IDX_WIDTH-1:0] prev_phy;
     bit [ARCH_REG_WIDTH-1:0]          rd_addr;
     bit                               rw;
     bit                               mw;
     bit                               compl;
-    bit [DMEM_DEPTH-1:0]              sw_addr;
+    bit [DMEM_ADDR_WIDTH-1:0]              sw_addr;
     bit [W_BYTE_NUM-1:0]              sw_strb;
-    bit [IMEM_DEPTH-1:0]              pc;
+    bit [PC_WIDTH-1:0]              pc;
     bit [TRAP_CAUSE_WIDTH-1:0]        trap_cause;
     bit                               mret_occur;
     bit                               is_csr;
@@ -36,11 +36,11 @@ class cpu_commit_item #(
 
     `uvm_object_param_utils_begin(cpu_commit_item #(
         ROB_INDEX_WIDTH,
-        DMEM_DEPTH,
-        IMEM_DEPTH,
+        DMEM_ADDR_WIDTH,
+        PC_WIDTH,
         REG_FILE_DATA_WIDTH,
         ARCH_REG_WIDTH,
-        PHY_REGISTER_FILE_WIDTH,
+        PHY_REG_IDX_WIDTH,
         W_BYTE_NUM,
         TRAP_CAUSE_WIDTH,
         CSR_ADDR_WIDTH,
@@ -97,20 +97,20 @@ class cpu_commit_item #(
     // Same word index as cpu_base_item.imem_word_index() for scoreboard PC matching.
     function bit [63:0] pc_word_index();
         // Zero-extend word index (Questa lint-friendly vs. param-sized replication).
-        return 64'(pc[IMEM_DEPTH-1:2]);
+        return 64'(pc[PC_WIDTH-1:2]);
     endfunction
 
     // Populate all rob_entry fields in one call (monitor / reference model helper).
     function void set_rob_entry(
-        input bit [PHY_REGISTER_FILE_WIDTH-1:0] curr_phy_in,
-        input bit [PHY_REGISTER_FILE_WIDTH-1:0] prev_phy_in,
+        input bit [PHY_REG_IDX_WIDTH-1:0] curr_phy_in,
+        input bit [PHY_REG_IDX_WIDTH-1:0] prev_phy_in,
         input bit [ARCH_REG_WIDTH-1:0]          rd_addr_in,
         input bit                               rw_in,
         input bit                               mw_in,
         input bit                               compl_in,
-        input bit [DMEM_DEPTH-1:0]              sw_addr_in,
+        input bit [DMEM_ADDR_WIDTH-1:0]              sw_addr_in,
         input bit [W_BYTE_NUM-1:0]              sw_strb_in,
-        input bit [IMEM_DEPTH-1:0]              pc_in,
+        input bit [PC_WIDTH-1:0]              pc_in,
         input bit [TRAP_CAUSE_WIDTH-1:0]        trap_cause_in,
         input bit                               mret_occur_in,
         input bit                               is_csr_in,
@@ -140,11 +140,11 @@ class cpu_commit_item #(
     // Snapshot from rob_commit_monitor lat_* (one-cycle commit pulse).
     function void sample_from_commit_if(virtual cpu_commit_if #(
         ROB_INDEX_WIDTH,
-        DMEM_DEPTH,
-        IMEM_DEPTH,
+        DMEM_ADDR_WIDTH,
+        PC_WIDTH,
         REG_FILE_DATA_WIDTH,
         ARCH_REG_WIDTH,
-        PHY_REGISTER_FILE_WIDTH,
+        PHY_REG_IDX_WIDTH,
         W_BYTE_NUM,
         TRAP_CAUSE_WIDTH,
         CSR_ADDR_WIDTH,
@@ -259,8 +259,8 @@ class cpu_commit_item #(
     endfunction
 
     virtual function void do_copy(uvm_object rhs);
-        cpu_commit_item #(ROB_INDEX_WIDTH, DMEM_DEPTH, IMEM_DEPTH, REG_FILE_DATA_WIDTH,
-            ARCH_REG_WIDTH, PHY_REGISTER_FILE_WIDTH, W_BYTE_NUM, TRAP_CAUSE_WIDTH,
+        cpu_commit_item #(ROB_INDEX_WIDTH, DMEM_ADDR_WIDTH, PC_WIDTH, REG_FILE_DATA_WIDTH,
+            ARCH_REG_WIDTH, PHY_REG_IDX_WIDTH, W_BYTE_NUM, TRAP_CAUSE_WIDTH,
             CSR_ADDR_WIDTH, CSR_CMD_WIDTH) rhs_;
 
         if (!$cast(rhs_, rhs)) begin
@@ -291,8 +291,8 @@ class cpu_commit_item #(
     endfunction
 
     virtual function bit do_compare(uvm_object rhs, uvm_comparer comparer);
-        cpu_commit_item #(ROB_INDEX_WIDTH, DMEM_DEPTH, IMEM_DEPTH, REG_FILE_DATA_WIDTH,
-            ARCH_REG_WIDTH, PHY_REGISTER_FILE_WIDTH, W_BYTE_NUM, TRAP_CAUSE_WIDTH,
+        cpu_commit_item #(ROB_INDEX_WIDTH, DMEM_ADDR_WIDTH, PC_WIDTH, REG_FILE_DATA_WIDTH,
+            ARCH_REG_WIDTH, PHY_REG_IDX_WIDTH, W_BYTE_NUM, TRAP_CAUSE_WIDTH,
             CSR_ADDR_WIDTH, CSR_CMD_WIDTH) rhs_;
         bit same;
 

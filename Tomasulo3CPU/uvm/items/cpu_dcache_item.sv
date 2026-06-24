@@ -1,7 +1,7 @@
 // Memory transaction item for future load/store scoreboard / dcache monitor agent.
 class cpu_dcache_item #(
     int unsigned DMEM_WIDTH = CPU_REG_FILE_DATA_WIDTH,
-    int unsigned DMEM_DEPTH = CPU_DMEM_DEPTH
+    int unsigned DMEM_ADDR_WIDTH = CPU_DMEM_DEPTH
 ) extends uvm_sequence_item;
 
     typedef enum bit [1:0] { DCACHE_READ, DCACHE_WRITE } access_e;
@@ -10,10 +10,10 @@ class cpu_dcache_item #(
     rand access_e              access;
     rand event_e               event_kind;
     rand bit [DMEM_WIDTH-1:0]  data;
-    rand bit [DMEM_DEPTH-1:0]  addr;
+    rand bit [DMEM_ADDR_WIDTH-1:0]  addr;
     rand bit [CPU_W_BYTE_NUM-1:0] strb;
 
-    `uvm_object_param_utils_begin(cpu_dcache_item #(DMEM_WIDTH, DMEM_DEPTH))
+    `uvm_object_param_utils_begin(cpu_dcache_item #(DMEM_WIDTH, DMEM_ADDR_WIDTH))
         `uvm_field_enum(access_e, access, UVM_ALL_ON)
         `uvm_field_enum(event_e, event_kind, UVM_ALL_ON)
         `uvm_field_int(data, UVM_ALL_ON | UVM_HEX)

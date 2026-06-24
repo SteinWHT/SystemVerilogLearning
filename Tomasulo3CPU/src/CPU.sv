@@ -1,19 +1,20 @@
 `timescale 1ns/1ps
 module CPU #(
     parameter int unsigned INSTR_WIDTH             = 32,
-    parameter int unsigned IMEM_DEPTH              = 64,
-    parameter int unsigned IMEM_WIDTH              = 32,
-    parameter int unsigned IMEM_DEPTH_WORD         = IMEM_DEPTH - 1,
+    parameter int unsigned PC_WIDTH                = 64,  // PC / instruction-address width
+    parameter int unsigned IMEM_WIDTH              = 32,  // fetch width; invariant: == INSTR_WIDTH
+    parameter int unsigned PC_WORD_WIDTH           = PC_WIDTH - 1,  // word-aligned PC (drops LSB)
 
+    // invariant: XLEN == REG_FILE_DATA_WIDTH == DMEM_WIDTH (all 64-bit data path)
     parameter int unsigned XLEN                    = 64,
     parameter int unsigned ARCH_REG_COUNT          = 32,
     parameter int unsigned ARCH_REG_WIDTH          = $clog2(ARCH_REG_COUNT),
     parameter int unsigned REG_FILE_DATA_WIDTH     = 64,
 
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned PHY_REG_IDX_WIDTH       = 7,   // physical-register index width
 
     parameter int unsigned DMEM_WIDTH              = 64,
-    parameter int unsigned DMEM_DEPTH              = 32,
+    parameter int unsigned DMEM_ADDR_WIDTH         = 32,  // data-memory byte-address width
     parameter int unsigned W_BYTE_NUM              = DMEM_WIDTH / 8,
 
     parameter int unsigned BPB_PC_BITS             = 3,
@@ -23,8 +24,8 @@ module CPU #(
 
     parameter int unsigned RAS_DEPTH               = 4,
 
-    parameter int unsigned FRL_SIZE                = 128,
-    parameter int unsigned FRL_PTR_WIDTH           = $clog2(FRL_SIZE),
+    parameter int unsigned FRL_DEPTH                = 128,
+    parameter int unsigned FRL_PTR_WIDTH           = $clog2(FRL_DEPTH),
 
     parameter int unsigned NUM_CHECKPOINT          = 8,
 
@@ -51,23 +52,23 @@ module CPU #(
     input  logic rst_n,
 
     // I-Cache interface (valid/ready handshake)
-    output logic [IMEM_DEPTH-1:0]   imem_addr,
-    output logic                    imem_req_valid,
-    input  logic                    imem_req_ready,
-    input  logic [IMEM_WIDTH-1:0]  imem_resp_data,
-    input  logic                    imem_resp_valid,
-    output logic                    imem_resp_ready,
+    output logic [PC_WIDTH-1:0]             imem_addr,
+    output logic                            imem_req_valid,
+    input  logic                            imem_req_ready,
+    input  logic [IMEM_WIDTH-1:0]           imem_resp_data,
+    input  logic                            imem_resp_valid,
+    output logic                            imem_resp_ready,
 
     // Cache-coherence handshake
-    output logic                    fence_i_coh_start,
-    input  logic                    fence_i_coh_done,
+    output logic                            fence_i_coh_start,
+    input  logic                            fence_i_coh_done,
 
     // D-Cache read interface
     input  logic                            dcache_rready,
     input  logic                            dcache_rresp_valid,
     input  logic [REG_FILE_DATA_WIDTH-1:0]  dcache_rdata,
 
-    output logic [DMEM_DEPTH-1:0]           dcache_raddr,
+    output logic [DMEM_ADDR_WIDTH-1:0]      dcache_raddr,
     output logic                            dcache_rvalid,
     output logic                            dcache_rresp_ready,
 
@@ -78,7 +79,7 @@ module CPU #(
     output logic                            dcache_write,
     output logic [DMEM_WIDTH-1:0]           dcache_sw_data,
     output logic [W_BYTE_NUM-1:0]           dcache_wstrb,
-    output logic [DMEM_DEPTH-1:0]           dcache_sw_addr,
+    output logic [DMEM_ADDR_WIDTH-1:0]      dcache_sw_addr,
     output logic                            dcache_wvalid,
     output logic                            dcache_wresp_ready
 );
@@ -87,83 +88,56 @@ module CPU #(
     // Front-end ↔ Back-end internal wires
     // ----------------------------------------------------------------
 
-    // Issue queue status (back-end → front-end)
-    logic issq_intq_full;
-    logic issq_divq_full;
-    logic issq_mulq_full;
-    logic issq_ld_stq_full;
-    logic issq_intq_two_or_more_vacant;
-    logic issq_divq_two_or_more_vacant;
-    logic issq_mulq_two_or_more_vacant;
-    logic issq_ld_stq_two_or_more_vacant;
+    // Dispatch channel (front-end DISPATCH → back-end issue queues)
+    dispatch_if #(
+        .PHY_REG_IDX_WIDTH (PHY_REG_IDX_WIDTH),
+        .XLEN              (XLEN),
+        .PC_WIDTH          (PC_WIDTH),
+        .OPCODE_WIDTH      (OPCODE_WIDTH),
+        .BPB_PC_BITS       (BPB_PC_BITS)
+    ) dispatch_bus ();
 
-    // Dispatch signals (front-end → back-end)
-    logic                                dis_rs_data_ready;
-    logic                                dis_rt_data_ready;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]  dis_rs_phy_addr;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]  dis_rt_phy_addr;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]  dis_new_rd_phy_addr;
-    logic                                dis_reg_write;
-    logic [XLEN-1:0]                     dis_imm;
-    logic [IMEM_DEPTH-1:0]               dis_branch_other_addr;
-    logic                                dis_branch_prediction;
-    logic                                dis_branch;
-    logic [BPB_PC_BITS-1:0]              dis_branch_pc_bits;
-    logic                                dis_jr_inst;
-    logic                                dis_jal_inst;
-    logic                                dis_jr31_inst;
-    logic [IMEM_DEPTH-1:0]               dis_pc;
-    logic [OPCODE_WIDTH-1:0]             dis_opcode;
-    logic                                dis_int_issue_en;
-    logic                                dis_div_issue_en;
-    logic                                dis_mul_issue_en;
-    logic                                dis_ld_st_issue_en;
+    // Common data bus (back-end → front-end broadcast)
+    cdb_if #(
+        .PHY_REG_IDX_WIDTH   (PHY_REG_IDX_WIDTH),
+        .ROB_INDEX_WIDTH     (ROB_INDEX_WIDTH),
+        .REG_FILE_DATA_WIDTH (REG_FILE_DATA_WIDTH),
+        .DMEM_ADDR_WIDTH     (DMEM_ADDR_WIDTH),
+        .W_BYTE_NUM          (W_BYTE_NUM),
+        .PC_WIDTH            (PC_WIDTH),
+        .BPB_PC_BITS         (BPB_PC_BITS)
+    ) cdb_bus ();
 
-    // CDB signals (back-end → front-end)
-    logic                                cdb_valid;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]  cdb_rd_phy_addr;
-    logic                                cdb_reg_write;
-    logic [ROB_INDEX_WIDTH-1:0]          cdb_rob_tag;
-    logic [DMEM_DEPTH-1:0]               cdb_sw_addr;
-    logic [W_BYTE_NUM-1:0]               cdb_sw_strb;
-    logic [IMEM_DEPTH-1:0]               cdb_branch_addr;
-    logic [BPB_PC_BITS-1:0]              cdb_upd_branch_addr;
-    logic                                cdb_upd_branch;
-    logic                                cdb_branch_outcome;
-    logic                                cdb_flush;
-    logic [REG_FILE_DATA_WIDTH-1:0]      cdb_rd_data;
-    logic [ROB_INDEX_WIDTH-1:0]          cdb_rob_depth;
+    // Issue-queue occupancy/back-pressure (back-end → front-end DISPATCH)
+    issq_status_if issq_bus ();
 
-    // ROB sideband (front-end → back-end)
-    logic [ROB_INDEX_WIDTH-1:0]          rob_bottom_ptr;
-    logic [ROB_INDEX_WIDTH-1:0]          rob_top_ptr;
-    logic                                rob_commit_mem_write;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_curr_phy_addr;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]  rt_sb_phy_addr;
-    logic                                rob_fence_pending;
-    logic [ROB_INDEX_WIDTH-1:0]          rob_fence_tag;
+    // ROB sideband (front-end ROB → back-end)
+    rob_sideband_if #(
+        .ROB_INDEX_WIDTH   (ROB_INDEX_WIDTH),
+        .PHY_REG_IDX_WIDTH (PHY_REG_IDX_WIDTH)
+    ) rob_sb_bus ();
 
-    // SB / SAB interface (front-end → back-end)
-    logic [SB_INDEX_WIDTH-1:0]           sb_flush_sw_tag;
-    logic                                sb_flush_sw;
-    logic                                sb_entry_sw;
-    logic [SB_INDEX_WIDTH-1:0]           sb_entry_sw_tag;
-    logic [ROB_INDEX_WIDTH-1:0]          sb_entry_sw_rob_tag;
+    // Store-buffer allocation (front-end SB → back-end LSQ addr buffer)
+    sb_alloc_if #(
+        .SB_INDEX_WIDTH  (SB_INDEX_WIDTH),
+        .ROB_INDEX_WIDTH (ROB_INDEX_WIDTH)
+    ) sb_bus ();
 
-    // Store data path (back-end → front-end)
-    logic [REG_FILE_DATA_WIDTH-1:0]      rt_sb_data;
+    // Store-source / CSR rs1 PRF read (front sends phys addr, back returns data)
+    logic [PHY_REG_IDX_WIDTH-1:0]        st_src_phy_addr;
+    logic [REG_FILE_DATA_WIDTH-1:0]      st_src_data;
 
     // CSR write-back to PRF (front-end → back-end)
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]  csr_wr_phy_addr;
+    logic [PHY_REG_IDX_WIDTH-1:0]  csr_wr_phy_addr;
     logic [REG_FILE_DATA_WIDTH-1:0]      csr_wr_data;
     logic                                csr_wr_en;
 
     // LSB sideband (back-end outputs, partially used)
     logic [ROB_INDEX_WIDTH-1:0]          lsb_rob_tag;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]  lsb_rd_phy_addr;
+    logic [PHY_REG_IDX_WIDTH-1:0]  lsb_rd_phy_addr;
     logic [REG_FILE_DATA_WIDTH-1:0]      lsb_data;
     logic                                lsb_rw;
-    logic [DMEM_DEPTH-1:0]               lsb_sw_addr;
+    logic [DMEM_ADDR_WIDTH-1:0]               lsb_sw_addr;
     logic                                lsb_result_valid;
 
     // ----------------------------------------------------------------
@@ -171,20 +145,20 @@ module CPU #(
     // ----------------------------------------------------------------
     CPU_FRONT_END #(
         .INSTR_WIDTH             (INSTR_WIDTH),
-        .IMEM_DEPTH              (IMEM_DEPTH),
+        .PC_WIDTH                (PC_WIDTH),
         .IMEM_WIDTH              (IMEM_WIDTH),
-        .IMEM_DEPTH_WORD         (IMEM_DEPTH_WORD),
+        .PC_WORD_WIDTH           (PC_WORD_WIDTH),
         .ARCH_REG_COUNT          (ARCH_REG_COUNT),
         .ARCH_REG_WIDTH          (ARCH_REG_WIDTH),
         .REG_FILE_DATA_WIDTH     (REG_FILE_DATA_WIDTH),
-        .PHY_REGISTER_FILE_WIDTH (PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH       (PHY_REG_IDX_WIDTH),
         .DMEM_WIDTH              (DMEM_WIDTH),
-        .DMEM_DEPTH              (DMEM_DEPTH),
+        .DMEM_ADDR_WIDTH         (DMEM_ADDR_WIDTH),
         .BPB_PC_BITS             (BPB_PC_BITS),
         .NUM_WAYS                (NUM_WAYS),
         .IFQ_DEPTH               (IFQ_DEPTH),
         .RAS_DEPTH               (RAS_DEPTH),
-        .FRL_SIZE                (FRL_SIZE),
+        .FRL_DEPTH               (FRL_DEPTH),
         .FRL_PTR_WIDTH           (FRL_PTR_WIDTH),
         .NUM_CHECKPOINT          (NUM_CHECKPOINT),
         .ROB_DEPTH               (ROB_DEPTH),
@@ -192,7 +166,7 @@ module CPU #(
         .SB_DEPTH                (SB_DEPTH),
         .SB_INDEX_WIDTH          (SB_INDEX_WIDTH),
         .OPCODE_WIDTH            (OPCODE_WIDTH),
-        .FENCE_I_COHERENCE      (FENCE_I_COHERENCE)
+        .FENCE_I_COHERENCE       (FENCE_I_COHERENCE)
     ) front_end (
         .clk                             (clk),
         .rst_n                           (rst_n),
@@ -209,85 +183,30 @@ module CPU #(
         .imem_resp_valid                 (imem_resp_valid),
         .imem_resp_ready                 (imem_resp_ready),
 
-        // D-Cache write (SB → D-Cache)
-        .dcache_ready                    (dcache_wready),
-        .dcache_resp_valid               (dcache_wresp_valid),
-
+        // D-Cache store port (SB → D-Cache)
+        .dcache_st_ready                 (dcache_wready),
+        .dcache_st_resp_valid            (dcache_wresp_valid),
         .dcache_sw_addr                  (dcache_sw_addr),
         .dcache_sw_data                  (dcache_sw_data),
         .dcache_sw_strb                  (dcache_wstrb),
-        .dcache_valid                    (dcache_wvalid),
-        .dcache_resp_ready               (dcache_wresp_ready),
+        .dcache_st_valid                 (dcache_wvalid),
+        .dcache_st_resp_ready            (dcache_wresp_ready),
 
-        // Issue queue status from back-end
-        .issue_intq_full                 (issq_intq_full),
-        .issue_divq_full                 (issq_divq_full),
-        .issue_mulq_full                 (issq_mulq_full),
-        .issue_ld_stq_full               (issq_ld_stq_full),
-        .issue_intq_two_or_more_vacant   (issq_intq_two_or_more_vacant),
-        .issue_divq_two_or_more_vacant   (issq_divq_two_or_more_vacant),
-        .issue_mulq_two_or_more_vacant   (issq_mulq_two_or_more_vacant),
-        .issue_ld_stq_two_or_more_vacant (issq_ld_stq_two_or_more_vacant),
+        // Front-end ↔ back-end channels (interfaces)
+        .dispatch_bus                    (dispatch_bus.producer),
+        .cdb_bus                         (cdb_bus.consumer),
+        .issq_bus                        (issq_bus.consumer),
+        .rob_sb_bus                      (rob_sb_bus.producer),
+        .sb_bus                          (sb_bus.producer),
 
-        // Dispatch outputs to back-end
-        .dis_rs_data_ready               (dis_rs_data_ready),
-        .dis_rt_data_ready               (dis_rt_data_ready),
-        .dis_rs_phy_addr                 (dis_rs_phy_addr),
-        .dis_rt_phy_addr                 (dis_rt_phy_addr),
-        .dis_new_rd_phy_addr             (dis_new_rd_phy_addr),
-        .dis_reg_write                   (dis_reg_write),
-        .dis_imm                         (dis_imm),
-        .dis_branch_other_addr           (dis_branch_other_addr),
-        .dis_branch_prediction           (dis_branch_prediction),
-        .dis_branch                      (dis_branch),
-        .dis_branch_pc_bits              (dis_branch_pc_bits),
-        .dis_jr_inst                     (dis_jr_inst),
-        .dis_jal_inst                    (dis_jal_inst),
-        .dis_jr31_inst                   (dis_jr31_inst),
-        .dis_pc                          (dis_pc),
-        .dis_opcode                      (dis_opcode),
-        .dis_int_issue_en                (dis_int_issue_en),
-        .dis_div_issue_en                (dis_div_issue_en),
-        .dis_mul_issue_en                (dis_mul_issue_en),
-        .dis_ld_st_issue_en              (dis_ld_st_issue_en),
-
-        // CDB from back-end
-        .cdb_valid                       (cdb_valid),
-        .cdb_rd_phy_addr                 (cdb_rd_phy_addr),
-        .cdb_reg_write                   (cdb_reg_write),
-        .cdb_rob_tag                     (cdb_rob_tag),
-        .cdb_sw_addr                     (cdb_sw_addr),
-
-        .cdb_sw_strb                     (cdb_sw_strb),
-        .cdb_branch_addr                 (cdb_branch_addr),
-        .cdb_br_updt_addr                (cdb_upd_branch_addr),
-        .cdb_branch                      (cdb_upd_branch),
-        .cdb_branch_outcome              (cdb_branch_outcome),
-        .cdb_flush                       (cdb_flush),
-
-        // PRF interface
-        .rt_sb_phy_addr                 (rt_sb_phy_addr),
-        .rt_sb_data                     (rt_sb_data),
+        // Store-source / CSR rs1 PRF read
+        .st_src_phy_addr                 (st_src_phy_addr),
+        .st_src_data                     (st_src_data),
 
         // CSR write-back to PRF
-        .csr_wr_phy_addr                (csr_wr_phy_addr),
-        .csr_wr_data                    (csr_wr_data),
-        .csr_wr_en                      (csr_wr_en),
-
-        // SB / SAB interface to back-end
-        .sb_flush_sw_tag                 (sb_flush_sw_tag),
-        .sb_flush_sw                     (sb_flush_sw),
-        .sb_entry_sw                     (sb_entry_sw),
-        .sb_entry_sw_tag                 (sb_entry_sw_tag),
-        .sb_entry_sw_rob_tag             (sb_entry_sw_rob_tag),
-
-        // ROB sideband to back-end
-        .rob_bottom_ptr_out              (rob_bottom_ptr),
-        .rob_top_ptr_out                 (rob_top_ptr),
-        .rob_commit_mem_write_out        (rob_commit_mem_write),
-        .rob_commit_curr_phy_addr_out    (rob_commit_curr_phy_addr),
-        .rob_fence_pending_out           (rob_fence_pending),
-        .rob_fence_tag_out               (rob_fence_tag)
+        .csr_wr_phy_addr                 (csr_wr_phy_addr),
+        .csr_wr_data                     (csr_wr_data),
+        .csr_wr_en                       (csr_wr_en)
     );
 
     // ----------------------------------------------------------------
@@ -298,11 +217,11 @@ module CPU #(
         .INSTR_WIDTH             (INSTR_WIDTH),
         .ARCH_REG_COUNT          (ARCH_REG_COUNT),
         .ARCH_REG_WIDTH          (ARCH_REG_WIDTH),
-        .PHY_REGISTER_FILE_WIDTH (PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH       (PHY_REG_IDX_WIDTH),
         .REG_FILE_DATA_WIDTH     (REG_FILE_DATA_WIDTH),
         .DMEM_WIDTH              (DMEM_WIDTH),
-        .DMEM_DEPTH              (DMEM_DEPTH),
-        .IMEM_DEPTH              (IMEM_DEPTH),
+        .DMEM_ADDR_WIDTH         (DMEM_ADDR_WIDTH),
+        .PC_WIDTH                (PC_WIDTH),
         .ROB_DEPTH               (ROB_DEPTH),
         .ROB_INDEX_WIDTH         (ROB_INDEX_WIDTH),
         .ISSUE_QUEUE_DEPTH       (ISSUE_QUEUE_DEPTH),
@@ -318,85 +237,29 @@ module CPU #(
         .clk                             (clk),
         .rst_n                           (rst_n),
 
-        .rob_top_ptr                     (rob_top_ptr),
-        .rob_fence_pending               (rob_fence_pending),
-        .rob_fence_tag                   (rob_fence_tag),
+        // Front-end ↔ back-end channels (interfaces)
+        .dispatch_bus                    (dispatch_bus.consumer),
+        .cdb_bus                         (cdb_bus.producer),
+        .issq_bus                        (issq_bus.producer),
+        .rob_sb_bus                      (rob_sb_bus.consumer),
+        .sb_bus                          (sb_bus.consumer),
 
-        // Dispatch from front-end
-        .dis_int_issq_en                 (dis_int_issue_en),
-        .dis_div_issq_en                 (dis_div_issue_en),
-        .dis_mul_issq_en                 (dis_mul_issue_en),
-        .dis_ld_st_issq_en               (dis_ld_st_issue_en),
-        .dis_reg_write                   (dis_reg_write),
-        .dis_rs_data_ready               (dis_rs_data_ready),
-        .dis_rt_data_ready               (dis_rt_data_ready),
-        .dis_rs_phy_addr                 (dis_rs_phy_addr),
-        .dis_rt_phy_addr                 (dis_rt_phy_addr),
-        .dis_new_rd_phy_addr             (dis_new_rd_phy_addr),
-        .dis_rob_tag                     (rob_bottom_ptr),
-        .dis_opcode                      (dis_opcode),
-        .dis_imm                         (dis_imm),
-        .dis_branch_other_addr           (dis_branch_other_addr),
-        .dis_branch_pc_bits              ({1'b0, dis_branch_pc_bits}),
-        .dis_branch_prediction           (dis_branch_prediction),
-        .dis_branch                      (dis_branch),
-        .dis_jr_inst                     (dis_jr_inst),
-        .dis_jal_inst                    (dis_jal_inst),
-        .dis_jr31_inst                   (dis_jr31_inst),
-        .dis_pc                          (dis_pc),
-
-        // ROB sideband
-        .rob_tag                         (rob_bottom_ptr),
-        .rob_commit_mem_write            (rob_commit_mem_write),
-
-        // Store data PRF read port
-        .rt_sb_phy_addr                  (rt_sb_phy_addr),
-        .rt_sb_data                      (rt_sb_data),
+        // Store-source / CSR rs1 PRF read
+        .st_src_phy_addr                 (st_src_phy_addr),
+        .st_src_data                     (st_src_data),
 
         // CSR write-back to PRF
         .csr_wr_phy_addr                 (csr_wr_phy_addr),
         .csr_wr_data                     (csr_wr_data),
         .csr_wr_en                       (csr_wr_en),
 
-        // SB / SAB
-        .sb_flush_sw_tag                 (sb_flush_sw_tag),
-        .sb_flush_sw                     (sb_flush_sw),
-        .sb_entry_sw                     (sb_entry_sw),
-        .sb_entry_sw_tag                 (sb_entry_sw_tag),
-        .sb_entry_sw_rob_tag             (sb_entry_sw_rob_tag),
-
-        // D-Cache read
-        .dcache_ready                    (dcache_rready),
-        .dcache_resp_valid               (dcache_rresp_valid),
-        .dcache_rdata                    (dcache_rdata),
-        .dcache_addr                     (dcache_raddr),
-        .dcache_valid                    (dcache_rvalid),
-        .dcache_resp_ready               (dcache_rresp_ready),
-
-        // Issue queue status to front-end
-        .issq_intq_full                  (issq_intq_full),
-        .issq_divq_full                  (issq_divq_full),
-        .issq_mulq_full                  (issq_mulq_full),
-        .issq_ld_stq_full                (issq_ld_stq_full),
-        .issq_intq_two_or_more_vacant    (issq_intq_two_or_more_vacant),
-        .issq_divq_two_or_more_vacant    (issq_divq_two_or_more_vacant),
-        .issq_mulq_two_or_more_vacant    (issq_mulq_two_or_more_vacant),
-        .issq_ld_stq_two_or_more_vacant  (issq_ld_stq_two_or_more_vacant),
-
-        // CDB to front-end
-        .cdb_valid                       (cdb_valid),
-        .cdb_rob_tag                     (cdb_rob_tag),
-        .cdb_rd_phy_addr                 (cdb_rd_phy_addr),
-        .cdb_rd_data                     (cdb_rd_data),
-        .cdb_reg_write                   (cdb_reg_write),
-        .cdb_flush                       (cdb_flush),
-        .cdb_rob_depth                   (cdb_rob_depth),
-        .cdb_sw_addr                     (cdb_sw_addr),
-        .cdb_sw_strb                     (cdb_sw_strb),
-        .cdb_upd_branch                  (cdb_upd_branch),
-        .cdb_upd_branch_addr             (cdb_upd_branch_addr),
-        .cdb_branch_outcome              (cdb_branch_outcome),
-        .cdb_branch_addr                 (cdb_branch_addr),
+        // D-Cache load port
+        .dcache_ld_ready                 (dcache_rready),
+        .dcache_ld_resp_valid            (dcache_rresp_valid),
+        .dcache_ld_rdata                 (dcache_rdata),
+        .dcache_ld_addr                  (dcache_raddr),
+        .dcache_ld_valid                 (dcache_rvalid),
+        .dcache_ld_resp_ready            (dcache_rresp_ready),
 
         // LSB sideband
         .lsb_rob_tag                     (lsb_rob_tag),
@@ -408,7 +271,7 @@ module CPU #(
     );
 
     // synthesis translate_off
-    assign front_end.rob.sim_cdb_rd_data = cdb_rd_data;
+    assign front_end.rob.sim_cdb_rd_data = cdb_bus.rd_data;
     // synthesis translate_on
 
 endmodule

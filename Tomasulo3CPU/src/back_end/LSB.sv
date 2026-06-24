@@ -4,12 +4,12 @@ import riscv_types_pkg::*;
 #(
     parameter int unsigned LSB_DEPTH = 4,
     parameter int unsigned LSB_INDEX_WIDTH = $clog2(LSB_DEPTH),
-    parameter int unsigned DMEM_DEPTH = 32,
+    parameter int unsigned DMEM_ADDR_WIDTH = 32,
     parameter int unsigned DMEM_WIDTH = 64,
     parameter int unsigned ROB_DEPTH = 16,
     parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
     parameter int unsigned ARCH_REG_WIDTH = 5,
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
     parameter int unsigned OPCODE_WIDTH = 7,
     parameter int unsigned W_BYTE_NUM = DMEM_WIDTH / 8
@@ -25,8 +25,8 @@ import riscv_types_pkg::*;
     // LSQ Interface
     input  logic [OPCODE_WIDTH-1:0]            iss_lsb_opcode,
     input  logic [ROB_INDEX_WIDTH-1:0]         iss_lsb_rob_tag,
-    input  logic [DMEM_DEPTH-1:0]              iss_lsb_addr,
-    input  logic [PHY_REGISTER_FILE_WIDTH-1:0] iss_lsb_phy_addr,
+    input  logic [DMEM_ADDR_WIDTH-1:0]         iss_lsb_addr,
+    input  logic [PHY_REG_IDX_WIDTH-1:0]       iss_lsb_phy_addr,
     input  logic                               iss_lsb_rdy,
     output logic                               lsb_en,
 
@@ -38,10 +38,10 @@ import riscv_types_pkg::*;
     input  logic                               cdb_flush,
     input  logic [ROB_INDEX_WIDTH-1:0]         cdb_rob_depth,
     output logic [ROB_INDEX_WIDTH-1:0]         lsb_rob_tag,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0] lsb_rd_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]       lsb_rd_phy_addr,
     output logic [REG_FILE_DATA_WIDTH-1:0]     lsb_data,
     output logic                               lsb_rw,
-    output logic [DMEM_DEPTH-1:0]              lsb_sw_addr,
+    output logic [DMEM_ADDR_WIDTH-1:0]         lsb_sw_addr,
     output logic [W_BYTE_NUM-1:0]              lsb_sw_strb,
     output logic                               lsb_ready,
 
@@ -52,8 +52,8 @@ import riscv_types_pkg::*;
     typedef struct packed {
         logic [ROB_INDEX_WIDTH-1:0]         rob_tag;
         logic                               rw;
-        logic [DMEM_DEPTH-1:0]              addr;
-        logic [PHY_REGISTER_FILE_WIDTH-1:0] phy_addr;
+        logic [DMEM_ADDR_WIDTH-1:0]         addr;
+        logic [PHY_REG_IDX_WIDTH-1:0]       phy_addr;
         logic [REG_FILE_DATA_WIDTH-1:0]     data;
         logic [W_BYTE_NUM-1:0]              strb;
     } lsb_entry_t;

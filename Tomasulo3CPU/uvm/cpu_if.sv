@@ -1,9 +1,9 @@
 interface cpu_if #(
     parameter int unsigned INSTR_WIDTH  = 32,
-    parameter int unsigned IMEM_DEPTH   = 64,
+    parameter int unsigned PC_WIDTH   = 64,
     parameter int unsigned IMEM_WIDTH   = 32,
     parameter int unsigned DMEM_WIDTH   = 64,
-    parameter int unsigned DMEM_DEPTH   = 32,
+    parameter int unsigned DMEM_ADDR_WIDTH   = 32,
     parameter int unsigned W_BYTE_NUM   = DMEM_WIDTH / 8,
     parameter int unsigned IMEM_WORDS   = 1024,
     parameter int unsigned DMEM_LINES   = 256,
@@ -21,12 +21,12 @@ interface cpu_if #(
     logic [IMEM_WIDTH-1:0]  imem_resp_data;
     logic                   imem_req_valid;
     logic                   imem_req_ready;
-    logic [IMEM_DEPTH-1:0]  imem_addr;
+    logic [PC_WIDTH-1:0]  imem_addr;
 
     logic                   dcache_rready;
     logic                   dcache_rresp_valid;
     logic [DMEM_WIDTH-1:0]  dcache_rdata;
-    logic [DMEM_DEPTH-1:0]  dcache_raddr;
+    logic [DMEM_ADDR_WIDTH-1:0]  dcache_raddr;
     logic                   dcache_rvalid;
     logic                   dcache_rresp_ready;
 
@@ -35,7 +35,7 @@ interface cpu_if #(
     logic                   dcache_write;
     logic [DMEM_WIDTH-1:0]  dcache_sw_data;
     logic [W_BYTE_NUM-1:0]  dcache_wstrb;
-    logic [DMEM_DEPTH-1:0]  dcache_sw_addr;
+    logic [DMEM_ADDR_WIDTH-1:0]  dcache_sw_addr;
     logic                   dcache_wvalid;
     logic                   dcache_wresp_ready;
 
@@ -43,7 +43,7 @@ interface cpu_if #(
     logic [MEM_IDX_BITS-1:0]    dcache_mem_init_idx;
     logic [DMEM_WIDTH-1:0]      dcache_mem_init_data;
     logic                       axi_mem_init_en;
-    logic [DMEM_DEPTH-1:0]      axi_mem_init_word_idx;
+    logic [DMEM_ADDR_WIDTH-1:0]      axi_mem_init_word_idx;
     logic [DMEM_WIDTH-1:0]      axi_mem_init_data;
     logic [31:0]                dcache_hits;
     logic [31:0]                dcache_misses;
@@ -86,14 +86,14 @@ interface cpu_if #(
     );
         @(negedge clk);
         axi_mem_init_en       = 1'b1;
-        axi_mem_init_word_idx = DMEM_DEPTH'(word_idx);
+        axi_mem_init_word_idx = DMEM_ADDR_WIDTH'(word_idx);
         axi_mem_init_data     = data;
         @(negedge clk);
         axi_mem_init_en       = 1'b0;
     endtask
 
     task automatic load_instr(
-        input logic [IMEM_DEPTH-1:0] byte_addr,
+        input logic [PC_WIDTH-1:0] byte_addr,
         input logic [INSTR_WIDTH-1:0] instr
     );
         int unsigned instr_idx;
@@ -142,7 +142,7 @@ interface cpu_if #(
     endfunction
 
     task automatic fill_nops(
-        input logic [IMEM_DEPTH-1:0] byte_addr,
+        input logic [PC_WIDTH-1:0] byte_addr,
         input int unsigned count
     );
         for (int unsigned i = 0; i < count; i++) begin
@@ -206,13 +206,13 @@ interface cpu_if #(
     endtask
 
     function automatic logic [DMEM_WIDTH-1:0] read_dmem_line(
-        input logic [DMEM_DEPTH-1:0] byte_addr
+        input logic [DMEM_ADDR_WIDTH-1:0] byte_addr
     );
-        return dmem_array[byte_addr[DMEM_DEPTH-1:3]];
+        return dmem_array[byte_addr[DMEM_ADDR_WIDTH-1:3]];
     endfunction
 
     function automatic logic [31:0] read_dmem_word32(
-        input logic [DMEM_DEPTH-1:0] byte_addr
+        input logic [DMEM_ADDR_WIDTH-1:0] byte_addr
     );
         logic [DMEM_WIDTH-1:0] line;
         line = read_dmem_line(byte_addr);

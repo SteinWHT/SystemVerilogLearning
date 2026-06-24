@@ -2,11 +2,11 @@
 // In tb_top, connect lat_* / mon_* to dut.front_end.rob.u_rob_commit_mon.*
 interface cpu_commit_if #(
     int unsigned ROB_INDEX_WIDTH         = 4,
-    int unsigned DMEM_DEPTH              = 32,
-    int unsigned IMEM_DEPTH              = 64,
+    int unsigned DMEM_ADDR_WIDTH              = 32,
+    int unsigned PC_WIDTH              = 64,
     int unsigned REG_FILE_DATA_WIDTH     = 64,
     int unsigned ARCH_REG_WIDTH          = 5,
-    int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    int unsigned PHY_REG_IDX_WIDTH = 7,
     int unsigned W_BYTE_NUM              = 8,
     int unsigned TRAP_CAUSE_WIDTH        = 4,
     int unsigned CSR_ADDR_WIDTH          = 12,
@@ -20,14 +20,14 @@ interface cpu_commit_if #(
     // Combinational commit-head view
     logic                                 mon_commit_valid;
     logic [ROB_INDEX_WIDTH-1:0]           mon_commit_rob_tag;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]   mon_curr_phy;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]   mon_prev_phy;
+    logic [PHY_REG_IDX_WIDTH-1:0]   mon_curr_phy;
+    logic [PHY_REG_IDX_WIDTH-1:0]   mon_prev_phy;
     logic [ARCH_REG_WIDTH-1:0]            mon_rd_arch;
     logic                                 mon_reg_write;
     logic                                 mon_mem_write;
-    logic [DMEM_DEPTH-1:0]                mon_sw_addr;
+    logic [DMEM_ADDR_WIDTH-1:0]                mon_sw_addr;
     logic [W_BYTE_NUM-1:0]                mon_sw_strb;
-    logic [IMEM_DEPTH-1:0]                mon_pc;
+    logic [PC_WIDTH-1:0]                mon_pc;
     logic [TRAP_CAUSE_WIDTH-1:0]          mon_trap_cause;
     logic                                 mon_mret;
     logic                                 mon_is_csr;
@@ -39,14 +39,14 @@ interface cpu_commit_if #(
     // Latched one-cycle snapshot
     logic                                 lat_valid;
     logic [ROB_INDEX_WIDTH-1:0]           lat_rob_tag;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]   lat_curr_phy;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]   lat_prev_phy;
+    logic [PHY_REG_IDX_WIDTH-1:0]   lat_curr_phy;
+    logic [PHY_REG_IDX_WIDTH-1:0]   lat_prev_phy;
     logic [ARCH_REG_WIDTH-1:0]            lat_rd_arch;
     logic                                 lat_reg_write;
     logic                                 lat_mem_write;
-    logic [DMEM_DEPTH-1:0]                lat_sw_addr;
+    logic [DMEM_ADDR_WIDTH-1:0]                lat_sw_addr;
     logic [W_BYTE_NUM-1:0]                lat_sw_strb;
-    logic [IMEM_DEPTH-1:0]                lat_pc;
+    logic [PC_WIDTH-1:0]                lat_pc;
     logic [TRAP_CAUSE_WIDTH-1:0]          lat_trap_cause;
     logic                                 lat_mret;
     logic                                 lat_is_csr;

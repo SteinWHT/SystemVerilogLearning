@@ -15,20 +15,20 @@ import riscv_types_pkg::*;
     parameter int unsigned OPCODE_WIDTH = 7,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7,
     parameter int unsigned MUL_CYCLES = 4
 ) (
     input logic clk,
     input logic rst_n,
 
     // PRF interface
-    input logic [REG_FILE_DATA_WIDTH-1:0]           rs_data_mul,
-    input logic [REG_FILE_DATA_WIDTH-1:0]           rt_data_mul,
+    input logic [REG_FILE_DATA_WIDTH-1:0]           rs1_data_mul,
+    input logic [REG_FILE_DATA_WIDTH-1:0]           rs2_data_mul,
 
     // ISSUEQ interface
     input logic [ROB_INDEX_WIDTH-1:0]               rob_tag,
     input logic [OPCODE_WIDTH-1:0]                  opcode,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]       rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]             rd_phy_addr,
     input logic                                     valid,
 
     // CDB interface
@@ -39,7 +39,7 @@ import riscv_types_pkg::*;
     input logic [ROB_INDEX_WIDTH-1:0]               rob_top_ptr,
 
     output logic [ROB_INDEX_WIDTH-1:0]              exe_rob_tag,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]      exe_rd_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]            exe_rd_phy_addr,
     output logic [REG_FILE_DATA_WIDTH-1:0]          exe_rd_data,
     output logic                                    exe_reg_write,
     output logic                                    exe_result_valid
@@ -47,7 +47,7 @@ import riscv_types_pkg::*;
     localparam int unsigned MUL_WIDTH = XLEN + 1; // 65-bit operands
 
     logic [ROB_INDEX_WIDTH-1:0]               mul_rob_tag[MUL_CYCLES];
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]       mul_rd_phy_addr[MUL_CYCLES];
+    logic [PHY_REG_IDX_WIDTH-1:0]             mul_rd_phy_addr[MUL_CYCLES];
     logic [OPCODE_WIDTH-1:0]                  mul_opcode[MUL_CYCLES];
     logic                                     mul_valid[MUL_CYCLES];
     logic                                     killed[MUL_CYCLES];
@@ -60,20 +60,20 @@ import riscv_types_pkg::*;
     always_comb begin
         unique case (instr_e'(opcode))
             INSTR_MULHU: begin
-                mul_a = {1'b0, rs_data_mul};
-                mul_b = {1'b0, rt_data_mul};
+                mul_a = {1'b0, rs1_data_mul};
+                mul_b = {1'b0, rs2_data_mul};
             end
             INSTR_MULHSU: begin
-                mul_a = {rs_data_mul[XLEN-1], rs_data_mul};
-                mul_b = {1'b0, rt_data_mul};
+                mul_a = {rs1_data_mul[XLEN-1], rs1_data_mul};
+                mul_b = {1'b0, rs2_data_mul};
             end
             INSTR_MULW: begin
-                mul_a = {{(MUL_WIDTH-32){rs_data_mul[31]}}, rs_data_mul[31:0]};
-                mul_b = {{(MUL_WIDTH-32){rt_data_mul[31]}}, rt_data_mul[31:0]};
+                mul_a = {{(MUL_WIDTH-32){rs1_data_mul[31]}}, rs1_data_mul[31:0]};
+                mul_b = {{(MUL_WIDTH-32){rs2_data_mul[31]}}, rs2_data_mul[31:0]};
             end
             default: begin // MUL, MULH
-                mul_a = {rs_data_mul[XLEN-1], rs_data_mul};
-                mul_b = {rt_data_mul[XLEN-1], rt_data_mul};
+                mul_a = {rs1_data_mul[XLEN-1], rs1_data_mul};
+                mul_b = {rs2_data_mul[XLEN-1], rs2_data_mul};
             end
         endcase
     end

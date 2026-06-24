@@ -9,9 +9,9 @@
 // but in cost of more logic and area
 module IFQ #(
     parameter int unsigned INSTR_WIDTH = 32,
-    parameter int unsigned IMEM_DEPTH = 64,
+    parameter int unsigned PC_WIDTH = 64,
     parameter int unsigned IMEM_WIDTH = 32,
-    parameter int unsigned IMEM_WIDTH_WORD = IMEM_DEPTH - 1,
+    parameter int unsigned PC_WORD_WIDTH = PC_WIDTH - 1,
     parameter int unsigned DEPTH = 16,
     parameter int unsigned NUM_WAYS = 4
 ) (
@@ -20,7 +20,7 @@ module IFQ #(
 
     // I-CACHE interface (valid/ready handshake)
     // Request channel: IFQ -> I-CACHE
-    output logic [IMEM_DEPTH-1:0]       imem_addr,
+    output logic [PC_WIDTH-1:0]         imem_addr,
     output logic                        imem_req_valid,
     input  logic                        imem_req_ready,
 
@@ -32,12 +32,12 @@ module IFQ #(
     // DISPATCH interface
     input  logic                        dis_ren,
     input  logic                        dis_jmpbr,
-    input  logic [IMEM_WIDTH_WORD-1:0]  dis_jmpbr_addr,
+    input  logic [PC_WORD_WIDTH-1:0]    dis_jmpbr_addr,
     input  logic                        dis_jmpbr_addr_valid,
 
     output logic [INSTR_WIDTH-1:0]      ifq_instr_out,
-    output logic [IMEM_DEPTH-1:0]       ifq_pc,
-    output logic [IMEM_DEPTH-1:0]       ifq_pc_plus4,
+    output logic [PC_WIDTH-1:0]         ifq_pc,
+    output logic [PC_WIDTH-1:0]         ifq_pc_plus4,
     output logic                        ifq_empty
 );
 
@@ -67,12 +67,12 @@ module IFQ #(
     logic imem_req_fire;
     logic imem_resp_fire;
 
-    logic [IMEM_DEPTH-1:0] pc;
-    logic [IMEM_DEPTH-1:0] pc_plus4;
-    logic [IMEM_DEPTH-1:0] imem_pc;
+    logic [PC_WIDTH-1:0] pc;
+    logic [PC_WIDTH-1:0] pc_plus4;
+    logic [PC_WIDTH-1:0] imem_pc;
 
     assign flush   = dis_jmpbr && dis_jmpbr_addr_valid;
-    assign pc_plus4 = pc + IMEM_DEPTH'(InstrBytes);
+    assign pc_plus4 = pc + PC_WIDTH'(InstrBytes);
     assign imem_req_fire = imem_req_valid && imem_req_ready;
 
     // full: any FIFO is full
@@ -163,7 +163,7 @@ module IFQ #(
                 if (imem_resp_fire) begin
                     wr_way  <= wr_way + OneTimeInstrNum[NumWaysWidth-1:0];
                     if (!discard_req) begin
-                        imem_pc <= imem_pc + IMEM_DEPTH'(OneTimeInstrNum * (InstrBytes));
+                        imem_pc <= imem_pc + PC_WIDTH'(OneTimeInstrNum * (InstrBytes));
                     end
                 end
 

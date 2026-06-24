@@ -6,15 +6,15 @@
 // No too small assertion
 `timescale 1ns/1ps
 module FRL #(
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7,
     parameter int unsigned ARCH_REG_COUNT = 32,
-    parameter int unsigned FRL_SIZE = 2**PHY_REGISTER_FILE_WIDTH - ARCH_REG_COUNT,
-    parameter int unsigned FRL_PTR_WIDTH = $clog2(FRL_SIZE)
+    parameter int unsigned FRL_DEPTH = 2**PHY_REG_IDX_WIDTH - ARCH_REG_COUNT,
+    parameter int unsigned FRL_PTR_WIDTH = $clog2(FRL_DEPTH)
 ) (
     input  logic clk,
     input  logic rst_n,
 
-    input  logic [PHY_REGISTER_FILE_WIDTH - 1:0]rob_commit_pre_phy_addr,
+    input  logic [PHY_REG_IDX_WIDTH - 1:0]      rob_commit_pre_phy_addr,
     input  logic                                rob_commit,
     input  logic                                rob_commit_reg_write,
 
@@ -23,7 +23,7 @@ module FRL #(
     input  logic                                cdb_flush,
 
     input  logic                                dis_frl_read,
-    output logic [PHY_REGISTER_FILE_WIDTH - 1:0]frl_read_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH - 1:0]      frl_read_phy_addr,
     output logic                                frl_read_empty,
 
     output logic [FRL_PTR_WIDTH:0]              frl_head_ptr_to_frat
@@ -32,12 +32,12 @@ module FRL #(
     logic [FRL_PTR_WIDTH:0] head_ptr, tail_ptr;
     logic empty, full;
     logic do_read, do_write;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] frl_array [FRL_SIZE];
+    logic [PHY_REG_IDX_WIDTH-1:0] frl_array [FRL_DEPTH];
 
     function automatic logic [FRL_PTR_WIDTH:0] ptr_next(
         input logic [FRL_PTR_WIDTH:0] ptr
     );
-        if (ptr[FRL_PTR_WIDTH-1:0] == FRL_PTR_WIDTH'(FRL_SIZE - 1)) begin
+        if (ptr[FRL_PTR_WIDTH-1:0] == FRL_PTR_WIDTH'(FRL_DEPTH - 1)) begin
             ptr_next = {~ptr[FRL_PTR_WIDTH], {FRL_PTR_WIDTH{1'b0}}};
         end else begin
             ptr_next = ptr + 1'b1;
@@ -48,9 +48,9 @@ module FRL #(
         if (!rst_n) begin
             head_ptr <= '0;
             tail_ptr <= {1'b1, {FRL_PTR_WIDTH{1'b0}}};
-            for (int i = 0; i < FRL_SIZE; i++) begin
+            for (int i = 0; i < FRL_DEPTH; i++) begin
                 // initialize with physical register indices
-                frl_array[i] <= PHY_REGISTER_FILE_WIDTH'(ARCH_REG_COUNT + i);
+                frl_array[i] <= PHY_REG_IDX_WIDTH'(ARCH_REG_COUNT + i);
             end
             frl_read_phy_addr <= '0;
         end else begin

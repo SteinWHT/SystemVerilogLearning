@@ -1,5 +1,5 @@
 // MUL QUEUE DATA STRUCTURE:
-//  robtag      rs      rsrdy       rt      rtrdy       op      rd      valid       rw
+//  robtag      rs1      rsrdy       rs2      rtrdy       op      rd      valid       rw
 //  5b          6b      1b          6b      1b          6       6b      1b          1b
 
 module MULQ 
@@ -7,7 +7,7 @@ import riscv_types_pkg::*;
 #(
     parameter int unsigned MUL_QUEUE_DEPTH = 8,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7,
     parameter int unsigned OPCODE_WIDTH = 7
 ) (
     input logic clk,
@@ -18,29 +18,29 @@ import riscv_types_pkg::*;
     input logic                                 cdb_flush,
     input logic [ROB_INDEX_WIDTH-1:0]           rob_top_ptr,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_depth,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         cdb_rd_phy_addr,
     input logic                                 cdb_phy_reg_write,
 
     // forwarding logic interface
     // ALU interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   int_rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         int_rd_phy_addr,
     input logic                                 int_exe_ready,
     // MULT interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   mul_rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         mul_rd_phy_addr,
     input logic                                 mul_exe_ready,
     // DIV interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   div_rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         div_rd_phy_addr,
     input logic                                 div_exe_ready,
     // LD/ST interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   ls_buf_rd_phy_addr,
-    input logic                                 ls_buf_buf_rd_write,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         lsb_wake_phy_addr,
+    input logic                                 lsb_wake_valid,
 
     // MULT interface
     output logic [ROB_INDEX_WIDTH-1:0]          iss_rob_tag_mul,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_mul,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rt_phy_addr_mul,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_rs1_phy_addr_mul,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_rs2_phy_addr_mul,
     output logic [OPCODE_WIDTH-1:0]             iss_opcode_mul,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rd_phy_addr_mul,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_rd_phy_addr_mul,
     output logic                                iss_rw_mul,
     output logic                                exe_mul_grant,
 
@@ -50,13 +50,13 @@ import riscv_types_pkg::*;
     output logic                                issue_mul_rdy,
 
     // Dispatch interface
-    input logic                                 dis_mul_issq_en,
+    input logic                                 dis_mul_issue_en,
     input logic                                 dis_reg_write,
-    input logic                                 dis_rs_data_ready,
-    input logic                                 dis_rt_data_ready,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rs_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rt_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
+    input logic                                 dis_rs1_data_ready,
+    input logic                                 dis_rs2_data_ready,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_rs1_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_rs2_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_new_rd_phy_addr,
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
     input logic [OPCODE_WIDTH-1:0]              dis_opcode,
 
@@ -70,12 +70,12 @@ import riscv_types_pkg::*;
     // Entry Struct
     typedef struct packed {
         logic [ROB_INDEX_WIDTH-1:0]         rob_tag;
-        logic [PHY_REGISTER_FILE_WIDTH-1:0] rs;
-        logic                               rs_rdy;
-        logic [PHY_REGISTER_FILE_WIDTH-1:0] rt;
-        logic                               rt_rdy;
+        logic [PHY_REG_IDX_WIDTH-1:0]       rs1;
+        logic                               rs1_rdy;
+        logic [PHY_REG_IDX_WIDTH-1:0]       rs2;
+        logic                               rs2_rdy;
         logic [OPCODE_WIDTH-1:0]            op;
-        logic [PHY_REGISTER_FILE_WIDTH-1:0] rd;
+        logic [PHY_REG_IDX_WIDTH-1:0]       rd;
         logic                               rw;
     } mulq_entry_t;
 
@@ -85,53 +85,53 @@ import riscv_types_pkg::*;
     logic                               issue_mul;
 
     // Wakeup Logic — snoop CDB, ALU, MUL, DIV, LD/ST forwarding buses
-    logic wk_rs_rdy [MUL_QUEUE_DEPTH];
-    logic wk_rt_rdy [MUL_QUEUE_DEPTH];
+    logic wk_rs1_rdy [MUL_QUEUE_DEPTH];
+    logic wk_rs2_rdy [MUL_QUEUE_DEPTH];
 
     always_comb begin
         for (int i = 0; i < MUL_QUEUE_DEPTH; i++) begin
-            wk_rs_rdy[i] = q[i].rs_rdy;
-            wk_rt_rdy[i] = q[i].rt_rdy;
+            wk_rs1_rdy[i] = q[i].rs1_rdy;
+            wk_rs2_rdy[i] = q[i].rs2_rdy;
 
             if (q_valid[i]) begin
-                if (!q[i].rs_rdy) begin
-                    if (cdb_valid && cdb_phy_reg_write    && (q[i].rs == cdb_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
-                    if (int_exe_ready        && (q[i].rs == int_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
-                    if (mul_exe_ready        && (q[i].rs == mul_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
-                    if (div_exe_ready        && (q[i].rs == div_rd_phy_addr))     wk_rs_rdy[i] = 1'b1;
-                    if (ls_buf_buf_rd_write  && (q[i].rs == ls_buf_rd_phy_addr))  wk_rs_rdy[i] = 1'b1;
+                if (!q[i].rs1_rdy) begin
+                    if (cdb_valid && cdb_phy_reg_write    && (q[i].rs1 == cdb_rd_phy_addr))     wk_rs1_rdy[i] = 1'b1;
+                    if (int_exe_ready        && (q[i].rs1 == int_rd_phy_addr))     wk_rs1_rdy[i] = 1'b1;
+                    if (mul_exe_ready        && (q[i].rs1 == mul_rd_phy_addr))     wk_rs1_rdy[i] = 1'b1;
+                    if (div_exe_ready        && (q[i].rs1 == div_rd_phy_addr))     wk_rs1_rdy[i] = 1'b1;
+                    if (lsb_wake_valid  && (q[i].rs1 == lsb_wake_phy_addr))  wk_rs1_rdy[i] = 1'b1;
                 end
-                if (!q[i].rt_rdy) begin
-                    if (cdb_valid && cdb_phy_reg_write   && (q[i].rt == cdb_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
-                    if (int_exe_ready        && (q[i].rt == int_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
-                    if (mul_exe_ready        && (q[i].rt == mul_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
-                    if (div_exe_ready        && (q[i].rt == div_rd_phy_addr))     wk_rt_rdy[i] = 1'b1;
-                    if (ls_buf_buf_rd_write  && (q[i].rt == ls_buf_rd_phy_addr))  wk_rt_rdy[i] = 1'b1;
+                if (!q[i].rs2_rdy) begin
+                    if (cdb_valid && cdb_phy_reg_write   && (q[i].rs2 == cdb_rd_phy_addr))     wk_rs2_rdy[i] = 1'b1;
+                    if (int_exe_ready        && (q[i].rs2 == int_rd_phy_addr))     wk_rs2_rdy[i] = 1'b1;
+                    if (mul_exe_ready        && (q[i].rs2 == mul_rd_phy_addr))     wk_rs2_rdy[i] = 1'b1;
+                    if (div_exe_ready        && (q[i].rs2 == div_rd_phy_addr))     wk_rs2_rdy[i] = 1'b1;
+                    if (lsb_wake_valid  && (q[i].rs2 == lsb_wake_phy_addr))  wk_rs2_rdy[i] = 1'b1;
                 end
             end
         end
     end
 
     // Dispatch-Time Wakeup — catch same-cycle forwarding for new entry
-    logic dis_rs_rdy_eff, dis_rt_rdy_eff;
+    logic dis_rs1_rdy_eff, dis_rs2_rdy_eff;
 
     always_comb begin
-        dis_rs_rdy_eff = dis_rs_data_ready;
-        dis_rt_rdy_eff = dis_rt_data_ready;
+        dis_rs1_rdy_eff = dis_rs1_data_ready;
+        dis_rs2_rdy_eff = dis_rs2_data_ready;
 
-        if (!dis_rs_data_ready) begin
-            if (cdb_valid && cdb_phy_reg_write    && (dis_rs_phy_addr == cdb_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
-            if (int_exe_ready        && (dis_rs_phy_addr == int_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
-            if (mul_exe_ready        && (dis_rs_phy_addr == mul_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
-            if (div_exe_ready        && (dis_rs_phy_addr == div_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
-            if (ls_buf_buf_rd_write  && (dis_rs_phy_addr == ls_buf_rd_phy_addr))  dis_rs_rdy_eff = 1'b1;
+        if (!dis_rs1_data_ready) begin
+            if (cdb_valid && cdb_phy_reg_write    && (dis_rs1_phy_addr == cdb_rd_phy_addr))     dis_rs1_rdy_eff = 1'b1;
+            if (int_exe_ready        && (dis_rs1_phy_addr == int_rd_phy_addr))     dis_rs1_rdy_eff = 1'b1;
+            if (mul_exe_ready        && (dis_rs1_phy_addr == mul_rd_phy_addr))     dis_rs1_rdy_eff = 1'b1;
+            if (div_exe_ready        && (dis_rs1_phy_addr == div_rd_phy_addr))     dis_rs1_rdy_eff = 1'b1;
+            if (lsb_wake_valid  && (dis_rs1_phy_addr == lsb_wake_phy_addr))  dis_rs1_rdy_eff = 1'b1;
         end
-        if (!dis_rt_data_ready) begin
-            if (cdb_valid && cdb_phy_reg_write    && (dis_rt_phy_addr == cdb_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
-            if (int_exe_ready        && (dis_rt_phy_addr == int_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
-            if (mul_exe_ready        && (dis_rt_phy_addr == mul_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
-            if (div_exe_ready        && (dis_rt_phy_addr == div_rd_phy_addr))     dis_rt_rdy_eff = 1'b1;
-            if (ls_buf_buf_rd_write  && (dis_rt_phy_addr == ls_buf_rd_phy_addr))  dis_rt_rdy_eff = 1'b1;
+        if (!dis_rs2_data_ready) begin
+            if (cdb_valid && cdb_phy_reg_write    && (dis_rs2_phy_addr == cdb_rd_phy_addr))     dis_rs2_rdy_eff = 1'b1;
+            if (int_exe_ready        && (dis_rs2_phy_addr == int_rd_phy_addr))     dis_rs2_rdy_eff = 1'b1;
+            if (mul_exe_ready        && (dis_rs2_phy_addr == mul_rd_phy_addr))     dis_rs2_rdy_eff = 1'b1;
+            if (div_exe_ready        && (dis_rs2_phy_addr == div_rd_phy_addr))     dis_rs2_rdy_eff = 1'b1;
+            if (lsb_wake_valid  && (dis_rs2_phy_addr == lsb_wake_phy_addr))  dis_rs2_rdy_eff = 1'b1;
         end
     end
 
@@ -143,7 +143,7 @@ import riscv_types_pkg::*;
 
     always_comb begin
         for (int i = 0; i < MUL_QUEUE_DEPTH; i++) begin
-            q_ready[i]     = q_valid[i] & wk_rs_rdy[i] & wk_rt_rdy[i];
+            q_ready[i]     = q_valid[i] & wk_rs1_rdy[i] & wk_rs2_rdy[i];
             entry_depth[i] = q[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_top_ptr;
         end
 
@@ -199,10 +199,10 @@ import riscv_types_pkg::*;
             for (int i = 0; i < MUL_QUEUE_DEPTH; i++) begin
                 q[i]       <= '{
                     rob_tag : '0,
-                    rs      : '0,
-                    rs_rdy  : 1'b0,
-                    rt      : '0,
-                    rt_rdy  : 1'b0,
+                    rs1     : '0,
+                    rs1_rdy : 1'b0,
+                    rs2     : '0,
+                    rs2_rdy : 1'b0,
                     op      : INSTR_NONE,
                     rd      : '0,
                     rw      : 1'b0
@@ -211,8 +211,8 @@ import riscv_types_pkg::*;
             end
         end else begin
             for (int i = 0; i < MUL_QUEUE_DEPTH; i++) begin
-                q[i].rs_rdy <= wk_rs_rdy[i];
-                q[i].rt_rdy <= wk_rt_rdy[i];
+                q[i].rs1_rdy <= wk_rs1_rdy[i];
+                q[i].rs2_rdy <= wk_rs2_rdy[i];
             end
 
             for (int i = 0; i < MUL_QUEUE_DEPTH; i++) begin
@@ -227,26 +227,26 @@ import riscv_types_pkg::*;
                 iss_rd_phy_addr_mul <= q[sel_idx].rd;
                 iss_rob_tag_mul     <= q[sel_idx].rob_tag;
                 iss_opcode_mul      <= q[sel_idx].op;
-                iss_rs_phy_addr_mul <= q[sel_idx].rs;
-                iss_rt_phy_addr_mul <= q[sel_idx].rt;
+                iss_rs1_phy_addr_mul<= q[sel_idx].rs1;
+                iss_rs2_phy_addr_mul<= q[sel_idx].rs2;
             end else begin
                 exe_mul_grant       <= '0;
                 iss_rw_mul          <= '0;
                 iss_rd_phy_addr_mul <= '0;
                 iss_rob_tag_mul     <= '0;
                 iss_opcode_mul      <= INSTR_NONE;
-                iss_rs_phy_addr_mul <= '0;
-                iss_rt_phy_addr_mul <= '0;
+                iss_rs1_phy_addr_mul<= '0;
+                iss_rs2_phy_addr_mul<= '0;
             end
 
-            if (dis_mul_issq_en && has_free && !cdb_flush) begin
+            if (dis_mul_issue_en && has_free && !cdb_flush) begin
                 q_valid[free_idx] <= 1'b1;
                 q[free_idx]       <= '{
                     rob_tag : dis_rob_tag,
-                    rs      : dis_rs_phy_addr,
-                    rs_rdy  : dis_rs_rdy_eff,
-                    rt      : dis_rt_phy_addr,
-                    rt_rdy  : dis_rt_rdy_eff,
+                    rs1     : dis_rs1_phy_addr,
+                    rs1_rdy : dis_rs1_rdy_eff,
+                    rs2     : dis_rs2_phy_addr,
+                    rs2_rdy : dis_rs2_rdy_eff,
                     op      : dis_opcode,
                     rd      : dis_new_rd_phy_addr,
                     rw      : dis_reg_write

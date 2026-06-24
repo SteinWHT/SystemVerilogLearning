@@ -123,6 +123,7 @@ SRC_FILES := \
 	$(SRC_DIR)/riscv_funct_pkg.sv \
 	$(SRC_DIR)/riscv_opcode_pkg.sv \
 	$(SRC_DIR)/riscv_types_pkg.sv \
+	$(SRC_DIR)/interfaces/cpu_core_ifs.sv \
 	$(SRC_DIR)/simple_module/sync_fifo.sv \
 	$(SRC_DIR)/simple_module/dual_port_memory.sv \
 	$(SRC_DIR)/simple_module/sync_lifo.sv \

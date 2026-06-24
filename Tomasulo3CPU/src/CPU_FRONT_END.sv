@@ -4,9 +4,9 @@ module CPU_FRONT_END
 #(
     // I-CACHE
     parameter int unsigned INSTR_WIDTH = 32,
-    parameter int unsigned IMEM_DEPTH = 64,
+    parameter int unsigned PC_WIDTH = 64,
     parameter int unsigned IMEM_WIDTH = 32,
-    parameter int unsigned IMEM_DEPTH_WORD = IMEM_DEPTH - 1,
+    parameter int unsigned PC_WORD_WIDTH = PC_WIDTH - 1,
 
     // ARCH_REG
     parameter int unsigned XLEN = 64,
@@ -15,11 +15,11 @@ module CPU_FRONT_END
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
 
     // PHY_REGISTER_FILE
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7,
 
     // D-CACHE
     parameter int unsigned DMEM_WIDTH = 64,
-    parameter int unsigned DMEM_DEPTH = 32,
+    parameter int unsigned DMEM_ADDR_WIDTH = 32,
     parameter int unsigned W_BYTE_NUM = DMEM_WIDTH / 8,
 
     // BPB
@@ -34,8 +34,8 @@ module CPU_FRONT_END
     parameter int unsigned RAS_DEPTH = 4,
 
     // FRL
-    parameter int unsigned FRL_SIZE = 128,
-    parameter int unsigned FRL_PTR_WIDTH = $clog2(FRL_SIZE),
+    parameter int unsigned FRL_DEPTH = 128,
+    parameter int unsigned FRL_PTR_WIDTH = $clog2(FRL_DEPTH),
 
     // FRAT
     parameter int unsigned NUM_CHECKPOINT = 8,
@@ -62,7 +62,7 @@ module CPU_FRONT_END
     input  logic                                fence_i_coh_done,
 
     // I-CACHE interface (valid/ready handshake)
-    output logic [IMEM_DEPTH-1:0]               imem_addr,
+    output logic [PC_WIDTH-1:0]                 imem_addr,
     output logic                                imem_req_valid,
     input  logic                                imem_req_ready,
 
@@ -70,111 +70,145 @@ module CPU_FRONT_END
     input  logic                                imem_resp_valid,
     output logic                                imem_resp_ready,
 
-    // D-CACHE interface
-    input logic                                 dcache_ready,
-    input logic                                 dcache_resp_valid,
-
-    output logic [DMEM_DEPTH-1:0]               dcache_sw_addr,
+    // D-CACHE store port (SB → D-Cache)
+    input  logic                                dcache_st_ready,
+    input  logic                                dcache_st_resp_valid,
+    output logic [DMEM_ADDR_WIDTH-1:0]          dcache_sw_addr,
     output logic [DMEM_WIDTH-1:0]               dcache_sw_data,
     output logic [W_BYTE_NUM-1:0]               dcache_sw_strb,
-    output logic                                dcache_valid,
-    output logic                                dcache_resp_ready,
+    output logic                                dcache_st_valid,
+    output logic                                dcache_st_resp_ready,
 
-    // back-end interface
-    // ISSUEQ interface
-    input logic                                 issue_intq_full,
-    input logic                                 issue_divq_full,
-    input logic                                 issue_mulq_full,
-    input logic                                 issue_ld_stq_full,
-    input logic                                 issue_intq_two_or_more_vacant,
-    input logic                                 issue_divq_two_or_more_vacant,
-    input logic                                 issue_mulq_two_or_more_vacant,
-    input logic                                 issue_ld_stq_two_or_more_vacant,
-
-    output logic                                dis_rs_data_ready,
-    output logic                                dis_rt_data_ready,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  dis_rs_phy_addr,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  dis_rt_phy_addr,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  dis_new_rd_phy_addr,
-    output logic                                dis_reg_write,
-    output logic [XLEN-1:0]                     dis_imm,
-    output logic [IMEM_DEPTH-1:0]               dis_branch_other_addr,
-    output logic                                dis_branch_prediction,
-    output logic                                dis_branch,
-    output logic [BPB_PC_BITS-1:0]              dis_branch_pc_bits,
-    output logic                                dis_jr_inst,
-    output logic                                dis_jal_inst,
-    output logic                                dis_jr31_inst,
-    output logic [OPCODE_WIDTH-1:0]             dis_opcode,
-    output logic [IMEM_DEPTH-1:0]               dis_pc,
-
-    output logic                                dis_int_issue_en,
-    output logic                                dis_div_issue_en,
-    output logic                                dis_mul_issue_en,
-    output logic                                dis_ld_st_issue_en,
-
-    // CDB interface
-    input logic                                 cdb_valid,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,
-    input logic                                 cdb_reg_write,
-    input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_tag,
-    input logic [DMEM_DEPTH-1:0]                cdb_sw_addr,
-    input logic [W_BYTE_NUM-1:0]                cdb_sw_strb,
-    input logic [IMEM_DEPTH-1:0]                cdb_branch_addr,
-    input logic [BPB_PC_BITS-1:0]               cdb_br_updt_addr,
-    input logic                                 cdb_branch,
-    input logic                                 cdb_branch_outcome,
-    input logic                                 cdb_flush,
+    // Front-end ↔ back-end channels (interfaces)
+    dispatch_if.producer                        dispatch_bus,  // DISPATCH → issue queues
+    cdb_if.consumer                             cdb_bus,       // CDB broadcast in
+    issq_status_if.consumer                     issq_bus,      // issue-queue occupancy in
 
     // PRF interface (store-data / CSR rs1 read)
-    input  logic [DMEM_WIDTH-1:0]               rt_sb_data,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rt_sb_phy_addr,
+    input  logic [DMEM_WIDTH-1:0]               st_src_data,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        st_src_phy_addr,
 
     // CSR write-back to PRF (new port from commit path)
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  csr_wr_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        csr_wr_phy_addr,
     output logic [REG_FILE_DATA_WIDTH-1:0]      csr_wr_data,
     output logic                                csr_wr_en,
 
-    // SAB interface
-    output logic [SB_INDEX_WIDTH-1:0]           sb_flush_sw_tag,
-    output logic                                sb_flush_sw,
-    output logic                                sb_entry_sw,
-    output logic [SB_INDEX_WIDTH-1:0]           sb_entry_sw_tag,
-    output logic [ROB_INDEX_WIDTH-1:0]          sb_entry_sw_rob_tag,
-
-    // Back-end ROB sideband
-    output logic [ROB_INDEX_WIDTH-1:0]          rob_bottom_ptr_out,
-    output logic [ROB_INDEX_WIDTH-1:0]          rob_top_ptr_out,
-    output logic                                rob_commit_mem_write_out,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_curr_phy_addr_out,
-    output logic                                rob_fence_pending_out,
-    output logic [ROB_INDEX_WIDTH-1:0]          rob_fence_tag_out
+    // Store-buffer alloc + ROB sideband to back-end (interfaces)
+    sb_alloc_if.producer                        sb_bus,
+    rob_sideband_if.producer                    rob_sb_bus
 );
+    // ============================================================
+    // Boundary adapter: pack/unpack interface members <-> local nets,
+    // so every sub-module instantiation below stays flat and unchanged.
+    // ============================================================
+    // D-cache store handshake (external flat port <-> local nets)
+    logic dcache_ready, dcache_resp_valid, dcache_valid, dcache_resp_ready;
+    assign dcache_ready         = dcache_st_ready;
+    assign dcache_resp_valid    = dcache_st_resp_valid;
+    assign dcache_st_valid      = dcache_valid;
+    assign dcache_st_resp_ready = dcache_resp_ready;
+
+    // Issue-queue status (issq_bus.consumer -> locals)
+    logic issq_intq_full, issq_divq_full, issq_mulq_full, issq_ld_stq_full;
+    logic issq_intq_two_or_more_vacant, issq_divq_two_or_more_vacant,
+          issq_mulq_two_or_more_vacant, issq_ld_stq_two_or_more_vacant;
+    assign issq_intq_full                 = issq_bus.intq_full;
+    assign issq_divq_full                 = issq_bus.divq_full;
+    assign issq_mulq_full                 = issq_bus.mulq_full;
+    assign issq_ld_stq_full               = issq_bus.ld_stq_full;
+    assign issq_intq_two_or_more_vacant   = issq_bus.intq_two_or_more_vacant;
+    assign issq_divq_two_or_more_vacant   = issq_bus.divq_two_or_more_vacant;
+    assign issq_mulq_two_or_more_vacant   = issq_bus.mulq_two_or_more_vacant;
+    assign issq_ld_stq_two_or_more_vacant = issq_bus.ld_stq_two_or_more_vacant;
+
+    // CDB (cdb_bus.consumer -> locals)
+    logic cdb_valid, cdb_reg_write, cdb_upd_branch, cdb_branch_outcome, cdb_flush;
+    logic [PHY_REG_IDX_WIDTH-1:0] cdb_rd_phy_addr;
+    logic [ROB_INDEX_WIDTH-1:0]   cdb_rob_tag;
+    logic [DMEM_ADDR_WIDTH-1:0]   cdb_sw_addr;
+    logic [W_BYTE_NUM-1:0]        cdb_sw_strb;
+    logic [PC_WIDTH-1:0]          cdb_branch_addr;
+    logic [BPB_PC_BITS-1:0]       cdb_upd_branch_addr;
+    assign cdb_valid           = cdb_bus.valid;
+    assign cdb_rd_phy_addr     = cdb_bus.rd_phy_addr;
+    assign cdb_reg_write       = cdb_bus.reg_write;
+    assign cdb_rob_tag         = cdb_bus.rob_tag;
+    assign cdb_sw_addr         = cdb_bus.sw_addr;
+    assign cdb_sw_strb         = cdb_bus.sw_strb;
+    assign cdb_branch_addr     = cdb_bus.branch_addr;
+    assign cdb_upd_branch_addr = cdb_bus.upd_branch_addr;
+    assign cdb_upd_branch      = cdb_bus.upd_branch;
+    assign cdb_branch_outcome  = cdb_bus.branch_outcome;
+    assign cdb_flush           = cdb_bus.flush;
+
+    // Dispatch (locals -> dispatch_bus.producer)
+    logic dis_rs1_data_ready, dis_rs2_data_ready, dis_reg_write,
+          dis_branch_prediction, dis_branch, dis_jr_inst, dis_jal_inst, dis_jr31_inst,
+          dis_int_issue_en, dis_div_issue_en, dis_mul_issue_en, dis_ld_st_issue_en;
+    logic [PHY_REG_IDX_WIDTH-1:0] dis_rs1_phy_addr, dis_rs2_phy_addr, dis_new_rd_phy_addr;
+    logic [XLEN-1:0]              dis_imm;
+    logic [PC_WIDTH-1:0]          dis_branch_other_addr, dis_pc;
+    logic [BPB_PC_BITS-1:0]       dis_branch_pc_bits;
+    logic [OPCODE_WIDTH-1:0]      dis_opcode;
+    assign dispatch_bus.int_issue_en      = dis_int_issue_en;
+    assign dispatch_bus.div_issue_en      = dis_div_issue_en;
+    assign dispatch_bus.mul_issue_en      = dis_mul_issue_en;
+    assign dispatch_bus.ld_st_issue_en    = dis_ld_st_issue_en;
+    assign dispatch_bus.reg_write         = dis_reg_write;
+    assign dispatch_bus.rs1_data_ready    = dis_rs1_data_ready;
+    assign dispatch_bus.rs2_data_ready    = dis_rs2_data_ready;
+    assign dispatch_bus.rs1_phy_addr      = dis_rs1_phy_addr;
+    assign dispatch_bus.rs2_phy_addr      = dis_rs2_phy_addr;
+    assign dispatch_bus.new_rd_phy_addr   = dis_new_rd_phy_addr;
+    assign dispatch_bus.opcode            = dis_opcode;
+    assign dispatch_bus.imm               = dis_imm;
+    assign dispatch_bus.branch_other_addr = dis_branch_other_addr;
+    assign dispatch_bus.branch_pc_bits    = {1'b0, dis_branch_pc_bits};  // zero-extend 3->4
+    assign dispatch_bus.branch_prediction = dis_branch_prediction;
+    assign dispatch_bus.branch            = dis_branch;
+    assign dispatch_bus.jr_inst           = dis_jr_inst;
+    assign dispatch_bus.jal_inst          = dis_jal_inst;
+    assign dispatch_bus.jr31_inst         = dis_jr31_inst;
+    assign dispatch_bus.pc                = dis_pc;
+
+    // Store-buffer alloc (locals -> sb_bus.producer)
+    logic sb_flush_sw, sb_entry_sw;
+    logic [SB_INDEX_WIDTH-1:0]  sb_flush_sw_tag, sb_entry_sw_tag;
+    logic [ROB_INDEX_WIDTH-1:0] sb_entry_sw_rob_tag;
+    assign sb_bus.flush_sw         = sb_flush_sw;
+    assign sb_bus.flush_sw_tag     = sb_flush_sw_tag;
+    assign sb_bus.entry_sw         = sb_entry_sw;
+    assign sb_bus.entry_sw_tag     = sb_entry_sw_tag;
+    assign sb_bus.entry_sw_rob_tag = sb_entry_sw_rob_tag;
+
+    // (ROB sideband is packed onto rob_sb_bus at the end of the module, after
+    //  the ROB internal nets are declared.)
+
     // ------------------------------------------------------------
     // INTERFACE
     // ------------------------------------------------------------
     // IFQ interface
     logic [INSTR_WIDTH-1:0] ifq_instr_out;
     logic ifq_empty;
-    logic [IMEM_DEPTH-1:0] ifq_pc;
-    logic [IMEM_DEPTH-1:0] ifq_pc_plus4;
+    logic [PC_WIDTH-1:0] ifq_pc;
+    logic [PC_WIDTH-1:0] ifq_pc_plus4;
 
     // DISPATCH interface
     // DISPATCH <-> IFQ
     logic dis_ren;
     logic dis_jmpbr;
-    logic [IMEM_DEPTH_WORD-1:0] dis_jmpbr_addr;
+    logic [PC_WORD_WIDTH-1:0] dis_jmpbr_addr;
     logic dis_jmpbr_addr_valid;
 
     // DISPATCH <-> FRAT
-    logic [ARCH_REG_WIDTH-1:0] dis_rs1_arch_address;
-    logic [ARCH_REG_WIDTH-1:0] dis_rs2_arch_address;
-    logic [ARCH_REG_WIDTH-1:0] dis_rd_arch_address;
+    logic [ARCH_REG_WIDTH-1:0] dis_rs1_arch_addr;
+    logic [ARCH_REG_WIDTH-1:0] dis_rs2_arch_addr;
+    logic [ARCH_REG_WIDTH-1:0] dis_rd_arch_addr;
 
     // DISPATCH <-> ROB
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_sw_rt_phy_addr;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_pre_phy_addr;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_new_phy_addr;
+    logic [PHY_REG_IDX_WIDTH-1:0] dis_sw_rs2_phy_addr;
+    logic [PHY_REG_IDX_WIDTH-1:0] dis_pre_phy_addr;
+    logic [PHY_REG_IDX_WIDTH-1:0] dis_new_phy_addr;
     logic dis_inst_valid;
     logic [ARCH_REG_WIDTH-1:0] dis_rob_rd_arch_addr;
     rob_opclass_t dis_rob_opclass;
@@ -193,37 +227,37 @@ module CPU_FRONT_END
     logic dis_cdb_branch_outcome;
 
     // RAS interface
-    logic [IMEM_DEPTH_WORD-1:0] ras_addr;
+    logic [PC_WORD_WIDTH-1:0] ras_addr;
     logic dis_ras_jr31_inst;
     logic dis_ras_jal_inst;
-    logic [IMEM_DEPTH-1:0] dis_pc_plus4;
+    logic [PC_WIDTH-1:0] dis_pc_plus4;
 
     // FRL interface
     logic dis_frl_empty;
     logic dis_frl_read;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_frl_rd_phy_addr;
+    logic [PHY_REG_IDX_WIDTH-1:0] dis_frl_rd_phy_addr;
     logic [FRL_PTR_WIDTH:0] frl_head_ptr_to_frat;
     logic [FRL_PTR_WIDTH:0] frat_frl_head_ptr;
 
     // FRAT interface
     logic frat_full;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] frat_rs_phy_addr;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] frat_rt_phy_addr;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] frat_rd_phy_addr;
+    logic [PHY_REG_IDX_WIDTH-1:0] frat_rs1_phy_addr;
+    logic [PHY_REG_IDX_WIDTH-1:0] frat_rs2_phy_addr;
+    logic [PHY_REG_IDX_WIDTH-1:0] frat_rd_phy_addr;
 
     // ROB interface
     logic [ROB_INDEX_WIDTH-1:0] rob_bottom_ptr;
     logic rob_full;
     logic rob_two_or_more_vacant;
-    logic [DMEM_DEPTH-1:0] rob_sw_addr;
+    logic [DMEM_ADDR_WIDTH-1:0] rob_sw_addr;
     logic [W_BYTE_NUM-1:0] rob_sw_strb;
     logic rob_commit_mem_write;
     logic [ROB_INDEX_WIDTH-1:0] rob_top_ptr;
     logic rob_commit;
     logic [ARCH_REG_WIDTH-1:0] rob_commit_rd_arch_addr;
     logic rob_reg_write;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] rob_commit_curr_phy_addr;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] rob_commit_pre_phy_addr;
+    logic [PHY_REG_IDX_WIDTH-1:0] rob_commit_curr_phy_addr;
+    logic [PHY_REG_IDX_WIDTH-1:0] rob_commit_pre_phy_addr;
     logic rob_serializing_committed;
     logic rob_fence_pending;
     logic [ROB_INDEX_WIDTH-1:0] rob_fence_tag;
@@ -237,7 +271,7 @@ module CPU_FRONT_END
     logic ecall_commit;
     logic ebreak_commit;
     logic mret_commit;
-    logic [IMEM_DEPTH-1:0] trap_commit_pc;
+    logic [PC_WIDTH-1:0] trap_commit_pc;
 
     // CSR -> ROB results
     logic [REG_FILE_DATA_WIDTH-1:0] csr_rdata;
@@ -245,13 +279,13 @@ module CPU_FRONT_END
     logic [REG_FILE_DATA_WIDTH-1:0] csr_redirect_pc;
 
     // RRAT -> ROB: committed phy reg for CSR rs1 (read at commit time)
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] rrat_csr_rs1_phy;
+    logic [PHY_REG_IDX_WIDTH-1:0] rrat_csr_rs1_phy;
 
     // ROB trap flush
     logic trap_commit_flush;
-    logic [IMEM_DEPTH-1:0] trap_redirect_pc;
+    logic [PC_WIDTH-1:0] trap_redirect_pc;
     logic fence_i_commit_flush;
-    logic [IMEM_DEPTH-1:0] fence_i_redirect_pc;
+    logic [PC_WIDTH-1:0] fence_i_redirect_pc;
 
     // SB interface
     logic sb_full;
@@ -259,13 +293,13 @@ module CPU_FRONT_END
     logic sb_drained;
 
     // RBA
-    logic [PHY_REGISTER_FILE_WIDTH-1:0] dis_rba_new_rd_phy_addr;
+    logic [PHY_REG_IDX_WIDTH-1:0] dis_rba_new_rd_phy_addr;
 
     // Combined flush: CDB branch mispredict OR trap commit flush
     logic combined_flush;
-    logic [IMEM_DEPTH-1:0] combined_flush_addr;
+    logic [PC_WIDTH-1:0] combined_flush_addr;
     logic dispatch_flush;
-    logic [IMEM_DEPTH-1:0] dispatch_flush_addr;
+    logic [PC_WIDTH-1:0] dispatch_flush_addr;
     assign combined_flush = cdb_flush || trap_commit_flush;
     assign combined_flush_addr = trap_commit_flush ? trap_redirect_pc : cdb_branch_addr;
     assign dispatch_flush = combined_flush || fence_i_commit_flush;
@@ -278,7 +312,7 @@ module CPU_FRONT_END
     // IFQ
     IFQ #(
         .INSTR_WIDTH(INSTR_WIDTH),
-        .IMEM_DEPTH(IMEM_DEPTH),
+        .PC_WIDTH(PC_WIDTH),
         .IMEM_WIDTH(IMEM_WIDTH),
         .DEPTH(IFQ_DEPTH),
         .NUM_WAYS(NUM_WAYS)
@@ -309,9 +343,9 @@ module CPU_FRONT_END
     DISPATCH #(
         .XLEN(REG_FILE_DATA_WIDTH),
         .INSTR_WIDTH(INSTR_WIDTH),
-        .IMEM_DEPTH(IMEM_DEPTH),
+        .PC_WIDTH(PC_WIDTH),
         .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH(PHY_REG_IDX_WIDTH),
         .BPB_PC_BITS(BPB_PC_BITS),
         .OPCODE_WIDTH(OPCODE_WIDTH)
     ) dispatch (
@@ -345,24 +379,24 @@ module CPU_FRONT_END
         .cdb_flush(dispatch_flush),
 
         .frat_full(frat_full),
-        .frat_rs_phy_addr(frat_rs_phy_addr),
-        .frat_rt_phy_addr(frat_rt_phy_addr),
+        .frat_rs1_phy_addr(frat_rs1_phy_addr),
+        .frat_rs2_phy_addr(frat_rs2_phy_addr),
         .frat_rd_phy_addr(frat_rd_phy_addr),
 
-        .dis_rs_arch_addr(dis_rs1_arch_address),
-        .dis_rt_arch_addr(dis_rs2_arch_address),
-        .dis_rd_arch_addr(dis_rd_arch_address),
+        .dis_rs1_arch_addr(dis_rs1_arch_addr),
+        .dis_rs2_arch_addr(dis_rs2_arch_addr),
+        .dis_rd_arch_addr(dis_rd_arch_addr),
 
-        .issue_intq_full(issue_intq_full),
-        .issue_divq_full(issue_divq_full),
-        .issue_mulq_full(issue_mulq_full),
-        .issue_ld_stq_full(issue_ld_stq_full),
-        .issue_intq_two_or_more_vacant(issue_intq_two_or_more_vacant),
-        .issue_divq_two_or_more_vacant(issue_divq_two_or_more_vacant),
-        .issue_mulq_two_or_more_vacant(issue_mulq_two_or_more_vacant),
-        .issue_ld_stq_two_or_more_vacant(issue_ld_stq_two_or_more_vacant),
-        .dis_rs_phy_addr(dis_rs_phy_addr),
-        .dis_rt_phy_addr(dis_rt_phy_addr),
+        .issq_intq_full(issq_intq_full),
+        .issq_divq_full(issq_divq_full),
+        .issq_mulq_full(issq_mulq_full),
+        .issq_ld_stq_full(issq_ld_stq_full),
+        .issq_intq_two_or_more_vacant(issq_intq_two_or_more_vacant),
+        .issq_divq_two_or_more_vacant(issq_divq_two_or_more_vacant),
+        .issq_mulq_two_or_more_vacant(issq_mulq_two_or_more_vacant),
+        .issq_ld_stq_two_or_more_vacant(issq_ld_stq_two_or_more_vacant),
+        .dis_rs1_phy_addr(dis_rs1_phy_addr),
+        .dis_rs2_phy_addr(dis_rs2_phy_addr),
         .dis_new_rd_phy_addr(dis_new_rd_phy_addr),
         .dis_opcode(dis_opcode),
         .dis_imm(dis_imm),
@@ -391,7 +425,7 @@ module CPU_FRONT_END
         .dis_csr_addr(dis_csr_addr),
         .dis_trap_cause(dis_trap_cause),
         .dis_csr_rs1_arch_addr(dis_csr_rs1_arch_addr),
-        .dis_sw_rt_phy_addr(dis_sw_rt_phy_addr),
+        .dis_sw_rs2_phy_addr(dis_sw_rs2_phy_addr),
         .dis_rba_new_rd_phy_addr(dis_rba_new_rd_phy_addr),
         .dis_rba_reg_write(dis_reg_write)
     );
@@ -407,18 +441,18 @@ module CPU_FRONT_END
         .dis_bpb_branch(dis_bpb_branch),
         .bpb_branch_prediction(bpb_branch_prediction),
 
-        .dis_cdb_upd_branch(cdb_branch),
+        .dis_cdb_upd_branch(cdb_upd_branch),
         .dis_cdb_upd_branch_addr(dis_cdb_upd_branch_addr),
         .dis_cdb_branch_outcome(dis_cdb_branch_outcome)
     );
 
-    assign dis_cdb_upd_branch_addr = cdb_br_updt_addr;
+    assign dis_cdb_upd_branch_addr = cdb_upd_branch_addr;
     assign dis_cdb_branch_outcome = cdb_branch_outcome;
 
     // RAS
     RAS #(
-        .IMEM_DEPTH(IMEM_DEPTH),
-        .IMEM_DEPTH_WORD(IMEM_DEPTH_WORD),
+        .PC_WIDTH(PC_WIDTH),
+        .PC_WORD_WIDTH(PC_WORD_WIDTH),
         .DEPTH(RAS_DEPTH)
     ) ras (
         .clk(clk),
@@ -432,7 +466,7 @@ module CPU_FRONT_END
 
     // FRL
     FRL #(
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH(PHY_REG_IDX_WIDTH),
         .ARCH_REG_COUNT(ARCH_REG_COUNT)
     ) frl (
         .clk(clk),
@@ -455,7 +489,7 @@ module CPU_FRONT_END
 
     // FRAT
     FRAT #(
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH(PHY_REG_IDX_WIDTH),
         .ARCH_REG_WIDTH(ARCH_REG_WIDTH),
         .NUM_CHECKPOINT(NUM_CHECKPOINT),
         .ROB_DEPTH(ROB_DEPTH)
@@ -466,8 +500,8 @@ module CPU_FRONT_END
         .is_branch(dis_inst_valid && (dis_branch || dis_jr31_inst)),
         .rob_bottom_ptr(rob_bottom_ptr),
         .dis_frat_reg_write(dis_reg_write),
-        .rd_new_phy_address_in(dis_new_rd_phy_addr),
-        .rd_new_arch_address_in(dis_rob_rd_arch_addr),
+        .rd_new_phy_addr_in(dis_new_rd_phy_addr),
+        .rd_new_arch_addr_in(dis_rob_rd_arch_addr),
 
         .cdb_valid(cdb_valid),
         .branch_mispredict(combined_flush),
@@ -478,20 +512,20 @@ module CPU_FRONT_END
         .frl_head_ptr(frl_head_ptr_to_frat),
         .frat_frl_head_ptr(frat_frl_head_ptr),
 
-        .rd_prev_arch_address_in(dis_rd_arch_address),
-        .rs1_arch_address_in(dis_rs1_arch_address),
-        .rs2_arch_address_in(dis_rs2_arch_address),
+        .rd_prev_arch_addr_in(dis_rd_arch_addr),
+        .rs1_arch_addr_in(dis_rs1_arch_addr),
+        .rs2_arch_addr_in(dis_rs2_arch_addr),
 
-        .rd_prev_phy_address(frat_rd_phy_addr),
-        .rs1_phy_address(frat_rs_phy_addr),
-        .rs2_phy_address(frat_rt_phy_addr),
+        .rd_prev_phy_addr(frat_rd_phy_addr),
+        .rs1_phy_addr(frat_rs1_phy_addr),
+        .rs2_phy_addr(frat_rs2_phy_addr),
 
         .full(frat_full)
     );
 
     // RRAT
     RRAT #(
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH(PHY_REG_IDX_WIDTH),
         .ARCH_REG_COUNT(ARCH_REG_COUNT),
         .NUM_CHECKPOINT(NUM_CHECKPOINT)
     ) rrat (
@@ -511,17 +545,17 @@ module CPU_FRONT_END
     ROB #(
         .ROB_DEPTH(ROB_DEPTH),
         .DMEM_WIDTH(DMEM_WIDTH),
-        .DMEM_DEPTH(DMEM_DEPTH),
-        .IMEM_DEPTH(IMEM_DEPTH),
+        .DMEM_ADDR_WIDTH(DMEM_ADDR_WIDTH),
+        .PC_WIDTH(PC_WIDTH),
         .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
         .ARCH_REG_COUNT(ARCH_REG_COUNT),
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH(PHY_REG_IDX_WIDTH),
         .FENCE_I_COHERENCE(FENCE_I_COHERENCE)
     ) rob (
         .clk(clk),
         .rst_n(rst_n),
 
-        .dis_sw_rt_phy_addr(dis_sw_rt_phy_addr),
+        .dis_sw_rs2_phy_addr(dis_sw_rs2_phy_addr),
         .dis_pre_phy_addr(dis_pre_phy_addr),
         .dis_new_phy_addr(dis_new_phy_addr),
         .dis_inst_valid(dis_inst_valid),
@@ -546,7 +580,7 @@ module CPU_FRONT_END
         .cdb_sw_strb(cdb_sw_strb),
         .cdb_flush(cdb_flush),
 
-        .rt_sb_phy_addr(rt_sb_phy_addr),
+        .st_src_phy_addr(st_src_phy_addr),
 
         .sb_full(sb_full),
         .sb_drained(sb_drained),
@@ -602,7 +636,7 @@ module CPU_FRONT_END
         .csr_valid(csr_commit_valid),
         .csr_cmd(csr_commit_cmd),
         .csr_addr(csr_commit_addr),
-        .csr_rs1_data(rt_sb_data),
+        .csr_rs1_data(st_src_data),
         .csr_rs1_is_x0(csr_commit_rs1_is_x0),
         .csr_zimm(csr_commit_zimm),
 
@@ -631,7 +665,7 @@ module CPU_FRONT_END
     SB #(
         .SB_DEPTH(SB_DEPTH),
         .DMEM_WIDTH(DMEM_WIDTH),
-        .DMEM_DEPTH(DMEM_DEPTH),
+        .DMEM_ADDR_WIDTH(DMEM_ADDR_WIDTH),
         .ROB_DEPTH(ROB_DEPTH)
     ) sb (
         .clk(clk),
@@ -642,7 +676,7 @@ module CPU_FRONT_END
         .rob_sw_strb(rob_sw_strb),
         .rob_commit_mem_write(rob_commit_mem_write),
 
-        .rt_sb_data(rt_sb_data),
+        .st_src_data(st_src_data),
 
         .dcache_ready(dcache_ready),
         .dcache_resp_valid(dcache_resp_valid),
@@ -665,19 +699,19 @@ module CPU_FRONT_END
 
     // RBA
     RBA #(
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH(PHY_REG_IDX_WIDTH),
         .ARCH_REG_COUNT(ARCH_REG_COUNT)
     ) rba (
         .clk(clk),
         .rst_n(rst_n),
 
-        .dis_rs_phy_addr(dis_rs_phy_addr),
-        .dis_rt_phy_addr(dis_rt_phy_addr),
+        .dis_rs1_phy_addr(dis_rs1_phy_addr),
+        .dis_rs2_phy_addr(dis_rs2_phy_addr),
         .dis_new_rd_phy_addr(dis_rba_new_rd_phy_addr),
         .dis_reg_write(dis_reg_write),
 
-        .rs_data_ready(dis_rs_data_ready),
-        .rt_data_ready(dis_rt_data_ready),
+        .rs1_data_ready(dis_rs1_data_ready),
+        .rs2_data_ready(dis_rs2_data_ready),
 
         .rd_phy_addr(cdb_rd_phy_addr),
         .cdb_reg_write(cdb_reg_write),
@@ -686,10 +720,11 @@ module CPU_FRONT_END
         .csr_wr_en(csr_wr_en)
     );
 
-    assign rob_bottom_ptr_out          = rob_bottom_ptr;
-    assign rob_top_ptr_out             = rob_top_ptr;
-    assign rob_commit_mem_write_out    = rob_commit_mem_write;
-    assign rob_commit_curr_phy_addr_out = rob_commit_curr_phy_addr;
-    assign rob_fence_pending_out       = rob_fence_pending;
-    assign rob_fence_tag_out           = rob_fence_tag;
+    // ROB sideband (internal ROB nets -> rob_sb_bus.producer)
+    assign rob_sb_bus.bottom_ptr           = rob_bottom_ptr;
+    assign rob_sb_bus.top_ptr              = rob_top_ptr;
+    assign rob_sb_bus.commit_mem_write     = rob_commit_mem_write;
+    assign rob_sb_bus.commit_curr_phy_addr = rob_commit_curr_phy_addr;
+    assign rob_sb_bus.fence_pending        = rob_fence_pending;
+    assign rob_sb_bus.fence_tag            = rob_fence_tag;
 endmodule

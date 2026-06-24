@@ -5,9 +5,9 @@ module IF_BP
     import riscv_btb_pkg::*;
 #(
     parameter int unsigned INSTR_WIDTH      = 32,
-    parameter int unsigned IMEM_DEPTH       = 32,
+    parameter int unsigned PC_WIDTH       = 32,
     parameter int unsigned IMEM_WIDTH       = 32,
-    parameter int unsigned IMEM_WIDTH_WORD  = IMEM_DEPTH - 1,
+    parameter int unsigned PC_WORD_WIDTH  = PC_WIDTH - 1,
 
     parameter int unsigned BTB_NUM_SETS     = 128,
     parameter int unsigned BTB_NUM_WAYS     = 4,
@@ -24,7 +24,7 @@ module IF_BP
     input  logic                            clk,
     input  logic                            rst_n,
 
-    output logic [IMEM_DEPTH-1:0]           imem_addr,
+    output logic [PC_WIDTH-1:0]           imem_addr,
     output logic                            imem_req_valid,
     input  logic                            imem_req_ready,
     input  logic [IMEM_WIDTH-1:0]           imem_resp_data,
@@ -33,28 +33,28 @@ module IF_BP
 
     input  logic                            dis_ren,
     input  logic                            dis_jmpbr,
-    input  logic [IMEM_WIDTH_WORD-1:0]      dis_jmpbr_addr,
+    input  logic [PC_WORD_WIDTH-1:0]      dis_jmpbr_addr,
     input  logic                            dis_jmpbr_addr_valid,
 
     output logic [INSTR_WIDTH-1:0]          ifq_instr_out,
-    output logic [IMEM_DEPTH-1:0]           ifq_pc,
-    output logic [IMEM_DEPTH-1:0]           ifq_pc_plus4,
+    output logic [PC_WIDTH-1:0]           ifq_pc,
+    output logic [PC_WIDTH-1:0]           ifq_pc_plus4,
     output logic                            ifq_empty,
     output logic                            ifq_pred_valid,
     output logic                            ifq_pred_taken,
-    output logic [IMEM_DEPTH-1:0]           ifq_pred_target,
+    output logic [PC_WIDTH-1:0]           ifq_pred_target,
     output btb_br_type_e                    ifq_pred_br_type,
 
     input  logic                            btb_update_valid_i,
-    input  logic [IMEM_DEPTH-1:0]           btb_update_pc_i,
-    input  logic [IMEM_DEPTH-1:0]           btb_update_target_i,
+    input  logic [PC_WIDTH-1:0]           btb_update_pc_i,
+    input  logic [PC_WIDTH-1:0]           btb_update_target_i,
     input  btb_br_type_e                    btb_update_br_type_i,
     input  logic                            btb_update_taken_i,
     input  logic                            btb_update_allocate_i,
 
     input  logic                            ras_spec_valid_i,
     input  ras_op_e                         ras_spec_op_i,
-    input  logic [IMEM_DEPTH-1:0]           ras_spec_return_addr_i,
+    input  logic [PC_WIDTH-1:0]           ras_spec_return_addr_i,
     input  logic                            ras_ckpt_alloc_i,
     output logic [RAS_CKPT_BITS-1:0]        ras_ckpt_id_o,
     input  logic                            ras_restore_i,
@@ -72,9 +72,9 @@ module IF_BP
         (FETCH_INSTRS > 1) ? $clog2(FETCH_INSTRS) : 1;
 
     // F0/F1 request state
-    logic [IMEM_DEPTH-1:0] fetch_pc_q;
-    logic [IMEM_DEPTH-1:0] request_start_pc_q;
-    logic [IMEM_DEPTH-1:0] request_block_pc_q;
+    logic [PC_WIDTH-1:0] fetch_pc_q;
+    logic [PC_WIDTH-1:0] request_start_pc_q;
+    logic [PC_WIDTH-1:0] request_block_pc_q;
     logic [FETCH_INDEX_BITS-1:0] request_start_index_q;
     logic                  imem_inflight_q;
     logic                  btb_waiting_q;
@@ -85,9 +85,9 @@ module IF_BP
     logic                  btb_lookup_valid;
     logic                  btb_resp_valid;
     logic                  btb_resp_hit;
-    logic [IMEM_DEPTH-1:0] btb_resp_pc;
-    logic [IMEM_DEPTH-1:0] btb_resp_branch_pc;
-    logic [IMEM_DEPTH-1:0] btb_resp_target;
+    logic [PC_WIDTH-1:0] btb_resp_pc;
+    logic [PC_WIDTH-1:0] btb_resp_branch_pc;
+    logic [PC_WIDTH-1:0] btb_resp_target;
     logic                  btb_resp_taken;
     btb_br_type_e          btb_resp_br_type;
 
@@ -102,10 +102,10 @@ module IF_BP
     logic                  f2_pair_valid;
     logic                  f2_pair_ready;
     logic [IMEM_WIDTH-1:0] f2_pair_imem_data;
-    logic [IMEM_DEPTH-1:0] f2_pair_block_pc;
+    logic [PC_WIDTH-1:0] f2_pair_block_pc;
     logic [FETCH_INDEX_BITS-1:0] f2_pair_start_index;
-    logic [IMEM_DEPTH-1:0] f2_pair_btb_branch_pc;
-    logic [IMEM_DEPTH-1:0] f2_pair_btb_target;
+    logic [PC_WIDTH-1:0] f2_pair_btb_branch_pc;
+    logic [PC_WIDTH-1:0] f2_pair_btb_target;
     logic                  f2_pair_btb_hit;
     logic                  f2_pair_btb_taken;
     btb_br_type_e          f2_pair_btb_br_type;
@@ -113,8 +113,8 @@ module IF_BP
     // F3 branch decode
     logic                  br_decode_valid;
     logic                  decoded_branch_valid;
-    logic [IMEM_DEPTH-1:0] decoded_branch_pc;
-    logic [IMEM_DEPTH-1:0] decoded_direct_target;
+    logic [PC_WIDTH-1:0] decoded_branch_pc;
+    logic [PC_WIDTH-1:0] decoded_direct_target;
     logic                  decoded_direct_target_valid;
     btb_br_type_e          decoded_branch_type;
 
@@ -127,14 +127,14 @@ module IF_BP
     // F3 branch checker
     logic                  checker_result_valid;
     logic                  checker_prediction_valid;
-    logic [IMEM_DEPTH-1:0] checker_branch_pc;
-    logic [IMEM_DEPTH-1:0] checker_target;
+    logic [PC_WIDTH-1:0] checker_branch_pc;
+    logic [PC_WIDTH-1:0] checker_target;
     logic                  checker_taken;
     btb_br_type_e          checker_branch_type;
-    logic [IMEM_DEPTH-1:0] checker_next_pc;
+    logic [PC_WIDTH-1:0] checker_next_pc;
     logic                  checker_repair_valid;
-    logic [IMEM_DEPTH-1:0] checker_repair_pc;
-    logic [IMEM_DEPTH-1:0] checker_repair_target;
+    logic [PC_WIDTH-1:0] checker_repair_pc;
+    logic [PC_WIDTH-1:0] checker_repair_target;
     btb_br_type_e          checker_repair_type;
     logic                  checker_fire;
 
@@ -144,13 +144,13 @@ module IF_BP
     logic                  fetch_target_valid;
     logic                  fetch_target_ready;
     logic                  fetch_target_fire;
-    logic [IMEM_DEPTH-1:0] fetch_target;
+    logic [PC_WIDTH-1:0] fetch_target;
     logic                  fetch_target_empty;
 
     // BTB update arbitration
     logic                  selected_btb_update_valid;
-    logic [IMEM_DEPTH-1:0] selected_btb_update_pc;
-    logic [IMEM_DEPTH-1:0] selected_btb_update_target;
+    logic [PC_WIDTH-1:0] selected_btb_update_pc;
+    logic [PC_WIDTH-1:0] selected_btb_update_target;
     btb_br_type_e          selected_btb_update_type;
     logic                  selected_btb_update_taken;
     logic                  selected_btb_update_allocate;
@@ -158,24 +158,24 @@ module IF_BP
     // RAS arbitration
     logic                  auto_ras_valid;
     ras_op_e               auto_ras_op;
-    logic [IMEM_DEPTH-1:0] auto_ras_return_addr;
+    logic [PC_WIDTH-1:0] auto_ras_return_addr;
     logic                  ras_spec_valid;
     ras_op_e               ras_spec_op;
-    logic [IMEM_DEPTH-1:0] ras_spec_return_addr;
+    logic [PC_WIDTH-1:0] ras_spec_return_addr;
 
     // Pipeline control
     logic                  redirect;
-    logic [IMEM_DEPTH-1:0] redirect_target;
+    logic [PC_WIDTH-1:0] redirect_target;
     logic                  can_issue_request;
     logic                  request_fire;
     logic                  imem_response_fire;
     logic                  btb_response_accepted;
-    logic [IMEM_DEPTH-1:0] f2_imem_start_pc;
-    logic [IMEM_DEPTH-1:0] f2_imem_block_pc;
+    logic [PC_WIDTH-1:0] f2_imem_start_pc;
+    logic [PC_WIDTH-1:0] f2_imem_block_pc;
     logic [FETCH_INDEX_BITS-1:0] f2_imem_start_index;
 
-    function automatic logic [IMEM_DEPTH-1:0] align_fetch_address(
-        input logic [IMEM_DEPTH-1:0] address
+    function automatic logic [PC_WIDTH-1:0] align_fetch_address(
+        input logic [PC_WIDTH-1:0] address
     );
         align_fetch_address =
             (address >> FETCH_OFFSET_BITS) << FETCH_OFFSET_BITS;
@@ -275,7 +275,7 @@ module IF_BP
         auto_ras_valid       = 1'b0;
         auto_ras_op          = RAS_OP_NONE;
         auto_ras_return_addr =
-            checker_branch_pc + IMEM_DEPTH'(INSTR_BYTES);
+            checker_branch_pc + PC_WIDTH'(INSTR_BYTES);
 
         if (checker_fire &&
             checker_prediction_valid &&
@@ -334,7 +334,7 @@ module IF_BP
     end
 
     BTB #(
-        .XLEN          (IMEM_DEPTH),
+        .XLEN          (PC_WIDTH),
         .FETCH_BYTES   (FETCH_BYTES),
         .NUM_SETS      (BTB_NUM_SETS),
         .NUM_WAYS      (BTB_NUM_WAYS),
@@ -372,7 +372,7 @@ module IF_BP
     );
 
     RESP_QUEUES #(
-        .XLEN             (IMEM_DEPTH),
+        .XLEN             (PC_WIDTH),
         .IMEM_WIDTH       (IMEM_WIDTH),
         .FETCH_INDEX_BITS (FETCH_INDEX_BITS),
         .DEPTH            (F2_QUEUE_DEPTH)
@@ -411,7 +411,7 @@ module IF_BP
     );
 
     BR_DECODER #(
-        .XLEN             (IMEM_DEPTH),
+        .XLEN             (PC_WIDTH),
         .INSTR_WIDTH      (INSTR_WIDTH),
         .IMEM_WIDTH       (IMEM_WIDTH),
         .FETCH_INDEX_BITS (FETCH_INDEX_BITS)
@@ -429,7 +429,7 @@ module IF_BP
     );
 
     BACKING_PREDICTOR #(
-        .XLEN (IMEM_DEPTH)
+        .XLEN (PC_WIDTH)
     ) backing_predictor (
         .lookup_valid_i (backing_lookup_valid),
         .lookup_pc_i    (decoded_branch_pc),
@@ -445,7 +445,7 @@ module IF_BP
     );
 
     BR_CHECKER #(
-        .XLEN        (IMEM_DEPTH),
+        .XLEN        (PC_WIDTH),
         .IMEM_WIDTH  (IMEM_WIDTH),
         .FETCH_BYTES (FETCH_BYTES)
     ) br_checker (
@@ -477,7 +477,7 @@ module IF_BP
     );
 
     FETCH_BUFFER #(
-        .XLEN             (IMEM_DEPTH),
+        .XLEN             (PC_WIDTH),
         .INSTR_WIDTH      (INSTR_WIDTH),
         .IMEM_WIDTH       (IMEM_WIDTH),
         .FETCH_INDEX_BITS (FETCH_INDEX_BITS),
@@ -508,7 +508,7 @@ module IF_BP
     );
 
     FETCH_TARGET_BUFFER #(
-        .XLEN  (IMEM_DEPTH),
+        .XLEN  (PC_WIDTH),
         .DEPTH (TARGET_BUF_DEPTH)
     ) fetch_target_buffer (
         .clk            (clk),
@@ -612,7 +612,7 @@ module IF_BP
             else $fatal(1, "IF_BP: IMEM_WIDTH must contain whole instructions");
         assert ((FETCH_BYTES & (FETCH_BYTES - 1)) == 0)
             else $fatal(1, "IF_BP: fetch width in bytes must be a power of two");
-        assert (IMEM_WIDTH_WORD == IMEM_DEPTH - 1)
+        assert (PC_WORD_WIDTH == PC_WIDTH - 1)
             else $fatal(1, "IF_BP: redirect address must omit exactly bit zero");
     end
     // synthesis translate_on

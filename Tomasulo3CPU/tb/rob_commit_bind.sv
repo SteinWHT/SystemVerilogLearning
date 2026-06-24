@@ -8,12 +8,12 @@ module rob_commit_monitor
     parameter int unsigned ROB_DEPTH               = 32,
     parameter int unsigned ROB_INDEX_WIDTH         = $clog2(ROB_DEPTH),
     parameter int unsigned DMEM_WIDTH              = 64,
-    parameter int unsigned DMEM_DEPTH              = 32,
-    parameter int unsigned IMEM_DEPTH              = 64,
+    parameter int unsigned DMEM_ADDR_WIDTH              = 32,
+    parameter int unsigned PC_WIDTH              = 64,
     parameter int unsigned REG_FILE_DATA_WIDTH     = 64,
     parameter int unsigned ARCH_REG_COUNT          = 32,
     parameter int unsigned ARCH_REG_WIDTH          = $clog2(ARCH_REG_COUNT),
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7,
     parameter int unsigned W_BYTE_NUM              = DMEM_WIDTH / 8
 ) (
     input logic clk,
@@ -22,14 +22,14 @@ module rob_commit_monitor
     // Bound from ROB internals / existing commit outputs (no RTL port changes).
     input logic                                 commit_valid,
     input logic [ROB_INDEX_WIDTH-1:0]           commit_rob_tag,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   head_curr_phy,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   head_prev_phy,
+    input logic [PHY_REG_IDX_WIDTH-1:0]   head_curr_phy,
+    input logic [PHY_REG_IDX_WIDTH-1:0]   head_prev_phy,
     input logic [ARCH_REG_WIDTH-1:0]            head_rd_arch,
     input logic                                 head_rw,
     input logic                                 head_mw,
-    input logic [DMEM_DEPTH-1:0]                head_sw_addr,
+    input logic [DMEM_ADDR_WIDTH-1:0]                head_sw_addr,
     input logic [W_BYTE_NUM-1:0]                head_sw_strb,
-    input logic [IMEM_DEPTH-1:0]                head_pc,
+    input logic [PC_WIDTH-1:0]                head_pc,
     input trap_cause_t                          head_trap_cause,
     input logic                                 head_mret,
     input logic                                 head_is_csr,
@@ -42,14 +42,14 @@ module rob_commit_monitor
     // Combinational view of the retiring ROB head (valid while commit_valid).
     logic                                 mon_commit_valid;
     logic [ROB_INDEX_WIDTH-1:0]           mon_commit_rob_tag;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]   mon_curr_phy;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]   mon_prev_phy;
+    logic [PHY_REG_IDX_WIDTH-1:0]   mon_curr_phy;
+    logic [PHY_REG_IDX_WIDTH-1:0]   mon_prev_phy;
     logic [ARCH_REG_WIDTH-1:0]            mon_rd_arch;
     logic                                 mon_reg_write;
     logic                                 mon_mem_write;
-    logic [DMEM_DEPTH-1:0]                mon_sw_addr;
+    logic [DMEM_ADDR_WIDTH-1:0]                mon_sw_addr;
     logic [W_BYTE_NUM-1:0]                mon_sw_strb;
-    logic [IMEM_DEPTH-1:0]                mon_pc;
+    logic [PC_WIDTH-1:0]                mon_pc;
     trap_cause_t                          mon_trap_cause;
     logic                                 mon_mret;
     logic                                 mon_is_csr;
@@ -79,14 +79,14 @@ module rob_commit_monitor
     // Latched snapshot for UVM scoreboards / callbacks (one retire per cycle).
     logic                                 lat_valid;
     logic [ROB_INDEX_WIDTH-1:0]           lat_rob_tag;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]   lat_curr_phy;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]   lat_prev_phy;
+    logic [PHY_REG_IDX_WIDTH-1:0]   lat_curr_phy;
+    logic [PHY_REG_IDX_WIDTH-1:0]   lat_prev_phy;
     logic [ARCH_REG_WIDTH-1:0]            lat_rd_arch;
     logic                                 lat_reg_write;
     logic                                 lat_mem_write;
-    logic [DMEM_DEPTH-1:0]                lat_sw_addr;
+    logic [DMEM_ADDR_WIDTH-1:0]                lat_sw_addr;
     logic [W_BYTE_NUM-1:0]                lat_sw_strb;
-    logic [IMEM_DEPTH-1:0]                lat_pc;
+    logic [PC_WIDTH-1:0]                lat_pc;
     trap_cause_t                          lat_trap_cause;
     logic                                 lat_mret;
     logic                                 lat_is_csr;
@@ -147,12 +147,12 @@ bind ROB rob_commit_monitor #(
     .ROB_DEPTH              (ROB_DEPTH),
     .ROB_INDEX_WIDTH        (ROB_INDEX_WIDTH),
     .DMEM_WIDTH             (DMEM_WIDTH),
-    .DMEM_DEPTH             (DMEM_DEPTH),
-    .IMEM_DEPTH             (IMEM_DEPTH),
+    .DMEM_ADDR_WIDTH             (DMEM_ADDR_WIDTH),
+    .PC_WIDTH             (PC_WIDTH),
     .REG_FILE_DATA_WIDTH    (REG_FILE_DATA_WIDTH),
     .ARCH_REG_COUNT         (ARCH_REG_COUNT),
     .ARCH_REG_WIDTH         (ARCH_REG_WIDTH),
-    .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+    .PHY_REG_IDX_WIDTH(PHY_REG_IDX_WIDTH),
     .W_BYTE_NUM             (W_BYTE_NUM)
 ) u_rob_commit_mon (
     .clk              (clk),

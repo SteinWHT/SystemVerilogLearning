@@ -3,10 +3,10 @@ import riscv_types_pkg::*;
 #(
     parameter int unsigned XLEN = 64,
     parameter int unsigned ISSUE_QUEUE_DEPTH = 16,
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
-    parameter int unsigned DMEM_DEPTH = 32,
-    parameter int unsigned IMEM_DEPTH = 64,
+    parameter int unsigned DMEM_ADDR_WIDTH = 32,
+    parameter int unsigned PC_WIDTH = 64,
     parameter int unsigned ROB_DEPTH = 16,
     parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
     parameter int unsigned SB_DEPTH = 4,
@@ -21,42 +21,42 @@ import riscv_types_pkg::*;
     input logic                                 cdb_valid,
     input logic                                 cdb_flush,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_depth,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         cdb_rd_phy_addr,
     input logic                                 cdb_phy_reg_write,
 
     // PRF interface
-    input logic [REG_FILE_DATA_WIDTH-1:0]       iss_rs_data_lsq,
+    input logic [REG_FILE_DATA_WIDTH-1:0]       iss_rs1_data_lsq,
 
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_alu,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rt_phy_addr_alu,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_div,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rt_phy_addr_div,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_mul,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rt_phy_addr_mul,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_ls,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_rs1_phy_addr_alu,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_rs2_phy_addr_alu,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_rs1_phy_addr_div,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_rs2_phy_addr_div,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_rs1_phy_addr_mul,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_rs2_phy_addr_mul,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_rs1_phy_addr_ls,
 
     // DISPATCH interface
-    input logic                                 dis_int_issq_en,
-    input logic                                 dis_div_issq_en,
-    input logic                                 dis_mul_issq_en,
-    input logic                                 dis_ld_st_issq_en,
+    input logic                                 dis_int_issue_en,
+    input logic                                 dis_div_issue_en,
+    input logic                                 dis_mul_issue_en,
+    input logic                                 dis_ld_st_issue_en,
     input logic                                 dis_reg_write,
-    input logic                                 dis_rs_data_ready,
-    input logic                                 dis_rt_data_ready,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rs_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rt_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
+    input logic                                 dis_rs1_data_ready,
+    input logic                                 dis_rs2_data_ready,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_rs1_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_rs2_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_new_rd_phy_addr,
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
     input logic [OPCODE_WIDTH-1:0]              dis_opcode,
     input logic [XLEN-1:0]                      dis_imm,
-    input logic [IMEM_DEPTH-1:0]                dis_branch_other_addr,
+    input logic [PC_WIDTH-1:0]                  dis_branch_other_addr,
     input logic [BPB_PC_BITS:0]                 dis_branch_pc_bits,
     input logic                                 dis_branch_prediction,
     input logic                                 dis_branch,
     input logic                                 dis_jr_inst,
     input logic                                 dis_jal_inst,
     input logic                                 dis_jr31_inst,
-    input logic [IMEM_DEPTH-1:0]                dis_pc,
+    input logic [PC_WIDTH-1:0]                  dis_pc,
 
     output logic                                issq_intq_full,
     output logic                                issq_divq_full,
@@ -69,14 +69,14 @@ import riscv_types_pkg::*;
 
 
     // EXE / CDB forwarding into reservation queues
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   int_rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         int_rd_phy_addr,
     input logic                                 int_exe_ready,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   mul_rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         mul_rd_phy_addr,
     input logic                                 mul_exe_ready,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   div_rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         div_rd_phy_addr,
     input logic                                 div_exe_ready,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   ls_buf_rd_phy_addr,
-    input logic                                 ls_buf_buf_rd_write,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         lsb_wake_phy_addr,
+    input logic                                 lsb_wake_valid,
 
     output logic                                exe_int_grant,
     output logic                                exe_div_grant,
@@ -85,19 +85,19 @@ import riscv_types_pkg::*;
     // Muxed issue metadata to EXE (one functional unit granted per cycle)
     output logic [ROB_INDEX_WIDTH-1:0]          iss_exe_rob_tag,
     output logic [OPCODE_WIDTH-1:0]             iss_exe_opcode,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rd_phy_addr,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rs_phy_addr,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_exe_rt_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_exe_rd_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_exe_rs1_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_exe_rs2_phy_addr,
     output logic                                iss_exe_rw,
     output logic [XLEN-1:0]                     iss_exe_imm,
-    output logic [IMEM_DEPTH-1:0]               iss_exe_branch_other_addr,
+    output logic [PC_WIDTH-1:0]                 iss_exe_branch_other_addr,
     output logic                                iss_exe_branch_prediction,
     output logic                                iss_exe_branch,
     output logic                                iss_exe_jr_inst,
     output logic                                iss_exe_jr31_inst,
     output logic                                iss_exe_jal_inst,
     output logic [BPB_PC_BITS-1:0]              iss_exe_branch_pc_bits,
-    output logic [IMEM_DEPTH-1:0]               iss_exe_pc,
+    output logic [PC_WIDTH-1:0]                 iss_exe_pc,
 
     // ISSUEUNIT interface
     input logic                                 issue_int_en,
@@ -127,21 +127,21 @@ import riscv_types_pkg::*;
 
     output logic [OPCODE_WIDTH-1:0]             iss_lsb_opcode,
     output logic [ROB_INDEX_WIDTH-1:0]          iss_lsb_rob_tag,
-    output logic [DMEM_DEPTH-1:0]               iss_lsb_addr,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_lsb_phy_addr,
+    output logic [DMEM_ADDR_WIDTH-1:0]          iss_lsb_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_lsb_phy_addr,
     output logic                                iss_lsb_rdy,
 
     // D-Cache Interface
     input logic                                 dcache_ready,
 
     output logic                                dcache_valid,
-    output logic [DMEM_DEPTH-1:0]               dcache_addr
+    output logic [DMEM_ADDR_WIDTH-1:0]          dcache_addr
 );
 
     // INTQ-only issue bus (also used for DIV/MUL wakeup)
     logic [ROB_INDEX_WIDTH-1:0]           iss_rob_tag_alu;
     logic [OPCODE_WIDTH-1:0]              iss_opcode_alu;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rd_phy_addr_alu;
+    logic [PHY_REG_IDX_WIDTH-1:0]         iss_rd_phy_addr_alu;
     logic                                 iss_rw_alu;
     logic [XLEN-1:0]                      iss_imm_alu;
     logic                                 iss_branch_prediction_alu;
@@ -150,17 +150,17 @@ import riscv_types_pkg::*;
     logic                                 iss_jr31_inst_alu;
     logic                                 iss_jal_inst_alu;
     logic [BPB_PC_BITS-1:0]               iss_branch_pc_bits_alu;
-    logic [IMEM_DEPTH-1:0]                iss_branch_other_addr_alu;
-    logic [IMEM_DEPTH-1:0]                iss_pc;
+    logic [PC_WIDTH-1:0]                  iss_branch_other_addr_alu;
+    logic [PC_WIDTH-1:0]                  iss_pc;
 
     // DIV / MUL issue metadata (internal until EXE is wired)
     logic [ROB_INDEX_WIDTH-1:0]           iss_rob_tag_div;
     logic [OPCODE_WIDTH-1:0]              iss_opcode_div;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rd_phy_addr_div;
+    logic [PHY_REG_IDX_WIDTH-1:0]         iss_rd_phy_addr_div;
     logic                                 iss_rw_div;
     logic [ROB_INDEX_WIDTH-1:0]           iss_rob_tag_mul;
     logic [OPCODE_WIDTH-1:0]              iss_opcode_mul;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]   iss_rd_phy_addr_mul;
+    logic [PHY_REG_IDX_WIDTH-1:0]         iss_rd_phy_addr_mul;
     logic                                 iss_rw_mul;
 
     // INTQ ALU destination valid for DIV/MUL operand wakeup
@@ -172,8 +172,8 @@ import riscv_types_pkg::*;
         .XLEN(XLEN),
         .INT_QUEUE_DEPTH(ISSUE_QUEUE_DEPTH),
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
-        .IMEM_DEPTH(IMEM_DEPTH),
+        .PHY_REG_IDX_WIDTH(PHY_REG_IDX_WIDTH),
+        .PC_WIDTH(PC_WIDTH),
         .BPB_PC_BITS(BPB_PC_BITS),
         .OPCODE_WIDTH(OPCODE_WIDTH)
     ) intq (
@@ -191,12 +191,12 @@ import riscv_types_pkg::*;
         .mul_exe_ready(mul_exe_ready),
         .div_rd_phy_addr(div_rd_phy_addr),
         .div_exe_ready(div_exe_ready),
-        .ls_buf_rd_phy_addr(ls_buf_rd_phy_addr),
-        .ls_buf_buf_rd_write(ls_buf_buf_rd_write),
+        .lsb_wake_phy_addr(lsb_wake_phy_addr),
+        .lsb_wake_valid(lsb_wake_valid),
 
         .iss_rob_tag_alu(iss_rob_tag_alu),
-        .iss_rs_phy_addr_alu(iss_rs_phy_addr_alu),
-        .iss_rt_phy_addr_alu(iss_rt_phy_addr_alu),
+        .iss_rs1_phy_addr_alu(iss_rs1_phy_addr_alu),
+        .iss_rs2_phy_addr_alu(iss_rs2_phy_addr_alu),
         .iss_opcode_alu(iss_opcode_alu),
         .iss_rd_phy_addr_alu(iss_rd_phy_addr_alu),
         .iss_rw_alu(iss_rw_alu),
@@ -214,12 +214,12 @@ import riscv_types_pkg::*;
         .issue_int_rdy(issue_int_rdy),
         .exe_int_grant(exe_int_grant),
 
-        .dis_int_en(dis_int_issq_en),
+        .dis_int_en(dis_int_issue_en),
         .dis_reg_write(dis_reg_write),
-        .dis_rs_data_ready(dis_rs_data_ready),
-        .dis_rt_data_ready(dis_rt_data_ready),
-        .dis_rs_phy_addr(dis_rs_phy_addr),
-        .dis_rt_phy_addr(dis_rt_phy_addr),
+        .dis_rs1_data_ready(dis_rs1_data_ready),
+        .dis_rs2_data_ready(dis_rs2_data_ready),
+        .dis_rs1_phy_addr(dis_rs1_phy_addr),
+        .dis_rs2_phy_addr(dis_rs2_phy_addr),
         .dis_new_rd_phy_addr(dis_new_rd_phy_addr),
         .dis_rob_tag(dis_rob_tag),
         .dis_opcode(dis_opcode),
@@ -241,7 +241,7 @@ import riscv_types_pkg::*;
     DIVQ #(
         .DIV_QUEUE_DEPTH(ISSUE_QUEUE_DEPTH),
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH(PHY_REG_IDX_WIDTH),
         .OPCODE_WIDTH(OPCODE_WIDTH)
     ) divq (
         .clk(clk),
@@ -260,12 +260,12 @@ import riscv_types_pkg::*;
         .mul_exe_ready(mul_exe_ready),
         .div_rd_phy_addr(div_rd_phy_addr),
         .div_exe_ready(div_exe_ready),
-        .ls_buf_rd_phy_addr(ls_buf_rd_phy_addr),
-        .ls_buf_buf_rd_write(ls_buf_buf_rd_write),
+        .lsb_wake_phy_addr(lsb_wake_phy_addr),
+        .lsb_wake_valid(lsb_wake_valid),
 
         .iss_rob_tag_div(iss_rob_tag_div),
-        .iss_rs_phy_addr_div(iss_rs_phy_addr_div),
-        .iss_rt_phy_addr_div(iss_rt_phy_addr_div),
+        .iss_rs1_phy_addr_div(iss_rs1_phy_addr_div),
+        .iss_rs2_phy_addr_div(iss_rs2_phy_addr_div),
         .iss_opcode_div(iss_opcode_div),
         .iss_rd_phy_addr_div(iss_rd_phy_addr_div),
         .iss_rw_div(iss_rw_div),
@@ -274,12 +274,12 @@ import riscv_types_pkg::*;
         .issue_div_rdy(issue_div_rdy),
         .exe_div_grant(exe_div_grant),
 
-        .dis_div_issq_en(dis_div_issq_en),
+        .dis_div_issue_en(dis_div_issue_en),
         .dis_reg_write(dis_reg_write),
-        .dis_rs_data_ready(dis_rs_data_ready),
-        .dis_rt_data_ready(dis_rt_data_ready),
-        .dis_rs_phy_addr(dis_rs_phy_addr),
-        .dis_rt_phy_addr(dis_rt_phy_addr),
+        .dis_rs1_data_ready(dis_rs1_data_ready),
+        .dis_rs2_data_ready(dis_rs2_data_ready),
+        .dis_rs1_phy_addr(dis_rs1_phy_addr),
+        .dis_rs2_phy_addr(dis_rs2_phy_addr),
         .dis_new_rd_phy_addr(dis_new_rd_phy_addr),
         .dis_rob_tag(dis_rob_tag),
         .dis_opcode(dis_opcode),
@@ -292,7 +292,7 @@ import riscv_types_pkg::*;
     MULQ #(
         .MUL_QUEUE_DEPTH(ISSUE_QUEUE_DEPTH),
         .ROB_INDEX_WIDTH(ROB_INDEX_WIDTH),
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH(PHY_REG_IDX_WIDTH),
         .OPCODE_WIDTH(OPCODE_WIDTH)
     ) mulq (
         .clk(clk),
@@ -311,12 +311,12 @@ import riscv_types_pkg::*;
         .mul_exe_ready(mul_exe_ready),
         .div_rd_phy_addr(div_rd_phy_addr),
         .div_exe_ready(div_exe_ready),
-        .ls_buf_rd_phy_addr(ls_buf_rd_phy_addr),
-        .ls_buf_buf_rd_write(ls_buf_buf_rd_write),
+        .lsb_wake_phy_addr(lsb_wake_phy_addr),
+        .lsb_wake_valid(lsb_wake_valid),
 
         .iss_rob_tag_mul(iss_rob_tag_mul),
-        .iss_rs_phy_addr_mul(iss_rs_phy_addr_mul),
-        .iss_rt_phy_addr_mul(iss_rt_phy_addr_mul),
+        .iss_rs1_phy_addr_mul(iss_rs1_phy_addr_mul),
+        .iss_rs2_phy_addr_mul(iss_rs2_phy_addr_mul),
         .iss_opcode_mul(iss_opcode_mul),
         .iss_rd_phy_addr_mul(iss_rd_phy_addr_mul),
         .iss_rw_mul(iss_rw_mul),
@@ -325,12 +325,12 @@ import riscv_types_pkg::*;
         .issue_mul_rdy(issue_mul_rdy),
         .exe_mul_grant(exe_mul_grant),
 
-        .dis_mul_issq_en(dis_mul_issq_en),
+        .dis_mul_issue_en(dis_mul_issue_en),
         .dis_reg_write(dis_reg_write),
-        .dis_rs_data_ready(dis_rs_data_ready),
-        .dis_rt_data_ready(dis_rt_data_ready),
-        .dis_rs_phy_addr(dis_rs_phy_addr),
-        .dis_rt_phy_addr(dis_rt_phy_addr),
+        .dis_rs1_data_ready(dis_rs1_data_ready),
+        .dis_rs2_data_ready(dis_rs2_data_ready),
+        .dis_rs1_phy_addr(dis_rs1_phy_addr),
+        .dis_rs2_phy_addr(dis_rs2_phy_addr),
         .dis_new_rd_phy_addr(dis_new_rd_phy_addr),
         .dis_rob_tag(dis_rob_tag),
         .dis_opcode(dis_opcode),
@@ -344,9 +344,9 @@ import riscv_types_pkg::*;
         .XLEN(XLEN),
         .LSQ_DEPTH(ISSUE_QUEUE_DEPTH),
         .SAB_DEPTH(),
-        .DMEM_DEPTH(DMEM_DEPTH),
+        .DMEM_ADDR_WIDTH(DMEM_ADDR_WIDTH),
         .ROB_DEPTH(ROB_DEPTH),
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH(PHY_REG_IDX_WIDTH),
         .REG_FILE_DATA_WIDTH(REG_FILE_DATA_WIDTH),
         .SB_DEPTH(SB_DEPTH),
         .OPCODE_WIDTH(OPCODE_WIDTH)
@@ -371,12 +371,12 @@ import riscv_types_pkg::*;
         // --------------------------------------------------------
         // LSQ part
         // --------------------------------------------------------
-        .dis_rs_data_ready(dis_rs_data_ready),
-        .dis_rs_phy_addr(dis_rs_phy_addr),
+        .dis_rs1_data_ready(dis_rs1_data_ready),
+        .dis_rs1_phy_addr(dis_rs1_phy_addr),
         .dis_new_rd_phy_addr(dis_new_rd_phy_addr),
         .dis_rob_tag(dis_rob_tag),
         .dis_opcode(dis_opcode),
-        .dis_ld_st_issue_en(dis_ld_st_issq_en),
+        .dis_ld_st_issue_en(dis_ld_st_issue_en),
         .dis_imm(dis_imm),
 
         .lsq_ld_st_full(issq_ld_stq_full),
@@ -392,24 +392,24 @@ import riscv_types_pkg::*;
         .cdb_rd_phy_addr(cdb_rd_phy_addr),
         .cdb_phy_reg_write(cdb_phy_reg_write),
 
-        .iss_rs_data_lsq(iss_rs_data_lsq),
-        .iss_rs_phy_addr_ls(iss_rs_phy_addr_ls),
+        .iss_rs1_data_lsq(iss_rs1_data_lsq),
+        .iss_rs1_phy_addr_ls(iss_rs1_phy_addr_ls),
 
         .lsb_en(lsb_en),
 
-        .iss_lsq_opcode(iss_lsb_opcode),
-        .iss_lsq_rob_tag(iss_lsb_rob_tag),
-        .iss_lsq_addr(iss_lsb_addr),
-        .iss_lsq_phy_addr(iss_lsb_phy_addr),
-        .iss_lsq_rdy(iss_lsb_rdy)
+        .iss_lsb_opcode(iss_lsb_opcode),
+        .iss_lsb_rob_tag(iss_lsb_rob_tag),
+        .iss_lsb_addr(iss_lsb_addr),
+        .iss_lsb_phy_addr(iss_lsb_phy_addr),
+        .iss_lsb_rdy(iss_lsb_rdy)
     );
 
     always_comb begin
         iss_exe_rob_tag             = '0;
         iss_exe_opcode              = '0;
         iss_exe_rd_phy_addr         = '0;
-        iss_exe_rs_phy_addr         = '0;
-        iss_exe_rt_phy_addr         = '0;
+        iss_exe_rs1_phy_addr        = '0;
+        iss_exe_rs2_phy_addr        = '0;
         iss_exe_rw                  = 1'b0;
         iss_exe_imm                 = '0;
         iss_exe_branch_other_addr   = '0;
@@ -425,8 +425,8 @@ import riscv_types_pkg::*;
             iss_exe_rob_tag             = iss_rob_tag_alu;
             iss_exe_opcode              = iss_opcode_alu;
             iss_exe_rd_phy_addr         = iss_rd_phy_addr_alu;
-            iss_exe_rs_phy_addr         = iss_rs_phy_addr_alu;
-            iss_exe_rt_phy_addr         = iss_rt_phy_addr_alu;
+            iss_exe_rs1_phy_addr        = iss_rs1_phy_addr_alu;
+            iss_exe_rs2_phy_addr        = iss_rs2_phy_addr_alu;
             iss_exe_rw                  = iss_rw_alu;
             iss_exe_imm                 = iss_imm_alu;
             iss_exe_branch_other_addr   = iss_branch_other_addr_alu;
@@ -441,15 +441,15 @@ import riscv_types_pkg::*;
             iss_exe_rob_tag             = iss_rob_tag_div;
             iss_exe_opcode              = iss_opcode_div;
             iss_exe_rd_phy_addr         = iss_rd_phy_addr_div;
-            iss_exe_rs_phy_addr         = iss_rs_phy_addr_div;
-            iss_exe_rt_phy_addr         = iss_rt_phy_addr_div;
+            iss_exe_rs1_phy_addr        = iss_rs1_phy_addr_div;
+            iss_exe_rs2_phy_addr        = iss_rs2_phy_addr_div;
             iss_exe_rw                  = iss_rw_div;
         end else if (exe_mul_grant) begin
             iss_exe_rob_tag             = iss_rob_tag_mul;
             iss_exe_opcode              = iss_opcode_mul;
             iss_exe_rd_phy_addr         = iss_rd_phy_addr_mul;
-            iss_exe_rs_phy_addr         = iss_rs_phy_addr_mul;
-            iss_exe_rt_phy_addr         = iss_rt_phy_addr_mul;
+            iss_exe_rs1_phy_addr        = iss_rs1_phy_addr_mul;
+            iss_exe_rs2_phy_addr        = iss_rs2_phy_addr_mul;
             iss_exe_rw                  = iss_rw_mul;
         end
     end

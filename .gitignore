@@ -83,3 +83,7 @@ INTERVIEW_GUIDE.md
 *ucli.key
 /L1DCache/doc
 /L1ICache/build
+
+/AXISoC/doc/VERIFICATION_PLAN.md
+/Tomasulo3CPU/uvm/APPLE*
+/Tomasulo3CPU/uvm/DPI*

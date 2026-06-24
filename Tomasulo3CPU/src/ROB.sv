@@ -24,13 +24,13 @@ module ROB
     parameter int unsigned ROB_DEPTH = 32,
     parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
     parameter int unsigned DMEM_WIDTH = 64,
-    parameter int unsigned DMEM_DEPTH = 32,
-    parameter int unsigned IMEM_DEPTH = 64,
+    parameter int unsigned DMEM_ADDR_WIDTH = 32,
+    parameter int unsigned PC_WIDTH = 64,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
     parameter int unsigned CSR_CAUSE_WIDTH = 5,
     parameter int unsigned ARCH_REG_COUNT = 32,
     parameter int unsigned ARCH_REG_WIDTH = $clog2(ARCH_REG_COUNT),
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7,
     parameter int unsigned W_BYTE_NUM = DMEM_WIDTH / 8,
     // When set, FENCE.I commit is held until the external cache-coherence
     // controller reports the I$/D$ have been synchronized (D$ cleaned to
@@ -42,13 +42,13 @@ module ROB
     input logic rst_n,
 
     // DISPATCH interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_sw_rt_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_pre_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_sw_rs2_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_pre_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_new_phy_addr,
     input logic                                 dis_inst_valid,
     input logic [ARCH_REG_WIDTH-1:0]            dis_rob_rd_arch_addr,
     input logic                                 dis_reg_write,
-    input logic [IMEM_DEPTH-1:0]                dis_pc,
+    input logic [PC_WIDTH-1:0]                  dis_pc,
     input rob_opclass_t                         dis_rob_opclass,
     input csr_cmd_e                             dis_csr_cmd,
     input csr_addr_t                            dis_csr_addr,
@@ -56,7 +56,7 @@ module ROB
     input logic [ARCH_REG_WIDTH-1:0]            dis_csr_rs1_arch_addr,
 
     // RRAT-resolved physical register for CSR rs1 (combinational from RRAT)
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   rrat_csr_rs1_phy,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         rrat_csr_rs1_phy,
 
     output logic [ROB_INDEX_WIDTH-1:0]          rob_bottom_ptr,
     output logic                                rob_full,
@@ -65,17 +65,17 @@ module ROB
     // CDB interface
     input logic                                 cdb_valid,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_tag,
-    input logic [DMEM_DEPTH-1:0]                cdb_sw_addr,
+    input logic [DMEM_ADDR_WIDTH-1:0]           cdb_sw_addr,
     input logic [W_BYTE_NUM-1:0]                cdb_sw_strb,
     input logic                                 cdb_flush,
 
     // PRF interface (store-data read at commit; reused for CSR rs1 read)
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rt_sb_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        st_src_phy_addr,
 
     // SB interface
     input logic sb_full,
     input logic sb_drained,
-    output logic [DMEM_DEPTH-1:0]               rob_sw_addr,
+    output logic [DMEM_ADDR_WIDTH-1:0]          rob_sw_addr,
     output logic [W_BYTE_NUM-1:0]               rob_sw_strb,
     output logic                                rob_commit_mem_write,
 
@@ -86,10 +86,10 @@ module ROB
     // RRAT interface
     output logic [ARCH_REG_WIDTH-1:0]           rob_commit_rd_arch_addr,
     output logic                                rob_reg_write,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_curr_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        rob_commit_curr_phy_addr,
 
     // FRL interface
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  rob_commit_pre_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        rob_commit_pre_phy_addr,
 
     // DISPATCH csr_stall release
     output logic                                rob_serializing_committed,
@@ -105,7 +105,7 @@ module ROB
     output logic                                ecall_commit,
     output logic                                ebreak_commit,
     output logic                                mret_commit,
-    output logic [IMEM_DEPTH-1:0]               trap_commit_pc,
+    output logic [PC_WIDTH-1:0]                 trap_commit_pc,
 
     // CSR module results (from CSR combinational read)
     input  logic [REG_FILE_DATA_WIDTH-1:0]      csr_rdata,
@@ -113,18 +113,18 @@ module ROB
     input  logic [REG_FILE_DATA_WIDTH-1:0]      csr_redirect_pc,
 
     // PRF/RBA write port for CSR result (old CSR value -> rd)
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  csr_wr_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        csr_wr_phy_addr,
     output logic [REG_FILE_DATA_WIDTH-1:0]      csr_wr_data,
     output logic                                csr_wr_en,
 
     // Trap flush: redirect front-end after ECALL/EBREAK/MRET commit
     // TODO: flush other parts, not only dispatch
     output logic                                trap_commit_flush,
-    output logic [IMEM_DEPTH-1:0]               trap_redirect_pc,
+    output logic [PC_WIDTH-1:0]                 trap_redirect_pc,
 
     // FENCE.I redirects fetch after all prior stores are globally complete.
     output logic                                fence_i_commit_flush,
-    output logic [IMEM_DEPTH-1:0]               fence_i_redirect_pc,
+    output logic [PC_WIDTH-1:0]                 fence_i_redirect_pc,
 
     // Cache-coherence handshake for FENCE.I (used when FENCE_I_COHERENCE=1).
     //   fence_i_coh_start : a FENCE.I is at the head, completed, and the store
@@ -136,15 +136,15 @@ module ROB
 );
 
     typedef struct packed {
-        logic [PHY_REGISTER_FILE_WIDTH-1:0] curr_phy;
-        logic [PHY_REGISTER_FILE_WIDTH-1:0] prev_phy;
+        logic [PHY_REG_IDX_WIDTH-1:0]       curr_phy;
+        logic [PHY_REG_IDX_WIDTH-1:0]       prev_phy;
         logic [ARCH_REG_WIDTH-1:0]          rd_addr;
         logic                               rw;
         rob_opclass_t                       opclass;
         logic                               compl;
-        logic [DMEM_DEPTH-1:0]              sw_addr;
+        logic [DMEM_ADDR_WIDTH-1:0]         sw_addr;
         logic [W_BYTE_NUM-1:0]              sw_strb;
-        logic [IMEM_DEPTH-1:0]              pc;
+        logic [PC_WIDTH-1:0]                pc;
         trap_cause_t                        trap_cause;
         csr_addr_t                          csr_addr;
         csr_cmd_e                           csr_cmd;
@@ -189,7 +189,7 @@ module ROB
             if (dis_inst_valid && !full) begin
                 ROB_array[write_ptr[ROB_INDEX_WIDTH-1:0]] <= '{
                     curr_phy:   (dis_rob_opclass == ROB_STORE) ?
-                                dis_sw_rt_phy_addr : dis_new_phy_addr,
+                                dis_sw_rs2_phy_addr : dis_new_phy_addr,
                     prev_phy:   dis_pre_phy_addr,
                     rd_addr:    dis_rob_rd_arch_addr,
                     rw:         dis_reg_write,
@@ -248,7 +248,7 @@ module ROB
     assign rob_sw_addr = head.sw_addr;
     assign rob_sw_strb = head.sw_strb;
     assign rob_commit_mem_write = (head.opclass == ROB_STORE) && enable;
-    assign rt_sb_phy_addr = (head.opclass == ROB_CSR) ?
+    assign st_src_phy_addr = (head.opclass == ROB_CSR) ?
                             rrat_csr_rs1_phy : head.curr_phy;
 
     // CFC interface
@@ -286,9 +286,9 @@ module ROB
 
     // Trap/MRET flush and redirect
     assign trap_commit_flush = enable && (head_has_trap || head_is_mret);
-    assign trap_redirect_pc  = csr_redirect_pc[IMEM_DEPTH-1:0];
+    assign trap_redirect_pc  = csr_redirect_pc[PC_WIDTH-1:0];
     assign fence_i_commit_flush = enable && (head.opclass == ROB_FENCE_I);
-    assign fence_i_redirect_pc  = head.pc + IMEM_DEPTH'(4);
+    assign fence_i_redirect_pc  = head.pc + PC_WIDTH'(4);
 
     // Ready to synchronize the caches: a completed FENCE.I is at the head and
     // every older store has drained out of the store buffer into the D$.

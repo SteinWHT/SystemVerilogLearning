@@ -1,5 +1,5 @@
 // LS QUEUE DATA STRUCTURE:
-//  valid   rs_data_valid   opcode      addr_rdy      robtag        rs_phy_addr     rd_phy_addr    addr/offset
+//  valid   rs1_data_valid   opcode      addr_rdy      robtag        rs1_phy_addr     rd_phy_addr    addr/offset
 //  1b      1b              6b           1b           5b            6b              6b             32b
 // The LSQ and SAB are intergrated into one module, and the SAB is used to store the store addresses.
 // Because they are fully coupled, I don't want to use so many ports to connect them.
@@ -15,10 +15,10 @@ import riscv_types_pkg::*;
     parameter int unsigned LSQ_INDEX_WIDTH = $clog2(LSQ_DEPTH),
     parameter int unsigned SAB_DEPTH = 8,
     parameter int unsigned SAB_INDEX_WIDTH = $clog2(SAB_DEPTH),
-    parameter int unsigned DMEM_DEPTH = 32,
+    parameter int unsigned DMEM_ADDR_WIDTH = 32,
     parameter int unsigned ROB_DEPTH = 16,
     parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
     parameter int unsigned SB_DEPTH = 4,
     parameter int unsigned SB_INDEX_WIDTH = $clog2(SB_DEPTH),
@@ -49,9 +49,9 @@ import riscv_types_pkg::*;
     // --------------------------------------------------------
     // DISPATCH interface
     input logic                                 dis_ld_st_issue_en,
-    input logic                                 dis_rs_data_ready,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rs_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
+    input logic                                 dis_rs1_data_ready,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_rs1_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_new_rd_phy_addr,
     input logic [ROB_INDEX_WIDTH-1:0]           dis_rob_tag,
     input logic [OPCODE_WIDTH-1:0]              dis_opcode,
     input logic [XLEN-1:0]                      dis_imm,
@@ -63,13 +63,13 @@ import riscv_types_pkg::*;
     input logic                                 dcache_ready,
 
     output logic                                dcache_valid,
-    output logic [DMEM_DEPTH-1:0]               dcache_addr,
+    output logic [DMEM_ADDR_WIDTH-1:0]          dcache_addr,
 
     // CDB interface
     input logic                                 cdb_valid,
     input logic                                 cdb_flush,
     input logic [ROB_INDEX_WIDTH-1:0]           cdb_rob_depth,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   cdb_rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         cdb_rd_phy_addr,
     input logic                                 cdb_phy_reg_write,
 
     // no forwarding in LSQ
@@ -78,24 +78,24 @@ import riscv_types_pkg::*;
     // LSQ interface
 
     // PRF interface
-    input logic [REG_FILE_DATA_WIDTH-1:0]       iss_rs_data_lsq,
+    input logic [REG_FILE_DATA_WIDTH-1:0]       iss_rs1_data_lsq,
 
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_rs_phy_addr_ls,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_rs1_phy_addr_ls,
 
     // LSB interface
     input logic                                 lsb_en,
 
-    output logic [OPCODE_WIDTH-1:0]             iss_lsq_opcode,
-    output logic [ROB_INDEX_WIDTH-1:0]          iss_lsq_rob_tag,
-    output logic [DMEM_DEPTH-1:0]               iss_lsq_addr,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]  iss_lsq_phy_addr,
-    output logic                                iss_lsq_rdy
+    output logic [OPCODE_WIDTH-1:0]             iss_lsb_opcode,
+    output logic [ROB_INDEX_WIDTH-1:0]          iss_lsb_rob_tag,
+    output logic [DMEM_ADDR_WIDTH-1:0]          iss_lsb_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]        iss_lsb_phy_addr,
+    output logic                                iss_lsb_rdy
 );
     // --------------------------------------------------------
     // SAB part
     // --------------------------------------------------------
     typedef struct packed {
-        logic [DMEM_DEPTH-1:0] addr;
+        logic [DMEM_ADDR_WIDTH-1:0] addr;
         logic [ROB_INDEX_WIDTH-1:0] rob_tag;
         logic [SB_INDEX_WIDTH-1:0] sb_tag;
         logic tag_sel;
@@ -113,13 +113,13 @@ import riscv_types_pkg::*;
     // LSQ part
     // --------------------------------------------------------
     typedef struct packed {
-        logic rs_data_valid;
-        logic [OPCODE_WIDTH-1:0] opcode;
-        logic addr_rdy;
-        logic [ROB_INDEX_WIDTH-1:0] rob_tag;
-        logic [PHY_REGISTER_FILE_WIDTH-1:0] rs_phy_addr;
-        logic [PHY_REGISTER_FILE_WIDTH-1:0] rd_phy_addr;
-        logic [DMEM_DEPTH-1:0] addr_offset;
+        logic                           rs1_data_valid;
+        logic [OPCODE_WIDTH-1:0]        opcode;
+        logic                           addr_rdy;
+        logic [ROB_INDEX_WIDTH-1:0]     rob_tag;
+        logic [PHY_REG_IDX_WIDTH-1:0]   rs1_phy_addr;
+        logic [PHY_REG_IDX_WIDTH-1:0]   rd_phy_addr;
+        logic [DMEM_ADDR_WIDTH-1:0]     addr_offset;
     } lsq_entry_t;
 
     lsq_entry_t q [LSQ_DEPTH];
@@ -129,7 +129,7 @@ import riscv_types_pkg::*;
     logic [LSQ_INDEX_WIDTH-1:0] issue_idx;
 
      // Wakeup Logic — snoop CDB forwarding bus
-    logic wk_rs_rdy [LSQ_DEPTH];
+    logic wk_rs1_rdy [LSQ_DEPTH];
 
     function automatic logic is_load(logic [OPCODE_WIDTH-1:0] op);
         instr_e instr_op;
@@ -149,11 +149,11 @@ import riscv_types_pkg::*;
 
     always_comb begin
         for (int i = 0; i < LSQ_DEPTH; i++) begin
-            wk_rs_rdy[i] = q[i].rs_data_valid;
+            wk_rs1_rdy[i] = q[i].rs1_data_valid;
 
             if (q_valid[i]) begin
-                if (!q[i].rs_data_valid) begin
-                    if (cdb_valid && cdb_phy_reg_write   && (q[i].rs_phy_addr == cdb_rd_phy_addr))      wk_rs_rdy[i] = 1'b1;
+                if (!q[i].rs1_data_valid) begin
+                    if (cdb_valid && cdb_phy_reg_write   && (q[i].rs1_phy_addr == cdb_rd_phy_addr))      wk_rs1_rdy[i] = 1'b1;
                 end
             end
         end
@@ -162,15 +162,15 @@ import riscv_types_pkg::*;
     // Get the register data from the PRF and add offset to get the address
     logic addr_calculating_valid;
     logic [LSQ_INDEX_WIDTH-1:0] addr_calculating_idx;
-    logic [DMEM_DEPTH-1:0] lsq_addr_next;
-    assign iss_rs_phy_addr_ls = q[addr_calculating_idx].rs_phy_addr;
-    assign lsq_addr_next = q[addr_calculating_idx].addr_offset + iss_rs_data_lsq;
+    logic [DMEM_ADDR_WIDTH-1:0] lsq_addr_next;
+    assign iss_rs1_phy_addr_ls = q[addr_calculating_idx].rs1_phy_addr;
+    assign lsq_addr_next = q[addr_calculating_idx].addr_offset + iss_rs1_data_lsq;
 
     always_comb begin
         addr_calculating_valid = 1'b0;
         addr_calculating_idx = '0;
         for (int i = 0; i < LSQ_DEPTH; i++) begin
-            if (q_valid[i] && wk_rs_rdy[i] && !q[i].addr_rdy) begin
+            if (q_valid[i] && wk_rs1_rdy[i] && !q[i].addr_rdy) begin
                 addr_calculating_valid = 1'b1;
                 addr_calculating_idx = i;
             end
@@ -179,13 +179,13 @@ import riscv_types_pkg::*;
 
     // Dispatch-Time Wakeup — catch same-cycle forwarding for new entry
     // TODO: check if no this forwarding, will the cdb data be lost?
-    logic dis_rs_rdy_eff;
+    logic dis_rs1_rdy_eff;
 
     always_comb begin
-        dis_rs_rdy_eff = dis_rs_data_ready;
+        dis_rs1_rdy_eff = dis_rs1_data_ready;
 
-        if (!dis_rs_data_ready) begin
-            if (cdb_valid && cdb_phy_reg_write   && (dis_rs_phy_addr == cdb_rd_phy_addr))     dis_rs_rdy_eff = 1'b1;
+        if (!dis_rs1_data_ready) begin
+            if (cdb_valid && cdb_phy_reg_write   && (dis_rs1_phy_addr == cdb_rd_phy_addr))     dis_rs1_rdy_eff = 1'b1;
         end
     end
 
@@ -198,7 +198,7 @@ import riscv_types_pkg::*;
         for (int i = 0; i < LSQ_DEPTH; i++) begin
             if (q_valid[i] && is_load(q[i].opcode)) begin
                 for (int j = 0; j < SAB_DEPTH; j++) begin
-                    if (sab_array[j].addr[DMEM_DEPTH-1:3] == q[i].addr_offset[DMEM_DEPTH-1:3] &&
+                    if (sab_array[j].addr[DMEM_ADDR_WIDTH-1:3] == q[i].addr_offset[DMEM_ADDR_WIDTH-1:3] &&
                         sab_valid[j] == 1'b1) begin
                         match_number[i] = match_number[i] + 1;
                     end
@@ -225,7 +225,7 @@ import riscv_types_pkg::*;
     always_comb begin
         fence_depth = rob_fence_tag - rob_top_ptr;
         for (int i = 0; i < LSQ_DEPTH; i++) begin
-            q_ready[i]     = q_valid[i] & wk_rs_rdy[i] && q[i].addr_rdy;
+            q_ready[i]     = q_valid[i] & wk_rs1_rdy[i] && q[i].addr_rdy;
             entry_depth[i] = q_valid[i] ? (q[i].rob_tag[ROB_INDEX_WIDTH-1:0] - rob_top_ptr) :
                             {ROB_INDEX_WIDTH{1'b1}};
         end
@@ -273,7 +273,7 @@ import riscv_types_pkg::*;
                             (entry_depth[j] < entry_depth[i]) &&
                             ((q[j].addr_rdy == 1'b0) ||
                             ((q[j].addr_rdy == 1'b1) &&
-                            q[j].addr_offset[DMEM_DEPTH-1:3] == q[i].addr_offset[DMEM_DEPTH-1:3]))) begin
+                            q[j].addr_offset[DMEM_ADDR_WIDTH-1:3] == q[i].addr_offset[DMEM_ADDR_WIDTH-1:3]))) begin
                             sel_valid = 1'b0;
                             break;
                         end
@@ -324,23 +324,23 @@ import riscv_types_pkg::*;
 
     // LSQ issues to LSB when an entry is ready and LSB can accept (not ISSUEUNIT).
     logic issue_lsq;
-    assign issue_lsq = iss_lsq_rdy & lsb_en;
-    assign iss_lsq_rdy = sel_valid & ~cdb_flush;
+    assign issue_lsq = iss_lsb_rdy & lsb_en;
+    assign iss_lsb_rdy = sel_valid & ~cdb_flush;
 
     assign dcache_valid = issue_lsq && is_load(q[sel_idx].opcode);
     assign dcache_addr  = q[sel_idx].addr_offset;
 
     always_comb begin
-        iss_lsq_rob_tag         = '0;
-        iss_lsq_opcode          = INSTR_NONE;
-        iss_lsq_addr            = '0;
-        iss_lsq_phy_addr        = '0;
+        iss_lsb_rob_tag         = '0;
+        iss_lsb_opcode          = INSTR_NONE;
+        iss_lsb_addr            = '0;
+        iss_lsb_phy_addr        = '0;
 
         if (issue_lsq) begin
-            iss_lsq_rob_tag         = q[sel_idx].rob_tag;
-            iss_lsq_opcode          = q[sel_idx].opcode;
-            iss_lsq_addr            = q[sel_idx].addr_offset;
-            iss_lsq_phy_addr        = q[sel_idx].rd_phy_addr;
+            iss_lsb_rob_tag         = q[sel_idx].rob_tag;
+            iss_lsb_opcode          = q[sel_idx].opcode;
+            iss_lsb_addr            = q[sel_idx].addr_offset;
+            iss_lsb_phy_addr        = q[sel_idx].rd_phy_addr;
         end
     end
 
@@ -350,11 +350,11 @@ import riscv_types_pkg::*;
         if (!rst_n) begin
             for (int i = 0; i < LSQ_DEPTH; i++) begin
                 q[i]       <= '{
-                    rs_data_valid : 1'b0,
+                    rs1_data_valid : 1'b0,
                     opcode : INSTR_NONE,
                     addr_rdy : 1'b0,
                     rob_tag : '0,
-                    rs_phy_addr : '0,
+                    rs1_phy_addr : '0,
                     rd_phy_addr : '0,
                     addr_offset : '0
                 };
@@ -364,7 +364,7 @@ import riscv_types_pkg::*;
         end else begin
             // Wakeup: latch updated ready bits
             for (int i = 0; i < LSQ_DEPTH; i++) begin
-                q[i].rs_data_valid <= wk_rs_rdy[i];
+                q[i].rs1_data_valid <= wk_rs1_rdy[i];
             end
 
             // Addr Calculating: calculate the address
@@ -378,7 +378,7 @@ import riscv_types_pkg::*;
                 if (flush_mask[i] && q_valid[i]) begin
                     if (is_load(q[i].opcode)) begin
                         for (int j = 0; j < SAB_DEPTH; j++) begin
-                            if (sab_array[j].addr[DMEM_DEPTH-1:3] == q[i].addr_offset[DMEM_DEPTH-1:3] &&
+                            if (sab_array[j].addr[DMEM_ADDR_WIDTH-1:3] == q[i].addr_offset[DMEM_ADDR_WIDTH-1:3] &&
                                 sab_valid[j] == 1'b1 &&
                                 sab_entry_depth[j] > cdb_rob_depth) begin
                                 junior_counter[i] <= junior_counter[i] - 1;
@@ -398,7 +398,7 @@ import riscv_types_pkg::*;
                         // when sw is issued, the junior counter of the older lw is incremented
                         if (is_load(q[i].opcode) &&
                             (entry_depth[i] < entry_depth[sel_idx]) &&
-                            (q[i].addr_offset[DMEM_DEPTH-1:3] == q[sel_idx].addr_offset[DMEM_DEPTH-1:3])) begin
+                            (q[i].addr_offset[DMEM_ADDR_WIDTH-1:3] == q[sel_idx].addr_offset[DMEM_ADDR_WIDTH-1:3])) begin
                             junior_counter[i] <= junior_counter[i] + 1;
                         end
                     end
@@ -409,11 +409,11 @@ import riscv_types_pkg::*;
             if (dis_ld_st_issue_en && has_free && !cdb_flush) begin
                 q_valid[free_idx] <= 1'b1;
                 q[free_idx]       <= '{
-                    rs_data_valid : dis_rs_rdy_eff,
+                    rs1_data_valid : dis_rs1_rdy_eff,
                     opcode : dis_opcode,
                     addr_rdy : 1'b0,
                     rob_tag   : dis_rob_tag,
-                    rs_phy_addr : dis_rs_phy_addr,
+                    rs1_phy_addr : dis_rs1_phy_addr,
                     rd_phy_addr : dis_new_rd_phy_addr,
                     addr_offset : dis_imm
                 };

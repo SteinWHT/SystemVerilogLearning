@@ -4,7 +4,7 @@ module SB #(
     parameter int unsigned ROB_DEPTH = 32,
     parameter int unsigned ROB_INDEX_WIDTH = $clog2(ROB_DEPTH),
     parameter int unsigned DMEM_WIDTH = 64,
-    parameter int unsigned DMEM_DEPTH = 32,
+    parameter int unsigned DMEM_ADDR_WIDTH = 32,
     parameter int unsigned W_BYTE_NUM = DMEM_WIDTH / 8
 ) (
     input logic clk,
@@ -12,18 +12,18 @@ module SB #(
 
     // ROB interface
     input logic [ROB_INDEX_WIDTH-1:0]   rob_top_ptr,
-    input logic [DMEM_DEPTH-1:0]        rob_sw_addr,
+    input logic [DMEM_ADDR_WIDTH-1:0]   rob_sw_addr,
     input logic [W_BYTE_NUM-1:0]        rob_sw_strb,
     input logic                         rob_commit_mem_write,
 
     // PRF interface
-    input logic [DMEM_WIDTH-1:0]        rt_sb_data,
+    input logic [DMEM_WIDTH-1:0]        st_src_data,
 
     // D-CACHE interface
     input logic                         dcache_ready,
     input logic                         dcache_resp_valid,
 
-    output logic [DMEM_DEPTH-1:0]       dcache_sw_addr,
+    output logic [DMEM_ADDR_WIDTH-1:0]  dcache_sw_addr,
     output logic [W_BYTE_NUM-1:0]       dcache_wstrb,
     output logic [DMEM_WIDTH-1:0]       dcache_sw_data,
     output logic                        dcache_valid,
@@ -41,7 +41,7 @@ module SB #(
     output logic                        drained
 );
     typedef struct packed {
-        logic [DMEM_DEPTH-1:0]              sw_addr;
+        logic [DMEM_ADDR_WIDTH-1:0]         sw_addr;
         logic [DMEM_WIDTH-1:0]              sw_data;
         logic [W_BYTE_NUM-1:0]              sw_strb;
     } sb_entry_t;
@@ -61,7 +61,7 @@ module SB #(
             if (rob_commit_mem_write && !full) begin
                 sb_array[write_ptr[SB_INDEX_WIDTH-1:0]] <=
                     '{sw_addr: rob_sw_addr,
-                      sw_data: rt_sb_data,
+                      sw_data: st_src_data,
                       sw_strb: rob_sw_strb};
 
                 write_ptr           <= write_ptr + 1;

@@ -1,10 +1,10 @@
 // One FENCE.I I$/D$ coherence episode observed by cpu_coherence_monitor.
 class cpu_coherence_item #(
-    int unsigned IMEM_DEPTH = 64
+    int unsigned PC_WIDTH = 64
 ) extends uvm_sequence_item;
 
     // Redirect target the FENCE.I committed to (committing PC + 4).
-    rand bit [IMEM_DEPTH-1:0] fence_pc;
+    rand bit [PC_WIDTH-1:0] fence_pc;
 
     // 64-bit words written back to shared memory while cleaning the D-cache.
     // A full dirty line is 8 beats, so this is a multiple of 8.
@@ -19,7 +19,7 @@ class cpu_coherence_item #(
     // Monitor-local result: clean completed before invalidate, invalidate seen.
     rand bit                  ordering_ok;
 
-    `uvm_object_param_utils_begin(cpu_coherence_item #(IMEM_DEPTH))
+    `uvm_object_param_utils_begin(cpu_coherence_item #(PC_WIDTH))
         `uvm_field_int(fence_pc,     UVM_ALL_ON | UVM_HEX)
         `uvm_field_int(wb_beats,     UVM_ALL_ON | UVM_DEC)
         `uvm_field_int(clean_cycles, UVM_ALL_ON | UVM_DEC)

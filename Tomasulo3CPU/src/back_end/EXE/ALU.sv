@@ -7,32 +7,32 @@ import riscv_types_pkg::*;
     parameter int unsigned XLEN = 64,
     parameter int unsigned OPCODE_WIDTH = 7,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
-    parameter int unsigned IMEM_DEPTH = 64,
+    parameter int unsigned PC_WIDTH = 64,
     parameter int unsigned BPB_PC_BITS = 3,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7
 ) (
     input logic clk,
     input logic rst_n,
 
     // PRF interface
-    input logic [REG_FILE_DATA_WIDTH-1:0]           rs_data_alu,
-    input logic [REG_FILE_DATA_WIDTH-1:0]           rt_data_alu,
+    input logic [REG_FILE_DATA_WIDTH-1:0]           rs1_data_alu,
+    input logic [REG_FILE_DATA_WIDTH-1:0]           rs2_data_alu,
 
     // ISSUEQ interface
     input logic [ROB_INDEX_WIDTH-1:0]               rob_tag,
     input logic [OPCODE_WIDTH-1:0]                  opcode,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]       rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]             rd_phy_addr,
     input logic                                     rw,
     input logic [XLEN-1:0]                          imm,
-    input logic [IMEM_DEPTH-1:0]                    branch_other_addr,
+    input logic [PC_WIDTH-1:0]                      branch_other_addr,
     input logic                                     branch_prediction,
     input logic                                     branch,
     input logic                                     jr_inst,
     input logic                                     jr31_inst,
     input logic                                     jal_inst,
     input logic [BPB_PC_BITS-1:0]                   branch_pc_bits,
-    input logic [IMEM_DEPTH-1:0]                    pc,
+    input logic [PC_WIDTH-1:0]                      pc,
     input logic                                     valid,
 
     // CDB interface
@@ -42,7 +42,7 @@ import riscv_types_pkg::*;
 
     output logic                                    exe_valid,
     output logic [ROB_INDEX_WIDTH-1:0]              exe_rob_tag,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]      exe_rd_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]            exe_rd_phy_addr,
     output logic [REG_FILE_DATA_WIDTH-1:0]          exe_rd_data,
     output logic                                    exe_reg_write,
     output logic                                    exe_branch_mispredicted,
@@ -51,13 +51,13 @@ import riscv_types_pkg::*;
     output logic                                    exe_jr31_inst,
     output logic                                    exe_jal_inst,
     output logic [BPB_PC_BITS-1:0]                  exe_branch_pc_bits,
-    output logic [IMEM_DEPTH-1:0]                   exe_branch_other_addr
+    output logic [PC_WIDTH-1:0]                     exe_branch_other_addr
 
 );
     logic [REG_FILE_DATA_WIDTH-1:0]     result_alu;
     logic [31:0]                        result_alu_32;
     logic [REG_FILE_DATA_WIDTH-1:0]     jr31_result;
-    logic [IMEM_DEPTH-1:0]              pc_plus_4;
+    logic [PC_WIDTH-1:0]              pc_plus_4;
     localparam int unsigned SHAMT_WIDTH = $clog2(XLEN);
 
     assign pc_plus_4 = pc + 4;
@@ -66,57 +66,57 @@ import riscv_types_pkg::*;
         jr31_result = '0;
         result_alu = '0;
         unique case (opcode)
-            INSTR_ADD:      result_alu = rs_data_alu + rt_data_alu;
+            INSTR_ADD:      result_alu = rs1_data_alu + rs2_data_alu;
 
-            INSTR_SUB, INSTR_BEQ, INSTR_BNE:      result_alu = rs_data_alu - rt_data_alu;
+            INSTR_SUB, INSTR_BEQ, INSTR_BNE:      result_alu = rs1_data_alu - rs2_data_alu;
 
-            INSTR_SLL:      result_alu = rs_data_alu << rt_data_alu[SHAMT_WIDTH-1:0];
+            INSTR_SLL:      result_alu = rs1_data_alu << rs2_data_alu[SHAMT_WIDTH-1:0];
 
-            INSTR_SLT,  INSTR_BLT:      result_alu = $signed(rs_data_alu) < $signed(rt_data_alu);
-            INSTR_SLTU, INSTR_BLTU:     result_alu = rs_data_alu < rt_data_alu;
-            INSTR_BGE:                  result_alu = $signed(rs_data_alu) >= $signed(rt_data_alu);
-            INSTR_BGEU:                 result_alu = rs_data_alu >= rt_data_alu;
+            INSTR_SLT,  INSTR_BLT:      result_alu = $signed(rs1_data_alu) < $signed(rs2_data_alu);
+            INSTR_SLTU, INSTR_BLTU:     result_alu = rs1_data_alu < rs2_data_alu;
+            INSTR_BGE:                  result_alu = $signed(rs1_data_alu) >= $signed(rs2_data_alu);
+            INSTR_BGEU:                 result_alu = rs1_data_alu >= rs2_data_alu;
 
-            INSTR_XOR:      result_alu = rs_data_alu ^ rt_data_alu;
-            INSTR_SRL:      result_alu = rs_data_alu >> rt_data_alu[SHAMT_WIDTH-1:0];
-            INSTR_SRA:      result_alu = $signed(rs_data_alu) >>> rt_data_alu[SHAMT_WIDTH-1:0];
-            INSTR_OR:       result_alu = rs_data_alu | rt_data_alu;
-            INSTR_AND:      result_alu = rs_data_alu & rt_data_alu;
-            INSTR_ADDI:     result_alu = rs_data_alu + imm;
+            INSTR_XOR:      result_alu = rs1_data_alu ^ rs2_data_alu;
+            INSTR_SRL:      result_alu = rs1_data_alu >> rs2_data_alu[SHAMT_WIDTH-1:0];
+            INSTR_SRA:      result_alu = $signed(rs1_data_alu) >>> rs2_data_alu[SHAMT_WIDTH-1:0];
+            INSTR_OR:       result_alu = rs1_data_alu | rs2_data_alu;
+            INSTR_AND:      result_alu = rs1_data_alu & rs2_data_alu;
+            INSTR_ADDI:     result_alu = rs1_data_alu + imm;
             INSTR_ADDIW: begin
-                result_alu_32 = rs_data_alu[31:0] + imm[31:0];
+                result_alu_32 = rs1_data_alu[31:0] + imm[31:0];
                 result_alu = {{32{result_alu_32[31]}}, result_alu_32};
             end
             INSTR_ADDW: begin
-                result_alu_32 = rs_data_alu[31:0] + rt_data_alu[31:0];
+                result_alu_32 = rs1_data_alu[31:0] + rs2_data_alu[31:0];
                 result_alu = {{32{result_alu_32[31]}}, result_alu_32};
             end
             INSTR_SUBW: begin
-                result_alu_32 = rs_data_alu[31:0] - rt_data_alu[31:0];
+                result_alu_32 = rs1_data_alu[31:0] - rs2_data_alu[31:0];
                 result_alu = {{32{result_alu_32[31]}}, result_alu_32};
             end
             INSTR_SLLW: begin
-                result_alu_32 = rs_data_alu[31:0] << rt_data_alu[4:0];
+                result_alu_32 = rs1_data_alu[31:0] << rs2_data_alu[4:0];
                 result_alu = {{32{result_alu_32[31]}}, result_alu_32};
             end
             INSTR_SRLW: begin
-                result_alu_32 = rs_data_alu[31:0] >> rt_data_alu[4:0];
+                result_alu_32 = rs1_data_alu[31:0] >> rs2_data_alu[4:0];
                 result_alu = {{32{result_alu_32[31]}}, result_alu_32};
             end
             INSTR_SRAW: begin
-                result_alu_32 = $signed(rs_data_alu[31:0]) >>> rt_data_alu[4:0];
+                result_alu_32 = $signed(rs1_data_alu[31:0]) >>> rs2_data_alu[4:0];
                 result_alu = {{32{result_alu_32[31]}}, result_alu_32};
             end
             INSTR_SLLIW: begin
-                result_alu_32 = rs_data_alu[31:0] << imm[4:0];
+                result_alu_32 = rs1_data_alu[31:0] << imm[4:0];
                 result_alu = {{32{result_alu_32[31]}}, result_alu_32};
             end
             INSTR_SRLIW: begin
-                result_alu_32 = rs_data_alu[31:0] >> imm[4:0];
+                result_alu_32 = rs1_data_alu[31:0] >> imm[4:0];
                 result_alu = {{32{result_alu_32[31]}}, result_alu_32};
             end
             INSTR_SRAIW: begin
-                result_alu_32 = $signed(rs_data_alu[31:0]) >>> imm[4:0];
+                result_alu_32 = $signed(rs1_data_alu[31:0]) >>> imm[4:0];
                 result_alu = {{32{result_alu_32[31]}}, result_alu_32};
             end
             INSTR_JAL:      result_alu = pc_plus_4;
@@ -126,27 +126,27 @@ import riscv_types_pkg::*;
             INSTR_JALR:     begin
                 if(jr31_inst) begin
                     result_alu = pc_plus_4;
-                    jr31_result = rs_data_alu + imm - branch_other_addr;
+                    jr31_result = rs1_data_alu + imm - branch_other_addr;
                 end else begin
                     result_alu = pc_plus_4;
                 end
             end
 
-            INSTR_SLTI:     result_alu = $signed(rs_data_alu) < $signed(imm);
-            INSTR_SLTIU:    result_alu = rs_data_alu < imm;
-            INSTR_XORI:     result_alu = rs_data_alu ^ imm;
-            INSTR_ORI:      result_alu = rs_data_alu | imm;
-            INSTR_ANDI:     result_alu = rs_data_alu & imm;
-            INSTR_SLLI:     result_alu = rs_data_alu << imm[SHAMT_WIDTH-1:0];
-            INSTR_SRLI:     result_alu = rs_data_alu >> imm[SHAMT_WIDTH-1:0];
-            INSTR_SRAI:     result_alu = $signed(rs_data_alu) >>> imm[SHAMT_WIDTH-1:0];
+            INSTR_SLTI:     result_alu = $signed(rs1_data_alu) < $signed(imm);
+            INSTR_SLTIU:    result_alu = rs1_data_alu < imm;
+            INSTR_XORI:     result_alu = rs1_data_alu ^ imm;
+            INSTR_ORI:      result_alu = rs1_data_alu | imm;
+            INSTR_ANDI:     result_alu = rs1_data_alu & imm;
+            INSTR_SLLI:     result_alu = rs1_data_alu << imm[SHAMT_WIDTH-1:0];
+            INSTR_SRLI:     result_alu = rs1_data_alu >> imm[SHAMT_WIDTH-1:0];
+            INSTR_SRAI:     result_alu = $signed(rs1_data_alu) >>> imm[SHAMT_WIDTH-1:0];
             INSTR_NONE:     result_alu = '0;
             default   :     result_alu = '0;
         endcase
     end
 
     logic                               branch_mispredicted;
-    logic [IMEM_DEPTH-1:0]              branch_other_addr_in;
+    logic [PC_WIDTH-1:0]              branch_other_addr_in;
     logic                               branch_taken;
     always_comb begin
         branch_taken = 1'b0;
@@ -178,7 +178,7 @@ import riscv_types_pkg::*;
             branch_mispredicted = (branch_prediction != branch_taken);
         end else if (opcode == INSTR_JALR) begin
             branch_mispredicted = (jr31_result != 0) || (exe_jr_inst);
-            branch_other_addr_in = rs_data_alu + imm;
+            branch_other_addr_in = rs1_data_alu + imm;
         end
     end
 

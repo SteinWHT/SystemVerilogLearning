@@ -3,23 +3,23 @@
 // Tomasulo CPU + L1 D-cache + L1 I-cache + shared AXI4 SRAM subsystem.
 module CPU_L1DCache_AXI #(
     parameter int unsigned INSTR_WIDTH             = 32,
-    parameter int unsigned IMEM_DEPTH              = 64,
+    parameter int unsigned PC_WIDTH                = 64,
     parameter int unsigned IMEM_WIDTH              = 128, // Default to 128 (4 instructions)
-    parameter int unsigned IMEM_DEPTH_WORD         = IMEM_DEPTH - 1,
+    parameter int unsigned PC_WORD_WIDTH           = PC_WIDTH - 1,
     parameter int unsigned XLEN                    = 64,
     parameter int unsigned ARCH_REG_COUNT          = 32,
     parameter int unsigned ARCH_REG_WIDTH          = $clog2(ARCH_REG_COUNT),
     parameter int unsigned REG_FILE_DATA_WIDTH     = 64,
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned PHY_REG_IDX_WIDTH       = 7,
     parameter int unsigned DMEM_WIDTH              = 64,
-    parameter int unsigned DMEM_DEPTH              = 64,
+    parameter int unsigned DMEM_ADDR_WIDTH         = 64,
     parameter int unsigned W_BYTE_NUM              = DMEM_WIDTH / 8,
     parameter int unsigned BPB_PC_BITS             = 3,
     parameter int unsigned NUM_WAYS                = 4,
     parameter int unsigned IFQ_DEPTH               = 16,
     parameter int unsigned RAS_DEPTH               = 4,
-    parameter int unsigned FRL_SIZE                = 128,
-    parameter int unsigned FRL_PTR_WIDTH           = $clog2(FRL_SIZE),
+    parameter int unsigned FRL_DEPTH               = 128,
+    parameter int unsigned FRL_PTR_WIDTH           = $clog2(FRL_DEPTH),
     parameter int unsigned NUM_CHECKPOINT          = 8,
     parameter int unsigned ROB_DEPTH               = 16,
     parameter int unsigned ROB_INDEX_WIDTH         = $clog2(ROB_DEPTH),
@@ -42,7 +42,7 @@ module CPU_L1DCache_AXI #(
     input  logic                            rst_n,
 
     // Expose ports for testbench observability
-    output logic [IMEM_DEPTH-1:0]           imem_addr,
+    output logic [PC_WIDTH-1:0]             imem_addr,
     output logic                            imem_req_valid,
     output logic                            imem_req_ready,
     input  logic [IMEM_WIDTH-1:0]           imem_resp_data,
@@ -62,7 +62,7 @@ module CPU_L1DCache_AXI #(
     output logic                            dcache_rready,
     output logic                            dcache_rresp_valid,
     output logic [REG_FILE_DATA_WIDTH-1:0]  dcache_rdata,
-    output logic [DMEM_DEPTH-1:0]           dcache_raddr,
+    output logic [DMEM_ADDR_WIDTH-1:0]      dcache_raddr,
     output logic                            dcache_rvalid,
     output logic                            dcache_rresp_ready,
     output logic                            dcache_wready,
@@ -70,7 +70,7 @@ module CPU_L1DCache_AXI #(
     output logic                            dcache_write,
     output logic [DMEM_WIDTH-1:0]           dcache_sw_data,
     output logic [W_BYTE_NUM-1:0]           dcache_wstrb,
-    output logic [DMEM_DEPTH-1:0]           dcache_sw_addr,
+    output logic [DMEM_ADDR_WIDTH-1:0]      dcache_sw_addr,
     output logic                            dcache_wvalid,
     output logic                            dcache_wresp_ready
 );
@@ -95,7 +95,7 @@ module CPU_L1DCache_AXI #(
     logic        icache_axi_error_internal;
 
     // CPU instruction fetch internal interfaces
-    logic [IMEM_DEPTH-1:0]   cpu_imem_addr;
+    logic [PC_WIDTH-1:0]             cpu_imem_addr;
     logic                            cpu_imem_req_valid;
     logic                            cpu_imem_req_ready;
     logic [IMEM_WIDTH-1:0]           cpu_imem_resp_data;
@@ -135,7 +135,7 @@ module CPU_L1DCache_AXI #(
     initial begin
         if (DMEM_WIDTH != WORD_BITS || AXI_DATA_WIDTH != WORD_BITS)
             $fatal(1, "CPU_L1DCache_AXI: CPU, cache, and AXI data widths must match");
-        if (DMEM_DEPTH < ADDR_WIDTH)
+        if (DMEM_ADDR_WIDTH < ADDR_WIDTH)
             $fatal(1, "CPU_L1DCache_AXI: CPU data address width is too narrow");
         if (IMEM_WIDTH == 0 || (IMEM_WIDTH % INSTR_WIDTH) != 0)
             $fatal(1, "CPU_L1DCache_AXI: IMEM_WIDTH must contain a whole number of instructions");
@@ -143,22 +143,22 @@ module CPU_L1DCache_AXI #(
 
     CPU #(
         .INSTR_WIDTH             (INSTR_WIDTH),
-        .IMEM_DEPTH              (IMEM_DEPTH),
+        .PC_WIDTH                (PC_WIDTH),
         .IMEM_WIDTH              (IMEM_WIDTH),
-        .IMEM_DEPTH_WORD         (IMEM_DEPTH_WORD),
+        .PC_WORD_WIDTH           (PC_WORD_WIDTH),
         .XLEN                    (XLEN),
         .ARCH_REG_COUNT          (ARCH_REG_COUNT),
         .ARCH_REG_WIDTH          (ARCH_REG_WIDTH),
         .REG_FILE_DATA_WIDTH     (REG_FILE_DATA_WIDTH),
-        .PHY_REGISTER_FILE_WIDTH (PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH       (PHY_REG_IDX_WIDTH),
         .DMEM_WIDTH              (DMEM_WIDTH),
-        .DMEM_DEPTH              (DMEM_DEPTH),
+        .DMEM_ADDR_WIDTH         (DMEM_ADDR_WIDTH),
         .W_BYTE_NUM              (W_BYTE_NUM),
         .BPB_PC_BITS             (BPB_PC_BITS),
         .NUM_WAYS                (NUM_WAYS),
         .IFQ_DEPTH               (IFQ_DEPTH),
         .RAS_DEPTH               (RAS_DEPTH),
-        .FRL_SIZE                (FRL_SIZE),
+        .FRL_DEPTH               (FRL_DEPTH),
         .FRL_PTR_WIDTH           (FRL_PTR_WIDTH),
         .NUM_CHECKPOINT          (NUM_CHECKPOINT),
         .ROB_DEPTH               (ROB_DEPTH),

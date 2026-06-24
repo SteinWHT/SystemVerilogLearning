@@ -6,7 +6,7 @@
 // ordering contract (clean the write-back D$ -> invalidate the I$ -> commit).
 
 interface cpu_coherence_if #(
-    parameter int unsigned IMEM_DEPTH = 64
+    parameter int unsigned PC_WIDTH = 64
 )(
     input logic clk,
     input logic rst_n
@@ -31,7 +31,7 @@ interface cpu_coherence_if #(
 
     // FENCE.I commit / redirect from the ROB
     logic                    fence_commit;       // fence_i_commit_flush pulse
-    logic [IMEM_DEPTH-1:0]   fence_redirect_pc;  // committing PC + 4
+    logic [PC_WIDTH-1:0]   fence_redirect_pc;  // committing PC + 4
 
     // ---------------------------------------------------------------- SVA
     // The ordering contract only needs checking once a coherence episode runs;

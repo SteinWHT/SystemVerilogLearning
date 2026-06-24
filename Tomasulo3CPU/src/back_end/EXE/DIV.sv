@@ -5,20 +5,20 @@ import riscv_types_pkg::*;
     parameter int unsigned OPCODE_WIDTH = 7,
     parameter int unsigned REG_FILE_DATA_WIDTH = 64,
     parameter int unsigned ROB_INDEX_WIDTH = 5,
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7,
     parameter int unsigned DIV_CYCLES = 64
 ) (
     input logic clk,
     input logic rst_n,
 
     // PRF interface
-    input logic [REG_FILE_DATA_WIDTH-1:0]           rs_data_div,
-    input logic [REG_FILE_DATA_WIDTH-1:0]           rt_data_div,
+    input logic [REG_FILE_DATA_WIDTH-1:0]           rs1_data_div,
+    input logic [REG_FILE_DATA_WIDTH-1:0]           rs2_data_div,
 
     // ISSUEQ interface
     input logic [ROB_INDEX_WIDTH-1:0]               rob_tag,
     input logic [OPCODE_WIDTH-1:0]                  opcode,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]       rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]             rd_phy_addr,
     input logic                                     valid,
 
     // ISSUE UNIT interface
@@ -32,7 +32,7 @@ import riscv_types_pkg::*;
     input logic [ROB_INDEX_WIDTH-1:0]               rob_top_ptr,
 
     output logic [ROB_INDEX_WIDTH-1:0]              exe_rob_tag,
-    output logic [PHY_REGISTER_FILE_WIDTH-1:0]      exe_rd_phy_addr,
+    output logic [PHY_REG_IDX_WIDTH-1:0]            exe_rd_phy_addr,
     output logic [REG_FILE_DATA_WIDTH-1:0]          exe_rd_data,
     output logic                                    exe_reg_write,
     output logic                                    exe_result_valid
@@ -46,7 +46,7 @@ import riscv_types_pkg::*;
     logic                                     div_valid;
     logic [OPCODE_WIDTH-1:0]                  div_opcode;
     logic [ROB_INDEX_WIDTH-1:0]               div_rob_tag;
-    logic [PHY_REGISTER_FILE_WIDTH-1:0]       div_rd_phy_addr;
+    logic [PHY_REG_IDX_WIDTH-1:0]             div_rd_phy_addr;
     logic [XLEN-1:0]                          dw_dividend;
     logic                                     is_unsigned_lat;
 
@@ -65,14 +65,14 @@ import riscv_types_pkg::*;
     logic [XLEN-1:0] a_cond, b_cond;
     always_comb begin
         if (is_word_op && is_unsigned_op) begin
-            a_cond = {{32{1'b0}}, rs_data_div[31:0]};
-            b_cond = {{32{1'b0}}, rt_data_div[31:0]};
+            a_cond = {{32{1'b0}}, rs1_data_div[31:0]};
+            b_cond = {{32{1'b0}}, rs2_data_div[31:0]};
         end else if (is_word_op) begin
-            a_cond = {{32{rs_data_div[31]}}, rs_data_div[31:0]};
-            b_cond = {{32{rt_data_div[31]}}, rt_data_div[31:0]};
+            a_cond = {{32{rs1_data_div[31]}}, rs1_data_div[31:0]};
+            b_cond = {{32{rs2_data_div[31]}}, rs2_data_div[31:0]};
         end else begin
-            a_cond = rs_data_div;
-            b_cond = rt_data_div;
+            a_cond = rs1_data_div;
+            b_cond = rs2_data_div;
         end
     end
 

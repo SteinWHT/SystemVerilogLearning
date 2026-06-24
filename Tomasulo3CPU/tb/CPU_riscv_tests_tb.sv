@@ -15,21 +15,21 @@ module CPU_riscv_tests_tb;
     import riscv_types_pkg::*;
 
     parameter int unsigned INSTR_WIDTH             = 32;
-    parameter int unsigned IMEM_DEPTH              = 64;
+    parameter int unsigned PC_WIDTH              = 64;
     parameter int unsigned IMEM_WIDTH              = 32;
-    parameter int unsigned IMEM_DEPTH_WORD         = IMEM_DEPTH - 1;
+    parameter int unsigned PC_WORD_WIDTH         = PC_WIDTH - 1;
     parameter int unsigned ARCH_REG_COUNT          = 32;
     parameter int unsigned ARCH_REG_WIDTH          = $clog2(ARCH_REG_COUNT);
     parameter int unsigned REG_FILE_DATA_WIDTH     = 64;
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7;
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7;
     parameter int unsigned DMEM_WIDTH              = 64;
-    parameter int unsigned DMEM_DEPTH              = 64;
+    parameter int unsigned DMEM_ADDR_WIDTH              = 64;
     parameter int unsigned BPB_PC_BITS             = 3;
     parameter int unsigned NUM_WAYS                = 4;
     parameter int unsigned IFQ_DEPTH               = 16;
     parameter int unsigned RAS_DEPTH               = 4;
-    parameter int unsigned FRL_SIZE                = 128;
-    parameter int unsigned FRL_PTR_WIDTH           = $clog2(FRL_SIZE);
+    parameter int unsigned FRL_DEPTH                = 128;
+    parameter int unsigned FRL_PTR_WIDTH           = $clog2(FRL_DEPTH);
     parameter int unsigned NUM_CHECKPOINT          = 8;
     parameter int unsigned ROB_DEPTH               = 16;
     parameter int unsigned ROB_INDEX_WIDTH         = $clog2(ROB_DEPTH);
@@ -55,12 +55,12 @@ module CPU_riscv_tests_tb;
     logic                    imem_resp_ready;
     logic [INSTR_WIDTH-1:0]  imem_resp_data;
     logic                    imem_req_valid;
-    logic [IMEM_DEPTH-1:0]   imem_addr;
+    logic [PC_WIDTH-1:0]   imem_addr;
 
     logic                            dcache_rready;
     logic                            dcache_rresp_valid;
     logic [REG_FILE_DATA_WIDTH-1:0]  dcache_rdata;
-    logic [DMEM_DEPTH-1:0]           dcache_raddr;
+    logic [DMEM_ADDR_WIDTH-1:0]           dcache_raddr;
     logic                            dcache_rvalid;
     logic                            dcache_rresp_ready;
 
@@ -69,26 +69,26 @@ module CPU_riscv_tests_tb;
     logic                            dcache_write;
     logic [DMEM_WIDTH-1:0]           dcache_sw_data;
     logic [W_BYTE_NUM-1:0]           dcache_wstrb;
-    logic [DMEM_DEPTH-1:0]           dcache_sw_addr;
+    logic [DMEM_ADDR_WIDTH-1:0]           dcache_sw_addr;
     logic                            dcache_wvalid;
     logic                            dcache_wresp_ready;
 
     CPU #(
         .INSTR_WIDTH             (INSTR_WIDTH),
-        .IMEM_DEPTH              (IMEM_DEPTH),
+        .PC_WIDTH              (PC_WIDTH),
         .IMEM_WIDTH              (IMEM_WIDTH),
-        .IMEM_DEPTH_WORD         (IMEM_DEPTH_WORD),
+        .PC_WORD_WIDTH         (PC_WORD_WIDTH),
         .ARCH_REG_COUNT          (ARCH_REG_COUNT),
         .ARCH_REG_WIDTH          (ARCH_REG_WIDTH),
         .REG_FILE_DATA_WIDTH     (REG_FILE_DATA_WIDTH),
-        .PHY_REGISTER_FILE_WIDTH (PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH (PHY_REG_IDX_WIDTH),
         .DMEM_WIDTH              (DMEM_WIDTH),
-        .DMEM_DEPTH              (DMEM_DEPTH),
+        .DMEM_ADDR_WIDTH              (DMEM_ADDR_WIDTH),
         .BPB_PC_BITS             (BPB_PC_BITS),
         .NUM_WAYS                (NUM_WAYS),
         .IFQ_DEPTH               (IFQ_DEPTH),
         .RAS_DEPTH               (RAS_DEPTH),
-        .FRL_SIZE                (FRL_SIZE),
+        .FRL_DEPTH                (FRL_DEPTH),
         .FRL_PTR_WIDTH           (FRL_PTR_WIDTH),
         .NUM_CHECKPOINT          (NUM_CHECKPOINT),
         .ROB_DEPTH               (ROB_DEPTH),

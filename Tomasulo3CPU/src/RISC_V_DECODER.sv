@@ -16,8 +16,8 @@ module RISC_V_DECODER
 ) (
     input  logic [INSTR_WIDTH-1:0]      instr,
     output logic [ARCH_REG_WIDTH-1:0]   rd_arch_addr,
-    output logic [ARCH_REG_WIDTH-1:0]   rs_arch_addr,
-    output logic [ARCH_REG_WIDTH-1:0]   rt_arch_addr,
+    output logic [ARCH_REG_WIDTH-1:0]   rs1_arch_addr,
+    output logic [ARCH_REG_WIDTH-1:0]   rs2_arch_addr,
     output logic [XLEN-1:0]             imm,
     output instr_e                      instr_type,
     output logic                        rw,
@@ -38,7 +38,7 @@ module RISC_V_DECODER
 
     // Instruction field extraction
     logic [6:0] opcode;
-    logic [4:0] rd, rs, rt;
+    logic [4:0] rd, rs1, rs2;
     logic [2:0] funct3;
     logic [6:0] funct7;
     csr_addr_t csr;
@@ -46,8 +46,8 @@ module RISC_V_DECODER
     assign opcode = instr[6:0];
     assign rd     = instr[11:7];
     assign funct3 = instr[14:12];
-    assign rs    = instr[19:15];
-    assign rt    = instr[24:20];
+    assign rs1    = instr[19:15];
+    assign rs2    = instr[24:20];
     assign funct7 = instr[31:25];
     assign csr    = instr[31:20];
 
@@ -268,7 +268,7 @@ module RISC_V_DECODER
             OP_SYSTEM: begin
                 unique case (funct3)
                     FUNCT3_PRIV: begin
-                        if ((rd == '0) && (rs == '0)) begin
+                        if ((rd == '0) && (rs1 == '0)) begin
                             unique case (csr)
                                 FUNCT12_ECALL:  instr_type = INSTR_ECALL;
                                 FUNCT12_EBREAK: instr_type = INSTR_EBREAK;
@@ -316,8 +316,8 @@ module RISC_V_DECODER
         mret_inst = 0;
         rob_opclass = ROB_ALU;
         rd_arch_addr = 0;
-        rs_arch_addr = 0;
-        rt_arch_addr = 0;
+        rs1_arch_addr = 0;
+        rs2_arch_addr = 0;
         imm = 0;
         unique case (instr_type)
             INSTR_ADD, INSTR_SUB, INSTR_SLT, INSTR_SLTU, INSTR_XOR,
@@ -331,8 +331,8 @@ module RISC_V_DECODER
             INSTR_SLLI, INSTR_SRLI, INSTR_SRAI: begin
                 rw = 1;
                 rd_arch_addr = rd;
-                rs_arch_addr = rs;
-                rt_arch_addr = rt;
+                rs1_arch_addr = rs1;
+                rs2_arch_addr = rs2;
                 imm = imm_i;
             end
             INSTR_LW, INSTR_LD, INSTR_LB, INSTR_LH,
@@ -340,22 +340,22 @@ module RISC_V_DECODER
                 rw = 1;
                 rob_opclass = ROB_LOAD;
                 rd_arch_addr = rd;
-                rs_arch_addr = rs;
-                rt_arch_addr = rt;
+                rs1_arch_addr = rs1;
+                rs2_arch_addr = rs2;
                 imm = imm_i;
             end
             INSTR_SD, INSTR_SW, INSTR_SB, INSTR_SH: begin
                 mw = 1;
                 rob_opclass = ROB_STORE;
-                rs_arch_addr = rs;
-                rt_arch_addr = rt;
+                rs1_arch_addr = rs1;
+                rs2_arch_addr = rs2;
                 imm = imm_s;
             end
             INSTR_BEQ, INSTR_BNE, INSTR_BLT, INSTR_BLTU, INSTR_BGE, INSTR_BGEU: begin
                 branch = 1;
                 rob_opclass = ROB_CONTROL;
-                rs_arch_addr = rs;
-                rt_arch_addr = rt;
+                rs1_arch_addr = rs1;
+                rs2_arch_addr = rs2;
                 imm = imm_b;
             end
             INSTR_JAL: begin
@@ -367,21 +367,21 @@ module RISC_V_DECODER
             end
             INSTR_JALR: begin
                 rob_opclass = ROB_CONTROL;
-                if (rs == 5'd1) begin
+                if (rs1 == 5'd1) begin
                     jr31_inst = 1;
                     imm = imm_i;
                     rw = 1;
-                    rs_arch_addr = rs;
+                    rs1_arch_addr = rs1;
                     rd_arch_addr = rd;
                 end else if (rd == 5'd0) begin
                     // This is a JR instruction (JALR with rd = x0)
                     jr_inst = 1;
-                    rs_arch_addr = rs;
+                    rs1_arch_addr = rs1;
                     imm = imm_i;
                 end else begin
                     jal_inst = 1;
                     jr_inst = 1;
-                    rs_arch_addr = rs;
+                    rs1_arch_addr = rs1;
                     imm = imm_i;
                     rw = 1;
                     rd_arch_addr = rd;
@@ -398,7 +398,7 @@ module RISC_V_DECODER
                 csr_inst = 1;
                 csr_addr = csr;
                 rd_arch_addr = rd;
-                rs_arch_addr = rs;
+                rs1_arch_addr = rs1;
                 imm = XLEN'(csr);
 
                 unique case (instr_type)
@@ -414,7 +414,7 @@ module RISC_V_DECODER
                 csr_inst = 1;
                 csr_addr = csr;
                 rd_arch_addr = rd;
-                rs_arch_addr = imm_zimm;
+                rs1_arch_addr = imm_zimm;
                 imm = XLEN'(csr);
 
                 unique case (instr_type)
@@ -452,8 +452,8 @@ module RISC_V_DECODER
                 mret_inst = 0;
                 rob_opclass = ROB_ALU;
                 rd_arch_addr = 0;
-                rs_arch_addr = 0;
-                rt_arch_addr = 0;
+                rs1_arch_addr = 0;
+                rs2_arch_addr = 0;
                 imm = 0;
             end
         endcase

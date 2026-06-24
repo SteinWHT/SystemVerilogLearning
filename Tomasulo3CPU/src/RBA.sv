@@ -1,26 +1,26 @@
 module RBA #(
-    parameter int unsigned PHY_REGISTER_FILE_WIDTH = 7,
-    parameter int unsigned PHY_REG_COUNT = 1 << PHY_REGISTER_FILE_WIDTH,
+    parameter int unsigned PHY_REG_IDX_WIDTH = 7,
+    parameter int unsigned PHY_REG_COUNT = 1 << PHY_REG_IDX_WIDTH,
     parameter int unsigned ARCH_REG_COUNT = 32
 ) (
     input logic clk,
     input logic rst_n,
 
     // DISPATCH interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rs_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_rt_phy_addr,
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   dis_new_rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_rs1_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_rs2_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         dis_new_rd_phy_addr,
     input logic                                 dis_reg_write,
 
-    output logic                                rs_data_ready,
-    output logic                                rt_data_ready,
+    output logic                                rs1_data_ready,
+    output logic                                rs2_data_ready,
 
     // CDB interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   rd_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         rd_phy_addr,
     input logic                                 cdb_reg_write,
 
     // ROB/CSR interface
-    input logic [PHY_REGISTER_FILE_WIDTH-1:0]   csr_wr_phy_addr,
+    input logic [PHY_REG_IDX_WIDTH-1:0]         csr_wr_phy_addr,
     input logic                                 csr_wr_en
 );
     // 2 read ports for dispatch
@@ -46,7 +46,7 @@ module RBA #(
         end
     end
 
-    assign rs_data_ready = prf_rdy_array[dis_rs_phy_addr];
-    assign rt_data_ready = prf_rdy_array[dis_rt_phy_addr];
+    assign rs1_data_ready = prf_rdy_array[dis_rs1_phy_addr];
+    assign rs2_data_ready = prf_rdy_array[dis_rs2_phy_addr];
 
 endmodule

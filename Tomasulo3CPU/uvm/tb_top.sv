@@ -8,21 +8,21 @@ module tb_top;
     localparam int unsigned ROB_DEPTH               = 16;
     localparam int unsigned ROB_INDEX_WIDTH         = $clog2(ROB_DEPTH);
     localparam int unsigned INSTR_WIDTH             = 32;
-    localparam int unsigned IMEM_DEPTH              = 64;
+    localparam int unsigned PC_WIDTH              = 64;
     localparam int unsigned IMEM_WIDTH              = 32;
-    localparam int unsigned IMEM_DEPTH_WORD         = IMEM_DEPTH - 1;
+    localparam int unsigned PC_WORD_WIDTH         = PC_WIDTH - 1;
     localparam int unsigned ARCH_REG_COUNT          = 32;
     localparam int unsigned ARCH_REG_WIDTH          = $clog2(ARCH_REG_COUNT);
     localparam int unsigned REG_FILE_DATA_WIDTH     = 64;
-    localparam int unsigned PHY_REGISTER_FILE_WIDTH = 7;
+    localparam int unsigned PHY_REG_IDX_WIDTH = 7;
     localparam int unsigned DMEM_WIDTH              = 64;
-    localparam int unsigned DMEM_DEPTH              = 64;
+    localparam int unsigned DMEM_ADDR_WIDTH              = 64;
     localparam int unsigned BPB_PC_BITS             = 3;
     localparam int unsigned NUM_WAYS                = 4;
     localparam int unsigned IFQ_DEPTH               = 16;
     localparam int unsigned RAS_DEPTH               = 4;
-    localparam int unsigned FRL_SIZE                = 128;
-    localparam int unsigned FRL_PTR_WIDTH           = $clog2(FRL_SIZE);
+    localparam int unsigned FRL_DEPTH                = 128;
+    localparam int unsigned FRL_PTR_WIDTH           = $clog2(FRL_DEPTH);
     localparam int unsigned NUM_CHECKPOINT          = 8;
     localparam int unsigned SB_DEPTH                = 4;
     localparam int unsigned SB_INDEX_WIDTH          = $clog2(SB_DEPTH);
@@ -42,10 +42,10 @@ module tb_top;
 
     cpu_if #(
         .INSTR_WIDTH (INSTR_WIDTH),
-        .IMEM_DEPTH  (IMEM_DEPTH),
+        .PC_WIDTH  (PC_WIDTH),
         .IMEM_WIDTH  (IMEM_WIDTH),
         .DMEM_WIDTH  (DMEM_WIDTH),
-        .DMEM_DEPTH  (DMEM_DEPTH),
+        .DMEM_ADDR_WIDTH  (DMEM_ADDR_WIDTH),
         .W_BYTE_NUM  (W_BYTE_NUM),
         .IMEM_WORDS  (IMEM_WORDS),
         .DMEM_LINES  (DMEM_LINES),
@@ -60,11 +60,11 @@ module tb_top;
 
     cpu_commit_if #(
         .ROB_INDEX_WIDTH         (ROB_INDEX_WIDTH),
-        .DMEM_DEPTH              (DMEM_DEPTH),
-        .IMEM_DEPTH              (IMEM_DEPTH),
+        .DMEM_ADDR_WIDTH              (DMEM_ADDR_WIDTH),
+        .PC_WIDTH              (PC_WIDTH),
         .REG_FILE_DATA_WIDTH     (REG_FILE_DATA_WIDTH),
         .ARCH_REG_WIDTH          (ARCH_REG_WIDTH),
-        .PHY_REGISTER_FILE_WIDTH (PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH (PHY_REG_IDX_WIDTH),
         .W_BYTE_NUM              (W_BYTE_NUM)
     ) commit_if (
         .clk   (clk),
@@ -73,20 +73,20 @@ module tb_top;
 
     CPU_L1DCache #(
         .INSTR_WIDTH             (INSTR_WIDTH),
-        .IMEM_DEPTH              (IMEM_DEPTH),
+        .PC_WIDTH              (PC_WIDTH),
         .IMEM_WIDTH              (IMEM_WIDTH),
-        .IMEM_DEPTH_WORD         (IMEM_DEPTH_WORD),
+        .PC_WORD_WIDTH         (PC_WORD_WIDTH),
         .ARCH_REG_COUNT          (ARCH_REG_COUNT),
         .ARCH_REG_WIDTH          (ARCH_REG_WIDTH),
         .REG_FILE_DATA_WIDTH     (REG_FILE_DATA_WIDTH),
-        .PHY_REGISTER_FILE_WIDTH (PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH (PHY_REG_IDX_WIDTH),
         .DMEM_WIDTH              (DMEM_WIDTH),
-        .DMEM_DEPTH              (DMEM_DEPTH),
+        .DMEM_ADDR_WIDTH              (DMEM_ADDR_WIDTH),
         .BPB_PC_BITS             (BPB_PC_BITS),
         .NUM_WAYS                (NUM_WAYS),
         .IFQ_DEPTH               (IFQ_DEPTH),
         .RAS_DEPTH               (RAS_DEPTH),
-        .FRL_SIZE                (FRL_SIZE),
+        .FRL_DEPTH                (FRL_DEPTH),
         .FRL_PTR_WIDTH           (FRL_PTR_WIDTH),
         .NUM_CHECKPOINT          (NUM_CHECKPOINT),
         .ROB_DEPTH               (ROB_DEPTH),
@@ -176,12 +176,12 @@ module tb_top;
         .ROB_DEPTH              (ROB_DEPTH),
         .ROB_INDEX_WIDTH        (ROB_INDEX_WIDTH),
         .DMEM_WIDTH             (DMEM_WIDTH),
-        .DMEM_DEPTH             (DMEM_DEPTH),
-        .IMEM_DEPTH             (IMEM_DEPTH),
+        .DMEM_ADDR_WIDTH             (DMEM_ADDR_WIDTH),
+        .PC_WIDTH             (PC_WIDTH),
         .REG_FILE_DATA_WIDTH    (REG_FILE_DATA_WIDTH),
         .ARCH_REG_COUNT         (ARCH_REG_COUNT),
         .ARCH_REG_WIDTH         (ARCH_REG_WIDTH),
-        .PHY_REGISTER_FILE_WIDTH(PHY_REGISTER_FILE_WIDTH),
+        .PHY_REG_IDX_WIDTH(PHY_REG_IDX_WIDTH),
         .W_BYTE_NUM             (W_BYTE_NUM)
     ) u_rob_commit_mon (
         .clk              (clk),
@@ -309,14 +309,14 @@ module tb_top;
             if (dut.u_cpu.front_end.rob.dis_inst_valid && (dut.u_cpu.back_end.dis_rob_tag == 0)
                 && !t0_disp_seen) begin
                 t0_disp_seen <= 1'b1;
-                t0_rs_rdy    <= dut.u_cpu.back_end.dis_rs_data_ready;
-                t0_rt_rdy    <= dut.u_cpu.back_end.dis_rt_data_ready;
-                $display("[ROBPROBE] TAG0 DISPATCH cyc=%0d rs_rdy=%0b rt_rdy=%0b rs_phy=%0d rt_phy=%0d rd_phy=%0d intqen=%0b mulqen=%0b divqen=%0b lsqen=%0b",
-                  probe_cyc, dut.u_cpu.back_end.dis_rs_data_ready, dut.u_cpu.back_end.dis_rt_data_ready,
-                  dut.u_cpu.back_end.dis_rs_phy_addr, dut.u_cpu.back_end.dis_rt_phy_addr,
+                t0_rs_rdy    <= dut.u_cpu.back_end.dis_rs1_data_ready;
+                t0_rt_rdy    <= dut.u_cpu.back_end.dis_rs2_data_ready;
+                $display("[ROBPROBE] TAG0 DISPATCH cyc=%0d rs1_rdy=%0b rs2_rdy=%0b rs_phy=%0d rt_phy=%0d rd_phy=%0d intqen=%0b mulqen=%0b divqen=%0b lsqen=%0b",
+                  probe_cyc, dut.u_cpu.back_end.dis_rs1_data_ready, dut.u_cpu.back_end.dis_rs2_data_ready,
+                  dut.u_cpu.back_end.dis_rs1_phy_addr, dut.u_cpu.back_end.dis_rs2_phy_addr,
                   dut.u_cpu.back_end.dis_new_rd_phy_addr,
-                  dut.u_cpu.back_end.dis_int_issq_en, dut.u_cpu.back_end.dis_mul_issq_en,
-                  dut.u_cpu.back_end.dis_div_issq_en, dut.u_cpu.back_end.dis_ld_st_issq_en);
+                  dut.u_cpu.back_end.dis_int_issue_en, dut.u_cpu.back_end.dis_mul_issue_en,
+                  dut.u_cpu.back_end.dis_div_issue_en, dut.u_cpu.back_end.dis_ld_st_issue_en);
             end
             // Did tag-0 ever issue to execution?
             if (dut.u_cpu.back_end.exe_int_grant && (dut.u_cpu.back_end.iss_exe_rob_tag == 0)
@@ -337,7 +337,7 @@ module tb_top;
         end
     end
     final if (probe_on)
-        $display("[ROBPROBE] TOTALS dispatch=%0d cdb=%0d enable=%0d cycles=%0d | TAG0 disp_seen=%0b rs_rdy=%0b rt_rdy=%0b issued=%0b",
+        $display("[ROBPROBE] TOTALS dispatch=%0d cdb=%0d enable=%0d cycles=%0d | TAG0 disp_seen=%0b rs1_rdy=%0b rs2_rdy=%0b issued=%0b",
                  dis_cnt, cdb_cnt, en_cnt, probe_cyc, t0_disp_seen, t0_rs_rdy, t0_rt_rdy, t0_issued);
     // synopsys translate_on
 
